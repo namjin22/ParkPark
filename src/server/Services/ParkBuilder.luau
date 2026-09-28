@@ -161,6 +161,52 @@ local function ensureGrayboxApproach(parkFolder: Folder)
 	end
 end
 
+local function hideDefaultBaseplate()
+	local baseplate = Workspace:FindFirstChild("Baseplate")
+	if baseplate == nil or not baseplate:IsA("BasePart") then
+		return
+	end
+
+	-- Keep the default floor as a safety collider, but remove its tiled surface
+	-- so it cannot z-fight with the temporary entrance ground.
+	baseplate.Transparency = 1
+	baseplate.CastShadow = false
+	baseplate.CanTouch = false
+	baseplate.CanQuery = false
+	for _, descendant in baseplate:GetDescendants() do
+		if descendant:IsA("Decal") or descendant:IsA("Texture") then
+			descendant.Transparency = 1
+		end
+	end
+end
+
+local function positionGrayboxSpawn()
+	local spawnInstance = Workspace:FindFirstChild("ParkParkSpawn") or Workspace:FindFirstChild("SpawnLocation")
+	local spawnLocation: SpawnLocation
+	if spawnInstance == nil then
+		spawnLocation = Instance.new("SpawnLocation")
+	elseif spawnInstance:IsA("SpawnLocation") then
+		spawnLocation = spawnInstance
+	else
+		warn("[ParkPark] Workspace.ParkParkSpawn exists but is not a SpawnLocation")
+		return
+	end
+
+	spawnLocation.Name = "ParkParkSpawn"
+	spawnLocation.Size = Vector3.new(6, 1, 6)
+	spawnLocation.CFrame = CFrame.new(0, 0.5, 35)
+	spawnLocation.Anchored = true
+	spawnLocation.Transparency = 1
+	spawnLocation.CanCollide = true
+	spawnLocation.CanTouch = false
+	spawnLocation.CanQuery = false
+	spawnLocation.Neutral = true
+	spawnLocation.Enabled = true
+	spawnLocation.Duration = 0
+	spawnLocation.AllowTeamChangeOnTouch = false
+	spawnLocation.Parent = Workspace
+end
+
 local function buildGrayboxDebris(entrance: Model): Model
 	local debris = Instance.new("Model")
 	debris.Name = "EntranceDebris"
@@ -440,6 +486,9 @@ local function getOrCreateModel(parent: Instance, name: string, build: (Folder) 
 end
 
 function ParkBuilder.Build(): References
+	hideDefaultBaseplate()
+	positionGrayboxSpawn()
+
 	local parkFolder = getOrCreateParkFolder()
 	local entrance = getOrCreateModel(parkFolder, ENTRANCE_NAME, buildGrayboxEntrance)
 	ensureGrayboxApproach(parkFolder)
