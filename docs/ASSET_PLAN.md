@@ -65,15 +65,34 @@ Creator Store 검색은 영어 검색어를 함께 사용해 후보 폭을 넓�
 4. **나머지 MVP 시설:** 티컵, 범퍼카, 스낵 판매대를 같은 재질·모서리·간판 규칙으로 맞춘다.
 5. **최종 확인:** 모바일의 여러 화면비와 저사양 설정에서 입구부터 목표까지의 가독성, 복구 전후 차이, 에셋 성능을 검수한다.
 
-## 코드 분리 리팩터링 계획 — 계획만
+## 현재 직접 제작한 모델 원본
 
-현재 [`src/server/Bootstrap.server.luau`](../src/server/Bootstrap.server.luau)는 `ParkParkWorld` 폴더 생성, 입구·회전목마 graybox 생성, 수리 프롬프트 검증, 플레이어별 일회성 보상, 회전목마 전체 시각 변경, `leaderstats.Tickets` 초기화를 한 파일에서 수행한다. 다음은 이 동작을 모듈로 나눌 **향후 계획**이며 아직 코드는 변경하지 않는다.
+`assets/models/parkpark/`에 입구 아치, 고정 플랫폼, 회전 rotor, 폐허/복구 차양, 수리 콘솔을 분리한 OBJ 메시 원본과 공통 MTL 팔레트가 있다. `tools/generate_parkpark_meshes.py`는 표준 라이브러리만으로 메시를 재생성하고 material 참조, face 인덱스, 20,000-triangle 상한을 확인한다. Rotor와 두 차양은 같은 회전축 원점을 공유하도록 만들었다.
 
-| 모듈 | 책임 분리 계획 |
+| 메시 원본 | 삼각형 수 | 대략적인 크기 (studs) |
+| --- | ---: | --- |
+| `ParkParkCarouselPlatform.obj` | 2,944 | 24 × 0.69 × 24 |
+| `ParkParkCarouselRotor.obj` | 7,424 | 약 17.51 × 11.7 × 17.51 |
+| `ParkParkCanopyNeglected.obj` | 1,500 | 약 18.7 × 5.19 × 18.7 |
+| `ParkParkCanopyRestored.obj` | 3,192 | 약 18.74 × 5.52 × 18.74 |
+| `ParkParkStorybookEntrance.obj` | 2,816 | 약 17.44 × 16.99 × 2.96 |
+| `ParkParkRepairConsole.obj` | 856 | 약 1.88 × 2.94 × 1.88 |
+
+복구 상태에서 입구·플랫폼·rotor·복구 차양·콘솔을 함께 쓰면 약 17.2K 삼각형이다. 폐허 차양은 복구 차양 대신 선택해 총량은 약 15.5K가 된다. 형상 검토용 이미지는 [`ParkParkModelPreview.png`](../assets/models/parkpark/ParkParkModelPreview.png)에서 볼 수 있다.
+
+이 파일들은 검토 가능한 커스텀 모델 원본이지만, Studio에서 import·조정·플레이 화면 검수를 마친 최종 에셋은 아니다. 기존 graybox를 최종 에셋으로 취급하지 않으며, 모델의 pivot과 형상을 확인한 뒤에만 게임 내 참조에 연결한다. import와 구도 검수 절차는 [`../assets/models/parkpark/README.md`](../assets/models/parkpark/README.md)를 따른다.
+
+## 현재 코드 구조와 에셋 연결점
+
+기존 단일 Bootstrap의 책임 분리는 구현되어 있다. [`src/server/Bootstrap.server.luau`](../src/server/Bootstrap.server.luau)는 서비스를 초기화하고, `ParkBuilder`만 아직 임시 graybox 형상을 생성한다. 새 OBJ 모델은 생성했지만 Studio에 import되거나 게임에 연결된 상태는 아니다.
+
+| 모듈 | 현재 책임 |
 | --- | --- |
-| `ParkBuilder` | 월드/시설 참조를 찾고, 필수 구조가 없을 때만 개발용 graybox를 세우는 초기화 책임. 이후에는 이름으로 박아 만든 형상 대신 승인된 아트 에셋을 연결하도록 전환한다. |
-| `RideService` | 회전목마 수리 프롬프트 연결, 플레이어/거리/생존 검증, 공유 시설의 복구 상태와 플레이어별 보상 청구 여부 관리. 복구 시 시각 상태 전환을 호출한다. |
-| `EconomyService` | `leaderstats.Tickets` 생성과 시작 잔액 초기화, 검증된 보상 지급을 한곳에서 관리한다. 티켓 수 변경의 권한은 서버에 둔다. |
-| `HUDController` | 클라이언트 티켓 표시와 값 변경 구독을 관리하고, 작은 화면 여백과 티켓/수리 피드백 시각 규칙을 적용한다. |
+| `ParkBuilder` | 임시 입구·회전목마 구성, 상호작용 참조와 회전 rotor 준비. 다음으로 승인된 모델을 연결한다. |
+| `ParkProgressionService` | 서버에서 입구 정리 거리/생존 상태를 검증하고 잔해를 치운 뒤 회전목마 수리를 연다. |
+| `RideService` | 회전목마 수리 검증과 플레이어별 보상 처리, 복구 상태 복제, rotor 회전 시작. |
+| `EconomyService` | 플레이어 티켓 초기화와 검증된 서버 티켓 지급. |
+| `HUDController` | 티켓 수 표시와 보상 시 짧은 시각 반응. |
+| `RepairFeedbackController` | 복구 상태 변경을 받아 짧은 완료/보상 안내 표시. |
 
-먼저 각 모듈의 입력·출력 계약을 정하고 Bootstrap은 서비스 초기화와 연결만 담당하게 한다. 공유 회전목마 상태와 플레이어별 보상 횟수는 분리해, 향후 저장/멀티플레이 정책을 바꿔도 시설 아트와 경제 처리가 서로 뒤섞이지 않게 한다.
+OBJ를 Studio에 연결할 때는 `Carousel` 아래에 고정 `RidePlatform`, 중심축을 pivot으로 사용하는 `CarouselRotor`, 그리고 동일한 위치에 정합된 `CanopyNeglected`/`CanopyRestored` 메시를 둔다. 수리 콘솔과 프롬프트는 rotor 밖의 고정 위치에 유지한다. 최종 적용에서는 graybox 전체 색상 변경을 canopy variant 토글로 대체하고, 모듈 경계를 유지한다.

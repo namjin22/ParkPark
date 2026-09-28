@@ -29,7 +29,7 @@ This file is the persistent project context and current roadmap for OpenCode. Re
 
 ## Current source and known prototype state
 
-- `src/server/Bootstrap.server.luau` starts `ParkBuilder`, `ParkProgressionService`, `EconomyService`, and `RideService`; the entrance and carousel geometry are still temporary graybox.
+- `src/server/Bootstrap.server.luau` starts `ParkBuilder`, `ParkProgressionService`, `EconomyService`, and `RideService`; the active entrance and carousel are still temporary graybox. Separate custom OBJ source meshes for the entrance, rides, and repair console are in `assets/models/parkpark/` and are not yet imported into the place.
 - `src/client/Bootstrap.client.luau` starts `HUDController` and `RepairFeedbackController` for ticket and restoration feedback.
 - `src/shared/Config/GameConfig.luau` holds starter ticket settings.
 - The final scene is not visually approved yet. Finish its authored entrance/carousel and compare the before/after states before adding gameplay breadth.
@@ -57,9 +57,9 @@ This file is the persistent project context and current roadmap for OpenCode. Re
    - **Result:** `docs/ART_DIRECTION.md` records the storybook fairground direction, palette, shape/material rules, mobile lighting/camera and entrance-to-carousel composition. `docs/ASSET_PLAN.md` lists MVP assets, per-item creation/refinement recommendations, Creator Store search/review criteria, and the planned `ParkBuilder`/`RideService`/`EconomyService`/`HUDController` split. Graybox geometry remains temporary and is not a final-art target.
    - **Verification:** Reviewed the project README, game design, Rojo mapping, and current source; manually checked the two design documents and their local references for consistency. No code tests or Studio visual checks were run because this phase changed documentation only.
 3. **Polished vertical slice — in progress (current phase):** one entrance area and one memorable carousel; repair interaction and ticket feedback, with an intentional before/after look.
-   - **Result:** The existing behavior is split across `ParkBuilder`, `ParkProgressionService`, `RideService`, `EconomyService`, and client controllers. Players clear entrance debris to unlock carousel repair; successful repair grants tickets, replicates its state, and starts the graybox rotor. The ticket HUD pulses on rewards and a brief repair toast confirms restoration. The generated scene remains temporary graybox; the distinctive authored carousel and approved final scene presentation are still pending.
-   - **Verification:** `verify.ps1` passed StyLua, Selene (0 warnings), Luau type analysis, and Rojo sourcemap/place build. Roblox Studio runtime and mobile visual checks were not run.
-   - **Next:** replace the temporary carousel/entrance with approved authored assets, then verify the before/after composition in Studio on mobile-sized views.
+   - **Result:** The existing behavior is split across `ParkBuilder`, `ParkProgressionService`, `RideService`, `EconomyService`, and client controllers. Players clear entrance debris to unlock carousel repair; successful repair grants tickets, replicates its state, and starts the graybox rotor. The ticket HUD pulses on rewards and a brief repair toast confirms restoration. Custom entrance/platform/rotor/broken-and-restored canopy/repair-console OBJ sources are now in `assets/models/parkpark/`; the active scene remains temporary graybox until the models are imported and visually reviewed.
+   - **Verification:** `verify.ps1` passed StyLua, Selene (0 warnings), Luau type analysis, and Rojo sourcemap/place build. The Python mesh generator produced six OBJ sources below 7,500 triangles each and a geometry preview sheet. Roblox Studio import, runtime, and mobile visual checks were not run.
+   - **Next:** import and review the custom OBJ models in Studio, wire approved model states into the asset pipeline, and verify the before/after composition on mobile-sized views.
 4. **First-session loop:** open the gate, bring in the first guests, and let guests use the ride.
 5. **Expand only after the slice is visually and mechanically approved:** more attractions, zones, saving, social visits, events, and later monetization.
 
