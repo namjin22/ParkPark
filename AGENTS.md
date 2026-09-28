@@ -25,6 +25,7 @@ This file is the persistent project context and current roadmap for OpenCode. Re
 - Git is initialized on branch `main` and connected to the public GitHub repository `https://github.com/namjin22/ParkPark`.
 - Rojo project and Studio plugin are connected to the local Place2. The server and client bootstrap messages were verified in Studio Output.
 - The current Rojo mapping is in `default.project.json`; imported model templates under `assets/models/roblox/` map to `ReplicatedStorage/ParkParkAssets`.
+- After the user reported `ParkParkAssets` missing in Studio, the Rojo serve process on port 34872 was restarted with the current project mapping; a Studio connection is present, but Play has not yet been rechecked.
 - Roblox Studio login succeeded through Quick Login while the phone and PC used the same network. Avoid repeating login troubleshooting unless the user reports a new issue.
 
 ## Current source and known prototype state
@@ -33,7 +34,7 @@ This file is the persistent project context and current roadmap for OpenCode. Re
 - `src/client/Bootstrap.client.luau` starts `HUDController` and `RepairFeedbackController` for ticket and restoration feedback.
 - `src/shared/Config/GameConfig.luau` holds starter ticket settings.
 - The final scene is not visually approved yet. Finish its authored entrance/carousel and compare the before/after states before adding gameplay breadth.
-- The user reported that Studio Play currently shows only a broad plain area. The optional asset-folder wait has been removed, but this latest startup path still needs a Studio Play check and Output inspection.
+- The user initially reported a broad plain area; the latest Play log shows the server and client bootstraps and visible graybox structures, but also showed the old Rojo mapping missing `ParkParkAssets`. Retest Play after the Rojo restart and inspect Output before diagnosing any remaining scene issue.
 
 ## Design and asset direction
 
@@ -59,8 +60,8 @@ This file is the persistent project context and current roadmap for OpenCode. Re
    - **Verification:** Reviewed the project README, game design, Rojo mapping, and current source; manually checked the two design documents and their local references for consistency. No code tests or Studio visual checks were run because this phase changed documentation only.
 3. **Polished vertical slice — in progress (current phase):** one entrance area and one memorable carousel; repair interaction and ticket feedback, with an intentional before/after look.
    - **Result:** The existing behavior is split across `ParkBuilder`, `ParkProgressionService`, `RideService`, `EconomyService`, and client controllers. Players clear entrance debris to unlock carousel repair; successful repair grants tickets, replicates its state, and starts the graybox rotor. The ticket HUD pulses on rewards and a brief repair toast confirms restoration. Seven custom OBJ sources are in `assets/models/parkpark/`; `default.project.json` maps imported `.rbxmx` templates from `assets/models/roblox/`, and `ParkBuilder` uses named templates when present while preserving the graybox fallback and switching authored canopy variants on repair.
-   - **Verification:** `verify.ps1` passed StyLua, Selene (0 warnings), Luau type analysis, and Rojo sourcemap/place build. The Python mesh generator produced seven OBJ sources below 7,500 triangles each and a geometry preview sheet. Roblox Studio import, runtime, and mobile visual checks were not run.
-   - **Next:** import the OBJ components in Studio, group/save the named entrance and carousel models into `assets/models/roblox/`, then verify the state swap and entrance-to-carousel composition on mobile-sized views.
+   - **Verification:** `verify.ps1` passed StyLua, Selene (0 warnings), Luau type analysis, and Rojo sourcemap/place build. The Python mesh generator produced seven OBJ sources below 7,500 triangles each and a geometry preview sheet. A Studio Play run showed the graybox, then Rojo was restarted to expose the new asset mapping; the post-restart Play check and mobile visual review are still pending.
+   - **Next:** retest Studio Play and confirm the missing-asset warning is gone; then import the OBJ components, group/save the named entrance and carousel models into `assets/models/roblox/`, and verify the state swap and mobile composition.
 4. **First-session loop:** open the gate, bring in the first guests, and let guests use the ride.
 5. **Expand only after the slice is visually and mechanically approved:** more attractions, zones, saving, social visits, events, and later monetization.
 
