@@ -47,13 +47,19 @@ def read_obj(path: Path) -> tuple[list[tuple[float, float, float]], list[tuple[s
 	return vertices, faces
 
 
-def combine(paths: tuple[Path, ...]) -> tuple[list[tuple[float, float, float]], list[tuple[str, tuple[int, ...]]]]:
+def combine(
+	paths: tuple[Path, ...], offsets: dict[str, tuple[float, float, float]] | None = None
+) -> tuple[list[tuple[float, float, float]], list[tuple[str, tuple[int, ...]]]]:
 	vertices: list[tuple[float, float, float]] = []
 	faces: list[tuple[str, tuple[int, ...]]] = []
 	for path in paths:
 		part_vertices, part_faces = read_obj(path)
 		offset = len(vertices)
-		vertices.extend(part_vertices)
+		translation = (offsets or {}).get(path.stem, (0.0, 0.0, 0.0))
+		vertices.extend(
+			(tuple(point[axis] + translation[axis] for axis in range(3)))
+			for point in part_vertices
+		)
 		faces.extend((material, tuple(index + offset for index in face)) for material, face in part_faces)
 	return vertices, faces
 
@@ -72,10 +78,11 @@ def render_card(
 	paths: tuple[Path, ...],
 	materials: dict[str, tuple[int, int, int]],
 	label: str,
+	offsets: dict[str, tuple[float, float, float]] | None = None,
 ) -> None:
 	draw = ImageDraw.Draw(canvas)
 	left, top, right, bottom = bounds
-	vertices, faces = combine(paths)
+	vertices, faces = combine(paths, offsets)
 	angle = math.radians(42)
 	pitch = math.radians(29)
 	cos_yaw, sin_yaw = math.cos(angle), math.sin(angle)
@@ -130,14 +137,14 @@ def render_card(
 
 def main() -> None:
 	materials = read_materials()
-	canvas = Image.new("RGB", (1800, 760), (255, 247, 229))
+	canvas = Image.new("RGB", (2200, 760), (255, 247, 229))
 	draw = ImageDraw.Draw(canvas)
 	font = ImageFont.load_default(size=40)
 	subtitle_font = ImageFont.load_default(size=22)
 	draw.text((72, 42), "ParkPark | first custom mesh pass", font=font, fill=(57, 67, 72))
 	draw.text((74, 94), "Generated OBJ review sheet · geometry preview, not a Studio render", font=subtitle_font, fill=(99, 103, 98))
 
-	columns = ((50, 170, 585, 705), (692, 170, 1227, 705), (1334, 170, 1750, 705))
+	columns = ((30, 170, 555, 705), (580, 170, 1105, 705), (1130, 170, 1655, 705), (1680, 170, 2170, 705))
 	for left, top, right, bottom in columns:
 		draw.rounded_rectangle((left, top, right, bottom), radius=26, fill=(255, 252, 244), outline=(225, 211, 181), width=2)
 
@@ -146,10 +153,20 @@ def main() -> None:
 	canopy_restored = ASSET_DIR / "ParkParkCanopyRestored.obj"
 	canopy_neglected = ASSET_DIR / "ParkParkCanopyNeglected.obj"
 	entrance = ASSET_DIR / "ParkParkStorybookEntrance.obj"
+	entrance_sign = ASSET_DIR / "ParkParkEntranceSign.obj"
+	repair_console = ASSET_DIR / "ParkParkRepairConsole.obj"
 
 	render_card(canvas, columns[0], (platform, rotor, canopy_restored), materials, "Restored carousel")
 	render_card(canvas, columns[1], (platform, rotor, canopy_neglected), materials, "Neglected carousel")
-	render_card(canvas, columns[2], (entrance,), materials, "Storybook entrance")
+	render_card(
+		canvas,
+		columns[2],
+		(entrance, entrance_sign),
+		materials,
+		"Storybook entrance",
+		{ "ParkParkEntranceSign": (0, 14.2, -1.35) },
+	)
+	render_card(canvas, columns[3], (repair_console,), materials, "Repair console")
 	canvas.save(OUTPUT)
 	print(f"Wrote {OUTPUT.relative_to(ROOT)}")
 

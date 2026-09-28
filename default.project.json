@@ -6,6 +6,9 @@
       "$className": "ReplicatedStorage",
       "ParkRebornShared": {
         "$path": "src/shared"
+      },
+      "ParkParkAssets": {
+        "$path": "assets/models/roblox"
       }
     },
     "ServerScriptService": {

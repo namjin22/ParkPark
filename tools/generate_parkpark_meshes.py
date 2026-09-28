@@ -543,13 +543,21 @@ def make_entrance() -> Mesh:
                 center_x=center_x,
             )
     add_arch_band(mesh)
-    add_box(mesh, (0, 14.2, 0), (7.4, 1.25, 2.5), "cream")
-    add_box(mesh, (0, 14.2, -1.28), (6.5, 0.68, 0.08), "coral")
     add_star(mesh, 16.25, 0.82, "gold")
     for side in (-1, 1):
         for tier in range(3):
             y = 9.4 + tier * 1.1
             add_ellipsoid(mesh, (side * (8.2 + tier * 0.16), y, -0.1), (0.2, 0.28, 0.2), "gold", slices=8, stacks=4)
+    return mesh
+
+
+def make_entrance_sign() -> Mesh:
+    mesh = Mesh("ParkParkEntranceSign")
+    add_box(mesh, (0, 0, 0), (7.4, 1.25, 0.3), "gold")
+    add_box(mesh, (0, 0, -0.17), (7.1, 1.02, 0.12), "cream")
+    add_box(mesh, (0, 0, -0.24), (6.72, 0.72, 0.06), "coral")
+    add_torus(mesh, 0.09, 0.055, 0.0, "gold", segments=16, sides=5, center_x=-3.4)
+    add_torus(mesh, 0.09, 0.055, 0.0, "gold", segments=16, sides=5, center_x=3.4)
     return mesh
 
 
@@ -604,6 +612,7 @@ def main() -> None:
         make_canopy(restored=False),
         make_canopy(restored=True),
         make_entrance(),
+        make_entrance_sign(),
         make_repair_console(),
     )
     for mesh in meshes:

@@ -1,10 +1,13 @@
 --!strict
 
 local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local PARK_FOLDER_NAME = "ParkParkWorld"
 local ENTRANCE_NAME = "RuinedEntrance"
 local CAROUSEL_NAME = "BrokenCarousel"
+local assetFolder = ReplicatedStorage:WaitForChild("ParkParkAssets")
+local assetManifest = require(assetFolder:WaitForChild("AssetManifest"))
 
 local ParkBuilder = {}
 
@@ -39,6 +42,50 @@ local function createPart(
 	part.BottomSurface = Enum.SurfaceType.Smooth
 	part.Parent = parent
 	return part
+end
+
+local function createEntranceSign(panel: BasePart)
+	if panel:FindFirstChild("EntranceSign") then
+		return
+	end
+
+	local sign = Instance.new("SurfaceGui")
+	sign.Name = "EntranceSign"
+	sign.Face = Enum.NormalId.Front
+	sign.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	sign.PixelsPerStud = 60
+	sign.Parent = panel
+
+	local label = Instance.new("TextLabel")
+	label.Name = "SignText"
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 1
+	label.Text = "PARK PARK"
+	label.TextColor3 = Color3.fromRGB(255, 241, 210)
+	label.TextScaled = true
+	label.Font = Enum.Font.GothamBold
+	label.Parent = sign
+end
+
+local function ensureGrayboxApproach(parkFolder: Folder)
+	if parkFolder:FindFirstChild("EntranceGround") == nil then
+		createPart(
+			"EntranceGround",
+			Vector3.new(70, 1, 60),
+			Vector3.new(0, -0.5, 10),
+			Color3.fromRGB(95, 95, 90),
+			parkFolder
+		)
+	end
+	if parkFolder:FindFirstChild("CrackedPath") == nil then
+		createPart(
+			"CrackedPath",
+			Vector3.new(14, 0.2, 20),
+			Vector3.new(0, 0.1, 11),
+			Color3.fromRGB(115, 112, 104),
+			parkFolder
+		)
+	end
 end
 
 local function buildGrayboxDebris(entrance: Model): Model
@@ -83,54 +130,24 @@ end
 local function buildGrayboxEntrance(parkFolder: Folder): Model
 	local entrance = Instance.new("Model")
 	entrance.Name = ENTRANCE_NAME
+	entrance:SetAttribute("IsGraybox", true)
 	entrance.Parent = parkFolder
 
-	createPart(
-		"EntranceGround",
-		Vector3.new(70, 1, 60),
-		Vector3.new(0, -0.5, 10),
-		Color3.fromRGB(95, 95, 90),
-		parkFolder
-	)
 	createPart("LeftPillar", Vector3.new(4, 14, 4), Vector3.new(-16, 7, 25), Color3.fromRGB(105, 105, 100), entrance)
 	createPart("RightPillar", Vector3.new(4, 14, 4), Vector3.new(16, 7, 25), Color3.fromRGB(105, 105, 100), entrance)
 
-	local beam =
+	local arch =
 		createPart("BrokenArch", Vector3.new(36, 3, 4), Vector3.new(0, 13, 25), Color3.fromRGB(80, 80, 76), entrance)
-	local sign = Instance.new("SurfaceGui")
-	sign.Name = "EntranceSign"
-	sign.Face = Enum.NormalId.Front
-	sign.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-	sign.PixelsPerStud = 40
-	sign.Parent = beam
-
-	local label = Instance.new("TextLabel")
-	label.Name = "SignText"
-	label.Size = UDim2.fromScale(1, 1)
-	label.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-	label.BackgroundTransparency = 0.1
-	label.Text = "PARK PARK"
-	label.TextColor3 = Color3.fromRGB(220, 220, 220)
-	label.TextScaled = true
-	label.Font = Enum.Font.GothamBold
-	label.Parent = sign
-
-	createPart(
-		"CrackedPath",
-		Vector3.new(14, 0.2, 20),
-		Vector3.new(0, 0.1, 11),
-		Color3.fromRGB(115, 112, 104),
-		parkFolder
-	)
+	createEntranceSign(arch)
 	buildGrayboxDebris(entrance)
 
 	return entrance
 end
 
-local function prepareGrayboxRotor(rotor: Model): Model
+local function prepareCarouselRotor(rotor: Model): Model
 	local root = rotor:FindFirstChild("CenterPost")
 	if root == nil or not root:IsA("BasePart") then
-		error("[ParkPark] BrokenCarousel.CarouselRotor.CenterPost must be a BasePart")
+		error("[ParkPark] CarouselRotor.CenterPost must be a BasePart")
 	end
 
 	rotor.PrimaryPart = root
@@ -156,6 +173,69 @@ local function prepareGrayboxRotor(rotor: Model): Model
 	return rotor
 end
 
+local function findAuthoredTemplate(name: string): Model?
+	local assetName: string?
+	if name == ENTRANCE_NAME then
+		assetName = assetManifest.Models.Entrance
+	elseif name == CAROUSEL_NAME then
+		assetName = assetManifest.Models.Carousel
+	end
+
+	if assetName == nil then
+		return nil
+	end
+
+	local template = assetFolder:FindFirstChild(assetName)
+	if template == nil then
+		return nil
+	end
+	if not template:IsA("Model") then
+		error(string.format("[ParkPark] ParkParkAssets.%s must be a Model", assetName))
+	end
+
+	return template
+end
+
+local function setVariantVisible(variant: Instance, visible: boolean)
+	local function applyVisibility(part: BasePart)
+		part.Transparency = if visible then 0 else 1
+		part.CanCollide = false
+		part.CanTouch = false
+		part.CanQuery = visible
+	end
+
+	if variant:IsA("BasePart") then
+		applyVisibility(variant)
+		return
+	end
+	for _, descendant in variant:GetDescendants() do
+		if descendant:IsA("BasePart") then
+			applyVisibility(descendant)
+		end
+	end
+end
+
+local function applyAuthoredCarouselState(carousel: Model, repaired: boolean)
+	local neglectedName = assetManifest.CarouselStates.NeglectedCanopy
+	local restoredName = assetManifest.CarouselStates.RestoredCanopy
+	local neglected = carousel:FindFirstChild(neglectedName, true)
+	local restored = carousel:FindFirstChild(restoredName, true)
+	if neglected == nil or restored == nil then
+		warn(
+			string.format(
+				"[ParkPark] Authored %s needs both canopy states (%s and %s)",
+				CAROUSEL_NAME,
+				neglectedName,
+				restoredName
+			)
+		)
+		return
+	end
+
+	setVariantVisible(neglected, not repaired)
+	setVariantVisible(restored, repaired)
+end
+
 local function ensureGrayboxDebris(entrance: Model): (Model, BasePart, ProximityPrompt)
 	local debrisInstance = entrance:FindFirstChild("EntranceDebris")
 	local debris: Model
@@ -179,9 +259,23 @@ local function ensureGrayboxDebris(entrance: Model): (Model, BasePart, Proximity
 	return debris, target, prompt
 end
 
+local function ensureAuthoredEntranceSign(entrance: Model)
+	if entrance:FindFirstChild("EntranceSign", true) then
+		return
+	end
+
+	local panel = entrance:FindFirstChild(assetManifest.EntranceSign, true)
+	if panel and panel:IsA("BasePart") then
+		createEntranceSign(panel)
+	elseif entrance:GetAttribute("IsGraybox") ~= true then
+		warn("[ParkPark] Authored RuinedEntrance is missing its SignPanel mesh")
+	end
+end
+
 local function buildGrayboxCarousel(parkFolder: Folder): Model
 	local carousel = Instance.new("Model")
 	carousel.Name = CAROUSEL_NAME
+	carousel:SetAttribute("IsGraybox", true)
 	carousel:SetAttribute("IsRepaired", false)
 	carousel.Parent = parkFolder
 
@@ -197,7 +291,7 @@ local function buildGrayboxCarousel(parkFolder: Folder): Model
 	createPart("BrokenSeatB", Vector3.new(3, 2, 3), Vector3.new(-7, 2, -12), Color3.fromRGB(105, 105, 100), rotor)
 	createPart("BrokenSeatC", Vector3.new(3, 2, 3), Vector3.new(0, 2, -19), Color3.fromRGB(105, 105, 100), rotor)
 	createPart("BrokenSeatD", Vector3.new(3, 2, 3), Vector3.new(0, 2, -5), Color3.fromRGB(105, 105, 100), rotor)
-	prepareGrayboxRotor(rotor)
+	prepareCarouselRotor(rotor)
 
 	local console = createPart(
 		"RepairConsole",
@@ -246,12 +340,32 @@ local function getOrCreateModel(parent: Instance, name: string, build: (Folder) 
 	if not parent:IsA("Folder") then
 		error("[ParkPark] Expected park folder while creating " .. name)
 	end
+
+	local template = findAuthoredTemplate(name)
+	if template then
+		local model = template:Clone()
+		model.Name = name
+		model:SetAttribute("IsGraybox", false)
+		model.Parent = parent
+		if name == ENTRANCE_NAME then
+			model:PivotTo(CFrame.new(0, 0, 25))
+		elseif name == CAROUSEL_NAME then
+			model:PivotTo(CFrame.new(0, 0, -12))
+		end
+		return model
+	end
+
 	return build(parent)
 end
 
 function ParkBuilder.Build(): References
 	local parkFolder = getOrCreateParkFolder()
 	local entrance = getOrCreateModel(parkFolder, ENTRANCE_NAME, buildGrayboxEntrance)
+	ensureGrayboxApproach(parkFolder)
+	if entrance:GetAttribute("IsGraybox") == nil then
+		entrance:SetAttribute("IsGraybox", true)
+	end
+	ensureAuthoredEntranceSign(entrance)
 	local debris, cleanupTarget, cleanupPrompt = ensureGrayboxDebris(entrance)
 	if parkFolder:GetAttribute("EntranceCleared") == nil then
 		parkFolder:SetAttribute("EntranceCleared", false)
@@ -267,6 +381,9 @@ function ParkBuilder.Build(): References
 		end
 	end
 	local carousel = getOrCreateModel(parkFolder, CAROUSEL_NAME, buildGrayboxCarousel)
+	if carousel:GetAttribute("IsGraybox") == nil then
+		carousel:SetAttribute("IsGraybox", true)
+	end
 	if carousel:GetAttribute("IsRepaired") == nil then
 		carousel:SetAttribute("IsRepaired", false)
 	end
@@ -301,7 +418,7 @@ function ParkBuilder.Build(): References
 	else
 		error("[ParkPark] BrokenCarousel.CarouselRotor must be a Model")
 	end
-	local rotor = prepareGrayboxRotor(rotorModel)
+	local rotor = prepareCarouselRotor(rotorModel)
 
 	local console = carousel:FindFirstChild("RepairConsole")
 	if console == nil or not console:IsA("BasePart") then
@@ -309,8 +426,24 @@ function ParkBuilder.Build(): References
 	end
 
 	local prompt = console:FindFirstChild("RepairPrompt")
-	if prompt == nil or not prompt:IsA("ProximityPrompt") then
+	local repairPrompt: ProximityPrompt
+	if prompt == nil then
+		repairPrompt = Instance.new("ProximityPrompt")
+		repairPrompt.Name = "RepairPrompt"
+		repairPrompt.ActionText = "수리하기"
+		repairPrompt.ObjectText = "고장 난 회전목마"
+		repairPrompt.HoldDuration = 2
+		repairPrompt.MaxActivationDistance = 10
+		repairPrompt.RequiresLineOfSight = false
+		repairPrompt.Enabled = parkFolder:GetAttribute("EntranceCleared") == true
+		repairPrompt.Parent = console
+	elseif prompt:IsA("ProximityPrompt") then
+		repairPrompt = prompt
+	else
 		error("[ParkPark] BrokenCarousel.RepairConsole.RepairPrompt must be a ProximityPrompt")
+	end
+	if carousel:GetAttribute("IsGraybox") ~= true then
+		applyAuthoredCarouselState(carousel, carousel:GetAttribute("IsRepaired") == true)
 	end
 
 	return {
@@ -322,13 +455,17 @@ function ParkBuilder.Build(): References
 		Carousel = carousel,
 		CarouselRotor = rotor,
 		RepairConsole = console,
-		RepairPrompt = prompt,
+		RepairPrompt = repairPrompt,
 	}
 end
 
--- This color swap belongs to the temporary graybox and must be replaced by
--- authored carousel state assets before the slice is presented as final art.
-function ParkBuilder.ApplyRepairedGrayboxAppearance(carousel: Model)
+-- Graybox rides use a temporary tint swap; authored rides toggle their canopy meshes.
+function ParkBuilder.ApplyRepairedAppearance(carousel: Model)
+	if carousel:GetAttribute("IsGraybox") ~= true then
+		applyAuthoredCarouselState(carousel, true)
+		return
+	end
+
 	for _, descendant in carousel:GetDescendants() do
 		if descendant:IsA("BasePart") then
 			descendant.Material = Enum.Material.SmoothPlastic

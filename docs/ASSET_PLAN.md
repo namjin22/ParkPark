@@ -67,7 +67,7 @@ Creator Store 검색은 영어 검색어를 함께 사용해 후보 폭을 넓�
 
 ## 현재 직접 제작한 모델 원본
 
-`assets/models/parkpark/`에 입구 아치, 고정 플랫폼, 회전 rotor, 폐허/복구 차양, 수리 콘솔을 분리한 OBJ 메시 원본과 공통 MTL 팔레트가 있다. `tools/generate_parkpark_meshes.py`는 표준 라이브러리만으로 메시를 재생성하고 material 참조, face 인덱스, 20,000-triangle 상한을 확인한다. Rotor와 두 차양은 같은 회전축 원점을 공유하도록 만들었다.
+`assets/models/parkpark/`에 입구 아치·간판, 고정 플랫폼, 회전 rotor, 폐허/복구 차양, 수리 콘솔을 분리한 OBJ 메시 원본과 공통 MTL 팔레트가 있다. `tools/generate_parkpark_meshes.py`는 표준 라이브러리만으로 메시를 재생성하고 material 참조, face 인덱스, 20,000-triangle 상한을 확인한다. Rotor와 두 차양은 같은 회전축 원점을 공유하도록 만들었다.
 
 | 메시 원본 | 삼각형 수 | 대략적인 크기 (studs) |
 | --- | ---: | --- |
@@ -75,12 +75,15 @@ Creator Store 검색은 영어 검색어를 함께 사용해 후보 폭을 넓�
 | `ParkParkCarouselRotor.obj` | 7,424 | 약 17.51 × 11.7 × 17.51 |
 | `ParkParkCanopyNeglected.obj` | 1,500 | 약 18.7 × 5.19 × 18.7 |
 | `ParkParkCanopyRestored.obj` | 3,192 | 약 18.74 × 5.52 × 18.74 |
-| `ParkParkStorybookEntrance.obj` | 2,816 | 약 17.44 × 16.99 × 2.96 |
+| `ParkParkStorybookEntrance.obj` | 2,792 | 약 17.44 × 16.99 × 2.96 |
+| `ParkParkEntranceSign.obj` | 356 | 7.4 × 1.25 × 0.42 |
 | `ParkParkRepairConsole.obj` | 856 | 약 1.88 × 2.94 × 1.88 |
 
-복구 상태에서 입구·플랫폼·rotor·복구 차양·콘솔을 함께 쓰면 약 17.2K 삼각형이다. 폐허 차양은 복구 차양 대신 선택해 총량은 약 15.5K가 된다. 형상 검토용 이미지는 [`ParkParkModelPreview.png`](../assets/models/parkpark/ParkParkModelPreview.png)에서 볼 수 있다.
+복구 상태에서 입구 아치·간판·플랫폼·rotor·복구 차양·콘솔을 함께 쓰면 약 17.6K 삼각형이다. 폐허 차양은 복구 차양 대신 선택해 총량은 약 15.9K가 된다. 형상 검토용 이미지는 [`ParkParkModelPreview.png`](../assets/models/parkpark/ParkParkModelPreview.png)에서 볼 수 있다.
 
 이 파일들은 검토 가능한 커스텀 모델 원본이지만, Studio에서 import·조정·플레이 화면 검수를 마친 최종 에셋은 아니다. 기존 graybox를 최종 에셋으로 취급하지 않으며, 모델의 pivot과 형상을 확인한 뒤에만 게임 내 참조에 연결한다. import와 구도 검수 절차는 [`../assets/models/parkpark/README.md`](../assets/models/parkpark/README.md)를 따른다.
+
+`default.project.json`은 `assets/models/roblox/`를 `ReplicatedStorage/ParkParkAssets`로 매핑한다. Studio에서 승인한 `RuinedEntrance.rbxmx`와 `BrokenCarousel.rbxmx`를 이 폴더에 저장하면 `ParkBuilder`가 이를 clone하고, 없으면 graybox로 실행한다. `AssetManifest.luau`에는 `SignPanel`, `CarouselRotor/CenterPost`, `CanopyNeglected`, `CanopyRestored` 이름 규약이 정의되어 있다. 가져온 모델은 실행 스크립트 없이 그래픽만 포함한다.
 
 ## 현재 코드 구조와 에셋 연결점
 
@@ -88,7 +91,7 @@ Creator Store 검색은 영어 검색어를 함께 사용해 후보 폭을 넓�
 
 | 모듈 | 현재 책임 |
 | --- | --- |
-| `ParkBuilder` | 임시 입구·회전목마 구성, 상호작용 참조와 회전 rotor 준비. 다음으로 승인된 모델을 연결한다. |
+| `ParkBuilder` | 승인된 asset template이 있으면 clone하고, 없으면 임시 입구·회전목마 graybox를 구성한다. 상호작용 참조와 회전 rotor를 준비한다. |
 | `ParkProgressionService` | 서버에서 입구 정리 거리/생존 상태를 검증하고 잔해를 치운 뒤 회전목마 수리를 연다. |
 | `RideService` | 회전목마 수리 검증과 플레이어별 보상 처리, 복구 상태 복제, rotor 회전 시작. |
 | `EconomyService` | 플레이어 티켓 초기화와 검증된 서버 티켓 지급. |
