@@ -18,7 +18,9 @@
 src/
 ├── client/
 │   ├── Bootstrap.client.luau
-│   └── Controllers/HUDController.luau
+│   └── Controllers/
+│       ├── HUDController.luau
+│       └── RepairFeedbackController.luau
 ├── server/
 │   ├── Bootstrap.server.luau
 │   └── Services/

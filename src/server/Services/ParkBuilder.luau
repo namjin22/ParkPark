@@ -86,6 +86,7 @@ end
 local function buildGrayboxCarousel(parkFolder: Folder): Model
 	local carousel = Instance.new("Model")
 	carousel.Name = CAROUSEL_NAME
+	carousel:SetAttribute("IsRepaired", false)
 	carousel.Parent = parkFolder
 
 	createPart("RidePlatform", Vector3.new(22, 1, 22), Vector3.new(0, 0.5, -12), Color3.fromRGB(90, 90, 90), carousel)
@@ -150,6 +151,9 @@ function ParkBuilder.Build(): References
 	local parkFolder = getOrCreateParkFolder()
 	local entrance = getOrCreateModel(parkFolder, ENTRANCE_NAME, buildGrayboxEntrance)
 	local carousel = getOrCreateModel(parkFolder, CAROUSEL_NAME, buildGrayboxCarousel)
+	if carousel:GetAttribute("IsRepaired") == nil then
+		carousel:SetAttribute("IsRepaired", false)
+	end
 
 	local console = carousel:FindFirstChild("RepairConsole")
 	if console == nil or not console:IsA("BasePart") then

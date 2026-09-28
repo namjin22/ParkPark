@@ -23,7 +23,10 @@ function RideService.Start(
 	applyRepairedAppearance: ApplyRepairedAppearance
 )
 	local rewardedPlayers: { [number]: boolean } = {}
-	local carouselRepaired = false
+	local carouselRepaired = park.Carousel:GetAttribute("IsRepaired") == true
+	if carouselRepaired then
+		park.RepairPrompt.ActionText = "수리 완료"
+	end
 
 	park.RepairPrompt.Triggered:Connect(function(player: Player)
 		if player.Parent ~= Players or rewardedPlayers[player.UserId] then
@@ -51,6 +54,7 @@ function RideService.Start(
 		if not carouselRepaired then
 			carouselRepaired = true
 			applyRepairedAppearance(park.Carousel)
+			park.Carousel:SetAttribute("IsRepaired", true)
 			park.RepairPrompt.ActionText = "수리 완료"
 		end
 	end)
