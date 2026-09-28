@@ -6,8 +6,73 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PARK_FOLDER_NAME = "ParkParkWorld"
 local ENTRANCE_NAME = "RuinedEntrance"
 local CAROUSEL_NAME = "BrokenCarousel"
-local assetFolder = ReplicatedStorage:WaitForChild("ParkParkAssets")
-local assetManifest = require(assetFolder:WaitForChild("AssetManifest"))
+
+type AssetManifest = {
+	Models: {
+		Entrance: string,
+		Carousel: string,
+	},
+	EntranceSign: string,
+	CarouselStates: {
+		NeglectedCanopy: string,
+		RestoredCanopy: string,
+	},
+}
+
+local assetManifest: AssetManifest = {
+	Models = {
+		Entrance = ENTRANCE_NAME,
+		Carousel = CAROUSEL_NAME,
+	},
+	EntranceSign = "SignPanel",
+	CarouselStates = {
+		NeglectedCanopy = "CanopyNeglected",
+		RestoredCanopy = "CanopyRestored",
+	},
+}
+local loadedManifest: ModuleScript? = nil
+local warnedAboutMissingAssets = false
+
+local function getAssetFolder(): Folder?
+	local folder = ReplicatedStorage:FindFirstChild("ParkParkAssets")
+	if folder == nil then
+		if not warnedAboutMissingAssets then
+			warnedAboutMissingAssets = true
+			warn("[ParkPark] ParkParkAssets is not synced; building the graybox scene")
+		end
+		return nil
+	end
+	if not folder:IsA("Folder") then
+		warn("[ParkPark] ReplicatedStorage.ParkParkAssets must be a Folder")
+		return nil
+	end
+
+	local manifestModule = folder:FindFirstChild("AssetManifest")
+	if manifestModule and manifestModule:IsA("ModuleScript") and manifestModule ~= loadedManifest then
+		loadedManifest = manifestModule
+		local ok, result = pcall(require, manifestModule)
+		if ok and type(result) == "table" then
+			local candidate = result :: any
+			if
+				type(candidate.Models) == "table"
+				and type(candidate.Models.Entrance) == "string"
+				and type(candidate.Models.Carousel) == "string"
+				and type(candidate.EntranceSign) == "string"
+				and type(candidate.CarouselStates) == "table"
+				and type(candidate.CarouselStates.NeglectedCanopy) == "string"
+				and type(candidate.CarouselStates.RestoredCanopy) == "string"
+			then
+				assetManifest = candidate :: AssetManifest
+			else
+				warn("[ParkPark] AssetManifest has an invalid model or canopy name")
+			end
+		else
+			warn("[ParkPark] Could not load ParkParkAssets.AssetManifest: " .. tostring(result))
+		end
+	end
+
+	return folder
+end
 
 local ParkBuilder = {}
 
@@ -174,6 +239,11 @@ local function prepareCarouselRotor(rotor: Model): Model
 end
 
 local function findAuthoredTemplate(name: string): Model?
+	local folder = getAssetFolder()
+	if folder == nil then
+		return nil
+	end
+
 	local assetName: string?
 	if name == ENTRANCE_NAME then
 		assetName = assetManifest.Models.Entrance
@@ -185,7 +255,7 @@ local function findAuthoredTemplate(name: string): Model?
 		return nil
 	end
 
-	local template = assetFolder:FindFirstChild(assetName)
+	local template = folder:FindFirstChild(assetName)
 	if template == nil then
 		return nil
 	end

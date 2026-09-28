@@ -29,10 +29,11 @@ This file is the persistent project context and current roadmap for OpenCode. Re
 
 ## Current source and known prototype state
 
-- `src/server/Bootstrap.server.luau` starts `ParkBuilder`, `ParkProgressionService`, `EconomyService`, and `RideService`; `ParkBuilder` can clone imported templates and still falls back to temporary graybox when they are absent. Separate custom OBJ source meshes for the entrance, rides, and repair console are in `assets/models/parkpark/` and are not yet imported into the place.
+- `src/server/Bootstrap.server.luau` starts `ParkBuilder`, `ParkProgressionService`, `EconomyService`, and `RideService`; `ParkBuilder` can clone imported templates and still falls back to temporary graybox when they are absent. It logs whether the entrance and carousel came from authored models or the fallback. Separate custom OBJ source meshes for the entrance, rides, and repair console are in `assets/models/parkpark/` and are not yet imported into the place.
 - `src/client/Bootstrap.client.luau` starts `HUDController` and `RepairFeedbackController` for ticket and restoration feedback.
 - `src/shared/Config/GameConfig.luau` holds starter ticket settings.
 - The final scene is not visually approved yet. Finish its authored entrance/carousel and compare the before/after states before adding gameplay breadth.
+- The user reported that Studio Play currently shows only a broad plain area. The optional asset-folder wait has been removed, but this latest startup path still needs a Studio Play check and Output inspection.
 
 ## Design and asset direction
 
