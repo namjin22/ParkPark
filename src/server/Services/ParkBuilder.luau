@@ -6,6 +6,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PARK_FOLDER_NAME = "ParkParkWorld"
 local ENTRANCE_NAME = "RuinedEntrance"
 local CAROUSEL_NAME = "BrokenCarousel"
+local ASSET_FOLDER_SYNC_TIMEOUT = 5
+local ASSET_TEMPLATE_SYNC_TIMEOUT = 2
 
 type AssetManifest = {
 	Models: {
@@ -36,6 +38,9 @@ local warnedAboutMissingAssets = false
 local function getAssetFolder(): Folder?
 	local folder = ReplicatedStorage:FindFirstChild("ParkParkAssets")
 	if folder == nil then
+		folder = ReplicatedStorage:WaitForChild("ParkParkAssets", ASSET_FOLDER_SYNC_TIMEOUT)
+	end
+	if folder == nil then
 		if not warnedAboutMissingAssets then
 			warnedAboutMissingAssets = true
 			warn("[ParkPark] ParkParkAssets is not synced; building the graybox scene")
@@ -48,6 +53,9 @@ local function getAssetFolder(): Folder?
 	end
 
 	local manifestModule = folder:FindFirstChild("AssetManifest")
+	if manifestModule == nil then
+		manifestModule = folder:WaitForChild("AssetManifest", ASSET_TEMPLATE_SYNC_TIMEOUT)
+	end
 	if manifestModule and manifestModule:IsA("ModuleScript") and manifestModule ~= loadedManifest then
 		loadedManifest = manifestModule
 		local ok, result = pcall(require, manifestModule)
@@ -256,6 +264,9 @@ local function findAuthoredTemplate(name: string): Model?
 	end
 
 	local template = folder:FindFirstChild(assetName)
+	if template == nil then
+		template = folder:WaitForChild(assetName, ASSET_TEMPLATE_SYNC_TIMEOUT)
+	end
 	if template == nil then
 		return nil
 	end

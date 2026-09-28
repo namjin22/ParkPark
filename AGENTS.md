@@ -30,11 +30,12 @@ This file is the persistent project context and current roadmap for OpenCode. Re
 
 ## Current source and known prototype state
 
-- `src/server/Bootstrap.server.luau` starts `ParkBuilder`, `ParkProgressionService`, `EconomyService`, and `RideService`; `ParkBuilder` can clone imported templates and still falls back to temporary graybox when they are absent. It logs whether the entrance and carousel came from authored models or the fallback. Separate custom OBJ source meshes for the entrance, rides, and repair console are in `assets/models/parkpark/` and are not yet imported into the place.
+- `src/server/Bootstrap.server.luau` starts `ParkBuilder`, `ParkProgressionService`, `EconomyService`, and `RideService`; `ParkBuilder` can clone imported templates and still falls back to temporary graybox when they are absent. It waits up to five seconds for the optional asset folder to allow Rojo's startup sync to finish. Bootstrap logs whether the entrance and carousel came from authored models or the fallback. Separate custom OBJ source meshes for the entrance, rides, and repair console are in `assets/models/parkpark/` and are not yet imported into the place.
 - `src/client/Bootstrap.client.luau` starts `HUDController` and `RepairFeedbackController` for ticket and restoration feedback.
 - `src/shared/Config/GameConfig.luau` holds starter ticket settings.
 - The final scene is not visually approved yet. Finish its authored entrance/carousel and compare the before/after states before adding gameplay breadth.
-- The user initially reported a broad plain area; the latest Play log shows the server and client bootstraps and visible graybox structures, but also showed the old Rojo mapping missing `ParkParkAssets`. Retest Play after the Rojo restart and inspect Output before diagnosing any remaining scene issue.
+- The user initially reported a broad plain area; Play now shows server/client bootstraps and visible graybox structures, but Output still reports `ParkParkAssets` not synced. Rojo was restarted and a bounded startup wait added; rerun Play and inspect Output before diagnosing any remaining scene issue.
+- The first Play after the Rojo restart still logged the missing asset folder while successfully building graybox structures. A second Play after the bounded-wait fix is still needed.
 
 ## Design and asset direction
 
