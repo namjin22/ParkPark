@@ -29,14 +29,14 @@ This file is the persistent project context and current roadmap for OpenCode. Re
 
 ## Current source and known prototype state
 
-- `src/server/Bootstrap.server.luau` currently creates a primitive graybox entrance/carousel and handles the first repair/ticket interaction in one script.
-- `src/client/Bootstrap.client.luau` currently creates a temporary ticket label.
+- `src/server/Bootstrap.server.luau` starts `ParkBuilder`, `EconomyService`, and `RideService`; `ParkBuilder` still creates the temporary entrance/carousel graybox.
+- `src/client/Bootstrap.client.luau` starts `HUDController`, which builds the ticket display and reacts to ticket changes.
 - `src/shared/Config/GameConfig.luau` holds starter ticket settings.
-- The visual result is not approved. Do not add more gameplay breadth before agreeing on visual direction and the first polished scene.
+- The final scene is not visually approved yet. Finish its authored entrance/carousel and compare the before/after states before adding gameplay breadth.
 
 ## Design and asset direction
 
-- A whimsical, nostalgic, storybook-style fairground is the proposed direction. Draft guidance is in `docs/ART_DIRECTION.md` and `docs/ASSET_PLAN.md`; both are awaiting user approval and are not yet a final approved art bible.
+- A whimsical, nostalgic, storybook-style fairground is the working direction for the vertical slice, following the user's instruction to proceed. `docs/ART_DIRECTION.md` and `docs/ASSET_PLAN.md` remain working guidance, not a final art bible.
 - Visual contrast should clearly show the park changing from faded, neglected, and overgrown to colorful, illuminated, and lively.
 - Use basic Parts only for grayboxing layout and interaction. Do not present primitive placeholders as final art.
 - Plan assets as a coherent set. Use Creator Store, custom models, or generated meshes selectively; do not invent asset IDs or copy recognizable third-party parks/brands.
@@ -53,11 +53,13 @@ This file is the persistent project context and current roadmap for OpenCode. Re
 ## Roadmap and current phase
 
 1. **Environment — complete:** VS Code/OpenCode, Git, Rojo, and Studio sync.
-2. **Visual direction and asset plan — draft complete, awaiting user approval (current phase):**
+2. **Visual direction and asset plan — complete:**
    - **Result:** `docs/ART_DIRECTION.md` records the storybook fairground direction, palette, shape/material rules, mobile lighting/camera and entrance-to-carousel composition. `docs/ASSET_PLAN.md` lists MVP assets, per-item creation/refinement recommendations, Creator Store search/review criteria, and the planned `ParkBuilder`/`RideService`/`EconomyService`/`HUDController` split. Graybox geometry remains temporary and is not a final-art target.
    - **Verification:** Reviewed the project README, game design, Rojo mapping, and current source; manually checked the two design documents and their local references for consistency. No code tests or Studio visual checks were run because this phase changed documentation only.
-   - **Gate:** Wait for explicit approval of the proposed direction before starting implementation.
-3. **Polished vertical slice — next after approval:** one entrance area and one memorable carousel; repair interaction and ticket feedback, with an intentional before/after look.
+3. **Polished vertical slice — in progress (current phase):** one entrance area and one memorable carousel; repair interaction and ticket feedback, with an intentional before/after look.
+   - **Result:** README refreshed; the existing behavior is split across `ParkBuilder`, `RideService`, `EconomyService`, and `HUDController`. Ticket changes have a small HUD pulse. The generated scene remains a temporary graybox; the distinctive authored carousel and approved final scene presentation are still pending.
+   - **Verification:** `verify.ps1` passed StyLua, Selene (0 warnings), Luau type analysis, and Rojo sourcemap/place build. Roblox Studio runtime and mobile visual checks were not run.
+   - **Next:** replace the temporary carousel/entrance with approved authored assets, then verify the before/after composition in Studio on mobile-sized views.
 4. **First-session loop:** open the gate, bring in the first guests, and let guests use the ride.
 5. **Expand only after the slice is visually and mechanically approved:** more attractions, zones, saving, social visits, events, and later monetization.
 
