@@ -1,0 +1,16 @@
+# Roblox Studio place files are backed up/published separately from synced Luau source.
+*.rbxl
+*.rbxlx
+/local_backups/
+
+# Generated tooling files
+/sourcemap.json
+/Packages/
+*.log
+
+# Local/editor files
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example
