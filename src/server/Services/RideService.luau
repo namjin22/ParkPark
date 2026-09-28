@@ -2,6 +2,7 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 
 local GameConfig =
 	require(ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("GameConfig"))
@@ -10,6 +11,7 @@ local RideService = {}
 
 type RideReferences = {
 	Carousel: Model,
+	CarouselRotor: Model,
 	RepairConsole: BasePart,
 	RepairPrompt: ProximityPrompt,
 }
@@ -24,8 +26,43 @@ function RideService.Start(
 )
 	local rewardedPlayers: { [number]: boolean } = {}
 	local carouselRepaired = park.Carousel:GetAttribute("IsRepaired") == true
+	local rotationStarted = false
+
+	local function startCarousel()
+		if rotationStarted then
+			return
+		end
+
+		local rotorRoot = park.CarouselRotor.PrimaryPart
+		if rotorRoot == nil then
+			warn("[ParkPark] Carousel rotor has no PrimaryPart")
+			return
+		end
+
+		rotationStarted = true
+		park.Carousel:SetAttribute("IsOperating", true)
+		local baseCFrame = rotorRoot.CFrame
+		task.spawn(function()
+			local angle = 0
+			local quarterTurnDuration = GameConfig.CarouselRotationSeconds / 4
+			while rotorRoot.Parent ~= nil and park.Carousel:GetAttribute("IsRepaired") == true do
+				angle = (angle + math.pi / 2) % (math.pi * 2)
+				local tween = TweenService:Create(
+					rotorRoot,
+					TweenInfo.new(quarterTurnDuration, Enum.EasingStyle.Linear),
+					{ CFrame = baseCFrame * CFrame.Angles(0, angle, 0) }
+				)
+				tween:Play()
+				if tween.Completed:Wait() ~= Enum.PlaybackState.Completed then
+					return
+				end
+			end
+		end)
+	end
+
 	if carouselRepaired then
 		park.RepairPrompt.ActionText = "수리 완료"
+		startCarousel()
 	end
 
 	park.RepairPrompt.Triggered:Connect(function(player: Player)
@@ -56,6 +93,7 @@ function RideService.Start(
 			applyRepairedAppearance(park.Carousel)
 			park.Carousel:SetAttribute("IsRepaired", true)
 			park.RepairPrompt.ActionText = "수리 완료"
+			startCarousel()
 		end
 	end)
 end

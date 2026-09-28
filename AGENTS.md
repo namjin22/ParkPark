@@ -29,8 +29,8 @@ This file is the persistent project context and current roadmap for OpenCode. Re
 
 ## Current source and known prototype state
 
-- `src/server/Bootstrap.server.luau` starts `ParkBuilder`, `EconomyService`, and `RideService`; `ParkBuilder` still creates the temporary entrance/carousel graybox.
-- `src/client/Bootstrap.client.luau` starts `HUDController`, which builds the ticket display and reacts to ticket changes.
+- `src/server/Bootstrap.server.luau` starts `ParkBuilder`, `ParkProgressionService`, `EconomyService`, and `RideService`; the entrance and carousel geometry are still temporary graybox.
+- `src/client/Bootstrap.client.luau` starts `HUDController` and `RepairFeedbackController` for ticket and restoration feedback.
 - `src/shared/Config/GameConfig.luau` holds starter ticket settings.
 - The final scene is not visually approved yet. Finish its authored entrance/carousel and compare the before/after states before adding gameplay breadth.
 
@@ -57,7 +57,7 @@ This file is the persistent project context and current roadmap for OpenCode. Re
    - **Result:** `docs/ART_DIRECTION.md` records the storybook fairground direction, palette, shape/material rules, mobile lighting/camera and entrance-to-carousel composition. `docs/ASSET_PLAN.md` lists MVP assets, per-item creation/refinement recommendations, Creator Store search/review criteria, and the planned `ParkBuilder`/`RideService`/`EconomyService`/`HUDController` split. Graybox geometry remains temporary and is not a final-art target.
    - **Verification:** Reviewed the project README, game design, Rojo mapping, and current source; manually checked the two design documents and their local references for consistency. No code tests or Studio visual checks were run because this phase changed documentation only.
 3. **Polished vertical slice — in progress (current phase):** one entrance area and one memorable carousel; repair interaction and ticket feedback, with an intentional before/after look.
-   - **Result:** README refreshed; the existing behavior is split across `ParkBuilder`, `RideService`, `EconomyService`, and client controllers. Server-owned carousel repair state replicates to clients; the ticket HUD pulses on rewards and a brief repair toast confirms the shared restoration. The generated scene remains a temporary graybox; the distinctive authored carousel and approved final scene presentation are still pending.
+   - **Result:** The existing behavior is split across `ParkBuilder`, `ParkProgressionService`, `RideService`, `EconomyService`, and client controllers. Players clear entrance debris to unlock carousel repair; successful repair grants tickets, replicates its state, and starts the graybox rotor. The ticket HUD pulses on rewards and a brief repair toast confirms restoration. The generated scene remains temporary graybox; the distinctive authored carousel and approved final scene presentation are still pending.
    - **Verification:** `verify.ps1` passed StyLua, Selene (0 warnings), Luau type analysis, and Rojo sourcemap/place build. Roblox Studio runtime and mobile visual checks were not run.
    - **Next:** replace the temporary carousel/entrance with approved authored assets, then verify the before/after composition in Studio on mobile-sized views.
 4. **First-session loop:** open the gate, bring in the first guests, and let guests use the ride.

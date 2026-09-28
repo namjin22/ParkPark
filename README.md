@@ -26,7 +26,8 @@ src/
 │   └── Services/
 │       ├── ParkBuilder.luau
 │       ├── RideService.luau
-│       └── EconomyService.luau
+│       ├── EconomyService.luau
+│       └── ParkProgressionService.luau
 └── shared/Config/GameConfig.luau
 
 docs/
