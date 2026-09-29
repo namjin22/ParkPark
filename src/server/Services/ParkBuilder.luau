@@ -7,7 +7,7 @@ local PARK_FOLDER_NAME = "ParkParkWorld"
 local ENTRANCE_NAME = "RuinedEntrance"
 local CAROUSEL_NAME = "BrokenCarousel"
 local ASSET_FOLDER_SYNC_TIMEOUT = 5
-local ASSET_TEMPLATE_SYNC_TIMEOUT = 2
+local ASSET_MANIFEST_SYNC_TIMEOUT = 2
 -- Guests spawn on +Z and walk through the entrance toward the carousel on -Z.
 local GUEST_APPROACH_DIRECTION = Vector3.new(0, 0, 1)
 -- Authored meshes use -Z as their front, so turn the entrance toward arriving guests.
@@ -59,7 +59,7 @@ local function getAssetFolder(): Folder?
 
 	local manifestModule = folder:FindFirstChild("AssetManifest")
 	if manifestModule == nil then
-		manifestModule = folder:WaitForChild("AssetManifest", ASSET_TEMPLATE_SYNC_TIMEOUT)
+		manifestModule = folder:WaitForChild("AssetManifest", ASSET_MANIFEST_SYNC_TIMEOUT)
 	end
 	if manifestModule and manifestModule:IsA("ModuleScript") and manifestModule ~= loadedManifest then
 		loadedManifest = manifestModule
@@ -212,6 +212,11 @@ local function positionGrayboxSpawn()
 	spawnLocation.Enabled = true
 	spawnLocation.Duration = 0
 	spawnLocation.AllowTeamChangeOnTouch = false
+	for _, descendant in spawnLocation:GetDescendants() do
+		if descendant:IsA("Decal") then
+			descendant.Transparency = 1
+		end
+	end
 	spawnLocation.Parent = Workspace
 end
 
@@ -317,10 +322,9 @@ local function findAuthoredTemplate(name: string): Model?
 		return nil
 	end
 
+	-- Rojo syncs the folder's children with it, so a missing template was never imported.
+	-- Waiting here only delayed every graybox Play start by the timeout per model.
 	local template = folder:FindFirstChild(assetName)
-	if template == nil then
-		template = folder:WaitForChild(assetName, ASSET_TEMPLATE_SYNC_TIMEOUT)
-	end
 	if template == nil then
 		return nil
 	end

@@ -83,7 +83,8 @@ function HUDController.Start()
 	iconText.BackgroundTransparency = 1
 	iconText.Size = UDim2.fromScale(1, 1)
 	iconText.Font = Enum.Font.GothamBold
-	iconText.Text = "✦"
+	-- GothamBold has no glyph for "✦"; "★" renders in Studio Play.
+	iconText.Text = "★"
 	iconText.TextColor3 = GameConfig.Palette.Cream
 	iconText.TextSize = 22
 	iconText.Parent = icon
