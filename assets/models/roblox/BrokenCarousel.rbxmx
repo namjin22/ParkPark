@@ -21,7 +21,7 @@
 </Properties></Item><Item class="Part" referent="RBX7"><Properties>
 <string name="Name">PlatformCollider</string>
 <token name="shape">2</token>
-<Vector3 name="size"><X>1.1199999999999999</X><Y>38.400000000000006</Y><Z>38.400000000000006</Z></Vector3>
+<Vector3 name="size"><X>1.12</X><Y>38.4</Y><Z>38.4</Z></Vector3>
 <CoordinateFrame name="CFrame"><X>0.0</X><Y>0.672</Y><Z>0.0</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">true</bool>
@@ -50,7 +50,7 @@
 </Properties>
 <Item class="MeshPart" referent="RBX9"><Properties>
 <string name="Name">CenterPost</string>
-<Content name="MeshId"><url>rbxassetid://130083848830205</url></Content>
+<Content name="MeshId"><url>rbxassetid://100711276425051</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
 <Vector3 name="InitialSize"><X>28.0128</X><Y>18.72</Y><Z>28.0128</Z></Vector3>
 <Vector3 name="size"><X>28.0128</X><Y>18.72</Y><Z>28.0128</Z></Vector3>
