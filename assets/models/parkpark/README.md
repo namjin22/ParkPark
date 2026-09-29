@@ -18,6 +18,8 @@
 | `ParkParkEntranceSign.obj` | SurfaceGui 글자를 얹을 별도 간판 메시 |
 | `ParkParkRepairConsole.obj` | 수리 상호작용을 위한 작은 장식 콘솔 |
 | `ParkParkEntranceDebris.obj` | 치울 잔해 더미: 부서진 판자, 쪼개진 상자, 쓰러진 표지판, 덤불 |
+| `ParkParkBumperPlatform.obj` | 범퍼카 링크: 테두리 바닥, 패드 레일, 바닥 무늬, 가로등 4개 |
+| `ParkParkBumperCar.obj` | 범퍼카 1대(정면 -Z): 범퍼 링, 보닛, 좌석, 스파크 폴. 템플릿에서 4대로 복제 |
 | `ParkParkFairground.mtl` | 공통 재질 팔레트 |
 
 ## 생성·가져오기
@@ -81,3 +83,5 @@ OBJ 이름과 모델 안 이름은 다음처럼 대응합니다. 아래 방향 �
 모델에 스크립트를 넣지 않습니다. 수리 prompt, 잔해 상호작용, 상태 변경은 게임 코드가 관리합니다. 규약을 갖춘 모델이 없으면 `ParkBuilder`가 기존 graybox를 계속 생성합니다.
 
 OBJ는 편집 가능한 **메시 원본**입니다. 입구·회전목마·잔해는 Studio 검수를 거쳐 Rojo 템플릿으로 연결되어 있습니다. 새 찻잔 라이드 메시 두 개는 Studio에서 각각 import한 뒤 실루엣, 재질, 피벗과 모바일 구도를 확인하고, 승인된 결과만 `MeshAssets.json`과 Rojo 템플릿에 연결합니다.
+
+`BumperCarsRide` 템플릿: `RidePlatform`(링크), `PlatformCollider`, `BumperConsole`, 그리고 `BumperCars` Model 안의 `BumperCar1`~`BumperCar4` MeshPart(전부 Anchored, 링 위 반지름 5.45 유닛에 접선 방향으로 배치)를 둡니다. 차는 서버(`BumperCarService`)가 매 프레임 CFrame으로 움직이고, 손님은 차에 용접됩니다. `BUMPER_SCALE`은 `GameConfig.BumperScale`과 같아야 합니다.

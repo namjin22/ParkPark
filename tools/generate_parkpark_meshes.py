@@ -831,6 +831,72 @@ def make_entrance_debris() -> Mesh:
     return mesh
 
 
+def make_bumper_platform() -> Mesh:
+    """Round bumper-car rink: rimmed floor, low bumper rail, floor inlays, and four lamp posts."""
+    mesh = Mesh("ParkParkBumperPlatform")
+    add_vertical_cylinder(mesh, 10.4, 0.08, 0.7, "cream", 48)
+    add_vertical_cylinder(mesh, 10.42, 0.08, 0.3, "coral", 48)
+    add_vertical_cylinder(mesh, 9.7, 0.7, 0.8, "mint", 48)
+    # Floor inlays make the rink read as a track rather than a plain disc.
+    add_torus(mesh, 6.6, 0.1, 0.82, "coral", segments=48, sides=5)
+    add_torus(mesh, 3.4, 0.1, 0.82, "gold", segments=40, sides=5)
+    add_vertical_cylinder(mesh, 1.0, 0.8, 0.9, "gold", 24)
+    add_vertical_cylinder(mesh, 0.55, 0.9, 0.98, "coral", 20)
+    # Bumper rail: posts around the rim joined by a padded coral rail with a gold cap.
+    for post in range(24):
+        angle = TAU * post / 24
+        add_vertical_cylinder(
+            mesh, 0.16, 0.8, 1.55, "cream", 8, 9.95 * math.cos(angle), 9.95 * math.sin(angle)
+        )
+    add_torus(mesh, 9.95, 0.34, 1.32, "coral", segments=48, sides=8)
+    add_torus(mesh, 9.95, 0.1, 1.72, "gold", segments=48, sides=6)
+    # Lamp posts at the diagonals, with a bulb, so the restored rink glows at dusk.
+    for index in range(4):
+        angle = math.pi / 4 + index * math.pi / 2
+        x, z = 10.6 * math.cos(angle), 10.6 * math.sin(angle)
+        add_vertical_cylinder(mesh, 0.22, 0.7, 6.0, "cream", 12, x, z)
+        add_vertical_cylinder(mesh, 0.42, 0.7, 1.1, "gold", 12, x, z)
+        add_torus(mesh, 0.3, 0.07, 5.7, "gold", segments=14, sides=5, center_x=x, center_z=z)
+        add_ellipsoid(mesh, (x, 6.35, z), (0.5, 0.5, 0.5), "gold", slices=10, stacks=6)
+        add_ellipsoid(mesh, (x, 6.95, z), (0.13, 0.2, 0.13), "coral", slices=6, stacks=4)
+    return mesh
+
+
+def make_bumper_car() -> Mesh:
+    """One bumper car facing local -Z: cushioned bumper ring, rounded body, seat, and a spark pole."""
+    mesh = Mesh("ParkParkBumperCar")
+    # Chassis and padded bumper ring.
+    add_box(mesh, (0, 0.34, 0), (1.7, 0.26, 2.5), "wood")
+    for x, z, size in (
+        (0, -1.38, (2.0, 0.34, 0.3)),
+        (0, 1.38, (2.0, 0.34, 0.3)),
+        (-1.0, 0, (0.3, 0.34, 2.5)),
+        (1.0, 0, (0.3, 0.34, 2.5)),
+    ):
+        add_box(mesh, (x, 0.48, z), size, "gold")
+    for x, z in ((-1.0, -1.38), (1.0, -1.38), (-1.0, 1.38), (1.0, 1.38)):
+        add_ellipsoid(mesh, (x, 0.48, z), (0.24, 0.2, 0.24), "gold", slices=8, stacks=4)
+    # Body shell: cowl, hood, and side fenders.
+    add_ellipsoid(mesh, (0, 0.88, 0.25), (0.86, 0.46, 1.05), "coral", slices=14, stacks=6)
+    add_ellipsoid(mesh, (0, 0.82, -0.85), (0.74, 0.34, 0.68), "coral", slices=12, stacks=6)
+    for side in (-1, 1):
+        add_ellipsoid(mesh, (side * 0.72, 0.72, -0.1), (0.24, 0.3, 1.3), "cream", slices=8, stacks=5)
+    add_box(mesh, (0, 1.2, -0.85), (0.5, 0.05, 0.86), "mint")
+    # Seat, backrest, and steering wheel.
+    add_box(mesh, (0, 1.12, 0.5), (1.1, 0.34, 0.9), "cream")
+    add_box(mesh, (0, 1.62, 0.92), (1.1, 0.9, 0.2), "cream")
+    add_cylinder_between(mesh, (0, 1.2, -0.2), (0, 1.55, 0.05), 0.05, 0.05, "wood", 6)
+    add_torus(mesh, 0.28, 0.05, 1.56, "gold", segments=14, sides=5, center_z=0.05)
+    # Headlights.
+    for side in (-1, 1):
+        add_ellipsoid(mesh, (side * 0.52, 0.92, -1.4), (0.17, 0.17, 0.12), "gold", slices=8, stacks=4)
+    # Spark pole with a contact plate on top.
+    add_cylinder_between(mesh, (0, 1.4, 1.0), (0, 5.0, 1.0), 0.08, 0.06, "wood", 8)
+    add_ellipsoid(mesh, (0, 5.05, 1.0), (0.5, 0.09, 0.5), "gold", slices=12, stacks=4)
+    add_ellipsoid(mesh, (0, 5.2, 1.0), (0.12, 0.14, 0.12), "coral", slices=6, stacks=4)
+    return mesh
+
+
 def write_materials() -> None:
     with (OUTPUT / "ParkParkFairground.mtl").open("w", encoding="utf-8", newline="\n") as output:
         output.write("# Shared low-poly palette for ParkPark's original fairground meshes\n")
@@ -887,6 +953,8 @@ def main() -> None:
         make_canopy(restored=True),
         make_teacups_platform(),
         make_teacups_rotor(),
+        make_bumper_platform(),
+        make_bumper_car(),
         make_entrance(),
         make_entrance_sign(),
         make_repair_console(),

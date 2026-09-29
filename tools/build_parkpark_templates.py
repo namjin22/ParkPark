@@ -27,11 +27,16 @@ ASSETS = json.loads((SOURCES / "MeshAssets.json").read_text(encoding="utf-8"))
 CREAM, CORAL, MINT, GOLD = (245, 217, 171), (232, 92, 82), (84, 166, 135), (235, 171, 69)
 FADED_CORAL = (135, 79, 74)
 WHITE = (255, 255, 255)
-# The carousel reads too small beside guests at 1:1, so its meshes render at this scale.
+# The rides read too small beside guests at 1:1, so their meshes render at these scales.
 # Keep in sync with GameConfig.CarouselScale, which places riders on the scaled horses.
-S = 1.6
+S = 3.2
 # Keep in sync with GameConfig.TeacupsScale, which places guests inside the cups.
-TEACUPS_SCALE = 1.0
+TEACUPS_SCALE = 2.5
+# Keep in sync with GameConfig.BumperScale, which sizes the arena and places riders in the cars.
+BUMPER_SCALE = 2.2
+BUMPER_CAR_COUNT = 4
+# Console pillars are enlarged so they stay easy to spot beside the big rides.
+CONSOLE_SCALE = 2.0
 
 _referents = count(1)
 
@@ -174,8 +179,16 @@ def main() -> None:
             [
                 mesh_part("RidePlatform", "ParkParkCarouselPlatform", (0, 0, 0), 0, False, MINT, S),
                 cylinder_collider("PlatformCollider", (0, 0.42, 0), 0.7, 24, S),
-                # The console keeps its authored size and sits just outside the scaled platform.
-                mesh_part("RepairConsole", "ParkParkRepairConsole", (12 * S + 1.2, 0, 0), 180, True, CREAM),
+                # The console sits just outside the scaled platform edge (12 units at scale 1).
+                mesh_part(
+                    "RepairConsole",
+                    "ParkParkRepairConsole",
+                    ((12 * S + 1.6) / CONSOLE_SCALE, 0, 0),
+                    180,
+                    True,
+                    CREAM,
+                    CONSOLE_SCALE,
+                ),
                 model(
                     "CarouselRotor",
                     [
@@ -211,7 +224,16 @@ def main() -> None:
                 [
                     mesh_part("RidePlatform", "ParkParkTeacupsPlatform", (0, 0, 0), 0, False, MINT, TEACUPS_SCALE),
                     cylinder_collider("PlatformCollider", (0, 0.42, 0), 0.7, 18.4, TEACUPS_SCALE),
-                    mesh_part("TeacupsConsole", "ParkParkRepairConsole", (0, 0, 10.5), 180, True, CREAM),
+                    # Platform radius is 9.2 units at scale 1.
+                    mesh_part(
+                        "TeacupsConsole",
+                        "ParkParkRepairConsole",
+                        (0, 0, (9.2 * TEACUPS_SCALE + 1.6) / CONSOLE_SCALE),
+                        180,
+                        True,
+                        CREAM,
+                        CONSOLE_SCALE,
+                    ),
                     model(
                         "TeacupsRotor",
                         [
@@ -232,6 +254,47 @@ def main() -> None:
     else:
         missing = ", ".join(name for name in teacups_meshes if name not in ASSETS["meshes"])
         print(f"skipped TeacupsRide: import {missing} and record their mesh IDs first")
+
+    bumper_meshes = ("ParkParkBumperPlatform", "ParkParkBumperCar")
+    if all(name in ASSETS["meshes"] for name in bumper_meshes):
+        car_center, _ = obj_bounds("ParkParkBumperCar")
+        cars = []
+        for index in range(BUMPER_CAR_COUNT):
+            angle = 2 * math.pi * index / BUMPER_CAR_COUNT
+            # Start on a ring, facing along it (car front is local -Z): yaw = atan2(-vx, -vz).
+            velocity = (-math.sin(angle), math.cos(angle))
+            yaw = math.degrees(math.atan2(-velocity[0], -velocity[1]))
+            wanted = (5.45 * math.cos(angle), 0.0, 5.45 * math.sin(angle))
+            # mesh_part places the part at scale * (origin + Ry(yaw) * center), so solve for the
+            # origin that puts the car's bounding-box center exactly at `wanted`.
+            cosine, sine = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
+            offset = (cosine * car_center[0] + sine * car_center[2], 0.0, -sine * car_center[0] + cosine * car_center[2])
+            origin = (wanted[0] - offset[0], 0.0, wanted[2] - offset[2])
+            cars.append(mesh_part(f"BumperCar{index + 1}", "ParkParkBumperCar", origin, yaw, False, CORAL, BUMPER_SCALE))
+        write(
+            "BumperCarsRide",
+            model(
+                "BumperCarsRide",
+                [
+                    mesh_part("RidePlatform", "ParkParkBumperPlatform", (0, 0, 0), 0, False, MINT, BUMPER_SCALE),
+                    cylinder_collider("PlatformCollider", (0, 0.42, 0), 0.7, 20.84, BUMPER_SCALE),
+                    # Platform radius is 10.42 units at scale 1.
+                    mesh_part(
+                        "BumperConsole",
+                        "ParkParkRepairConsole",
+                        (0, 0, (10.42 * BUMPER_SCALE + 1.6) / CONSOLE_SCALE),
+                        180,
+                        True,
+                        CREAM,
+                        CONSOLE_SCALE,
+                    ),
+                    model("BumperCars", cars),
+                ],
+            ),
+        )
+    else:
+        missing = ", ".join(name for name in bumper_meshes if name not in ASSETS["meshes"])
+        print(f"skipped BumperCarsRide: import {missing} and record their mesh IDs first")
 
 
 if __name__ == "__main__":

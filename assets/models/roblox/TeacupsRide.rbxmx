@@ -7,9 +7,9 @@
 <string name="Name">RidePlatform</string>
 <Content name="MeshId"><url>rbxassetid://139821469684572</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
-<Vector3 name="InitialSize"><X>18.4</X><Y>0.85</Y><Z>18.4</Z></Vector3>
-<Vector3 name="size"><X>18.4</X><Y>0.85</Y><Z>18.4</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>0.0</X><Y>0.505</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<Vector3 name="InitialSize"><X>46.0</X><Y>2.125</Y><Z>46.0</Z></Vector3>
+<Vector3 name="size"><X>46.0</X><Y>2.125</Y><Z>46.0</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>1.2625</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">false</bool>
 <bool name="CanTouch">false</bool>
@@ -21,8 +21,8 @@
 </Properties></Item><Item class="Part" referent="RBX17"><Properties>
 <string name="Name">PlatformCollider</string>
 <token name="shape">2</token>
-<Vector3 name="size"><X>0.7</X><Y>18.4</Y><Z>18.4</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>0.0</X><Y>0.42</Y><Z>0.0</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<Vector3 name="size"><X>1.75</X><Y>46.0</Y><Z>46.0</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>1.05</Y><Z>0.0</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">true</bool>
 <bool name="CanTouch">false</bool>
@@ -33,9 +33,9 @@
 <string name="Name">TeacupsConsole</string>
 <Content name="MeshId"><url>rbxassetid://137595459068722</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
-<Vector3 name="InitialSize"><X>1.88</X><Y>2.94</Y><Z>1.88</Z></Vector3>
-<Vector3 name="size"><X>1.88</X><Y>2.94</Y><Z>1.88</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>0.0</X><Y>1.55</Y><Z>10.5</Z><R00>-1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>-1.0</R22></CoordinateFrame>
+<Vector3 name="InitialSize"><X>3.76</X><Y>5.88</Y><Z>3.76</Z></Vector3>
+<Vector3 name="size"><X>3.76</X><Y>5.88</Y><Z>3.76</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>3.1</Y><Z>24.6</Z><R00>-1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>-1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">true</bool>
 <bool name="CanTouch">false</bool>
@@ -52,9 +52,9 @@
 <string name="Name">RotorCore</string>
 <Content name="MeshId"><url>rbxassetid://77925486433523</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
-<Vector3 name="InitialSize"><X>15.4464</X><Y>8.2</Y><Z>13.92</Z></Vector3>
-<Vector3 name="size"><X>15.4464</X><Y>8.2</Y><Z>13.92</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>0.0</X><Y>4.72</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<Vector3 name="InitialSize"><X>38.616</X><Y>20.5</Y><Z>34.8</Z></Vector3>
+<Vector3 name="size"><X>38.616</X><Y>20.5</Y><Z>34.8</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>11.8</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">false</bool>
 <bool name="CanTouch">false</bool>

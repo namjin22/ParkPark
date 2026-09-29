@@ -30,9 +30,11 @@ function ObjectiveController.Start()
 	local entrance = park:WaitForChild("RuinedEntrance")
 	local carousel = park:WaitForChild("BrokenCarousel")
 	local teacups = park:WaitForChild("TeacupsRide")
+	local bumper = park:WaitForChild("BumperCarsRide")
 	local debrisTarget = entrance:WaitForChild("EntranceDebris"):WaitForChild("CleanupTarget")
 	local console = carousel:WaitForChild("RepairConsole")
 	local teacupsConsole = teacups:WaitForChild("TeacupsConsole")
+	local bumperConsole = bumper:WaitForChild("BumperConsole")
 	local gateAnchor = park:WaitForChild("GateAnchor")
 	local coins = player:WaitForChild("leaderstats"):WaitForChild("Coins") :: IntValue
 	local currency = GameConfig.CurrencyDisplayName
@@ -136,9 +138,34 @@ function ObjectiveController.Start()
 				target = teacupsConsole,
 			}
 		end
+		if bumper:GetAttribute("IsUnlocked") ~= true then
+			local cost = GameConfig.BumperUnlockCost
+			return {
+				title = "7. 범퍼카 해금",
+				detail = if coins.Value >= cost
+					then string.format("콘솔에서 해금 · %d %s", cost, currency)
+					else string.format("%d %s 필요 · 지금 %d", cost, currency, coins.Value),
+				target = bumperConsole,
+			}
+		end
+		if bumper:GetAttribute("IsRepaired") ~= true then
+			local cost = GameConfig.BumperRepairCost
+			return {
+				title = "8. 범퍼카 수리",
+				detail = if coins.Value >= cost
+					then string.format("콘솔에서 수리 · %d %s", cost, currency)
+					else string.format("%d %s 필요 · 지금 %d", cost, currency, coins.Value),
+				target = bumperConsole,
+			}
+		end
 		return {
-			title = "7. 찻잔 손님을 맞이하세요",
-			detail = string.format("탑승 1회마다 +%d %s", GameConfig.TeacupsGuestRideFare, currency),
+			title = "9. 손님을 맞이하세요",
+			detail = string.format(
+				"탑승 1회마다 +%d~%d %s",
+				GameConfig.GuestRideFare,
+				GameConfig.BumperGuestRideFare,
+				currency
+			),
 			target = nil,
 		}
 	end
@@ -158,6 +185,8 @@ function ObjectiveController.Start()
 	carousel:GetAttributeChangedSignal("IsRepaired"):Connect(refresh)
 	teacups:GetAttributeChangedSignal("IsUnlocked"):Connect(refresh)
 	teacups:GetAttributeChangedSignal("IsRepaired"):Connect(refresh)
+	bumper:GetAttributeChangedSignal("IsUnlocked"):Connect(refresh)
+	bumper:GetAttributeChangedSignal("IsRepaired"):Connect(refresh)
 	coins:GetPropertyChangedSignal("Value"):Connect(refresh)
 	refresh()
 end

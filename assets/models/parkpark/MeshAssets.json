@@ -11,7 +11,9 @@
     "ParkParkCanopyRestored",
     "ParkParkEntranceDebris",
     "ParkParkTeacupsPlatform",
-    "ParkParkTeacupsRotor"
+    "ParkParkTeacupsRotor",
+    "ParkParkBumperPlatform",
+    "ParkParkBumperCar"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",

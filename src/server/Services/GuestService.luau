@@ -17,12 +17,15 @@ type GuestReferences = {
 	CarouselRotor: Model,
 	TeacupsRide: Model,
 	TeacupsRotor: Model,
+	BumperRide: Model,
+	BumperCars: Model,
 }
 
 type RideDefinition = {
 	name: string,
 	model: Model,
-	rotor: Model,
+	-- The part a guest is welded to for this seat: the rotor root, or the bumper car itself.
+	seatPart: (number) -> BasePart?,
 	seatCount: number,
 	seatTaken: { [number]: boolean },
 	fare: number,
@@ -38,7 +41,8 @@ type Notify = (Player, string, string) -> ()
 local GUEST_COLLISION_GROUP = "ParkParkGuests"
 local ENTRY_Z = 44
 local GATE_Z = 24
-local WALK_TIMEOUT = 12
+-- The scaled park is large: the farthest queue is about 100 studs from the gate.
+local WALK_TIMEOUT = 20
 local QUEUE_TIMEOUT = 40
 
 -- Horse geometry in unscaled OBJ units (tools/generate_parkpark_meshes.py make_rotor/add_horse).
@@ -138,6 +142,16 @@ local function carouselSeatOffset(index: number): CFrame
 	return CFrame.lookAt(position, position + forward)
 end
 
+-- Bumper cars face local -Z, so a rider with an identity rotation looks along the car's travel.
+local function bumperSeatOffset(_: number): CFrame
+	local scale = GameConfig.BumperScale
+	return CFrame.new(
+		0,
+		(GameConfig.BumperSeatHeight - GameConfig.BumperCarCenterHeight) * scale + GameConfig.BumperRiderHip,
+		GameConfig.BumperSeatZ * scale
+	)
+end
+
 local function teacupsSeatOffset(index: number): CFrame
 	local scale = GameConfig.TeacupsScale
 	local angle = (index - 1) * 2 * math.pi / GameConfig.TeacupsSeatCount
@@ -169,11 +183,14 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 	local carouselPivot = park.Carousel:GetPivot()
 	local platformFrontZ = carouselPivot.Position.Z + 12 * GameConfig.CarouselScale
 	local teacupsPivot = park.TeacupsRide:GetPivot().Position
+	local bumperPivot = park.BumperRide:GetPivot().Position
 	local rides: { RideDefinition } = {
 		{
 			name = "Carousel",
 			model = park.Carousel,
-			rotor = park.CarouselRotor,
+			seatPart = function()
+				return park.CarouselRotor.PrimaryPart
+			end,
 			seatCount = GameConfig.CarouselSeatCount,
 			seatTaken = {},
 			fare = GameConfig.GuestRideFare,
@@ -185,23 +202,48 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		{
 			name = "Teacups",
 			model = park.TeacupsRide,
-			rotor = park.TeacupsRotor,
+			seatPart = function()
+				return park.TeacupsRotor.PrimaryPart
+			end,
 			seatCount = GameConfig.TeacupsSeatCount,
 			seatTaken = {},
 			fare = GameConfig.TeacupsGuestRideFare,
 			rideSeconds = GameConfig.GuestRideSeconds,
-			queuePoint = Vector3.new(teacupsPivot.X, 0, teacupsPivot.Z + GameConfig.TeacupsPlatformRadius + 2.5),
+			queuePoint = Vector3.new(
+				teacupsPivot.X,
+				0,
+				teacupsPivot.Z + GameConfig.TeacupsPlatformRadius * GameConfig.TeacupsScale + 2.5
+			),
 			seatOffset = teacupsSeatOffset,
 			noticeTitle = "손님이 찻잔을 탔어요",
+		},
+		{
+			name = "Bumper",
+			model = park.BumperRide,
+			seatPart = function(seat: number)
+				local car = park.BumperCars:FindFirstChild(string.format("BumperCar%d", seat))
+				return if car and car:IsA("BasePart") then car else nil
+			end,
+			seatCount = GameConfig.BumperSeatCount,
+			seatTaken = {},
+			fare = GameConfig.BumperGuestRideFare,
+			rideSeconds = GameConfig.GuestRideSeconds,
+			queuePoint = Vector3.new(
+				bumperPivot.X,
+				0,
+				bumperPivot.Z + GameConfig.BumperPlatformRadius * GameConfig.BumperScale + 2.5
+			),
+			seatOffset = bumperSeatOffset,
+			noticeTitle = "손님이 범퍼카를 탔어요",
 		},
 	}
 
 	local function findAvailableRide(): (RideDefinition?, number?)
 		local candidates: { { Ride: RideDefinition, Seat: number } } = {}
 		for _, ride in rides do
-			if ride.model:GetAttribute("IsOperating") == true and ride.rotor.PrimaryPart ~= nil then
+			if ride.model:GetAttribute("IsOperating") == true then
 				for seat = 1, ride.seatCount do
-					if not ride.seatTaken[seat] then
+					if not ride.seatTaken[seat] and ride.seatPart(seat) ~= nil then
 						table.insert(candidates, { Ride = ride, Seat = seat })
 						break
 					end
@@ -255,9 +297,9 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			end
 			walkTo(humanoid, queuePoint)
 
-			local rotorRoot = ride.rotor.PrimaryPart
+			local rotorRoot = ride.seatPart(seat)
 			if rotorRoot then
-				-- The rotor root is anchored, so the weld alone carries the rider around.
+				-- The seat part (rotor root or bumper car) is anchored, so the weld alone carries the rider.
 				humanoid.Sit = true
 				root.CFrame = rotorRoot.CFrame * ride.seatOffset(seat)
 				local weld = Instance.new("WeldConstraint")

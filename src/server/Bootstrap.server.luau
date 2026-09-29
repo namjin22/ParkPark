@@ -1,6 +1,7 @@
 --!strict
 
 local parkBuilder = require(script.Parent.Services.ParkBuilder)
+local bumperCarService = require(script.Parent.Services.BumperCarService)
 local economyService = require(script.Parent.Services.EconomyService)
 local guestService = require(script.Parent.Services.GuestService)
 local noticeService = require(script.Parent.Services.NoticeService)
@@ -19,19 +20,23 @@ rideService.Start(
 	economyService.GetCoins,
 	parkBuilder.ApplyRepairedAppearance,
 	parkBuilder.ApplyTeacupsRepairedAppearance,
+	parkBuilder.ApplyBumperRepairedAppearance,
 	noticeService.Send
 )
+bumperCarService.Start(park)
 guestService.Start(park, economyService.AwardCoins, noticeService.Send)
 
-local entranceSource = if park.Entrance:GetAttribute("IsGraybox") == true then "graybox" else "authored"
-local carouselSource = if park.Carousel:GetAttribute("IsGraybox") == true then "graybox" else "authored"
-local teacupsSource = if park.TeacupsRide:GetAttribute("IsGraybox") == true then "graybox" else "authored"
+local function source(model: Model): string
+	return if model:GetAttribute("IsGraybox") == true then "graybox" else "authored"
+end
+
 print(
 	string.format(
-		"[ParkPark] Park ready (entrance=%s, carousel=%s, teacups=%s)",
-		entranceSource,
-		carouselSource,
-		teacupsSource
+		"[ParkPark] Park ready (entrance=%s, carousel=%s, teacups=%s, bumper=%s)",
+		source(park.Entrance),
+		source(park.Carousel),
+		source(park.TeacupsRide),
+		source(park.BumperRide)
 	)
 )
 

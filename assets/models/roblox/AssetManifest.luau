@@ -6,6 +6,7 @@ return {
 		Carousel = "BrokenCarousel",
 		Debris = "EntranceDebris",
 		Teacups = "TeacupsRide",
+		Bumper = "BumperCarsRide",
 	},
 	EntranceSign = "SignPanel",
 	CarouselStates = {

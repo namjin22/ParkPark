@@ -3,19 +3,27 @@
 local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local GameConfig =
+	require(ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("GameConfig"))
+
 local PARK_FOLDER_NAME = "ParkParkWorld"
 local ENTRANCE_NAME = "RuinedEntrance"
 local CAROUSEL_NAME = "BrokenCarousel"
 local TEACUPS_NAME = "TeacupsRide"
+local BUMPER_NAME = "BumperCarsRide"
 local ASSET_FOLDER_SYNC_TIMEOUT = 5
 local ASSET_MANIFEST_SYNC_TIMEOUT = 2
 -- Guests spawn on +Z and walk through the entrance toward the carousel on -Z.
 local GUEST_APPROACH_DIRECTION = Vector3.new(0, 0, 1)
 -- Authored meshes use -Z as their front, so turn the entrance toward arriving guests.
 local AUTHORED_ENTRANCE_PIVOT = CFrame.new(0, 0, 25) * CFrame.Angles(0, math.pi, 0)
--- The authored carousel is scaled (GameConfig.CarouselScale), so its platform edge still meets the path.
-local AUTHORED_CAROUSEL_PIVOT = CFrame.new(0, 0, -19.5)
-local AUTHORED_TEACUPS_PIVOT = CFrame.new(-34, 0, -19.5)
+-- The rides are scaled (GameConfig.CarouselScale / TeacupsScale). The carousel platform radius is 12 units
+-- and the teacups platform radius 9.2 units at scale 1, so these pivots leave a gap between the rides and
+-- put the carousel's front edge (z=-31.6) at the end of the main path and the teacups' (z=-17) beside a side path.
+local AUTHORED_CAROUSEL_PIVOT = CFrame.new(0, 0, -70)
+local AUTHORED_TEACUPS_PIVOT = CFrame.new(-75, 0, -40)
+-- Mirrors the teacups across the main path; the bumper rink radius is 10.42 units at scale 1.
+local AUTHORED_BUMPER_PIVOT = CFrame.new(75, 0, -40)
 local GATE_Z = 25
 local DEBRIS_NAME = "EntranceDebris"
 -- Beside the path just inside the gate, so guests pass it on the way to the carousel.
@@ -27,6 +35,7 @@ type AssetManifest = {
 		Carousel: string,
 		Debris: string?,
 		Teacups: string?,
+		Bumper: string?,
 	},
 	EntranceSign: string,
 	CarouselStates: {
@@ -46,6 +55,7 @@ local assetManifest: AssetManifest = {
 		Entrance = ENTRANCE_NAME,
 		Carousel = CAROUSEL_NAME,
 		Teacups = TEACUPS_NAME,
+		Bumper = BUMPER_NAME,
 	},
 	EntranceSign = "SignPanel",
 	CarouselStates = {
@@ -87,6 +97,7 @@ local function getAssetFolder(): Folder?
 				and type(candidate.Models.Entrance) == "string"
 				and type(candidate.Models.Carousel) == "string"
 				and (candidate.Models.Teacups == nil or type(candidate.Models.Teacups) == "string")
+				and (candidate.Models.Bumper == nil or type(candidate.Models.Bumper) == "string")
 				and type(candidate.EntranceSign) == "string"
 				and type(candidate.CarouselStates) == "table"
 				and type(candidate.CarouselStates.NeglectedCanopy) == "string"
@@ -129,6 +140,11 @@ export type References = {
 	TeacupsConsole: BasePart,
 	TeacupsUnlockPrompt: ProximityPrompt,
 	TeacupsRepairPrompt: ProximityPrompt,
+	BumperRide: Model,
+	BumperCars: Model,
+	BumperConsole: BasePart,
+	BumperUnlockPrompt: ProximityPrompt,
+	BumperRepairPrompt: ProximityPrompt,
 	GateRope: Model,
 	GatePrompt: ProximityPrompt,
 }
@@ -184,8 +200,8 @@ local function ensureGrayboxApproach(parkFolder: Folder)
 		-- Extends past the carousel's back edge now that the default baseplate is hidden.
 		createPart(
 			"EntranceGround",
-			Vector3.new(96, 1, 96),
-			Vector3.new(0, -0.5, -1),
+			Vector3.new(260, 1, 210),
+			Vector3.new(0, -0.5, -45),
 			Color3.fromRGB(104, 122, 82),
 			parkFolder,
 			Enum.Material.Grass
@@ -195,8 +211,30 @@ local function ensureGrayboxApproach(parkFolder: Folder)
 		createPart(
 			"CrackedPath",
 			-- Runs from the spawn through the gate to the carousel platform's front edge.
-			Vector3.new(10, 0.2, 38),
-			Vector3.new(0, 0.1, 19),
+			Vector3.new(10, 0.2, 70),
+			Vector3.new(0, 0.1, 3.4),
+			Color3.fromRGB(150, 140, 122),
+			parkFolder,
+			Enum.Material.Cobblestone
+		)
+	end
+	if parkFolder:FindFirstChild("BumperPath") == nil then
+		createPart(
+			"BumperPath",
+			-- Branches off the main path to the bumper rink's queue in front of its platform.
+			Vector3.new(76, 0.2, 8),
+			Vector3.new(38, 0.1, -13),
+			Color3.fromRGB(150, 140, 122),
+			parkFolder,
+			Enum.Material.Cobblestone
+		)
+	end
+	if parkFolder:FindFirstChild("TeacupsPath") == nil then
+		createPart(
+			"TeacupsPath",
+			-- Branches off the main path to the teacups' queue in front of their platform.
+			Vector3.new(76, 0.2, 8),
+			Vector3.new(-38, 0.1, -13),
 			Color3.fromRGB(150, 140, 122),
 			parkFolder,
 			Enum.Material.Cobblestone
@@ -463,6 +501,8 @@ local function findAuthoredTemplate(name: string): Model?
 		assetName = assetManifest.Models.Carousel
 	elseif name == TEACUPS_NAME then
 		assetName = assetManifest.Models.Teacups
+	elseif name == BUMPER_NAME then
+		assetName = assetManifest.Models.Bumper
 	elseif name == DEBRIS_NAME then
 		assetName = assetManifest.Models.Debris
 	end
@@ -565,7 +605,7 @@ local function applyAuthoredCarouselState(carousel: Model, repaired: boolean)
 	setVariantVisible(neglected, not repaired)
 	setVariantVisible(restored, repaired)
 	applyPalette(carousel, repaired)
-	setRestoredGlow(restored, repaired, 22)
+	setRestoredGlow(restored, repaired, 45)
 end
 
 local function applyTeacupsAppearance(ride: Model, repaired: boolean)
@@ -585,7 +625,25 @@ local function applyTeacupsAppearance(ride: Model, repaired: boolean)
 	else
 		applyPalette(ride, repaired)
 	end
-	setRestoredGlow(ride:FindFirstChild("RotorCore", true), repaired, 18)
+	setRestoredGlow(ride:FindFirstChild("RotorCore", true), repaired, 40)
+end
+
+local function applyBumperAppearance(ride: Model, repaired: boolean)
+	if ride:GetAttribute("IsGraybox") == true then
+		for _, descendant in ride:GetDescendants() do
+			if descendant:IsA("BasePart") then
+				descendant.Material = Enum.Material.SmoothPlastic
+				if descendant.Name == "RidePlatform" then
+					descendant.Color = if repaired then Color3.fromRGB(91, 186, 154) else Color3.fromRGB(106, 111, 104)
+				elseif string.match(descendant.Name, "^BumperCar%d+$") then
+					descendant.Color = if repaired then Color3.fromRGB(235, 122, 108) else Color3.fromRGB(126, 113, 98)
+				end
+			end
+		end
+	else
+		applyPalette(ride, repaired)
+	end
+	setRestoredGlow(ride:FindFirstChild("RidePlatform"), repaired, 45)
 end
 
 local function applyAuthoredEntranceState(entrance: Model, cleared: boolean)
@@ -777,11 +835,72 @@ local function buildGrayboxTeacups(parkFolder: Folder): Model
 	return ride
 end
 
-local function ensureTeacupsPrompt(
+local function buildGrayboxBumperCars(parkFolder: Folder): Model
+	local ride = Instance.new("Model")
+	ride.Name = BUMPER_NAME
+	ride:SetAttribute("IsGraybox", true)
+	ride.Parent = parkFolder
+
+	local pivot = createPart("ParkPivot", Vector3.new(0.1, 0.1, 0.1), Vector3.zero, Color3.new(1, 1, 1), ride)
+	pivot.Transparency = 1
+	pivot.CanCollide = false
+	pivot.CanTouch = false
+	pivot.CanQuery = false
+	pivot.CastShadow = false
+	ride.PrimaryPart = pivot
+
+	local scale = GameConfig.BumperScale
+	local diameter = GameConfig.BumperPlatformRadius * 2 * scale
+	local platform = createPart(
+		"RidePlatform",
+		Vector3.new(0.8, diameter, diameter),
+		Vector3.new(0, 0.42, 0),
+		Color3.fromRGB(105, 112, 98),
+		ride,
+		Enum.Material.Slate
+	)
+	platform.Shape = Enum.PartType.Cylinder
+	platform.CFrame = CFrame.new(0, 0.42, 0) * CFrame.Angles(0, 0, math.pi / 2)
+
+	local cars = Instance.new("Model")
+	cars.Name = "BumperCars"
+	cars.Parent = ride
+	local carHeight = GameConfig.BumperCarCenterHeight * scale
+	for index = 1, GameConfig.BumperSeatCount do
+		local angle = 2 * math.pi * (index - 1) / GameConfig.BumperSeatCount
+		local position = Vector3.new(5.45 * scale * math.cos(angle), carHeight, 5.45 * scale * math.sin(angle))
+		local car = createPart(
+			string.format("BumperCar%d", index),
+			Vector3.new(2.5 * scale, 2.2 * scale, 3.2 * scale),
+			position,
+			Color3.fromRGB(126, 113, 98),
+			cars,
+			Enum.Material.SmoothPlastic
+		)
+		car.CanCollide = false
+		car.CanTouch = false
+		car.CanQuery = false
+		car.CFrame = CFrame.lookAt(position, position + Vector3.new(-math.sin(angle), 0, math.cos(angle)))
+	end
+
+	local console = createPart(
+		"BumperConsole",
+		Vector3.new(2, 3, 2),
+		Vector3.new(0, 1.5, diameter / 2 + 1.6),
+		Color3.fromRGB(91, 87, 79),
+		ride
+	)
+	console.Material = Enum.Material.Slate
+	ride:PivotTo(AUTHORED_BUMPER_PIVOT)
+	return ride
+end
+
+local function ensureRidePrompt(
 	console: BasePart,
 	name: string,
 	actionText: string,
-	holdDuration: number
+	holdDuration: number,
+	objectText: string
 ): ProximityPrompt
 	local existing = console:FindFirstChild(name)
 	local prompt: ProximityPrompt
@@ -792,11 +911,11 @@ local function ensureTeacupsPrompt(
 	elseif existing:IsA("ProximityPrompt") then
 		prompt = existing
 	else
-		error(string.format("[ParkPark] TeacupsConsole.%s must be a ProximityPrompt", name))
+		error(string.format("[ParkPark] %s.%s must be a ProximityPrompt", console.Name, name))
 	end
 
 	prompt.ActionText = actionText
-	prompt.ObjectText = "찻잔 라이드"
+	prompt.ObjectText = objectText
 	prompt.HoldDuration = holdDuration
 	prompt.MaxActivationDistance = 10
 	prompt.RequiresLineOfSight = false
@@ -844,6 +963,8 @@ local function getOrCreateModel(parent: Instance, name: string, build: (Folder) 
 			model:PivotTo(AUTHORED_CAROUSEL_PIVOT)
 		elseif name == TEACUPS_NAME then
 			model:PivotTo(AUTHORED_TEACUPS_PIVOT)
+		elseif name == BUMPER_NAME then
+			model:PivotTo(AUTHORED_BUMPER_PIVOT)
 		end
 		return model
 	end
@@ -966,9 +1087,41 @@ function ParkBuilder.Build(): References
 	if teacupsConsoleInstance == nil or not teacupsConsoleInstance:IsA("BasePart") then
 		error("[ParkPark] TeacupsRide.TeacupsConsole must be a BasePart")
 	end
-	local unlockPrompt = ensureTeacupsPrompt(teacupsConsoleInstance, "UnlockPrompt", "해금하기", 1.5)
-	local teacupsRepairPrompt = ensureTeacupsPrompt(teacupsConsoleInstance, "RepairPrompt", "수리하기", 2)
+	local unlockPrompt =
+		ensureRidePrompt(teacupsConsoleInstance, "UnlockPrompt", "해금하기", 1.5, "찻잔 라이드")
+	local teacupsRepairPrompt =
+		ensureRidePrompt(teacupsConsoleInstance, "RepairPrompt", "수리하기", 2, "찻잔 라이드")
 	applyTeacupsAppearance(teacupsRide, teacupsRide:GetAttribute("IsRepaired") == true)
+
+	local bumperRide = getOrCreateModel(parkFolder, BUMPER_NAME, buildGrayboxBumperCars)
+	if bumperRide:GetAttribute("IsGraybox") == nil then
+		bumperRide:SetAttribute("IsGraybox", true)
+	end
+	for _, attribute in { "IsUnlocked", "IsRepaired", "IsOperating" } do
+		if bumperRide:GetAttribute(attribute) == nil then
+			bumperRide:SetAttribute(attribute, false)
+		end
+	end
+	local bumperCarsInstance = bumperRide:FindFirstChild("BumperCars")
+	if bumperCarsInstance == nil or not bumperCarsInstance:IsA("Model") then
+		error("[ParkPark] BumperCarsRide.BumperCars must be a Model")
+	end
+	-- Cars are driven by the server each frame, so they stay anchored and are never welded together.
+	for _, descendant in bumperCarsInstance:GetDescendants() do
+		if descendant:IsA("BasePart") then
+			descendant.Anchored = true
+			descendant.CanCollide = false
+			descendant.CanTouch = false
+			descendant.CanQuery = false
+		end
+	end
+	local bumperConsoleInstance = bumperRide:FindFirstChild("BumperConsole")
+	if bumperConsoleInstance == nil or not bumperConsoleInstance:IsA("BasePart") then
+		error("[ParkPark] BumperCarsRide.BumperConsole must be a BasePart")
+	end
+	local bumperUnlockPrompt = ensureRidePrompt(bumperConsoleInstance, "UnlockPrompt", "해금하기", 1.5, "범퍼카")
+	local bumperRepairPrompt = ensureRidePrompt(bumperConsoleInstance, "RepairPrompt", "수리하기", 2, "범퍼카")
+	applyBumperAppearance(bumperRide, bumperRide:GetAttribute("IsRepaired") == true)
 
 	return {
 		ParkFolder = parkFolder,
@@ -985,6 +1138,11 @@ function ParkBuilder.Build(): References
 		TeacupsConsole = teacupsConsoleInstance,
 		TeacupsUnlockPrompt = unlockPrompt,
 		TeacupsRepairPrompt = teacupsRepairPrompt,
+		BumperRide = bumperRide,
+		BumperCars = bumperCarsInstance,
+		BumperConsole = bumperConsoleInstance,
+		BumperUnlockPrompt = bumperUnlockPrompt,
+		BumperRepairPrompt = bumperRepairPrompt,
 		GateRope = gateRope,
 		GatePrompt = gatePrompt,
 	}
@@ -1017,6 +1175,10 @@ end
 
 function ParkBuilder.ApplyTeacupsRepairedAppearance(ride: Model)
 	applyTeacupsAppearance(ride, true)
+end
+
+function ParkBuilder.ApplyBumperRepairedAppearance(ride: Model)
+	applyBumperAppearance(ride, true)
 end
 
 return ParkBuilder

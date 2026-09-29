@@ -20,13 +20,33 @@ type RideReferences = {
 	TeacupsConsole: BasePart,
 	TeacupsUnlockPrompt: ProximityPrompt,
 	TeacupsRepairPrompt: ProximityPrompt,
+	BumperRide: Model,
+	BumperConsole: BasePart,
+	BumperUnlockPrompt: ProximityPrompt,
+	BumperRepairPrompt: ProximityPrompt,
 }
 
 type SpendCoins = (Player, number) -> boolean
 type GetCoins = (Player) -> number
 type ApplyRepairedAppearance = (Model) -> ()
-type ApplyTeacupsRepairedAppearance = (Model) -> ()
 type Notify = (Player, string, string) -> ()
+
+-- A ride that starts locked: the player pays to unlock it, then pays again to repair it, and it
+-- then earns fares from guests. `isAvailable` says when its console prompts may show.
+type UnlockableRide = {
+	displayName: string,
+	model: Model,
+	console: BasePart,
+	unlockPrompt: ProximityPrompt,
+	repairPrompt: ProximityPrompt,
+	unlockCost: number,
+	repairCost: number,
+	fare: number,
+	isAvailable: () -> boolean,
+	signals: { RBXScriptSignal },
+	start: () -> (),
+	applyRepairedAppearance: ApplyRepairedAppearance,
+}
 
 local function canUsePrompt(player: Player, target: BasePart, prompt: ProximityPrompt): boolean
 	if player.Parent ~= Players then
@@ -48,15 +68,13 @@ function RideService.Start(
 	spendCoins: SpendCoins,
 	getCoins: GetCoins,
 	applyRepairedAppearance: ApplyRepairedAppearance,
-	applyTeacupsRepairedAppearance: ApplyTeacupsRepairedAppearance,
+	applyTeacupsRepairedAppearance: ApplyRepairedAppearance,
+	applyBumperRepairedAppearance: ApplyRepairedAppearance,
 	notify: Notify
 )
 	local carouselRepaired = park.Carousel:GetAttribute("IsRepaired") == true
 	local carouselRotationStarted = false
-	local teacupsRotationStarted = false
 	local carouselCost = GameConfig.CarouselRepairCost
-	local teacupsUnlockCost = GameConfig.TeacupsUnlockCost
-	local teacupsRepairCost = GameConfig.TeacupsRepairCost
 	local currency = GameConfig.CurrencyDisplayName
 
 	local function startRotation(ride: Model, rotor: Model, rotationSeconds: number, name: string)
@@ -92,14 +110,6 @@ function RideService.Start(
 		end
 		carouselRotationStarted = true
 		startRotation(park.Carousel, park.CarouselRotor, GameConfig.CarouselRotationSeconds, "Carousel")
-	end
-
-	local function startTeacups()
-		if teacupsRotationStarted then
-			return
-		end
-		teacupsRotationStarted = true
-		startRotation(park.TeacupsRide, park.TeacupsRotor, GameConfig.TeacupsRotationSeconds, "Teacups")
 	end
 
 	park.RepairPrompt.ActionText = "수리하기"
@@ -141,106 +151,149 @@ function RideService.Start(
 		startCarousel()
 	end)
 
-	local teacupsUnlocked = park.TeacupsRide:GetAttribute("IsUnlocked") == true
-	local teacupsRepaired = park.TeacupsRide:GetAttribute("IsRepaired") == true
-	if teacupsRepaired then
-		teacupsUnlocked = true
-		park.TeacupsRide:SetAttribute("IsUnlocked", true)
-	end
-
-	park.TeacupsUnlockPrompt.ActionText = "해금하기"
-	park.TeacupsUnlockPrompt.ObjectText = string.format("찻잔 라이드 · %d %s", teacupsUnlockCost, currency)
-	park.TeacupsRepairPrompt.ActionText = "수리하기"
-	park.TeacupsRepairPrompt.ObjectText = string.format("찻잔 라이드 · %d %s", teacupsRepairCost, currency)
-
-	local function refreshTeacupsPrompts()
-		local parkOpen = park.ParkFolder:GetAttribute("ParkOpen") == true
-		park.TeacupsUnlockPrompt.Enabled = parkOpen and not teacupsUnlocked
-		park.TeacupsRepairPrompt.Enabled = parkOpen and teacupsUnlocked and not teacupsRepaired
-	end
-
-	park.ParkFolder:GetAttributeChangedSignal("ParkOpen"):Connect(refreshTeacupsPrompts)
-	refreshTeacupsPrompts()
-	if teacupsRepaired then
-		park.TeacupsRepairPrompt.ActionText = "수리 완료"
-		startTeacups()
-	end
-
-	park.TeacupsUnlockPrompt.Triggered:Connect(function(player: Player)
-		if
-			teacupsUnlocked
-			or park.ParkFolder:GetAttribute("ParkOpen") ~= true
-			or not canUsePrompt(player, park.TeacupsConsole, park.TeacupsUnlockPrompt)
-		then
-			return
+	local function setupUnlockableRide(ride: UnlockableRide)
+		local unlocked = ride.model:GetAttribute("IsUnlocked") == true
+		local repaired = ride.model:GetAttribute("IsRepaired") == true
+		if repaired then
+			unlocked = true
+			ride.model:SetAttribute("IsUnlocked", true)
 		end
 
-		if not spendCoins(player, teacupsUnlockCost) then
+		ride.unlockPrompt.ActionText = "해금하기"
+		ride.unlockPrompt.ObjectText = string.format("%s · %d %s", ride.displayName, ride.unlockCost, currency)
+		ride.repairPrompt.ActionText = "수리하기"
+		ride.repairPrompt.ObjectText = string.format("%s · %d %s", ride.displayName, ride.repairCost, currency)
+
+		local function refreshPrompts()
+			local available = ride.isAvailable()
+			ride.unlockPrompt.Enabled = available and not unlocked
+			ride.repairPrompt.Enabled = available and unlocked and not repaired
+		end
+
+		for _, signal in ride.signals do
+			signal:Connect(refreshPrompts)
+		end
+		refreshPrompts()
+		if repaired then
+			ride.repairPrompt.ActionText = "수리 완료"
+			ride.start()
+		end
+
+		ride.unlockPrompt.Triggered:Connect(function(player: Player)
+			if unlocked or not ride.isAvailable() or not canUsePrompt(player, ride.console, ride.unlockPrompt) then
+				return
+			end
+
+			if not spendCoins(player, ride.unlockCost) then
+				notify(
+					player,
+					string.format("%s이 부족해요", currency),
+					string.format(
+						"해금에 %d %s이 필요해요 (지금 %d)",
+						ride.unlockCost,
+						currency,
+						getCoins(player)
+					)
+				)
+				return
+			end
+
+			unlocked = true
+			ride.model:SetAttribute("IsUnlocked", true)
+			refreshPrompts()
 			notify(
 				player,
-				"코인이 부족해요",
-				string.format(
-					"해금에 %d %s이 필요해요 (지금 %d)",
-					teacupsUnlockCost,
-					currency,
-					getCoins(player)
-				)
+				string.format("%s 해금!", ride.displayName),
+				string.format("-%d %s · 콘솔에서 수리하세요", ride.unlockCost, currency)
 			)
-			return
-		end
+		end)
 
-		teacupsUnlocked = true
-		park.TeacupsRide:SetAttribute("IsUnlocked", true)
-		refreshTeacupsPrompts()
-		notify(
-			player,
-			"찻잔 라이드 해금!",
-			string.format("-%d %s · 콘솔에서 수리하세요", teacupsUnlockCost, currency)
-		)
-	end)
+		ride.repairPrompt.Triggered:Connect(function(player: Player)
+			if
+				not unlocked
+				or repaired
+				or not ride.isAvailable()
+				or not canUsePrompt(player, ride.console, ride.repairPrompt)
+			then
+				return
+			end
 
-	park.TeacupsRepairPrompt.Triggered:Connect(function(player: Player)
-		if
-			not teacupsUnlocked
-			or teacupsRepaired
-			or park.ParkFolder:GetAttribute("ParkOpen") ~= true
-			or not canUsePrompt(player, park.TeacupsConsole, park.TeacupsRepairPrompt)
-		then
-			return
-		end
+			if not spendCoins(player, ride.repairCost) then
+				notify(
+					player,
+					string.format("%s이 부족해요", currency),
+					string.format(
+						"수리에 %d %s이 필요해요 (지금 %d)",
+						ride.repairCost,
+						currency,
+						getCoins(player)
+					)
+				)
+				return
+			end
 
-		if not spendCoins(player, teacupsRepairCost) then
+			repaired = true
+			ride.applyRepairedAppearance(ride.model)
+			ride.model:SetAttribute("IsRepaired", true)
+			ride.repairPrompt.ActionText = "수리 완료"
+			refreshPrompts()
 			notify(
 				player,
-				"코인이 부족해요",
-				string.format(
-					"수리에 %d %s이 필요해요 (지금 %d)",
-					teacupsRepairCost,
-					currency,
-					getCoins(player)
-				)
+				string.format("%s 복구 완료!", ride.displayName),
+				string.format("-%d %s · 탑승 때마다 +%d %s", ride.repairCost, currency, ride.fare, currency)
 			)
-			return
-		end
+			ride.start()
+		end)
+	end
 
-		teacupsRepaired = true
-		applyTeacupsRepairedAppearance(park.TeacupsRide)
-		park.TeacupsRide:SetAttribute("IsRepaired", true)
-		park.TeacupsRepairPrompt.ActionText = "수리 완료"
-		refreshTeacupsPrompts()
-		notify(
-			player,
-			"찻잔 라이드 복구 완료!",
-			string.format(
-				"-%d %s · 탑승 때마다 +%d %s",
-				teacupsRepairCost,
-				currency,
-				GameConfig.TeacupsGuestRideFare,
-				currency
-			)
-		)
-		startTeacups()
-	end)
+	local teacupsRotationStarted = false
+	setupUnlockableRide({
+		displayName = "찻잔 라이드",
+		model = park.TeacupsRide,
+		console = park.TeacupsConsole,
+		unlockPrompt = park.TeacupsUnlockPrompt,
+		repairPrompt = park.TeacupsRepairPrompt,
+		unlockCost = GameConfig.TeacupsUnlockCost,
+		repairCost = GameConfig.TeacupsRepairCost,
+		fare = GameConfig.TeacupsGuestRideFare,
+		isAvailable = function()
+			return park.ParkFolder:GetAttribute("ParkOpen") == true
+		end,
+		signals = { park.ParkFolder:GetAttributeChangedSignal("ParkOpen") },
+		start = function()
+			if teacupsRotationStarted then
+				return
+			end
+			teacupsRotationStarted = true
+			startRotation(park.TeacupsRide, park.TeacupsRotor, GameConfig.TeacupsRotationSeconds, "Teacups")
+		end,
+		applyRepairedAppearance = applyTeacupsRepairedAppearance,
+	})
+
+	-- The bumper cars unlock only after the teacups run; BumperCarService moves the cars while
+	-- IsOperating is true, so starting this ride only flips that attribute.
+	setupUnlockableRide({
+		displayName = "범퍼카",
+		model = park.BumperRide,
+		console = park.BumperConsole,
+		unlockPrompt = park.BumperUnlockPrompt,
+		repairPrompt = park.BumperRepairPrompt,
+		unlockCost = GameConfig.BumperUnlockCost,
+		repairCost = GameConfig.BumperRepairCost,
+		fare = GameConfig.BumperGuestRideFare,
+		isAvailable = function()
+			return park.ParkFolder:GetAttribute("ParkOpen") == true
+				and park.TeacupsRide:GetAttribute("IsRepaired") == true
+		end,
+		signals = {
+			park.ParkFolder:GetAttributeChangedSignal("ParkOpen"),
+			park.TeacupsRide:GetAttributeChangedSignal("IsRepaired"),
+		},
+		start = function()
+			park.BumperRide:SetAttribute("IsOperating", true)
+		end,
+		applyRepairedAppearance = applyBumperRepairedAppearance,
+	})
 end
 
 return RideService
