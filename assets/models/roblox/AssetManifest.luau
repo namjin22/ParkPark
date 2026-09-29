@@ -14,6 +14,6 @@ return {
 	-- The game shows Neglected until an area is restored; an empty Neglected skips the swap.
 	Palettes = {
 		Restored = "rbxassetid://101072742922175",
-		Neglected = "",
+		Neglected = "rbxassetid://126600526194678",
 	},
 }

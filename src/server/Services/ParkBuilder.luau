@@ -136,7 +136,7 @@ local function createPart(
 	return part
 end
 
-local function createEntranceSign(panel: BasePart)
+local function createEntranceSign(panel: BasePart, textColor: Color3)
 	if panel:FindFirstChild("EntranceSign") then
 		return
 	end
@@ -155,7 +155,7 @@ local function createEntranceSign(panel: BasePart)
 	label.Size = UDim2.fromScale(1, 1)
 	label.BackgroundTransparency = 1
 	label.Text = "PARK PARK"
-	label.TextColor3 = Color3.fromRGB(255, 241, 210)
+	label.TextColor3 = textColor
 	label.TextScaled = true
 	label.Font = Enum.Font.GothamBold
 	label.Parent = sign
@@ -286,7 +286,7 @@ local function buildGrayboxEntrance(parkFolder: Folder): Model
 
 	local arch =
 		createPart("BrokenArch", Vector3.new(36, 3, 4), Vector3.new(0, 13, 25), Color3.fromRGB(80, 80, 76), entrance)
-	createEntranceSign(arch)
+	createEntranceSign(arch, Color3.fromRGB(255, 241, 210))
 	buildGrayboxDebris(entrance)
 
 	return entrance
@@ -473,7 +473,8 @@ local function ensureAuthoredEntranceSign(entrance: Model)
 
 	local panel = entrance:FindFirstChild(assetManifest.EntranceSign, true)
 	if panel and panel:IsA("BasePart") then
-		createEntranceSign(panel)
+		-- Dark wood lettering stays readable on both the faded and the bright gold sign.
+		createEntranceSign(panel, Color3.fromRGB(74, 42, 28))
 	elseif entrance:GetAttribute("IsGraybox") ~= true then
 		warn("[ParkPark] Authored RuinedEntrance is missing its SignPanel mesh")
 	end
