@@ -15,6 +15,7 @@
 | `ParkParkStorybookEntrance.obj` | 둥근 아치와 장식 띠 |
 | `ParkParkEntranceSign.obj` | SurfaceGui 글자를 얹을 별도 간판 메시 |
 | `ParkParkRepairConsole.obj` | 수리 상호작용을 위한 작은 장식 콘솔 |
+| `ParkParkEntranceDebris.obj` | 치울 잔해 더미: 부서진 판자, 쪼개진 상자, 쓰러진 표지판, 덤불 |
 | `ParkParkFairground.mtl` | 공통 재질 팔레트 |
 
 ## 생성·가져오기
@@ -53,6 +54,7 @@ Roblox Studio의 [3D Importer](https://create.roblox.com/docs/studio/importer)�
 
 - `RuinedEntrance` Model: 아치 메시와 `SignPanel` MeshPart를 포함하고, floor-center pivot을 사용합니다. `SignPanel`은 root 기준 `[0, 14.2, -1.35]`에 둡니다.
 - `BrokenCarousel` Model: 고정 `RidePlatform` MeshPart, 고정 `RepairConsole` MeshPart, `CarouselRotor` Model을 포함합니다. Platform은 root 원점에, 콘솔은 root 기준 `[13, 0, 0]`에 둡니다.
+- `EntranceDebris` Model: 잔해 메시 하나를 `CleanupTarget` MeshPart로 둡니다(root 원점, OBJ 좌표 유지). `ParkBuilder`가 `(-12, 0, 8)`에 배치해 입구 모델 안에 넣고 정리 prompt를 붙입니다. 템플릿이 없으면 graybox 잔해를 씁니다.
 - `CarouselRotor` 안에는 회전축 메시 `CenterPost`와 `CanopyNeglected`/`CanopyRestored` canopy variant를 둡니다. `CenterPost` pivot은 회전목마 바닥 중심에 맞춥니다. 콘솔은 rotor 밖에 둡니다.
 
 OBJ 이름과 모델 안 이름은 다음처럼 대응합니다. 아래 방향 규약의 `RepairConsole`을 제외한 MeshPart는 OBJ 좌표 방향을 그대로 유지하고, 모두 `Anchored`로 저장합니다. rotor 쪽 파트는 게임 코드가 `CenterPost`에 weld한 뒤 unanchor합니다.

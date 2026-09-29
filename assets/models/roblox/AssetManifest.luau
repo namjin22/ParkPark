@@ -4,6 +4,7 @@ return {
 	Models = {
 		Entrance = "RuinedEntrance",
 		Carousel = "BrokenCarousel",
+		Debris = "EntranceDebris",
 	},
 	EntranceSign = "SignPanel",
 	CarouselStates = {

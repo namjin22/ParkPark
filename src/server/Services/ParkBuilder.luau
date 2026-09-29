@@ -13,11 +13,15 @@ local GUEST_APPROACH_DIRECTION = Vector3.new(0, 0, 1)
 -- Authored meshes use -Z as their front, so turn the entrance toward arriving guests.
 local AUTHORED_ENTRANCE_PIVOT = CFrame.new(0, 0, 25) * CFrame.Angles(0, math.pi, 0)
 local AUTHORED_CAROUSEL_PIVOT = CFrame.new(0, 0, -12)
+local DEBRIS_NAME = "EntranceDebris"
+-- Beside the path just inside the gate, so guests pass it on the way to the carousel.
+local DEBRIS_PIVOT = CFrame.new(-12, 0, 8)
 
 type AssetManifest = {
 	Models: {
 		Entrance: string,
 		Carousel: string,
+		Debris: string?,
 	},
 	EntranceSign: string,
 	CarouselStates: {
@@ -176,8 +180,9 @@ local function ensureGrayboxApproach(parkFolder: Folder)
 	if parkFolder:FindFirstChild("CrackedPath") == nil then
 		createPart(
 			"CrackedPath",
-			Vector3.new(14, 0.2, 20),
-			Vector3.new(0, 0.1, 11),
+			-- Runs from the spawn through the gate to the carousel platform's front edge.
+			Vector3.new(10, 0.2, 38),
+			Vector3.new(0, 0.1, 19),
 			Color3.fromRGB(150, 140, 122),
 			parkFolder,
 			Enum.Material.Cobblestone
@@ -236,6 +241,17 @@ local function positionGrayboxSpawn()
 	spawnLocation.Parent = Workspace
 end
 
+local function addCleanupPrompt(target: BasePart)
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.Name = "CleanupPrompt"
+	prompt.ActionText = "잔해 치우기"
+	prompt.ObjectText = "입구 잔해"
+	prompt.HoldDuration = 1.5
+	prompt.MaxActivationDistance = 10
+	prompt.RequiresLineOfSight = false
+	prompt.Parent = target
+end
+
 local function buildGrayboxDebris(entrance: Model): Model
 	local debris = Instance.new("Model")
 	debris.Name = "EntranceDebris"
@@ -263,14 +279,7 @@ local function buildGrayboxDebris(entrance: Model): Model
 		debris
 	)
 
-	local prompt = Instance.new("ProximityPrompt")
-	prompt.Name = "CleanupPrompt"
-	prompt.ActionText = "잔해 치우기"
-	prompt.ObjectText = "입구 잔해"
-	prompt.HoldDuration = 1.5
-	prompt.MaxActivationDistance = 10
-	prompt.RequiresLineOfSight = false
-	prompt.Parent = target
+	addCleanupPrompt(target)
 
 	return debris
 end
@@ -332,6 +341,8 @@ local function findAuthoredTemplate(name: string): Model?
 		assetName = assetManifest.Models.Entrance
 	elseif name == CAROUSEL_NAME then
 		assetName = assetManifest.Models.Carousel
+	elseif name == DEBRIS_NAME then
+		assetName = assetManifest.Models.Debris
 	end
 
 	if assetName == nil then
@@ -444,10 +455,22 @@ local function applyAuthoredEntranceState(entrance: Model, cleared: boolean)
 end
 
 local function ensureGrayboxDebris(entrance: Model): (Model, BasePart, ProximityPrompt)
-	local debrisInstance = entrance:FindFirstChild("EntranceDebris")
+	local debrisInstance = entrance:FindFirstChild(DEBRIS_NAME)
 	local debris: Model
 	if debrisInstance == nil then
-		debris = buildGrayboxDebris(entrance)
+		local template = findAuthoredTemplate(DEBRIS_NAME)
+		if template then
+			debris = template:Clone()
+			debris.Name = DEBRIS_NAME
+			debris:PivotTo(DEBRIS_PIVOT)
+			debris.Parent = entrance
+			local target = debris:FindFirstChild("CleanupTarget")
+			if target and target:IsA("BasePart") and target:FindFirstChild("CleanupPrompt") == nil then
+				addCleanupPrompt(target)
+			end
+		else
+			debris = buildGrayboxDebris(entrance)
+		end
 	elseif debrisInstance:IsA("Model") then
 		debris = debrisInstance
 	else

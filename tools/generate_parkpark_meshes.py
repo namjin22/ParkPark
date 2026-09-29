@@ -160,6 +160,23 @@ def radial_transform(angle: float, origin: tuple[float, float, float]) -> PointT
     return transform
 
 
+def tilted_transform(
+    origin: tuple[float, float, float], yaw: float, pitch: float = 0.0, roll: float = 0.0
+) -> PointTransform:
+    """Rotate about X (roll), then Z (pitch), then Y (yaw), and move to origin. Angles in degrees."""
+    cr, sr = math.cos(math.radians(roll)), math.sin(math.radians(roll))
+    cp, sp = math.cos(math.radians(pitch)), math.sin(math.radians(pitch))
+    cy, sy = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
+
+    def transform(x: float, y: float, z: float) -> tuple[float, float, float]:
+        y, z = y * cr - z * sr, y * sr + z * cr
+        x, y = x * cp - y * sp, x * sp + y * cp
+        x, z = x * cy + z * sy, -x * sy + z * cy
+        return origin[0] + x, origin[1] + y, origin[2] + z
+
+    return transform
+
+
 def add_box(
     mesh: Mesh,
     center: tuple[float, float, float],
@@ -655,6 +672,41 @@ def make_repair_console() -> Mesh:
     return mesh
 
 
+def make_entrance_debris() -> Mesh:
+    """A cleanup pile: snapped planks, a split crate, a fallen ticket sign, and weeds with a few blooms."""
+    mesh = Mesh("ParkParkEntranceDebris")
+    # Split crate with a loose lid.
+    add_box(mesh, (0.9, 0.5, -0.5), (1.4, 1.0, 1.2), "wood", tilted_transform((0, 0, 0), 12))
+    add_box(mesh, (0, 0, 0), (1.5, 0.12, 1.3), "faded_cream", tilted_transform((1.2, 1.12, -0.35), 25, 14))
+    # Snapped planks leaning on and around the crate.
+    for origin, yaw, pitch, material in (
+        ((-0.6, 0.55, 0.2), -20, 24, "wood"),
+        ((-1.4, 0.18, -0.9), 58, 5, "faded_cream"),
+        ((0.2, 0.3, 1.1), 102, -9, "wood"),
+        ((-0.3, 0.95, -0.6), 150, 32, "faded_coral"),
+        ((1.9, 0.2, 0.9), 35, -4, "faded_cream"),
+    ):
+        add_box(mesh, (0, 0, 0), (2.8, 0.13, 0.42), material, tilted_transform(origin, yaw, pitch))
+    # Fallen ticket-booth sign, face down in the weeds.
+    add_box(mesh, (0, 0, 0), (1.9, 0.6, 0.1), "faded_coral", tilted_transform((-1.5, 0.28, 1.2), -30, 0, 72))
+    add_box(mesh, (0, 0, 0), (2.05, 0.72, 0.06), "faded_cream", tilted_transform((-1.5, 0.22, 1.22), -30, 0, 72))
+    # Weeds and bushes that have grown through the pile.
+    for center, radii, material in (
+        ((-2.2, 0.35, -0.4), (0.8, 0.55, 0.7), "faded_mint"),
+        ((2.3, 0.3, -0.7), (0.7, 0.45, 0.6), "faded_mint"),
+        ((-0.9, 0.25, -1.5), (0.6, 0.35, 0.5), "mint"),
+        ((1.1, 0.25, 1.7), (0.55, 0.32, 0.45), "faded_mint"),
+        ((0.1, 0.2, -1.4), (0.45, 0.28, 0.4), "mint"),
+    ):
+        add_ellipsoid(mesh, center, radii, material, slices=9, stacks=5)
+    # A few blooms and pebbles so the pile reads as overgrown rather than as plain rubble.
+    for center in ((-2.0, 0.85, -0.2), (2.4, 0.72, -0.5), (-0.8, 0.58, -1.4)):
+        add_ellipsoid(mesh, center, (0.13, 0.1, 0.13), "coral", slices=6, stacks=4)
+    for center in ((1.6, 0.1, -1.6), (-2.6, 0.08, 0.8), (0.6, 0.09, 2.1), (2.8, 0.08, 0.4)):
+        add_ellipsoid(mesh, center, (0.24, 0.12, 0.2), "faded_cream", slices=7, stacks=4)
+    return mesh
+
+
 def write_materials() -> None:
     with (OUTPUT / "ParkParkFairground.mtl").open("w", encoding="utf-8", newline="\n") as output:
         output.write("# Shared low-poly palette for ParkPark's original fairground meshes\n")
@@ -712,6 +764,7 @@ def main() -> None:
         make_entrance(),
         make_entrance_sign(),
         make_repair_console(),
+        make_entrance_debris(),
     )
     for mesh in meshes:
         path = OUTPUT / f"{mesh.name}.obj"

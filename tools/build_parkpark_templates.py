@@ -171,5 +171,19 @@ def main() -> None:
     )
 
 
+    # The debris pile sits at its own pivot (ParkBuilder places it beside the path) and
+    # carries the cleanup prompt, so its single mesh is the CleanupTarget.
+    if "ParkParkEntranceDebris" in ASSETS["meshes"]:
+        write(
+            "EntranceDebris",
+            model(
+                "EntranceDebris",
+                [mesh_part("CleanupTarget", "ParkParkEntranceDebris", (0, 0, 0), 0, False, (97, 56, 36))],
+            ),
+        )
+    else:
+        print("skipped EntranceDebris: import ParkParkEntranceDebris.obj and record its mesh ID first")
+
+
 if __name__ == "__main__":
     main()

@@ -110,9 +110,14 @@ This file is the persistent project context and current roadmap for OpenCode. Re
      - **Play check:** each stage swaps exactly. Before any action, all meshes use the neglected texture and both glows are off. After cleanup, the arch and sign are restored and the sign glow is on, while the carousel stays faded. After repair, the carousel is restored and the canopy glow is on. Output shows only the four bootstrap lines.
      - **Result:** captures show a clear dusty gray-brown → coral/cream/gold change in stages, with grass and cobblestone ground.
      - **Sign text:** the cream `PARK PARK` was unreadable on the restored gold sign. Authored signs now use dark wood lettering (graybox keeps cream), confirmed readable in both states. `verify.ps1` passes.
+     **Debris and path (2026-09-29):**
+     - **Debris mesh:** the generator now writes `ParkParkEntranceDebris.obj` (snapped planks, a split crate, a fallen sign, weeds and blooms; 744 triangles). An EditableMesh preview in Studio confirmed it reads as an overgrown pile.
+     - **Debris contract:** `ParkBuilder` clones an `EntranceDebris` template (`AssetManifest.Models.Debris`) to `(-12, 0, 8)` inside the entrance and adds the cleanup prompt to its `CleanupTarget`; otherwise it falls back to the graybox crates. `tools/build_parkpark_templates.py` writes the template once `MeshAssets.json` has the debris mesh ID.
+     - **Path:** `CrackedPath` is now 10×38 and runs from the spawn through the gate to the platform edge.
+     - **Play check:** Output is clean, the graybox debris fallback works while no template exists, and the path is continuous. `verify.ps1` passes.
    - **Next:**
-     - (1) Replace the graybox debris crates with an authored debris/overgrowth mesh. Add it to the generator, have the user import one OBJ, then add it to the template/`EntranceDebris` contract.
-     - (2) Review phone portrait on a real device, and extend or reshape `CrackedPath` so it runs from the spawn through the gate.
+     - (1) User: 3D-import `ParkParkEntranceDebris.obj`. Claude: record its mesh ID, build the template, remove the import, and Play-check cleanup with the authored pile.
+     - (2) Review phone portrait on a real device.
      - (3) Ask the user for visual approval of the slice before phase 4.
      - (2) Replace the graybox ground and path with authored ground, and recheck mobile portrait on a real device.
      - (3) Then ask the user to approve the slice visually before phase 4.
