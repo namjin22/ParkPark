@@ -319,6 +319,8 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			awardCoins(other, fare)
 		end
 		popup(guest.root.Position + Vector3.new(0, 9, 0), string.format("+%d %s", fare, currency))
+		-- Per-ride totals are kept as attributes so tests (and later a ride rating) can read them.
+		ride.model:SetAttribute("Boardings", ((ride.model:GetAttribute("Boardings") :: number?) or 0) + 1)
 		park.ParkFolder:SetAttribute(
 			"GuestsBoarded",
 			((park.ParkFolder:GetAttribute("GuestsBoarded") :: number?) or 0) + 1
