@@ -13,7 +13,10 @@
     "ParkParkTeacupsPlatform",
     "ParkParkTeacupsRotor",
     "ParkParkBumperPlatform",
-    "ParkParkBumperCar"
+    "ParkParkBumperCar",
+    "ParkParkTeacupsHub",
+    "ParkParkTeacup",
+    "ParkParkLitter"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",

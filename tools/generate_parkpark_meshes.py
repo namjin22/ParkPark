@@ -403,7 +403,7 @@ def add_horse(mesh: Mesh, angle: float, orbit_radius: float, palette: str) -> No
         for z in (-0.34, 0.34):
             add_cylinder_between(mesh, (x, 1.95, z), (x + 0.04, 0.93, z), 0.12, 0.07, palette, 7, transform)
     add_cylinder_between(mesh, (-1.03, 2.27, 0), (-1.42, 1.98, 0), 0.13, 0.06, "gold", 7, transform)
-    add_ellipsoid(mesh, (0.18, 2.69, 0), (0.48, 0.2, 0.54), "wood", transform, 8, 4)
+    add_ellipsoid(mesh, (-0.45, 2.69, 0), (0.48, 0.2, 0.54), "wood", transform, 8, 4)
 
 
 def make_platform() -> Mesh:
@@ -480,8 +480,9 @@ def make_rotor() -> Mesh:
         add_cylinder_between(mesh, (0, 11.65, 0), outer, 0.13, 0.1, "gold", 8)
         origin = (6.6 * math.cos(angle), 0, 6.6 * math.sin(angle))
         transform = radial_transform(angle, origin)
-        add_cylinder_between(mesh, (0, 3.4, 0), (0, 11.9, 0), 0.105, 0.075, "cream", 8, transform)
-        add_ellipsoid(mesh, (0, 3.43, 0), (0.22, 0.16, 0.22), "gold", transform, 8, 4)
+        # The pole runs down into the horse's back so nothing hangs loose above the saddle.
+        add_cylinder_between(mesh, (0, 2.72, 0), (0, 11.9, 0), 0.105, 0.075, "cream", 8, transform)
+        add_ellipsoid(mesh, (0, 2.86, 0), (0.24, 0.16, 0.24), "gold", transform, 8, 4)
         add_horse(mesh, angle, 6.6, "mint" if horse_index % 2 else "coral")
     return mesh
 
@@ -854,8 +855,8 @@ def make_bumper_platform() -> Mesh:
     for index in range(4):
         angle = math.pi / 4 + index * math.pi / 2
         x, z = 10.6 * math.cos(angle), 10.6 * math.sin(angle)
-        add_vertical_cylinder(mesh, 0.22, 0.7, 6.0, "cream", 12, x, z)
-        add_vertical_cylinder(mesh, 0.42, 0.7, 1.1, "gold", 12, x, z)
+        add_vertical_cylinder(mesh, 0.22, 0.08, 6.0, "cream", 12, x, z)
+        add_vertical_cylinder(mesh, 0.42, 0.08, 1.1, "gold", 12, x, z)
         add_torus(mesh, 0.3, 0.07, 5.7, "gold", segments=14, sides=5, center_x=x, center_z=z)
         add_ellipsoid(mesh, (x, 6.35, z), (0.5, 0.5, 0.5), "gold", slices=10, stacks=6)
         add_ellipsoid(mesh, (x, 6.95, z), (0.13, 0.2, 0.13), "coral", slices=6, stacks=4)
@@ -894,6 +895,113 @@ def make_bumper_car() -> Mesh:
     add_cylinder_between(mesh, (0, 1.4, 1.0), (0, 5.0, 1.0), 0.08, 0.06, "wood", 8)
     add_ellipsoid(mesh, (0, 5.05, 1.0), (0.5, 0.09, 0.5), "gold", slices=12, stacks=4)
     add_ellipsoid(mesh, (0, 5.2, 1.0), (0.12, 0.14, 0.12), "coral", slices=6, stacks=4)
+    return mesh
+
+
+def make_teacups_hub() -> Mesh:
+    """Rotating teacup deck: turntable ring, six cup pedestals joined to a central column and small roof.
+
+    The cups are a separate mesh (make_teacup) so each one can spin on its own pedestal.
+    """
+    mesh = Mesh("ParkParkTeacupsHub")
+    # Deck sits on the platform top (y = 0.85) and rotates as one piece.
+    add_vertical_cylinder(mesh, 8.6, 0.74, 1.12, "cream", 48)
+    add_vertical_cylinder(mesh, 8.62, 0.74, 0.98, "coral", 48)
+    add_torus(mesh, 8.4, 0.12, 1.14, "gold", segments=48, sides=6)
+    lathe(
+        mesh,
+        [
+            (0.0, 1.1, "wood"),
+            (1.5, 1.1, "wood"),
+            (1.15, 1.6, "gold"),
+            (0.66, 2.0, "coral"),
+            (0.55, 4.6, "cream"),
+            (0.78, 4.8, "gold"),
+            (0.55, 5.1, "mint"),
+            (0.46, 7.4, "cream"),
+            (0.5, 7.6, "gold"),
+            (0.0, 7.7, "gold"),
+        ],
+        32,
+    )
+    # Small striped roof joined to the top of the column.
+    lathe(
+        mesh,
+        [(0.0, 8.7, "gold"), (1.6, 7.9, "coral"), (3.2, 7.35, "cream"), (4.1, 7.0, "coral"), (4.1, 6.85, "gold")],
+        32,
+    )
+    add_cylinder_between(mesh, (0, 7.4, 0), (0, 8.7, 0), 0.34, 0.16, "gold", 10)
+    add_star(mesh, 9.15, 0.5, "gold")
+    orbit_radius = 6.0
+    for index in range(6):
+        angle = TAU * index / 6
+        x, z = orbit_radius * math.cos(angle), orbit_radius * math.sin(angle)
+        # Flat spoke from the hub to each turntable, then the turntable the cup spins on.
+        add_cylinder_between(mesh, (0, 1.3, 0), (x, 1.3, z), 0.24, 0.24, "coral", 8)
+        add_vertical_cylinder(mesh, 2.0, 1.12, 1.34, "gold", 28, x, z)
+        add_vertical_cylinder(mesh, 1.7, 1.34, 1.42, "cream", 28, x, z)
+    return mesh
+
+
+def make_teacup() -> Mesh:
+    """One wide, shallow teacup with its base at y=0, so a guest can stand waist-deep in it."""
+    mesh = Mesh("ParkParkTeacup")
+    lathe(
+        mesh,
+        [
+            (0.0, 0.0, "gold"),
+            (0.8, 0.0, "gold"),
+            (1.05, 0.16, "coral"),
+            (1.45, 0.6, "coral"),
+            (1.65, 1.2, "coral"),
+            (1.58, 1.32, "gold"),
+            (1.38, 1.26, "cream"),
+            (1.28, 0.62, "dark_glass"),
+            (1.0, 0.5, "dark_glass"),
+            (0.0, 0.46, "dark_glass"),
+        ],
+        32,
+    )
+    for side in (-1, 1):
+        points = (
+            (side * 1.55, 1.05, 0.0),
+            (side * 1.95, 1.05, 0.0),
+            (side * 2.1, 0.78, 0.0),
+            (side * 1.9, 0.52, 0.0),
+            (side * 1.5, 0.52, 0.0),
+        )
+        for start, end in zip(points, points[1:]):
+            add_cylinder_between(mesh, start, end, 0.1, 0.1, "gold", 6)
+    for dot in range(10):
+        dot_angle = TAU * dot / 10 + 0.2
+        add_ellipsoid(
+            mesh,
+            (1.5 * math.cos(dot_angle), 0.9, 1.5 * math.sin(dot_angle)),
+            (0.12, 0.11, 0.12),
+            "cream",
+            slices=6,
+            stacks=4,
+        )
+    return mesh
+
+
+def make_litter() -> Mesh:
+    """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
+    mesh = Mesh("ParkParkLitter")
+    # Tipped paper cup lying on its side.
+    add_cylinder_between(mesh, (-0.6, 0.42, -0.3), (0.35, 0.3, -0.05), 0.42, 0.3, "faded_cream", 10)
+    add_cylinder_between(mesh, (-0.3, 0.4, -0.2), (0.0, 0.36, -0.1), 0.44, 0.43, "coral", 10)
+    # Crumpled wrapper.
+    add_box(mesh, (0, 0, 0), (0.9, 0.08, 0.7), "faded_coral", tilted_transform((0.9, 0.09, 0.7), 35, 3))
+    add_ellipsoid(mesh, (0.9, 0.22, 0.7), (0.3, 0.2, 0.28), "faded_coral", slices=7, stacks=4)
+    # Popcorn tub with a few spilled kernels.
+    add_box(mesh, (0, 0, 0), (0.8, 0.9, 0.8), "coral", tilted_transform((-0.9, 0.42, 0.85), 20, 0, 14))
+    add_box(mesh, (0, 0, 0), (0.82, 0.16, 0.82), "cream", tilted_transform((-0.9, 0.8, 0.85), 20, 0, 14))
+    for x, z in ((-0.2, 1.25), (0.05, 1.05), (-0.5, 1.4), (0.3, 1.4)):
+        add_ellipsoid(mesh, (x, 0.1, z), (0.12, 0.1, 0.12), "cream", slices=6, stacks=4)
+    # Apple core.
+    add_ellipsoid(mesh, (1.3, 0.18, -0.6), (0.24, 0.2, 0.24), "faded_mint", slices=7, stacks=4)
+    add_cylinder_between(mesh, (1.3, 0.2, -0.6), (1.3, 0.55, -0.6), 0.04, 0.03, "wood", 5)
     return mesh
 
 
@@ -953,6 +1061,9 @@ def main() -> None:
         make_canopy(restored=True),
         make_teacups_platform(),
         make_teacups_rotor(),
+        make_teacups_hub(),
+        make_teacup(),
+        make_litter(),
         make_bumper_platform(),
         make_bumper_car(),
         make_entrance(),

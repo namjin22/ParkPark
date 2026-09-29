@@ -4,11 +4,14 @@ local PhysicsService = game:GetService("PhysicsService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local GameConfig =
-	require(ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("GameConfig"))
+local Config = ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config")
+local GameConfig = require(Config:WaitForChild("GameConfig"))
+local ParkLayout = require(Config:WaitForChild("ParkLayout"))
 
--- Once the park is open, guests walk in through the gate, ride an operating attraction, pay a fare
--- to every player in the park, and leave. Guests are server-owned R15 rigs with default avatars.
+-- Once the park is open, guests walk in along the paths, pick a ride at random, and stand in that ride's
+-- line. The guest at the head of a line shows a prompt: a player walks up and lets them on, or the ride's
+-- staff (an upgrade) does it automatically. A guest who boards pays the fare to every player, rides, then
+-- may join another random ride or leave the way they came.
 local GuestService = {}
 
 type GuestReferences = {
@@ -17,38 +20,51 @@ type GuestReferences = {
 	CarouselRotor: Model,
 	TeacupsRide: Model,
 	TeacupsRotor: Model,
+	TeacupCups: Model?,
 	BumperRide: Model,
 	BumperCars: Model,
 }
 
-type RideDefinition = {
-	name: string,
+type Guest = {
 	model: Model,
-	-- The part a guest is welded to for this seat: the rotor root, or the bumper car itself.
+	humanoid: Humanoid,
+	root: BasePart,
+	prompt: ProximityPrompt,
+	lane: number,
+	jitter: number,
+	ridesTaken: number,
+	ride: Ride?,
+	slot: Vector3,
+	arrived: boolean,
+	seat: number?,
+	alive: boolean,
+}
+
+type Ride = {
+	key: string,
+	displayName: string,
+	model: Model,
 	seatPart: (number) -> BasePart?,
+	seatOffset: (number) -> CFrame,
 	seatCount: number,
 	seatTaken: { [number]: boolean },
-	fare: number,
-	rideSeconds: number,
-	queuePoint: Vector3,
-	seatOffset: (number) -> CFrame,
-	noticeTitle: string,
+	queue: { Guest },
+	lastStaffBoarding: number,
 }
 
 type AwardCoins = (Player, number) -> boolean
 type Notify = (Player, string, string) -> ()
+type Popup = (Vector3, string) -> ()
 
 local GUEST_COLLISION_GROUP = "ParkParkGuests"
-local ENTRY_Z = 44
-local GATE_Z = 24
--- The scaled park is large: the farthest queue is about 100 studs from the gate.
-local WALK_TIMEOUT = 20
-local QUEUE_TIMEOUT = 40
+local ARRIVAL_DISTANCE = 4.5
+local QUEUE_TICK = 0.4
 
 -- Horse geometry in unscaled OBJ units (tools/generate_parkpark_meshes.py make_rotor/add_horse).
 local HORSE_ORBIT = 6.6
 local SADDLE_HEIGHT = 2.89
-local SADDLE_FORWARD = 0.18
+-- Riders sit behind the pole, toward the horse's tail.
+local SADDLE_FORWARD = -0.45
 local ROTOR_CENTER_HEIGHT = 6.35
 -- Seated R15 root sits roughly this far above the saddle surface.
 local RIDER_HIP = 1.25
@@ -83,7 +99,7 @@ local function ensureCollisionGroup()
 	end
 end
 
-local function createGuest(): Model?
+local function createGuestModel(): Model?
 	local description = Instance.new("HumanoidDescription")
 	local skin = pick(SKIN_TONES)
 	description.HeadColor = skin
@@ -107,7 +123,7 @@ local function createGuest(): Model?
 	local humanoid = guest:FindFirstChildOfClass("Humanoid")
 	if humanoid then
 		humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-		humanoid.WalkSpeed = 10
+		humanoid.WalkSpeed = GameConfig.GuestWalkSpeed
 	end
 	for _, descendant in guest:GetDescendants() do
 		if descendant:IsA("BasePart") then
@@ -117,18 +133,27 @@ local function createGuest(): Model?
 	return guest
 end
 
-local function walkTo(humanoid: Humanoid, point: Vector3): boolean
-	local reached = false
-	local connection = humanoid.MoveToFinished:Connect(function(success: boolean)
-		reached = success
-	end)
-	humanoid:MoveTo(point)
+local function flatDistance(a: Vector3, b: Vector3): number
+	return (Vector3.new(a.X, 0, a.Z) - Vector3.new(b.X, 0, b.Z)).Magnitude
+end
+
+-- Walks to a point on the path, re-issuing MoveTo because a single call gives up after a few seconds.
+local function walkTo(guest: Guest, point: Vector3)
+	local timeout = math.max(6, flatDistance(guest.root.Position, point) / GameConfig.GuestWalkSpeed * 2.5)
 	local elapsed = 0
-	while not reached and elapsed < WALK_TIMEOUT and humanoid.Parent ~= nil do
-		elapsed += task.wait(0.25)
+	while guest.alive and elapsed < timeout and flatDistance(guest.root.Position, point) > ARRIVAL_DISTANCE do
+		guest.humanoid:MoveTo(point)
+		elapsed += task.wait(0.3)
 	end
-	connection:Disconnect()
-	return reached
+end
+
+local function followRoute(guest: Guest, route: { Vector3 })
+	for _, point in route do
+		if not guest.alive then
+			return
+		end
+		walkTo(guest, point)
+	end
 end
 
 -- Seat transform relative to the rotor root (CenterPost), facing the direction of travel.
@@ -142,17 +167,8 @@ local function carouselSeatOffset(index: number): CFrame
 	return CFrame.lookAt(position, position + forward)
 end
 
--- Bumper cars face local -Z, so a rider with an identity rotation looks along the car's travel.
-local function bumperSeatOffset(_: number): CFrame
-	local scale = GameConfig.BumperScale
-	return CFrame.new(
-		0,
-		(GameConfig.BumperSeatHeight - GameConfig.BumperCarCenterHeight) * scale + GameConfig.BumperRiderHip,
-		GameConfig.BumperSeatZ * scale
-	)
-end
-
-local function teacupsSeatOffset(index: number): CFrame
+-- Legacy single-mesh teacup rotor: the seat sits inside the cup on the rotor.
+local function legacyTeacupsSeatOffset(index: number): CFrame
 	local scale = GameConfig.TeacupsScale
 	local angle = (index - 1) * 2 * math.pi / GameConfig.TeacupsSeatCount
 	local outward = Vector3.new(math.cos(angle), 0, math.sin(angle))
@@ -165,7 +181,27 @@ local function teacupsSeatOffset(index: number): CFrame
 	return CFrame.lookAt(position, position + outward)
 end
 
-function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notify: Notify)
+-- A guest stands waist-deep in a spinning cup; the offset is relative to the cup part's centre.
+local function cupSeatOffset(_: number): CFrame
+	local scale = GameConfig.TeacupsScale
+	return CFrame.new(
+		0,
+		(GameConfig.TeacupCupFloorHeight - GameConfig.TeacupCupCenterHeight) * scale + GameConfig.TeacupStandHeight,
+		0
+	)
+end
+
+-- Bumper cars face local -Z, so a rider with an identity rotation looks along the car's travel.
+local function bumperSeatOffset(_: number): CFrame
+	local scale = GameConfig.BumperCarScale
+	return CFrame.new(
+		0,
+		(GameConfig.BumperSeatHeight - GameConfig.BumperCarCenterHeight) * scale + GameConfig.BumperRiderHip,
+		GameConfig.BumperSeatZ * scale
+	)
+end
+
+function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notify: Notify, popup: Popup)
 	ensureCollisionGroup()
 
 	local guestFolderInstance = park.ParkFolder:FindFirstChild("Guests")
@@ -179,169 +215,276 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 	end
 	local guestFolder = guestFolderInstance :: Folder
 
+	local currency = GameConfig.CurrencyDisplayName
 	local guestCount = 0
-	local carouselPivot = park.Carousel:GetPivot()
-	local platformFrontZ = carouselPivot.Position.Z + 12 * GameConfig.CarouselScale
-	local teacupsPivot = park.TeacupsRide:GetPivot().Position
-	local bumperPivot = park.BumperRide:GetPivot().Position
-	local rides: { RideDefinition } = {
-		{
-			name = "Carousel",
-			model = park.Carousel,
-			seatPart = function()
-				return park.CarouselRotor.PrimaryPart
-			end,
-			seatCount = GameConfig.CarouselSeatCount,
+
+	local function newRide(
+		key: string,
+		model: Model,
+		seatPart: (number) -> BasePart?,
+		seatOffset: (number) -> CFrame,
+		seatCount: number
+	): Ride
+		return {
+			key = key,
+			displayName = GameConfig.Rides[key].DisplayName,
+			model = model,
+			seatPart = seatPart,
+			seatOffset = seatOffset,
+			seatCount = seatCount,
 			seatTaken = {},
-			fare = GameConfig.GuestRideFare,
-			rideSeconds = GameConfig.GuestRideSeconds,
-			queuePoint = Vector3.new(carouselPivot.Position.X, 0, platformFrontZ + 3),
-			seatOffset = carouselSeatOffset,
-			noticeTitle = "손님이 회전목마를 탔어요",
-		},
-		{
-			name = "Teacups",
-			model = park.TeacupsRide,
-			seatPart = function()
+			queue = {},
+			lastStaffBoarding = os.clock(),
+		}
+	end
+
+	local cups = park.TeacupCups
+	local rides: { Ride } = {
+		newRide("Carousel", park.Carousel, function()
+			return park.CarouselRotor.PrimaryPart
+		end, carouselSeatOffset, GameConfig.CarouselSeatCount),
+		if cups
+			then newRide("Teacups", park.TeacupsRide, function(seat: number)
+				local cup = cups:FindFirstChild(string.format("TeacupCup%d", seat))
+				return if cup and cup:IsA("BasePart") then cup else nil
+			end, cupSeatOffset, GameConfig.TeacupCupCount)
+			else newRide("Teacups", park.TeacupsRide, function()
 				return park.TeacupsRotor.PrimaryPart
-			end,
-			seatCount = GameConfig.TeacupsSeatCount,
-			seatTaken = {},
-			fare = GameConfig.TeacupsGuestRideFare,
-			rideSeconds = GameConfig.GuestRideSeconds,
-			queuePoint = Vector3.new(
-				teacupsPivot.X,
-				0,
-				teacupsPivot.Z + GameConfig.TeacupsPlatformRadius * GameConfig.TeacupsScale + 2.5
-			),
-			seatOffset = teacupsSeatOffset,
-			noticeTitle = "손님이 찻잔을 탔어요",
-		},
-		{
-			name = "Bumper",
-			model = park.BumperRide,
-			seatPart = function(seat: number)
-				local car = park.BumperCars:FindFirstChild(string.format("BumperCar%d", seat))
-				return if car and car:IsA("BasePart") then car else nil
-			end,
-			seatCount = GameConfig.BumperSeatCount,
-			seatTaken = {},
-			fare = GameConfig.BumperGuestRideFare,
-			rideSeconds = GameConfig.GuestRideSeconds,
-			queuePoint = Vector3.new(
-				bumperPivot.X,
-				0,
-				bumperPivot.Z + GameConfig.BumperPlatformRadius * GameConfig.BumperScale + 2.5
-			),
-			seatOffset = bumperSeatOffset,
-			noticeTitle = "손님이 범퍼카를 탔어요",
-		},
+			end, legacyTeacupsSeatOffset, GameConfig.TeacupsSeatCount),
+		newRide("Bumper", park.BumperRide, function(seat: number)
+			local car = park.BumperCars:FindFirstChild(string.format("BumperCar%d", seat))
+			return if car and car:IsA("BasePart") then car else nil
+		end, bumperSeatOffset, GameConfig.BumperSeatCount),
 	}
 
-	local function findAvailableRide(): (RideDefinition?, number?)
-		local candidates: { { Ride: RideDefinition, Seat: number } } = {}
+	local function fareOf(ride: Ride): number
+		return (ride.model:GetAttribute("Fare") :: number?) or GameConfig.Rides[ride.key].BaseFare
+	end
+
+	local function firstFreeSeat(ride: Ride): number?
+		for seat = 1, ride.seatCount do
+			if not ride.seatTaken[seat] and ride.seatPart(seat) ~= nil then
+				return seat
+			end
+		end
+		return nil
+	end
+
+	local function updateQueue(ride: Ride)
+		for index, guest in ride.queue do
+			guest.slot = ParkLayout.QueueSlot(ride.key, index - 1, guest.jitter)
+		end
+		ride.model:SetAttribute("QueueLength", #ride.queue)
+	end
+
+	local function removeFromQueue(guest: Guest)
+		local ride = guest.ride
+		if ride == nil then
+			return
+		end
+		local index = table.find(ride.queue, guest)
+		if index then
+			table.remove(ride.queue, index)
+			updateQueue(ride)
+		end
+		guest.prompt.Enabled = false
+	end
+
+	-- Lets the head of a ride's line on. `player` is who allowed it, or nil when the ride's staff did.
+	local function tryBoard(ride: Ride, guest: Guest, player: Player?): boolean
+		if ride.queue[1] ~= guest or not guest.arrived or guest.seat ~= nil or not guest.alive then
+			return false
+		end
+		if ride.model:GetAttribute("IsOperating") ~= true then
+			return false
+		end
+
+		local seat = firstFreeSeat(ride)
+		if seat == nil then
+			if player then
+				notify(player, "자리가 없어요", "타고 있는 손님이 내리면 다시 허용하세요")
+			end
+			return false
+		end
+
+		ride.seatTaken[seat] = true
+		table.remove(ride.queue, 1)
+		updateQueue(ride)
+		guest.seat = seat
+		guest.prompt.Enabled = false
+
+		-- The fare is paid the moment a guest boards, so accepting a guest is immediately rewarded.
+		local fare = fareOf(ride)
+		for _, other in Players:GetPlayers() do
+			awardCoins(other, fare)
+		end
+		popup(guest.root.Position + Vector3.new(0, 9, 0), string.format("+%d %s", fare, currency))
+		park.ParkFolder:SetAttribute(
+			"GuestsBoarded",
+			((park.ParkFolder:GetAttribute("GuestsBoarded") :: number?) or 0) + 1
+		)
+		return true
+	end
+
+	local function pickRide(previous: Ride?): Ride?
+		local open: { Ride } = {}
 		for _, ride in rides do
-			if ride.model:GetAttribute("IsOperating") == true then
-				for seat = 1, ride.seatCount do
-					if not ride.seatTaken[seat] and ride.seatPart(seat) ~= nil then
-						table.insert(candidates, { Ride = ride, Seat = seat })
-						break
-					end
-				end
+			if ride.model:GetAttribute("IsOperating") == true and #ride.queue < GameConfig.QueueMax then
+				table.insert(open, ride)
 			end
 		end
-		if #candidates == 0 then
-			return nil, nil
-		end
-
-		local selected = candidates[math.random(1, #candidates)]
-		selected.Ride.seatTaken[selected.Seat] = true
-		return selected.Ride, selected.Seat
-	end
-
-	local function payFare(ride: RideDefinition)
-		for _, player in Players:GetPlayers() do
-			if awardCoins(player, ride.fare) then
-				notify(player, ride.noticeTitle, string.format("+%d %s", ride.fare, GameConfig.CurrencyDisplayName))
+		-- Prefer a different ride than the one just ridden, but never leave the choice empty.
+		if previous and #open > 1 then
+			local index = table.find(open, previous)
+			if index then
+				table.remove(open, index)
 			end
 		end
+		return if #open > 0 then pick(open) else nil
 	end
 
-	local function runGuest(guest: Model)
-		local humanoid = guest:FindFirstChildOfClass("Humanoid")
-		local root = guest:FindFirstChild("HumanoidRootPart")
-		if humanoid == nil or root == nil or not root:IsA("BasePart") then
+	local function rideOn(guest: Guest, rideInfo: Ride, seat: number)
+		local part = rideInfo.seatPart(seat)
+		if part == nil or not guest.alive then
+			rideInfo.seatTaken[seat] = nil
 			return
 		end
 
-		local lane = math.random(-30, 30) / 10
-		walkTo(humanoid, Vector3.new(lane, 0, GATE_Z))
-		walkTo(humanoid, Vector3.new(lane * 2, 0, platformFrontZ + 3 + math.random(0, 20) / 10))
+		-- The seat part (rotor root, cup, or bumper car) is anchored, so the weld alone carries the rider.
+		guest.humanoid.Sit = true
+		guest.root.CFrame = part.CFrame * rideInfo.seatOffset(seat)
+		local weld = Instance.new("WeldConstraint")
+		weld.Name = "RideWeld"
+		weld.Part0 = part
+		weld.Part1 = guest.root
+		weld.Parent = guest.root
 
-		local ride: RideDefinition? = nil
-		local seat: number? = nil
-		local waited = 0
-		while ride == nil and waited < QUEUE_TIMEOUT and guest.Parent ~= nil do
-			ride, seat = findAvailableRide()
-			if ride == nil then
-				waited += task.wait(0.5)
+		local elapsed = 0
+		while guest.alive and elapsed < GameConfig.GuestRideSeconds do
+			elapsed += task.wait(0.5)
+		end
+
+		if weld.Parent ~= nil then
+			weld:Destroy()
+		end
+		rideInfo.seatTaken[seat] = nil
+		if guest.alive and guest.humanoid.Health > 0 then
+			guest.humanoid.Sit = false
+			-- Step off at the front of the ride, on the path where the line forms.
+			guest.root.CFrame =
+				CFrame.new(ParkLayout.QueueSlot(rideInfo.key, 0, guest.jitter * 2) + Vector3.new(0, 4, 0))
+			guest.humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+		end
+	end
+
+	local function runGuest(guest: Guest)
+		local previousRide: Ride? = nil
+		local fromKey: string? = nil
+		local fromPosition = guest.root.Position
+
+		while guest.alive and guest.ridesTaken < GameConfig.GuestMaxRides do
+			local chosen = pickRide(previousRide)
+			if chosen == nil then
+				break
+			end
+
+			guest.ride = chosen
+			guest.arrived = false
+			guest.seat = nil
+			table.insert(chosen.queue, guest)
+			updateQueue(chosen)
+
+			followRoute(guest, ParkLayout.ToCrossing(fromKey, fromPosition, guest.lane))
+			followRoute(guest, ParkLayout.CrossingToRide(chosen.key, guest.lane, guest.slot))
+
+			-- Wait in line, stepping forward as the guests ahead board, until let on or out of patience.
+			local waited = 0
+			while guest.alive and guest.seat == nil and waited < GameConfig.GuestPatienceSeconds do
+				if flatDistance(guest.root.Position, guest.slot) > ARRIVAL_DISTANCE then
+					guest.humanoid:MoveTo(guest.slot)
+				end
+				waited += task.wait(QUEUE_TICK)
+			end
+
+			local seat = guest.seat
+			if seat == nil then
+				removeFromQueue(guest)
+				break
+			end
+
+			rideOn(guest, chosen, seat)
+			guest.ridesTaken += 1
+			previousRide = chosen
+			fromKey = chosen.key
+			fromPosition = guest.root.Position
+			if math.random() > GameConfig.GuestExtraRideChance then
+				break
 			end
 		end
 
-		if ride and seat and guest:IsDescendantOf(guestFolder) then
-			local queuePoint = ride.queuePoint
-			if ride.name == "Carousel" then
-				queuePoint += Vector3.new(lane * 2 + math.random(-8, 8) / 10, 0, math.random(0, 20) / 10)
-			else
-				queuePoint += Vector3.new(math.random(-20, 20) / 10, 0, math.random(-8, 8) / 10)
-			end
-			walkTo(humanoid, queuePoint)
-
-			local rotorRoot = ride.seatPart(seat)
-			if rotorRoot then
-				-- The seat part (rotor root or bumper car) is anchored, so the weld alone carries the rider.
-				humanoid.Sit = true
-				root.CFrame = rotorRoot.CFrame * ride.seatOffset(seat)
-				local weld = Instance.new("WeldConstraint")
-				weld.Name = "RideWeld"
-				weld.Part0 = rotorRoot
-				weld.Part1 = root
-				weld.Parent = root
-
-				task.wait(ride.rideSeconds)
-				if weld.Parent ~= nil then
-					weld:Destroy()
-				end
-				ride.seatTaken[seat] = nil
-				if guest:IsDescendantOf(guestFolder) and humanoid.Health > 0 then
-					humanoid.Sit = false
-					root.CFrame = CFrame.new(queuePoint + Vector3.new(0, 3, 0))
-					humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-					payFare(ride)
-				end
-			else
-				ride.seatTaken[seat] = nil
-			end
-		elseif ride and seat then
-			ride.seatTaken[seat] = nil
+		if guest.alive then
+			followRoute(guest, ParkLayout.ToCrossing(fromKey, fromPosition, guest.lane))
+			followRoute(guest, ParkLayout.CrossingToExit(guest.lane))
 		end
-
-		walkTo(humanoid, Vector3.new(if lane < 0 then -18 else 18, 0, ENTRY_Z))
 	end
 
 	local function spawnGuest()
-		local guest = createGuest()
-		if guest == nil then
+		local model = createGuestModel()
+		if model == nil then
+			return
+		end
+		local humanoid = model:FindFirstChildOfClass("Humanoid")
+		local root = model:FindFirstChild("HumanoidRootPart")
+		if humanoid == nil or root == nil or not root:IsA("BasePart") then
+			model:Destroy()
 			return
 		end
 
+		local prompt = Instance.new("ProximityPrompt")
+		prompt.Name = "AcceptPrompt"
+		prompt.ActionText = "태우기"
+		prompt.ObjectText = "손님"
+		prompt.HoldDuration = 0.25
+		prompt.MaxActivationDistance = 16
+		prompt.RequiresLineOfSight = false
+		prompt.Enabled = false
+		prompt.Parent = root
+
+		local lane = math.random(-50, 50) / 10
+		local guest: Guest = {
+			model = model,
+			humanoid = humanoid,
+			root = root,
+			prompt = prompt,
+			lane = lane,
+			jitter = math.random(-25, 25) / 10,
+			ridesTaken = 0,
+			ride = nil,
+			slot = Vector3.zero,
+			arrived = false,
+			seat = nil,
+			alive = true,
+		}
+
+		prompt.Triggered:Connect(function(player: Player)
+			local current = guest.ride
+			local character = player.Character
+			local playerRoot = character and character:FindFirstChild("HumanoidRootPart")
+			if current == nil or playerRoot == nil or not playerRoot:IsA("BasePart") then
+				return
+			end
+			if (playerRoot.Position - guest.root.Position).Magnitude > prompt.MaxActivationDistance + 6 then
+				return
+			end
+			tryBoard(current, guest, player)
+		end)
+
 		guestCount += 1
-		guest:PivotTo(CFrame.lookAt(Vector3.new(math.random(-40, 40) / 10, 3, ENTRY_Z), Vector3.new(0, 3, GATE_Z)))
-		guest.Parent = guestFolder
-		local root = guest:FindFirstChild("HumanoidRootPart")
-		if root and root:IsA("BasePart") then
-			root:SetNetworkOwner(nil)
-		end
+		model:PivotTo(
+			CFrame.lookAt(Vector3.new(lane, 3, ParkLayout.EntryZ + 4), Vector3.new(lane, 3, ParkLayout.GateZ))
+		)
+		model.Parent = guestFolder
+		root:SetNetworkOwner(nil)
 
 		task.spawn(function()
 			local ok, err = pcall(function()
@@ -350,15 +493,55 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			if not ok then
 				warn("[ParkPark] Guest stopped: " .. tostring(err))
 			end
-			guest:Destroy()
+			guest.alive = false
+			removeFromQueue(guest)
+			local seat = guest.seat
+			if seat and guest.ride then
+				-- A guest removed mid-ride frees the seat they held.
+				guest.ride.seatTaken[seat] = nil
+			end
+			model:Destroy()
 			guestCount -= 1
 		end)
 	end
 
+	-- One loop keeps every line in order: it marks who has reached their spot, shows the accept prompt on
+	-- the head of each line while a seat is free, and lets staff board guests automatically.
+	task.spawn(function()
+		while park.ParkFolder.Parent ~= nil do
+			local now = os.clock()
+			for _, rideInfo in rides do
+				local operating = rideInfo.model:GetAttribute("IsOperating") == true
+				local hasSeat = firstFreeSeat(rideInfo) ~= nil
+				local fare = fareOf(rideInfo)
+				for index, guest in rideInfo.queue do
+					guest.arrived = flatDistance(guest.root.Position, guest.slot) <= ARRIVAL_DISTANCE + 1
+					local isHead = index == 1
+					guest.prompt.Enabled = isHead and guest.arrived and operating and hasSeat
+					if isHead then
+						guest.prompt.ObjectText =
+							string.format("%s 손님 · +%d %s", rideInfo.displayName, fare, currency)
+					end
+				end
+
+				local interval = (rideInfo.model:GetAttribute("StaffInterval") :: number?) or 0
+				local head = rideInfo.queue[1]
+				if interval > 0 and head and now - rideInfo.lastStaffBoarding >= interval then
+					if tryBoard(rideInfo, head, nil) then
+						rideInfo.lastStaffBoarding = now
+					end
+				end
+			end
+			task.wait(QUEUE_TICK)
+		end
+	end)
+
 	task.spawn(function()
 		while park.ParkFolder.Parent ~= nil do
 			if park.ParkFolder:GetAttribute("ParkOpen") == true and guestCount < GameConfig.MaxGuests then
-				spawnGuest()
+				if pickRide(nil) ~= nil then
+					spawnGuest()
+				end
 			end
 			task.wait(GameConfig.GuestSpawnSeconds)
 		end

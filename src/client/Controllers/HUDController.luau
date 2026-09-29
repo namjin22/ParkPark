@@ -125,11 +125,47 @@ function HUDController.Start()
 	local displayedCoins = coins.Value
 	count.Text = tostring(displayedCoins)
 
+	-- A small "+N" / "-N" beside the balance shows each change without any popup in the middle of the screen.
+	local changeLabel = Instance.new("TextLabel")
+	changeLabel.Name = "CoinChange"
+	changeLabel.Position = UDim2.fromOffset(150, 48)
+	changeLabel.Size = UDim2.fromOffset(72, 24)
+	changeLabel.BackgroundTransparency = 1
+	changeLabel.Font = Enum.Font.GothamBlack
+	changeLabel.TextSize = 18
+	changeLabel.TextXAlignment = Enum.TextXAlignment.Left
+	changeLabel.TextTransparency = 1
+	changeLabel.TextStrokeColor3 = GameConfig.Palette.Ink
+	changeLabel.TextStrokeTransparency = 1
+	changeLabel.Parent = screenGui
+	local changeToken = 0
+
+	local function showChange(delta: number)
+		changeToken += 1
+		local token = changeToken
+		changeLabel.Text = if delta > 0 then string.format("+%d", delta) else string.format("%d", delta)
+		changeLabel.TextColor3 = if delta > 0 then GameConfig.Palette.Mint else GameConfig.Palette.Coral
+		changeLabel.Position = UDim2.fromOffset(150, 56)
+		changeLabel.TextTransparency = 0
+		changeLabel.TextStrokeTransparency = 0.6
+		TweenService:Create(changeLabel, TweenInfo.new(1.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Position = UDim2.fromOffset(150, 44),
+			TextTransparency = 1,
+			TextStrokeTransparency = 1,
+		}):Play()
+		task.delay(1.2, function()
+			if token == changeToken then
+				changeLabel.TextTransparency = 1
+			end
+		end)
+	end
+
 	coins:GetPropertyChangedSignal("Value"):Connect(function()
 		count.Text = tostring(coins.Value)
 		if coins.Value == displayedCoins then
 			return
 		end
+		showChange(coins.Value - displayedCoins)
 		displayedCoins = coins.Value
 
 		TweenService

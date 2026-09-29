@@ -20,6 +20,9 @@
 | `ParkParkEntranceDebris.obj` | 치울 잔해 더미: 부서진 판자, 쪼개진 상자, 쓰러진 표지판, 덤불 |
 | `ParkParkBumperPlatform.obj` | 범퍼카 링크: 테두리 바닥, 패드 레일, 바닥 무늬, 가로등 4개 |
 | `ParkParkBumperCar.obj` | 범퍼카 1대(정면 -Z): 범퍼 링, 보닛, 좌석, 스파크 폴. 템플릿에서 4대로 복제 |
+| `ParkParkTeacupsHub.obj` | 찻잔 회전판: 데크, 받침 6개, 중앙 기둥, 작은 지붕(컵 없음) |
+| `ParkParkTeacup.obj` | 찻잔 1개(바닥 y=0, 넓고 얕은 컵). 템플릿에서 6개로 복제되어 각자 회전 |
+| `ParkParkLitter.obj` | 바닥에 생기는 쓰레기 한 무더기(컵, 포장지, 팝콘 통, 사과 속) |
 | `ParkParkFairground.mtl` | 공통 재질 팔레트 |
 
 ## 생성·가져오기
@@ -87,3 +90,5 @@ OBJ는 편집 가능한 **메시 원본**입니다. 입구·회전목마·잔해
 `BumperCarsRide` 템플릿: `RidePlatform`(링크), `PlatformCollider`, `BumperConsole`, 그리고 `BumperCars` Model 안의 `BumperCar1`~`BumperCar4` MeshPart(전부 Anchored, 링 위 반지름 5.45 유닛에 접선 방향으로 배치)를 둡니다. 차는 서버(`BumperCarService`)가 매 프레임 CFrame으로 움직이고, 손님은 차에 용접됩니다. `BUMPER_SCALE`은 `GameConfig.BumperScale`과 같아야 합니다.
 
 템플릿에서 메시를 확대할 때 `Size`만 키우고 `InitialSize`는 OBJ의 원래 크기로 둡니다. Roblox는 `Size / InitialSize`로 메시를 확대하므로, 둘을 같은 값으로 저장하면 확대되지 않은 채 충돌 상자만 커집니다.
+
+`TeacupsRide` 새 구조: `TeacupsRotor/RotorCore`(허브 메시)와 `TeacupCups/TeacupCup1~6`(컵 메시, Anchored)를 둡니다. 컵은 링 반지름 6 유닛, 받침 높이 1.42 유닛 위에 놓이며 `TeacupService`가 매 프레임 허브와 함께 돌리고 각자 회전시킵니다. `Litter` 템플릿은 `LitterPiece` MeshPart 하나를 가진 Model입니다. 모든 배율은 `GameConfig.luau`에서 읽습니다.

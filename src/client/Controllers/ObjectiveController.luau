@@ -93,7 +93,26 @@ function ObjectiveController.Start()
 	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 	highlight.Parent = screenGui
 
+	local function need(cost: number, ready: string): string
+		if coins.Value >= cost then
+			return ready
+		end
+		return string.format(
+			"%d %s 필요 · 지금 %d · 쓰레기 줍기와 손님 태우기로 모으세요",
+			cost,
+			currency,
+			coins.Value
+		)
+	end
+
+	local function fare(key: string): number
+		return GameConfig.Rides[key].BaseFare
+	end
+
 	local function currentStep(): Step
+		local carouselConfig = GameConfig.Rides.Carousel
+		local teacupsConfig = GameConfig.Rides.Teacups
+		local bumperConfig = GameConfig.Rides.Bumper
 		if park:GetAttribute("EntranceCleared") ~= true then
 			return {
 				title = "1. 입구 쓰레기를 치우세요",
@@ -102,70 +121,91 @@ function ObjectiveController.Start()
 			}
 		end
 		if carousel:GetAttribute("IsRepaired") ~= true then
-			local cost = GameConfig.CarouselRepairCost
 			return {
 				title = "2. 회전목마를 수리하세요",
-				detail = if coins.Value >= cost
-					then string.format("콘솔에서 수리 · %d %s", cost, currency)
-					else string.format("%d %s 필요 · 지금 %d", cost, currency, coins.Value),
+				detail = need(
+					carouselConfig.RepairCost,
+					string.format(
+						"콘솔에서 수리 · %d %s · 손님당 +%d",
+						carouselConfig.RepairCost,
+						currency,
+						fare("Carousel")
+					)
+				),
 				target = console,
 			}
 		end
 		if park:GetAttribute("ParkOpen") ~= true then
 			return {
 				title = "3. 입구에서 개장하세요",
-				detail = "손님들이 회전목마를 타러 와요",
+				detail = "손님들이 놀이기구 앞에 줄을 서요",
 				target = gateAnchor,
 			}
 		end
+		if ((park:GetAttribute("GuestsBoarded") :: number?) or 0) < 1 then
+			return {
+				title = "4. 줄 선 손님을 태워주세요",
+				detail = string.format(
+					"맨 앞 손님 앞에서 태우기 · 손님당 +%d %s",
+					fare("Carousel"),
+					currency
+				),
+				target = nil,
+			}
+		end
 		if teacups:GetAttribute("IsUnlocked") ~= true then
-			local cost = GameConfig.TeacupsUnlockCost
 			return {
 				title = "5. 찻잔 라이드 해금",
-				detail = if coins.Value >= cost
-					then string.format("콘솔에서 해금 · %d %s", cost, currency)
-					else string.format("%d %s 필요 · 지금 %d", cost, currency, coins.Value),
+				detail = need(
+					teacupsConfig.UnlockCost,
+					string.format(
+						"콘솔에서 해금 · %d %s · 손님당 +%d",
+						teacupsConfig.UnlockCost,
+						currency,
+						fare("Teacups")
+					)
+				),
 				target = teacupsConsole,
 			}
 		end
 		if teacups:GetAttribute("IsRepaired") ~= true then
-			local cost = GameConfig.TeacupsRepairCost
 			return {
 				title = "6. 찻잔 라이드 수리",
-				detail = if coins.Value >= cost
-					then string.format("콘솔에서 수리 · %d %s", cost, currency)
-					else string.format("%d %s 필요 · 지금 %d", cost, currency, coins.Value),
+				detail = need(
+					teacupsConfig.RepairCost,
+					string.format("콘솔에서 수리 · %d %s", teacupsConfig.RepairCost, currency)
+				),
 				target = teacupsConsole,
 			}
 		end
 		if bumper:GetAttribute("IsUnlocked") ~= true then
-			local cost = GameConfig.BumperUnlockCost
 			return {
 				title = "7. 범퍼카 해금",
-				detail = if coins.Value >= cost
-					then string.format("콘솔에서 해금 · %d %s", cost, currency)
-					else string.format("%d %s 필요 · 지금 %d", cost, currency, coins.Value),
+				detail = need(
+					bumperConfig.UnlockCost,
+					string.format(
+						"콘솔에서 해금 · %d %s · 손님당 +%d",
+						bumperConfig.UnlockCost,
+						currency,
+						fare("Bumper")
+					)
+				),
 				target = bumperConsole,
 			}
 		end
 		if bumper:GetAttribute("IsRepaired") ~= true then
-			local cost = GameConfig.BumperRepairCost
 			return {
 				title = "8. 범퍼카 수리",
-				detail = if coins.Value >= cost
-					then string.format("콘솔에서 수리 · %d %s", cost, currency)
-					else string.format("%d %s 필요 · 지금 %d", cost, currency, coins.Value),
+				detail = need(
+					bumperConfig.RepairCost,
+					string.format("콘솔에서 수리 · %d %s", bumperConfig.RepairCost, currency)
+				),
 				target = bumperConsole,
 			}
 		end
 		return {
-			title = "9. 손님을 맞이하세요",
-			detail = string.format(
-				"탑승 1회마다 +%d~%d %s",
-				GameConfig.GuestRideFare,
-				GameConfig.BumperGuestRideFare,
-				currency
-			),
+			title = "9. 놀이기구를 키우세요",
+			detail = "콘솔에서 요금 올리기(E) · 직원 고용(F)",
 			target = nil,
 		}
 	end
@@ -185,6 +225,7 @@ function ObjectiveController.Start()
 	carousel:GetAttributeChangedSignal("IsRepaired"):Connect(refresh)
 	teacups:GetAttributeChangedSignal("IsUnlocked"):Connect(refresh)
 	teacups:GetAttributeChangedSignal("IsRepaired"):Connect(refresh)
+	park:GetAttributeChangedSignal("GuestsBoarded"):Connect(refresh)
 	bumper:GetAttributeChangedSignal("IsUnlocked"):Connect(refresh)
 	bumper:GetAttributeChangedSignal("IsRepaired"):Connect(refresh)
 	coins:GetPropertyChangedSignal("Value"):Connect(refresh)

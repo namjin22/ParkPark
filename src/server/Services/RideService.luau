@@ -15,15 +15,22 @@ type RideReferences = {
 	CarouselRotor: Model,
 	RepairConsole: BasePart,
 	RepairPrompt: ProximityPrompt,
+	CarouselIncomePrompt: ProximityPrompt,
+	CarouselStaffPrompt: ProximityPrompt,
 	TeacupsRide: Model,
 	TeacupsRotor: Model,
+	TeacupCups: Model?,
 	TeacupsConsole: BasePart,
 	TeacupsUnlockPrompt: ProximityPrompt,
 	TeacupsRepairPrompt: ProximityPrompt,
+	TeacupsIncomePrompt: ProximityPrompt,
+	TeacupsStaffPrompt: ProximityPrompt,
 	BumperRide: Model,
 	BumperConsole: BasePart,
 	BumperUnlockPrompt: ProximityPrompt,
 	BumperRepairPrompt: ProximityPrompt,
+	BumperIncomePrompt: ProximityPrompt,
+	BumperStaffPrompt: ProximityPrompt,
 }
 
 type SpendCoins = (Player, number) -> boolean
@@ -31,17 +38,16 @@ type GetCoins = (Player) -> number
 type ApplyRepairedAppearance = (Model) -> ()
 type Notify = (Player, string, string) -> ()
 
--- A ride that starts locked: the player pays to unlock it, then pays again to repair it, and it
--- then earns fares from guests. `isAvailable` says when its console prompts may show.
-type UnlockableRide = {
-	displayName: string,
+-- One ride's economy: an optional unlock, a repair, then income and staff upgrades that raise what
+-- each guest pays and let staff board guests automatically. `isAvailable` says when the console works.
+type RideDefinition = {
+	key: string,
 	model: Model,
 	console: BasePart,
-	unlockPrompt: ProximityPrompt,
+	unlockPrompt: ProximityPrompt?,
 	repairPrompt: ProximityPrompt,
-	unlockCost: number,
-	repairCost: number,
-	fare: number,
+	incomePrompt: ProximityPrompt,
+	staffPrompt: ProximityPrompt,
 	isAvailable: () -> boolean,
 	signals: { RBXScriptSignal },
 	start: () -> (),
@@ -60,21 +66,72 @@ local function canUsePrompt(player: Player, target: BasePart, prompt: ProximityP
 		return false
 	end
 
-	return (rootPart.Position - target.Position).Magnitude <= prompt.MaxActivationDistance + 2
+	return (rootPart.Position - target.Position).Magnitude <= prompt.MaxActivationDistance + 4
+end
+
+local function createLabel(parent: Instance, name: string, y: number, height: number, size: number, bold: boolean)
+	local label = Instance.new("TextLabel")
+	label.Name = name
+	label.Position = UDim2.fromOffset(12, y)
+	label.Size = UDim2.new(1, -24, 0, height)
+	label.BackgroundTransparency = 1
+	label.Font = if bold then Enum.Font.GothamBold else Enum.Font.GothamMedium
+	label.TextColor3 = GameConfig.Palette.Ink
+	label.TextSize = size
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.TextTruncate = Enum.TextTruncate.AtEnd
+	label.Parent = parent
+	return label
+end
+
+-- A sign over the console that shows the ride's state, what each guest pays, and its upgrade levels.
+local function createInfoBoard(console: BasePart, displayName: string): (TextLabel, TextLabel, TextLabel)
+	local existing = console:FindFirstChild("RideInfo")
+	if existing then
+		existing:Destroy()
+	end
+
+	local board = Instance.new("BillboardGui")
+	board.Name = "RideInfo"
+	board.Size = UDim2.fromOffset(330, 112)
+	board.StudsOffsetWorldSpace = Vector3.new(0, 9, 0)
+	board.MaxDistance = 95
+	board.LightInfluence = 0
+	board.ResetOnSpawn = false
+	board.Parent = console
+
+	local card = Instance.new("Frame")
+	card.Size = UDim2.fromScale(1, 1)
+	card.BackgroundColor3 = GameConfig.Palette.Cream
+	card.BackgroundTransparency = 0.06
+	card.BorderSizePixel = 0
+	card.Parent = board
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 16)
+	corner.Parent = card
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = GameConfig.Palette.Gold
+	stroke.Thickness = 2
+	stroke.Parent = card
+
+	local title = createLabel(card, "Title", 8, 26, 21, true)
+	title.Text = displayName
+	local fareLine = createLabel(card, "Fare", 38, 24, 17, true)
+	local detailLine = createLabel(card, "Detail", 64, 20, 14, false)
+	local queueLine = createLabel(card, "Queue", 86, 20, 14, false)
+	queueLine.TextTransparency = 0.15
+	return fareLine, detailLine, queueLine
 end
 
 function RideService.Start(
 	park: RideReferences,
 	spendCoins: SpendCoins,
 	getCoins: GetCoins,
-	applyRepairedAppearance: ApplyRepairedAppearance,
-	applyTeacupsRepairedAppearance: ApplyRepairedAppearance,
-	applyBumperRepairedAppearance: ApplyRepairedAppearance,
+	applyCarouselRepaired: ApplyRepairedAppearance,
+	applyTeacupsRepaired: ApplyRepairedAppearance,
+	applyBumperRepaired: ApplyRepairedAppearance,
 	notify: Notify
 )
-	local carouselRepaired = park.Carousel:GetAttribute("IsRepaired") == true
-	local carouselRotationStarted = false
-	local carouselCost = GameConfig.CarouselRepairCost
 	local currency = GameConfig.CurrencyDisplayName
 
 	local function startRotation(ride: Model, rotor: Model, rotationSeconds: number, name: string)
@@ -104,109 +161,182 @@ function RideService.Start(
 		end)
 	end
 
-	local function startCarousel()
-		if carouselRotationStarted then
-			return
-		end
-		carouselRotationStarted = true
-		startRotation(park.Carousel, park.CarouselRotor, GameConfig.CarouselRotationSeconds, "Carousel")
-	end
+	local function setupRide(ride: RideDefinition)
+		local config = GameConfig.Rides[ride.key]
+		local model = ride.model
+		local displayName = config.DisplayName
+		local started = false
 
-	park.RepairPrompt.ActionText = "수리하기"
-	park.RepairPrompt.ObjectText = string.format("회전목마 · %d %s", carouselCost, currency)
-	if carouselRepaired then
-		park.RepairPrompt.ActionText = "수리 완료"
-		park.RepairPrompt.Enabled = false
-		startCarousel()
-	end
-
-	park.RepairPrompt.Triggered:Connect(function(player: Player)
-		if
-			carouselRepaired
-			or park.ParkFolder:GetAttribute("EntranceCleared") ~= true
-			or not canUsePrompt(player, park.RepairConsole, park.RepairPrompt)
-		then
-			return
+		local function start()
+			if started then
+				return
+			end
+			started = true
+			ride.start()
 		end
 
-		if not spendCoins(player, carouselCost) then
-			notify(
-				player,
-				string.format("%s이 부족해요", currency),
-				string.format("수리에 %d %s이 필요해요 (지금 %d)", carouselCost, currency, getCoins(player))
-			)
-			return
-		end
-
-		carouselRepaired = true
-		applyRepairedAppearance(park.Carousel)
-		park.Carousel:SetAttribute("IsRepaired", true)
-		park.RepairPrompt.ActionText = "수리 완료"
-		park.RepairPrompt.Enabled = false
-		notify(
-			player,
-			"회전목마 복구 완료!",
-			string.format("-%d %s · 입구에서 개장하세요", carouselCost, currency)
-		)
-		startCarousel()
-	end)
-
-	local function setupUnlockableRide(ride: UnlockableRide)
-		local unlocked = ride.model:GetAttribute("IsUnlocked") == true
-		local repaired = ride.model:GetAttribute("IsRepaired") == true
+		local unlocked = config.UnlockCost == 0 or model:GetAttribute("IsUnlocked") == true
+		local repaired = model:GetAttribute("IsRepaired") == true
 		if repaired then
 			unlocked = true
-			ride.model:SetAttribute("IsUnlocked", true)
+		end
+		model:SetAttribute("IsUnlocked", unlocked)
+		if model:GetAttribute("IncomeLevel") == nil then
+			model:SetAttribute("IncomeLevel", 0)
+		end
+		if model:GetAttribute("StaffLevel") == nil then
+			model:SetAttribute("StaffLevel", 0)
 		end
 
-		ride.unlockPrompt.ActionText = "해금하기"
-		ride.unlockPrompt.ObjectText = string.format("%s · %d %s", ride.displayName, ride.unlockCost, currency)
-		ride.repairPrompt.ActionText = "수리하기"
-		ride.repairPrompt.ObjectText = string.format("%s · %d %s", ride.displayName, ride.repairCost, currency)
+		local function incomeLevel(): number
+			return (model:GetAttribute("IncomeLevel") :: number?) or 0
+		end
+		local function staffLevel(): number
+			return (model:GetAttribute("StaffLevel") :: number?) or 0
+		end
+		local function fareForLevel(level: number): number
+			return config.BaseFare + level * config.IncomePerLevel
+		end
+
+		-- GuestService reads these two attributes each time a guest boards.
+		local function publishRates()
+			model:SetAttribute("Fare", fareForLevel(incomeLevel()))
+			local level = staffLevel()
+			model:SetAttribute("StaffInterval", if level > 0 then GameConfig.StaffIntervals[level] else 0)
+		end
+		publishRates()
+
+		local fareLine, detailLine, queueLine = createInfoBoard(ride.console, displayName)
+
+		local function refreshBoard()
+			local fare = fareForLevel(incomeLevel())
+			if not unlocked then
+				fareLine.Text = string.format("손님당 +%d %s", config.BaseFare, currency)
+				detailLine.Text = string.format("해금 %d %s", config.UnlockCost, currency)
+				queueLine.Text = "잠겨 있어요"
+			elseif not repaired then
+				fareLine.Text = string.format("손님당 +%d %s", config.BaseFare, currency)
+				detailLine.Text = string.format("수리 %d %s", config.RepairCost, currency)
+				queueLine.Text = "고장 났어요"
+			else
+				fareLine.Text = string.format("손님당 +%d %s", fare, currency)
+				detailLine.Text = string.format(
+					"요금 Lv %d/%d · 직원 Lv %d/%d",
+					incomeLevel(),
+					#config.IncomeCosts,
+					staffLevel(),
+					#config.StaffCosts
+				)
+				local queueLength = (model:GetAttribute("QueueLength") :: number?) or 0
+				local interval = (model:GetAttribute("StaffInterval") :: number?) or 0
+				queueLine.Text = if interval > 0
+					then string.format(
+						"대기 %d/%d · 직원이 %d초마다 태워요",
+						queueLength,
+						GameConfig.QueueMax,
+						interval
+					)
+					else string.format(
+						"대기 %d/%d · 손님에게 다가가 허용하세요",
+						queueLength,
+						GameConfig.QueueMax
+					)
+			end
+		end
 
 		local function refreshPrompts()
 			local available = ride.isAvailable()
-			ride.unlockPrompt.Enabled = available and not unlocked
+			if ride.unlockPrompt then
+				ride.unlockPrompt.ObjectText = string.format(
+					"%s · %d %s · 손님당 +%d",
+					displayName,
+					config.UnlockCost,
+					currency,
+					config.BaseFare
+				)
+				ride.unlockPrompt.Enabled = available and not unlocked
+			end
+			ride.repairPrompt.ObjectText =
+				string.format("%s · %d %s · 손님당 +%d", displayName, config.RepairCost, currency, config.BaseFare)
 			ride.repairPrompt.Enabled = available and unlocked and not repaired
+
+			local income = incomeLevel()
+			local staff = staffLevel()
+			local incomeNext = config.IncomeCosts[income + 1]
+			local staffNext = config.StaffCosts[staff + 1]
+			ride.incomePrompt.Enabled = repaired and incomeNext ~= nil
+			if incomeNext then
+				ride.incomePrompt.ActionText = string.format("요금 올리기 Lv%d→%d", income, income + 1)
+				ride.incomePrompt.ObjectText = string.format(
+					"%s · %d %s · 손님당 +%d → +%d",
+					displayName,
+					incomeNext,
+					currency,
+					fareForLevel(income),
+					fareForLevel(income + 1)
+				)
+			end
+			ride.staffPrompt.Enabled = repaired and staffNext ~= nil
+			if staffNext then
+				ride.staffPrompt.ActionText = string.format("직원 고용 Lv%d→%d", staff, staff + 1)
+				ride.staffPrompt.ObjectText = string.format(
+					"%s · %d %s · %d초마다 자동 탑승",
+					displayName,
+					staffNext,
+					currency,
+					GameConfig.StaffIntervals[staff + 1]
+				)
+			end
+			refreshBoard()
 		end
 
 		for _, signal in ride.signals do
 			signal:Connect(refreshPrompts)
 		end
+		for _, attribute in { "QueueLength", "IncomeLevel", "StaffLevel" } do
+			model:GetAttributeChangedSignal(attribute):Connect(function()
+				publishRates()
+				refreshPrompts()
+			end)
+		end
 		refreshPrompts()
 		if repaired then
 			ride.repairPrompt.ActionText = "수리 완료"
-			ride.start()
+			start()
 		end
 
-		ride.unlockPrompt.Triggered:Connect(function(player: Player)
-			if unlocked or not ride.isAvailable() or not canUsePrompt(player, ride.console, ride.unlockPrompt) then
-				return
-			end
-
-			if not spendCoins(player, ride.unlockCost) then
-				notify(
-					player,
-					string.format("%s이 부족해요", currency),
-					string.format(
-						"해금에 %d %s이 필요해요 (지금 %d)",
-						ride.unlockCost,
-						currency,
-						getCoins(player)
-					)
-				)
-				return
-			end
-
-			unlocked = true
-			ride.model:SetAttribute("IsUnlocked", true)
-			refreshPrompts()
+		local function notEnough(player: Player, cost: number, verb: string)
 			notify(
 				player,
-				string.format("%s 해금!", ride.displayName),
-				string.format("-%d %s · 콘솔에서 수리하세요", ride.unlockCost, currency)
+				string.format("%s이 부족해요", currency),
+				string.format("%s에 %d %s이 필요해요 (지금 %d)", verb, cost, currency, getCoins(player))
 			)
-		end)
+		end
+
+		if ride.unlockPrompt then
+			ride.unlockPrompt.Triggered:Connect(function(player: Player)
+				if
+					unlocked
+					or not ride.isAvailable()
+					or not canUsePrompt(player, ride.console, ride.unlockPrompt :: ProximityPrompt)
+				then
+					return
+				end
+				if not spendCoins(player, config.UnlockCost) then
+					notEnough(player, config.UnlockCost, "해금")
+					return
+				end
+
+				unlocked = true
+				model:SetAttribute("IsUnlocked", true)
+				refreshPrompts()
+				notify(
+					player,
+					string.format("%s 해금!", displayName),
+					string.format("-%d %s · 이제 수리하세요", config.UnlockCost, currency)
+				)
+			end)
+		end
 
 		ride.repairPrompt.Triggered:Connect(function(player: Player)
 			if
@@ -217,70 +347,120 @@ function RideService.Start(
 			then
 				return
 			end
-
-			if not spendCoins(player, ride.repairCost) then
-				notify(
-					player,
-					string.format("%s이 부족해요", currency),
-					string.format(
-						"수리에 %d %s이 필요해요 (지금 %d)",
-						ride.repairCost,
-						currency,
-						getCoins(player)
-					)
-				)
+			if not spendCoins(player, config.RepairCost) then
+				notEnough(player, config.RepairCost, "수리")
 				return
 			end
 
 			repaired = true
-			ride.applyRepairedAppearance(ride.model)
-			ride.model:SetAttribute("IsRepaired", true)
+			ride.applyRepairedAppearance(model)
+			model:SetAttribute("IsRepaired", true)
 			ride.repairPrompt.ActionText = "수리 완료"
 			refreshPrompts()
 			notify(
 				player,
-				string.format("%s 복구 완료!", ride.displayName),
-				string.format("-%d %s · 탑승 때마다 +%d %s", ride.repairCost, currency, ride.fare, currency)
+				string.format("%s 복구 완료!", displayName),
+				string.format("-%d %s · 손님당 +%d %s", config.RepairCost, currency, config.BaseFare, currency)
 			)
-			ride.start()
+			start()
+		end)
+
+		ride.incomePrompt.Triggered:Connect(function(player: Player)
+			local level = incomeLevel()
+			local cost = config.IncomeCosts[level + 1]
+			if not repaired or cost == nil or not canUsePrompt(player, ride.console, ride.incomePrompt) then
+				return
+			end
+			if not spendCoins(player, cost) then
+				notEnough(player, cost, "요금 인상")
+				return
+			end
+
+			model:SetAttribute("IncomeLevel", level + 1)
+			notify(
+				player,
+				string.format("%s 요금 인상!", displayName),
+				string.format("-%d %s · 손님당 +%d %s", cost, currency, fareForLevel(level + 1), currency)
+			)
+		end)
+
+		ride.staffPrompt.Triggered:Connect(function(player: Player)
+			local level = staffLevel()
+			local cost = config.StaffCosts[level + 1]
+			if not repaired or cost == nil or not canUsePrompt(player, ride.console, ride.staffPrompt) then
+				return
+			end
+			if not spendCoins(player, cost) then
+				notEnough(player, cost, "직원 고용")
+				return
+			end
+
+			model:SetAttribute("StaffLevel", level + 1)
+			notify(
+				player,
+				string.format("%s 직원 고용!", displayName),
+				string.format(
+					"-%d %s · %d초마다 자동으로 태워요",
+					cost,
+					currency,
+					GameConfig.StaffIntervals[level + 1]
+				)
+			)
 		end)
 	end
 
-	local teacupsRotationStarted = false
-	setupUnlockableRide({
-		displayName = "찻잔 라이드",
+	local carouselRotationSeconds = GameConfig.CarouselRotationSeconds
+	setupRide({
+		key = "Carousel",
+		model = park.Carousel,
+		console = park.RepairConsole,
+		unlockPrompt = nil,
+		repairPrompt = park.RepairPrompt,
+		incomePrompt = park.CarouselIncomePrompt,
+		staffPrompt = park.CarouselStaffPrompt,
+		isAvailable = function()
+			return park.ParkFolder:GetAttribute("EntranceCleared") == true
+		end,
+		signals = { park.ParkFolder:GetAttributeChangedSignal("EntranceCleared") },
+		start = function()
+			startRotation(park.Carousel, park.CarouselRotor, carouselRotationSeconds, "Carousel")
+		end,
+		applyRepairedAppearance = applyCarouselRepaired,
+	})
+
+	setupRide({
+		key = "Teacups",
 		model = park.TeacupsRide,
 		console = park.TeacupsConsole,
 		unlockPrompt = park.TeacupsUnlockPrompt,
 		repairPrompt = park.TeacupsRepairPrompt,
-		unlockCost = GameConfig.TeacupsUnlockCost,
-		repairCost = GameConfig.TeacupsRepairCost,
-		fare = GameConfig.TeacupsGuestRideFare,
+		incomePrompt = park.TeacupsIncomePrompt,
+		staffPrompt = park.TeacupsStaffPrompt,
 		isAvailable = function()
 			return park.ParkFolder:GetAttribute("ParkOpen") == true
 		end,
 		signals = { park.ParkFolder:GetAttributeChangedSignal("ParkOpen") },
 		start = function()
-			if teacupsRotationStarted then
-				return
+			if park.TeacupCups then
+				-- TeacupService turns the hub and spins the cups while IsOperating is true.
+				park.TeacupsRide:SetAttribute("IsOperating", true)
+			else
+				startRotation(park.TeacupsRide, park.TeacupsRotor, GameConfig.TeacupsRotationSeconds, "Teacups")
 			end
-			teacupsRotationStarted = true
-			startRotation(park.TeacupsRide, park.TeacupsRotor, GameConfig.TeacupsRotationSeconds, "Teacups")
 		end,
-		applyRepairedAppearance = applyTeacupsRepairedAppearance,
+		applyRepairedAppearance = applyTeacupsRepaired,
 	})
 
 	-- The bumper cars unlock only after the teacups run; BumperCarService moves the cars while
 	-- IsOperating is true, so starting this ride only flips that attribute.
-	setupUnlockableRide({
-		displayName = "범퍼카",
+	setupRide({
+		key = "Bumper",
 		model = park.BumperRide,
 		console = park.BumperConsole,
 		unlockPrompt = park.BumperUnlockPrompt,
 		repairPrompt = park.BumperRepairPrompt,
-		unlockCost = GameConfig.BumperUnlockCost,
-		repairCost = GameConfig.BumperRepairCost,
-		fare = GameConfig.BumperGuestRideFare,
+		incomePrompt = park.BumperIncomePrompt,
+		staffPrompt = park.BumperStaffPrompt,
 		isAvailable = function()
 			return park.ParkFolder:GetAttribute("ParkOpen") == true
 				and park.TeacupsRide:GetAttribute("IsRepaired") == true
@@ -292,7 +472,7 @@ function RideService.Start(
 		start = function()
 			park.BumperRide:SetAttribute("IsOperating", true)
 		end,
-		applyRepairedAppearance = applyBumperRepairedAppearance,
+		applyRepairedAppearance = applyBumperRepaired,
 	})
 end
 

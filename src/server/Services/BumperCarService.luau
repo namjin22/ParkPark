@@ -45,9 +45,9 @@ local function shortestAngle(from: number, to: number): number
 end
 
 function BumperCarService.Start(park: BumperReferences)
-	local scale = GameConfig.BumperScale
-	local carRadius = GameConfig.BumperCarRadius * scale
-	local maxRadius = (GameConfig.BumperArenaRadius - GameConfig.BumperCarRadius) * scale
+	-- The rink and the cars have separate scales: cars are sized for the guests riding them.
+	local carRadius = GameConfig.BumperCarRadius * GameConfig.BumperCarScale
+	local maxRadius = GameConfig.BumperArenaRadius * GameConfig.BumperScale - carRadius
 	local speed = GameConfig.BumperCarSpeed
 	local ridePivot = park.BumperRide:GetPivot()
 

@@ -3,8 +3,9 @@
 local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local GameConfig =
-	require(ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("GameConfig"))
+local Config = ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config")
+local GameConfig = require(Config:WaitForChild("GameConfig"))
+local ParkLayout = require(Config:WaitForChild("ParkLayout"))
 
 local PARK_FOLDER_NAME = "ParkParkWorld"
 local ENTRANCE_NAME = "RuinedEntrance"
@@ -13,21 +14,20 @@ local TEACUPS_NAME = "TeacupsRide"
 local BUMPER_NAME = "BumperCarsRide"
 local ASSET_FOLDER_SYNC_TIMEOUT = 5
 local ASSET_MANIFEST_SYNC_TIMEOUT = 2
--- Guests spawn on +Z and walk through the entrance toward the carousel on -Z.
+-- Guests spawn on +Z and walk through the entrance toward the rides on -Z (see ParkLayout).
 local GUEST_APPROACH_DIRECTION = Vector3.new(0, 0, 1)
 -- Authored meshes use -Z as their front, so turn the entrance toward arriving guests.
-local AUTHORED_ENTRANCE_PIVOT = CFrame.new(0, 0, 25) * CFrame.Angles(0, math.pi, 0)
--- The rides are scaled (GameConfig.CarouselScale / TeacupsScale). The carousel platform radius is 12 units
--- and the teacups platform radius 9.2 units at scale 1, so these pivots leave a gap between the rides and
--- put the carousel's front edge (z=-31.6) at the end of the main path and the teacups' (z=-17) beside a side path.
-local AUTHORED_CAROUSEL_PIVOT = CFrame.new(0, 0, -70)
-local AUTHORED_TEACUPS_PIVOT = CFrame.new(-75, 0, -40)
--- Mirrors the teacups across the main path; the bumper rink radius is 10.42 units at scale 1.
-local AUTHORED_BUMPER_PIVOT = CFrame.new(75, 0, -40)
-local GATE_Z = 25
+local GATE_Z = ParkLayout.GateZ
+local AUTHORED_ENTRANCE_PIVOT = CFrame.new(0, 0, GATE_Z) * CFrame.Angles(0, math.pi, 0)
+local AUTHORED_CAROUSEL_PIVOT = CFrame.new(ParkLayout.Rides.Carousel.Pivot)
+local AUTHORED_TEACUPS_PIVOT = CFrame.new(ParkLayout.Rides.Teacups.Pivot)
+local AUTHORED_BUMPER_PIVOT = CFrame.new(ParkLayout.Rides.Bumper.Pivot)
 local DEBRIS_NAME = "EntranceDebris"
--- Beside the path just inside the gate, so guests pass it on the way to the carousel.
-local DEBRIS_PIVOT = CFrame.new(-12, 0, 8)
+-- Beside the path between the spawn and the gate, so the first job is right in front of the player.
+local DEBRIS_PIVOT = CFrame.new(-32, 0, 52)
+-- The entrance arch is scaled, so the gate rope sits in front of it and spans the gap between the pillars.
+local GATE_ROPE_Z = GATE_Z + 8
+local GATE_ROPE_HALF_WIDTH = 12.5
 
 type AssetManifest = {
 	Models: {
@@ -36,6 +36,7 @@ type AssetManifest = {
 		Debris: string?,
 		Teacups: string?,
 		Bumper: string?,
+		Litter: string?,
 	},
 	EntranceSign: string,
 	CarouselStates: {
@@ -56,6 +57,7 @@ local assetManifest: AssetManifest = {
 		Carousel = CAROUSEL_NAME,
 		Teacups = TEACUPS_NAME,
 		Bumper = BUMPER_NAME,
+		Litter = "Litter",
 	},
 	EntranceSign = "SignPanel",
 	CarouselStates = {
@@ -98,6 +100,7 @@ local function getAssetFolder(): Folder?
 				and type(candidate.Models.Carousel) == "string"
 				and (candidate.Models.Teacups == nil or type(candidate.Models.Teacups) == "string")
 				and (candidate.Models.Bumper == nil or type(candidate.Models.Bumper) == "string")
+				and (candidate.Models.Litter == nil or type(candidate.Models.Litter) == "string")
 				and type(candidate.EntranceSign) == "string"
 				and type(candidate.CarouselStates) == "table"
 				and type(candidate.CarouselStates.NeglectedCanopy) == "string"
@@ -135,16 +138,24 @@ export type References = {
 	CarouselRotor: Model,
 	RepairConsole: BasePart,
 	RepairPrompt: ProximityPrompt,
+	CarouselIncomePrompt: ProximityPrompt,
+	CarouselStaffPrompt: ProximityPrompt,
 	TeacupsRide: Model,
 	TeacupsRotor: Model,
+	-- Nil while the ride still uses the legacy single-mesh rotor (guests then sit on the rotor).
+	TeacupCups: Model?,
 	TeacupsConsole: BasePart,
 	TeacupsUnlockPrompt: ProximityPrompt,
 	TeacupsRepairPrompt: ProximityPrompt,
+	TeacupsIncomePrompt: ProximityPrompt,
+	TeacupsStaffPrompt: ProximityPrompt,
 	BumperRide: Model,
 	BumperCars: Model,
 	BumperConsole: BasePart,
 	BumperUnlockPrompt: ProximityPrompt,
 	BumperRepairPrompt: ProximityPrompt,
+	BumperIncomePrompt: ProximityPrompt,
+	BumperStaffPrompt: ProximityPrompt,
 	GateRope: Model,
 	GatePrompt: ProximityPrompt,
 }
@@ -196,46 +207,40 @@ local function createEntranceSign(panel: BasePart, textColor: Color3)
 end
 
 local function ensureGrayboxApproach(parkFolder: Folder)
+	local pathColor = Color3.fromRGB(150, 140, 122)
 	if parkFolder:FindFirstChild("EntranceGround") == nil then
-		-- Extends past the carousel's back edge now that the default baseplate is hidden.
+		local depth = ParkLayout.GroundMaxZ - ParkLayout.GroundMinZ
 		createPart(
 			"EntranceGround",
-			Vector3.new(260, 1, 210),
-			Vector3.new(0, -0.5, -45),
+			Vector3.new(ParkLayout.GroundHalfWidth * 2, 1, depth),
+			Vector3.new(0, -0.5, (ParkLayout.GroundMaxZ + ParkLayout.GroundMinZ) / 2),
 			Color3.fromRGB(104, 122, 82),
 			parkFolder,
 			Enum.Material.Grass
 		)
 	end
 	if parkFolder:FindFirstChild("CrackedPath") == nil then
+		-- The main path runs from the entry point through the gate to the carousel platform's front edge.
+		local carousel = ParkLayout.Rides.Carousel
+		local frontEdge = carousel.Pivot.Z + carousel.PlatformRadius
+		local startZ = ParkLayout.EntryZ + 8
 		createPart(
 			"CrackedPath",
-			-- Runs from the spawn through the gate to the carousel platform's front edge.
-			Vector3.new(10, 0.2, 70),
-			Vector3.new(0, 0.1, 3.4),
-			Color3.fromRGB(150, 140, 122),
+			Vector3.new(ParkLayout.MainPathHalfWidth * 2, 0.2, startZ - frontEdge),
+			Vector3.new(0, 0.1, (startZ + frontEdge) / 2),
+			pathColor,
 			parkFolder,
 			Enum.Material.Cobblestone
 		)
 	end
-	if parkFolder:FindFirstChild("BumperPath") == nil then
+	if parkFolder:FindFirstChild("SidePath") == nil then
+		-- One side path crosses the main path and reaches the teacups' and the bumper cars' queues.
+		local reach = math.abs(ParkLayout.Rides.Teacups.Pivot.X) + 10
 		createPart(
-			"BumperPath",
-			-- Branches off the main path to the bumper rink's queue in front of its platform.
-			Vector3.new(76, 0.2, 8),
-			Vector3.new(38, 0.1, -13),
-			Color3.fromRGB(150, 140, 122),
-			parkFolder,
-			Enum.Material.Cobblestone
-		)
-	end
-	if parkFolder:FindFirstChild("TeacupsPath") == nil then
-		createPart(
-			"TeacupsPath",
-			-- Branches off the main path to the teacups' queue in front of their platform.
-			Vector3.new(76, 0.2, 8),
-			Vector3.new(-38, 0.1, -13),
-			Color3.fromRGB(150, 140, 122),
+			"SidePath",
+			Vector3.new(reach * 2, 0.2, ParkLayout.SidePathHalfWidth * 2),
+			Vector3.new(0, 0.1, ParkLayout.SidePathZ),
+			pathColor,
 			parkFolder,
 			Enum.Material.Cobblestone
 		)
@@ -252,22 +257,22 @@ local function ensureGate(parkFolder: Folder): (Model, ProximityPrompt)
 	else
 		rope = Instance.new("Model")
 		rope.Name = "GateRope"
-		for _, x in { -5.2, 5.2 } do
+		for _, x in { -GATE_ROPE_HALF_WIDTH, GATE_ROPE_HALF_WIDTH } do
 			local post = createPart(
 				"RopePost",
-				Vector3.new(3.4, 0.5, 0.5),
-				Vector3.new(x, 1.7, GATE_Z + 2),
+				Vector3.new(7, 1.2, 1.2),
+				Vector3.new(x, 3.5, GATE_ROPE_Z),
 				Color3.fromRGB(235, 171, 69),
 				rope,
 				Enum.Material.SmoothPlastic
 			)
 			post.Shape = Enum.PartType.Cylinder
-			post.CFrame = CFrame.new(x, 1.7, GATE_Z + 2) * CFrame.Angles(0, 0, math.pi / 2)
+			post.CFrame = CFrame.new(x, 3.5, GATE_ROPE_Z) * CFrame.Angles(0, 0, math.pi / 2)
 		end
 		local cord = createPart(
 			"Rope",
-			Vector3.new(10.4, 0.28, 0.28),
-			Vector3.new(0, 2.8, GATE_Z + 2),
+			Vector3.new(GATE_ROPE_HALF_WIDTH * 2, 0.6, 0.6),
+			Vector3.new(0, 5.6, GATE_ROPE_Z),
 			Color3.fromRGB(232, 92, 82),
 			rope,
 			Enum.Material.Fabric
@@ -287,8 +292,8 @@ local function ensureGate(parkFolder: Folder): (Model, ProximityPrompt)
 	if anchor == nil then
 		local newAnchor = createPart(
 			"GateAnchor",
-			Vector3.new(4, 4, 1),
-			Vector3.new(0, 2.5, GATE_Z + 2),
+			Vector3.new(10, 8, 2),
+			Vector3.new(0, 4, GATE_ROPE_Z),
 			Color3.new(1, 1, 1),
 			parkFolder
 		)
@@ -311,7 +316,7 @@ local function ensureGate(parkFolder: Folder): (Model, ProximityPrompt)
 	openPrompt.ActionText = "개장하기"
 	openPrompt.ObjectText = "파크 파크"
 	openPrompt.HoldDuration = 1
-	openPrompt.MaxActivationDistance = 12
+	openPrompt.MaxActivationDistance = 24
 	openPrompt.RequiresLineOfSight = false
 	openPrompt.Enabled = false
 	openPrompt.Parent = anchor
@@ -351,7 +356,7 @@ local function positionGrayboxSpawn()
 
 	spawnLocation.Name = "ParkParkSpawn"
 	spawnLocation.Size = Vector3.new(6, 1, 6)
-	spawnLocation.CFrame = CFrame.new(0, 0.5, 35)
+	spawnLocation.CFrame = CFrame.new(0, 0.5, ParkLayout.SpawnZ)
 	spawnLocation.Anchored = true
 	spawnLocation.Transparency = 1
 	spawnLocation.CanCollide = true
@@ -865,13 +870,14 @@ local function buildGrayboxBumperCars(parkFolder: Folder): Model
 	local cars = Instance.new("Model")
 	cars.Name = "BumperCars"
 	cars.Parent = ride
-	local carHeight = GameConfig.BumperCarCenterHeight * scale
+	local carScale = GameConfig.BumperCarScale
+	local carHeight = GameConfig.BumperCarCenterHeight * carScale
 	for index = 1, GameConfig.BumperSeatCount do
 		local angle = 2 * math.pi * (index - 1) / GameConfig.BumperSeatCount
-		local position = Vector3.new(5.45 * scale * math.cos(angle), carHeight, 5.45 * scale * math.sin(angle))
+		local position = Vector3.new(5.5 * scale * math.cos(angle), carHeight, 5.5 * scale * math.sin(angle))
 		local car = createPart(
 			string.format("BumperCar%d", index),
-			Vector3.new(2.5 * scale, 2.2 * scale, 3.2 * scale),
+			Vector3.new(2.5 * carScale, 2.2 * carScale, 3.2 * carScale),
 			position,
 			Color3.fromRGB(126, 113, 98),
 			cars,
@@ -900,7 +906,9 @@ local function ensureRidePrompt(
 	name: string,
 	actionText: string,
 	holdDuration: number,
-	objectText: string
+	objectText: string,
+	keyCode: Enum.KeyCode?,
+	uiOffset: Vector2?
 ): ProximityPrompt
 	local existing = console:FindFirstChild(name)
 	local prompt: ProximityPrompt
@@ -917,10 +925,29 @@ local function ensureRidePrompt(
 	prompt.ActionText = actionText
 	prompt.ObjectText = objectText
 	prompt.HoldDuration = holdDuration
-	prompt.MaxActivationDistance = 10
+	-- Consoles are scaled up with their rides, so their prompts reach further than the small ones did.
+	prompt.MaxActivationDistance = 18
 	prompt.RequiresLineOfSight = false
+	prompt.KeyboardKeyCode = keyCode or Enum.KeyCode.E
+	prompt.UIOffset = uiOffset or Vector2.zero
 	prompt.Enabled = false
 	return prompt
+end
+
+-- Income and staff upgrades appear once a ride is repaired; RideService fills in their live text.
+local function ensureUpgradePrompts(console: BasePart, objectText: string): (ProximityPrompt, ProximityPrompt)
+	local income = ensureRidePrompt(
+		console,
+		"IncomePrompt",
+		"요금 올리기",
+		0.6,
+		objectText,
+		Enum.KeyCode.E,
+		Vector2.new(0, -70)
+	)
+	local staff =
+		ensureRidePrompt(console, "StaffPrompt", "직원 고용", 0.6, objectText, Enum.KeyCode.F, Vector2.zero)
+	return income, staff
 end
 
 local function getOrCreateParkFolder(): Folder
@@ -1052,7 +1079,7 @@ function ParkBuilder.Build(): References
 		repairPrompt.ActionText = "수리하기"
 		repairPrompt.ObjectText = "고장 난 회전목마"
 		repairPrompt.HoldDuration = 2
-		repairPrompt.MaxActivationDistance = 10
+		repairPrompt.MaxActivationDistance = 18
 		repairPrompt.RequiresLineOfSight = false
 		repairPrompt.Enabled = parkFolder:GetAttribute("EntranceCleared") == true
 		repairPrompt.Parent = console
@@ -1061,6 +1088,7 @@ function ParkBuilder.Build(): References
 	else
 		error("[ParkPark] BrokenCarousel.RepairConsole.RepairPrompt must be a ProximityPrompt")
 	end
+	local carouselIncomePrompt, carouselStaffPrompt = ensureUpgradePrompts(console, "회전목마")
 	if carousel:GetAttribute("IsGraybox") ~= true then
 		applyAuthoredCarouselState(carousel, carousel:GetAttribute("IsRepaired") == true)
 	end
@@ -1088,9 +1116,24 @@ function ParkBuilder.Build(): References
 		error("[ParkPark] TeacupsRide.TeacupsConsole must be a BasePart")
 	end
 	local unlockPrompt =
-		ensureRidePrompt(teacupsConsoleInstance, "UnlockPrompt", "해금하기", 1.5, "찻잔 라이드")
+		ensureRidePrompt(teacupsConsoleInstance, "UnlockPrompt", "해금하기", 1.5, "찻잔 라이드", nil, nil)
 	local teacupsRepairPrompt =
-		ensureRidePrompt(teacupsConsoleInstance, "RepairPrompt", "수리하기", 2, "찻잔 라이드")
+		ensureRidePrompt(teacupsConsoleInstance, "RepairPrompt", "수리하기", 2, "찻잔 라이드", nil, nil)
+	local teacupsIncomePrompt, teacupsStaffPrompt = ensureUpgradePrompts(teacupsConsoleInstance, "찻잔 라이드")
+	-- Spinning cups are a separate model; they are driven by TeacupService and never welded to the rotor.
+	local teacupCupsInstance = teacupsRide:FindFirstChild("TeacupCups")
+	local teacupCups: Model? = nil
+	if teacupCupsInstance and teacupCupsInstance:IsA("Model") then
+		teacupCups = teacupCupsInstance
+		for _, descendant in teacupCupsInstance:GetDescendants() do
+			if descendant:IsA("BasePart") then
+				descendant.Anchored = true
+				descendant.CanCollide = false
+				descendant.CanTouch = false
+				descendant.CanQuery = false
+			end
+		end
+	end
 	applyTeacupsAppearance(teacupsRide, teacupsRide:GetAttribute("IsRepaired") == true)
 
 	local bumperRide = getOrCreateModel(parkFolder, BUMPER_NAME, buildGrayboxBumperCars)
@@ -1119,8 +1162,11 @@ function ParkBuilder.Build(): References
 	if bumperConsoleInstance == nil or not bumperConsoleInstance:IsA("BasePart") then
 		error("[ParkPark] BumperCarsRide.BumperConsole must be a BasePart")
 	end
-	local bumperUnlockPrompt = ensureRidePrompt(bumperConsoleInstance, "UnlockPrompt", "해금하기", 1.5, "범퍼카")
-	local bumperRepairPrompt = ensureRidePrompt(bumperConsoleInstance, "RepairPrompt", "수리하기", 2, "범퍼카")
+	local bumperUnlockPrompt =
+		ensureRidePrompt(bumperConsoleInstance, "UnlockPrompt", "해금하기", 1.5, "범퍼카", nil, nil)
+	local bumperRepairPrompt =
+		ensureRidePrompt(bumperConsoleInstance, "RepairPrompt", "수리하기", 2, "범퍼카", nil, nil)
+	local bumperIncomePrompt, bumperStaffPrompt = ensureUpgradePrompts(bumperConsoleInstance, "범퍼카")
 	applyBumperAppearance(bumperRide, bumperRide:GetAttribute("IsRepaired") == true)
 
 	return {
@@ -1133,19 +1179,40 @@ function ParkBuilder.Build(): References
 		CarouselRotor = rotor,
 		RepairConsole = console,
 		RepairPrompt = repairPrompt,
+		CarouselIncomePrompt = carouselIncomePrompt,
+		CarouselStaffPrompt = carouselStaffPrompt,
 		TeacupsRide = teacupsRide,
 		TeacupsRotor = teacupsRotor,
+		TeacupCups = teacupCups,
 		TeacupsConsole = teacupsConsoleInstance,
 		TeacupsUnlockPrompt = unlockPrompt,
 		TeacupsRepairPrompt = teacupsRepairPrompt,
+		TeacupsIncomePrompt = teacupsIncomePrompt,
+		TeacupsStaffPrompt = teacupsStaffPrompt,
 		BumperRide = bumperRide,
 		BumperCars = bumperCarsInstance,
 		BumperConsole = bumperConsoleInstance,
 		BumperUnlockPrompt = bumperUnlockPrompt,
 		BumperRepairPrompt = bumperRepairPrompt,
+		BumperIncomePrompt = bumperIncomePrompt,
+		BumperStaffPrompt = bumperStaffPrompt,
 		GateRope = gateRope,
 		GatePrompt = gatePrompt,
 	}
+end
+
+-- The authored litter model, or nil while it has not been imported (LitterService then builds a graybox one).
+function ParkBuilder.FindLitterTemplate(): Model?
+	local folder = getAssetFolder()
+	local name = assetManifest.Models.Litter
+	if folder == nil or name == nil then
+		return nil
+	end
+	local template = folder:FindFirstChild(name)
+	if template and template:IsA("Model") then
+		return template
+	end
+	return nil
 end
 
 function ParkBuilder.ApplyEntranceRestored(entrance: Model)

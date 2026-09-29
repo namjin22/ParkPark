@@ -8,8 +8,8 @@
 <Content name="MeshId"><url>rbxassetid://128949435785416</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
 <Vector3 name="InitialSize"><X>17.44</X><Y>16.99</Y><Z>2.96</Z></Vector3>
-<Vector3 name="size"><X>17.44</X><Y>16.99</Y><Z>2.96</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>0.0</X><Y>8.575</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<Vector3 name="size"><X>41.856</X><Y>27.184</Y><Z>7.104</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>13.72</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">false</bool>
 <bool name="CanTouch">false</bool>
@@ -23,8 +23,8 @@
 <Content name="MeshId"><url>rbxassetid://103081984848080</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
 <Vector3 name="InitialSize"><X>7.4</X><Y>1.25</Y><Z>0.42</Z></Vector3>
-<Vector3 name="size"><X>7.4</X><Y>1.25</Y><Z>0.42</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>0.0</X><Y>14.2</Y><Z>-1.41</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<Vector3 name="size"><X>17.76</X><Y>2.0</Y><Z>1.008</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>22.72</Y><Z>-3.384</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">false</bool>
 <bool name="CanTouch">false</bool>
@@ -36,8 +36,8 @@
 </Properties></Item><Item class="Part" referent="RBX3"><Properties>
 <string name="Name">LeftPillarCollider</string>
 <token name="shape">2</token>
-<Vector3 name="size"><X>8.2</X><Y>2.6</Y><Z>2.6</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>-7.05</X><Y>4.1</Y><Z>0.0</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<Vector3 name="size"><X>13.12</X><Y>6.96</Y><Z>6.96</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>-16.92</X><Y>6.56</Y><Z>0.0</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">true</bool>
 <bool name="CanTouch">false</bool>
@@ -47,8 +47,8 @@
 </Properties></Item><Item class="Part" referent="RBX4"><Properties>
 <string name="Name">RightPillarCollider</string>
 <token name="shape">2</token>
-<Vector3 name="size"><X>8.2</X><Y>2.6</Y><Z>2.6</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>7.05</X><Y>4.1</Y><Z>0.0</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<Vector3 name="size"><X>13.12</X><Y>6.96</Y><Z>6.96</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>16.92</X><Y>6.56</Y><Z>0.0</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">true</bool>
 <bool name="CanTouch">false</bool>
