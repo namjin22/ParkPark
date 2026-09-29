@@ -9,7 +9,7 @@ local rideService = require(script.Parent.Services.RideService)
 economyService.Initialize()
 print("[ParkPark] Building park world")
 local park = parkBuilder.Build()
-parkProgressionService.Start(park, economyService.AwardTickets)
+parkProgressionService.Start(park, economyService.AwardTickets, parkBuilder.ApplyEntranceRestored)
 rideService.Start(park, economyService.AwardTickets, parkBuilder.ApplyRepairedAppearance)
 
 local entranceSource = if park.Entrance:GetAttribute("IsGraybox") == true then "graybox" else "authored"

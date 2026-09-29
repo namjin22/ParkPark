@@ -670,11 +670,21 @@ def write_materials() -> None:
                 output.write("\n")
 
 
-def write_palette() -> None:
-    """Write the palette texture as an sRGB PNG using only the standard library."""
+def neglected(diffuse: tuple[float, float, float]) -> tuple[float, float, float]:
+    """Fade a palette color toward a dusty, sun-bleached gray-brown for the unrepaired park."""
+    luminance = 0.3 * diffuse[0] + 0.59 * diffuse[1] + 0.11 * diffuse[2]
+    dust = (0.05, 0.035, 0.0)
+    return tuple(
+        min(1.0, (channel * 0.35 + luminance * 0.65) * 0.72 + dust[index]) for index, channel in enumerate(diffuse)
+    )
+
+
+def write_palette(file_name: str, transform: Callable[[tuple[float, float, float]], tuple[float, ...]]) -> None:
+    """Write a palette texture as an sRGB PNG using only the standard library."""
     width, height = PALETTE_CELL * len(MATERIALS), PALETTE_CELL
     row = b"".join(
-        bytes(round(channel * 255) for channel in diffuse) * PALETTE_CELL for diffuse in MATERIALS.values()
+        bytes(round(channel * 255) for channel in transform(diffuse)) * PALETTE_CELL
+        for diffuse in MATERIALS.values()
     )
     raw = b"".join(b"\x00" + row for _ in range(height))
 
@@ -685,13 +695,15 @@ def write_palette() -> None:
     png += chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0))
     png += chunk(b"IDAT", zlib.compress(raw, 9))
     png += chunk(b"IEND", b"")
-    (OUTPUT / "ParkParkPalette.png").write_bytes(png)
+    (OUTPUT / file_name).write_bytes(png)
 
 
 def main() -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     write_materials()
-    write_palette()
+    write_palette("ParkParkPalette.png", lambda diffuse: diffuse)
+    # Same UV layout, so the game swaps between the two textures for neglected/restored states.
+    write_palette("ParkParkPaletteNeglected.png", neglected)
     meshes = (
         make_platform(),
         make_rotor(),

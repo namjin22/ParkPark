@@ -24,7 +24,13 @@ type AssetManifest = {
 		NeglectedCanopy: string,
 		RestoredCanopy: string,
 	},
+	Palettes: {
+		Restored: string,
+		Neglected: string,
+	}?,
 }
+
+local RESTORED_GLOW_NAME = "RestoredGlow"
 
 local assetManifest: AssetManifest = {
 	Models = {
@@ -74,10 +80,18 @@ local function getAssetFolder(): Folder?
 				and type(candidate.CarouselStates) == "table"
 				and type(candidate.CarouselStates.NeglectedCanopy) == "string"
 				and type(candidate.CarouselStates.RestoredCanopy) == "string"
+				and (
+					candidate.Palettes == nil
+					or (
+						type(candidate.Palettes) == "table"
+						and type(candidate.Palettes.Restored) == "string"
+						and type(candidate.Palettes.Neglected) == "string"
+					)
+				)
 			then
 				assetManifest = candidate :: AssetManifest
 			else
-				warn("[ParkPark] AssetManifest has an invalid model or canopy name")
+				warn("[ParkPark] AssetManifest has an invalid model, canopy, or palette entry")
 			end
 		else
 			warn("[ParkPark] Could not load ParkParkAssets.AssetManifest: " .. tostring(result))
@@ -154,8 +168,9 @@ local function ensureGrayboxApproach(parkFolder: Folder)
 			"EntranceGround",
 			Vector3.new(70, 1, 80),
 			Vector3.new(0, -0.5, 4),
-			Color3.fromRGB(95, 95, 90),
-			parkFolder
+			Color3.fromRGB(104, 122, 82),
+			parkFolder,
+			Enum.Material.Grass
 		)
 	end
 	if parkFolder:FindFirstChild("CrackedPath") == nil then
@@ -163,8 +178,9 @@ local function ensureGrayboxApproach(parkFolder: Folder)
 			"CrackedPath",
 			Vector3.new(14, 0.2, 20),
 			Vector3.new(0, 0.1, 11),
-			Color3.fromRGB(115, 112, 104),
-			parkFolder
+			Color3.fromRGB(150, 140, 122),
+			parkFolder,
+			Enum.Material.Cobblestone
 		)
 	end
 end
@@ -354,6 +370,48 @@ local function setVariantVisible(variant: Instance, visible: boolean)
 	end
 end
 
+-- Authored meshes share one palette UV layout, so a texture swap fades or restores a whole area.
+-- Canopy variants carry their own neglected/restored geometry and keep their texture.
+local function applyPalette(model: Model, restored: boolean)
+	local palettes = assetManifest.Palettes
+	if palettes == nil or palettes.Neglected == "" then
+		return
+	end
+
+	local texture = if restored then palettes.Restored else palettes.Neglected
+	for _, descendant in model:GetDescendants() do
+		if
+			descendant:IsA("MeshPart")
+			and (descendant.TextureID == palettes.Restored or descendant.TextureID == palettes.Neglected)
+			and descendant.Name ~= assetManifest.CarouselStates.NeglectedCanopy
+			and descendant.Name ~= assetManifest.CarouselStates.RestoredCanopy
+		then
+			descendant.TextureID = texture
+		end
+	end
+end
+
+local function setRestoredGlow(part: Instance?, enabled: boolean, range: number)
+	if part == nil or not part:IsA("BasePart") then
+		return
+	end
+
+	local existing = part:FindFirstChild(RESTORED_GLOW_NAME)
+	if existing and existing:IsA("Light") then
+		existing.Enabled = enabled
+		return
+	end
+
+	local light = Instance.new("PointLight")
+	light.Name = RESTORED_GLOW_NAME
+	light.Color = Color3.fromRGB(255, 205, 140)
+	light.Brightness = 2
+	light.Range = range
+	light.Shadows = false
+	light.Enabled = enabled
+	light.Parent = part
+end
+
 local function applyAuthoredCarouselState(carousel: Model, repaired: boolean)
 	local neglectedName = assetManifest.CarouselStates.NeglectedCanopy
 	local restoredName = assetManifest.CarouselStates.RestoredCanopy
@@ -373,6 +431,16 @@ local function applyAuthoredCarouselState(carousel: Model, repaired: boolean)
 
 	setVariantVisible(neglected, not repaired)
 	setVariantVisible(restored, repaired)
+	applyPalette(carousel, repaired)
+	setRestoredGlow(restored, repaired, 22)
+end
+
+local function applyAuthoredEntranceState(entrance: Model, cleared: boolean)
+	if entrance:GetAttribute("IsGraybox") == true then
+		return
+	end
+	applyPalette(entrance, cleared)
+	setRestoredGlow(entrance:FindFirstChild(assetManifest.EntranceSign, true), cleared, 16)
 end
 
 local function ensureGrayboxDebris(entrance: Model): (Model, BasePart, ProximityPrompt)
@@ -522,6 +590,7 @@ function ParkBuilder.Build(): References
 			end
 		end
 	end
+	applyAuthoredEntranceState(entrance, parkFolder:GetAttribute("EntranceCleared") == true)
 	local carousel = getOrCreateModel(parkFolder, CAROUSEL_NAME, buildGrayboxCarousel)
 	if carousel:GetAttribute("IsGraybox") == nil then
 		carousel:SetAttribute("IsGraybox", true)
@@ -599,6 +668,10 @@ function ParkBuilder.Build(): References
 		RepairConsole = console,
 		RepairPrompt = repairPrompt,
 	}
+end
+
+function ParkBuilder.ApplyEntranceRestored(entrance: Model)
+	applyAuthoredEntranceState(entrance, true)
 end
 
 -- Graybox rides use a temporary tint swap; authored rides toggle their canopy meshes.

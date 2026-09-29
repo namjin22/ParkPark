@@ -10,6 +10,7 @@ local ParkProgressionService = {}
 
 type ParkReferences = {
 	ParkFolder: Folder,
+	Entrance: Model,
 	Debris: Model,
 	CleanupTarget: BasePart,
 	CleanupPrompt: ProximityPrompt,
@@ -17,6 +18,7 @@ type ParkReferences = {
 }
 
 type AwardTickets = (Player, number) -> boolean
+type ApplyEntranceRestored = (Model) -> ()
 
 local function hideDebris(debris: Model)
 	for _, descendant in debris:GetDescendants() do
@@ -44,7 +46,11 @@ local function canUsePrompt(player: Player, target: BasePart, prompt: ProximityP
 	return (rootPart.Position - target.Position).Magnitude <= prompt.MaxActivationDistance + 2
 end
 
-function ParkProgressionService.Start(park: ParkReferences, awardTickets: AwardTickets)
+function ParkProgressionService.Start(
+	park: ParkReferences,
+	awardTickets: AwardTickets,
+	applyEntranceRestored: ApplyEntranceRestored
+)
 	local entranceCleared = park.ParkFolder:GetAttribute("EntranceCleared") == true
 	park.CleanupPrompt.Enabled = not entranceCleared
 	park.RepairPrompt.Enabled = entranceCleared
@@ -66,6 +72,7 @@ function ParkProgressionService.Start(park: ParkReferences, awardTickets: AwardT
 		park.ParkFolder:SetAttribute("EntranceCleared", true)
 		park.Debris:SetAttribute("IsCleared", true)
 		hideDebris(park.Debris)
+		applyEntranceRestored(park.Entrance)
 		park.CleanupPrompt.ActionText = "정리 완료"
 		park.CleanupPrompt.Enabled = false
 		park.RepairPrompt.Enabled = true

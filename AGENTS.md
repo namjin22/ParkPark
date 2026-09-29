@@ -102,8 +102,13 @@ This file is the persistent project context and current roadmap for OpenCode. Re
      - **Play:** Output shows `Park ready (entrance=authored, carousel=authored)` and the bootstrap lines, with no warnings. Real navigation plus held E cleared the debris (2 tickets) and repaired the carousel (12 tickets, toast). The rotor turned (yaw 38°→107°) with the canopy swap, and the pillar and platform colliders let the player walk through the gate and onto the console path.
      - **Review:** `verify.ps1` passed. Desktop wide and phone-portrait crops show the arch framing the carousel with `PARK PARK` readable from the spawn.
      - **Weak contrast:** only the canopy changes between states. The entrance, platform, and horses are already bright before repair, which falls short of the art direction's faded → lively contrast.
+     **Neglected-state pass (2026-09-29, code done, Studio check pending):**
+     - **Neglected palette:** the generator also writes `ParkParkPaletteNeglected.png`, a dusty, desaturated copy with the same UV layout. `AssetManifest.Palettes` holds `Restored`/`Neglected` texture IDs.
+     - **State swaps:** `ParkBuilder` swaps the palette on the entrance meshes when debris is cleared (through a new `ParkProgressionService` callback) and on the carousel meshes on repair. Canopy variants keep their own texture. A warm `RestoredGlow` PointLight turns on at the sign and the restored canopy.
+     - **Ground:** the graybox ground is now Grass and the path Cobblestone.
+     - **Pending ID:** `Palettes.Neglected` is still empty, which skips the swap. Studio restarted without a place open ("Place is not open"), so the neglected palette could not be uploaded yet. `verify.ps1` passes.
    - **Next:**
-     - (1) Strengthen the neglected state: faded variants or a SurfaceAppearance/Color treatment for the arch, platform, and horses; overgrowth/debris meshes to replace the graybox crates; and a lit/bulb restoration beat.
+     - (1) With the place open and Rojo connected, upload `ParkParkPaletteNeglected.png` via MCP `upload_image` (serve it from a temporary localhost HTTP server) and put the ID in `AssetManifest.Palettes.Neglected` and `MeshAssets.json`. Then Play-check the faded → restored swaps, the glow, and the ground, comparing before/after in wide and portrait. Still open: overgrowth/debris meshes to replace the graybox crates.
      - (2) Replace the graybox ground and path with authored ground, and recheck mobile portrait on a real device.
      - (3) Then ask the user to approve the slice visually before phase 4.
      - (4) Play for `authored` sources, canopy swap, rotor weld/rotation, and wide/portrait composition. Recheck portrait framing with the narrower authored arch, and decide whether `CrackedPath` (z 1..21) should run through the gate from the spawn.
