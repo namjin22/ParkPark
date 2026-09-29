@@ -8,7 +8,8 @@
     "ParkParkRepairConsole",
     "ParkParkCarouselRotor",
     "ParkParkCanopyNeglected",
-    "ParkParkCanopyRestored"
+    "ParkParkCanopyRestored",
+    "ParkParkEntranceDebris"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",
@@ -17,6 +18,7 @@
     "ParkParkRepairConsole": "rbxassetid://137595459068722",
     "ParkParkCarouselRotor": "rbxassetid://130083848830205",
     "ParkParkCanopyNeglected": "rbxassetid://134904738284039",
-    "ParkParkCanopyRestored": "rbxassetid://132675346119260"
+    "ParkParkCanopyRestored": "rbxassetid://132675346119260",
+    "ParkParkEntranceDebris": "rbxassetid://103460329557231"
   }
 }

@@ -115,9 +115,12 @@ This file is the persistent project context and current roadmap for OpenCode. Re
      - **Debris contract:** `ParkBuilder` clones an `EntranceDebris` template (`AssetManifest.Models.Debris`) to `(-12, 0, 8)` inside the entrance and adds the cleanup prompt to its `CleanupTarget`; otherwise it falls back to the graybox crates. `tools/build_parkpark_templates.py` writes the template once `MeshAssets.json` has the debris mesh ID.
      - **Path:** `CrackedPath` is now 10×38 and runs from the spawn through the gate to the platform edge.
      - **Play check:** Output is clean, the graybox debris fallback works while no template exists, and the path is continuous. `verify.ps1` passes.
+     **Authored debris (2026-09-29):**
+     - **Import:** the user imported the debris mesh (`rbxassetid://103460329557231`). `EntranceDebris.rbxmx` was built, and the imported copy was removed.
+     - **Play check:** the pile renders with the neglected palette beside the path. Real navigation plus held E cleared it (hidden, 2 tickets), and the entrance → carousel restoration continued to 12 tickets, both glows, and rotation. Output is clean and `verify.ps1` passes.
+     - **Known Rojo issue:** Rojo 7.7 live sync again added the new `.rbxmx` twice. One Studio copy was deleted by hand. After adding a new template file, check `ParkParkAssets` for duplicates, or restart `rojo serve` and reconnect.
    - **Next:**
-     - (1) User: 3D-import `ParkParkEntranceDebris.obj`. Claude: record its mesh ID, build the template, remove the import, and Play-check cleanup with the authored pile.
-     - (2) Review phone portrait on a real device.
+     - (1) The user reviews the full slice in Studio (and on a phone if possible) and gives visual approval or feedback. On approval, mark phase 3 complete and start phase 4 (first-session loop).
      - (3) Ask the user for visual approval of the slice before phase 4.
      - (2) Replace the graybox ground and path with authored ground, and recheck mobile portrait on a real device.
      - (3) Then ask the user to approve the slice visually before phase 4.
