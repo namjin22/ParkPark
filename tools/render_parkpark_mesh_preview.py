@@ -137,14 +137,20 @@ def render_card(
 
 def main() -> None:
 	materials = read_materials()
-	canvas = Image.new("RGB", (2200, 760), (255, 247, 229))
+	canvas = Image.new("RGB", (2780, 760), (255, 247, 229))
 	draw = ImageDraw.Draw(canvas)
 	font = ImageFont.load_default(size=40)
 	subtitle_font = ImageFont.load_default(size=22)
 	draw.text((72, 42), "ParkPark | first custom mesh pass", font=font, fill=(57, 67, 72))
 	draw.text((74, 94), "Generated OBJ review sheet · geometry preview, not a Studio render", font=subtitle_font, fill=(99, 103, 98))
 
-	columns = ((30, 170, 555, 705), (580, 170, 1105, 705), (1130, 170, 1655, 705), (1680, 170, 2170, 705))
+	columns = (
+		(30, 170, 555, 705),
+		(580, 170, 1105, 705),
+		(1130, 170, 1655, 705),
+		(1680, 170, 2170, 705),
+		(2200, 170, 2750, 705),
+	)
 	for left, top, right, bottom in columns:
 		draw.rounded_rectangle((left, top, right, bottom), radius=26, fill=(255, 252, 244), outline=(225, 211, 181), width=2)
 
@@ -155,6 +161,8 @@ def main() -> None:
 	entrance = ASSET_DIR / "ParkParkStorybookEntrance.obj"
 	entrance_sign = ASSET_DIR / "ParkParkEntranceSign.obj"
 	repair_console = ASSET_DIR / "ParkParkRepairConsole.obj"
+	teacups_platform = ASSET_DIR / "ParkParkTeacupsPlatform.obj"
+	teacups_rotor = ASSET_DIR / "ParkParkTeacupsRotor.obj"
 
 	render_card(canvas, columns[0], (platform, rotor, canopy_restored), materials, "Restored carousel")
 	render_card(canvas, columns[1], (platform, rotor, canopy_neglected), materials, "Neglected carousel")
@@ -167,6 +175,7 @@ def main() -> None:
 		{ "ParkParkEntranceSign": (0, 14.2, -1.35) },
 	)
 	render_card(canvas, columns[3], (repair_console,), materials, "Repair console")
+	render_card(canvas, columns[4], (teacups_platform, teacups_rotor), materials, "Teacups ride")
 	canvas.save(OUTPUT)
 	print(f"Wrote {OUTPUT.relative_to(ROOT)}")
 

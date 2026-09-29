@@ -14,7 +14,7 @@
 | P0 입구·간판 | 둥근 아치/기둥, ParkPark 워드마크와 장식, 바랜 글자 상태 | **자체 제작 권장** | 첫 화면 구도를 만드는 고유 요소다. 짧고 큰 글자, 먼 거리에서 읽히는 대비, 회전목마를 가리지 않는 개방감을 확인한다. 기존 유명 공원 입구를 참고해 복제하지 않는다. |
 | P0 첫 구역 바닥·동선 | 입구 광장, 중앙 보행로, 가장자리 포장, 잔디 경계 | **간단한 모듈/타일을 자체 제작** | 플레이어 동선과 카메라 프레이밍을 직접 조정해야 한다. 반복 패턴이 눈에 띄지 않게 변형하고 잡초와 잔해가 통행/수리 지점을 가리지 않도록 한다. |
 | P0 폐허/복구 조경 키트 | 잡초 다발, 덩굴, 작은 잔해, 페인트 벗겨짐 데칼 또는 표면 변형 | **소형 키트 자체 제작** | 폐허 상태를 일관되게 만들고 회전목마 주변을 정돈할 수 있다. 적은 수의 재사용 가능한 형태로 제작하고 복구 때 숨기거나 정리한다. 깨진 유리의 날카로운 파편 묘사는 피한다. |
-| P1 티컵 라이드 | 중심 장식, 플랫폼, 회전 컵 여러 개, 폐허/복구 색 상태 | **Creator Store 후보를 선별해 다듬기 권장** | 회전목마 다음 시설이라 빠른 콘텐츠 제작이 중요하다. 우선 직접 디자인한 컵/중심 장식으로 실루엣을 바꾸고, 재질·비율·색을 팔레트에 맞춘다. 적합한 모델이 없거나 유명 시설을 연상시키면 자체 제작으로 전환한다. |
+| P1 티컵 라이드 | 중심 장식, 플랫폼, 회전 컵 여러 개, 폐허/복구 색 상태 | **자체 메시 제작 권장** | 회전목마 다음 시설도 ParkPark의 고유 실루엣으로 만든다. 컵 손잡이·받침·지지대를 큰 색 덩어리로 읽히게 하고, 팔레트 전환으로 방치/복구 상태를 보여준다. |
 | P1 범퍼카 라이드 | 낮은 실내/차양 구조, 차량, 경계, 복구 전후 조명 | **Creator Store 후보를 선별해 다듬기 권장** | 차량과 반복 구성요소가 있어 검증된 베이스를 다듬을 수 있다. 차량 외형·색·트랙 경계와 차양을 바꾸고 기존 로고/스크립트를 제거한다. 모바일에서 차량과 탑승 공간이 겹쳐 보이지 않는지 확인한다. |
 | P1 스낵 판매대 | 작은 키오스크, 차양, 진열창, 메뉴판, 폐허/복구 상태 | **자체 제작 권장** | 작은 화면에 명확히 읽히는 단순한 건축 형태가 적합하고 공원 브랜딩을 담을 수 있다. 둥근 모서리와 목재·크림·코랄 포인트를 시설 공통 규칙에 맞춘다. |
 | P1 대기열·안전 소품 | 낮은 줄 서기 난간, 입구 표식, 운영/정지 표지 | **재사용 모듈 자체 제작** | 여러 놀이기구에 반복 배치한다. 작은 모바일 화면에서도 경계가 읽히고 진행 동선을 막지 않는 크기로 설계한다. |
@@ -25,7 +25,7 @@
 | P2 공원 표지·장식 | 방향 표지, 운영 안내, 깃발/배너, 작은 화단 | **베이스가 있으면 선별·다듬기, 고유 글자·그래픽은 자체 제작** | 안내 정보를 간결하게 전달하고 세계관을 보강한다. 원본 브랜드 문구나 상표는 제거하고 한 공원에서 만든 듯한 공통 아이콘을 적용한다. |
 | P2 이벤트 효과·오디오 | 짧은 정전 연출, 차단된 조명, 복구 알림음, 공원 배경음/놀이기구 소리 | **효과음은 직접 제작 또는 사용 조건이 명확한 에셋을 선별** | 짧은 정전 이벤트의 이해를 돕는다. 반복 재생 피로와 갑작스러운 큰 음량을 피하고, 기존 유명 놀이공원의 음악·효과음을 흉내 내거나 사용하지 않는다. |
 
-**직접 모델링이 우선인 자산:** 회전목마, 입구/브랜딩, 스낵 판매대, 조경·수리 피드백 키트. 이 요소가 ParkPark의 개성을 결정한다. **선별 후 다듬을 자산:** 티컵, 범퍼카, 비대표 편의 소품과 손님 표현. 원본을 그대로 끼워 넣기보다 공원 팔레트·비율·재질에 맞게 다듬고, 필요하면 자체 제작으로 바꾼다.
+**직접 모델링이 우선인 자산:** 회전목마, 찻잔 라이드, 입구/브랜딩, 스낵 판매대, 조경·수리 피드백 키트. 이 요소가 ParkPark의 개성을 결정한다. **선별 후 다듬을 자산:** 범퍼카와 비대표 편의 소품·손님 표현. 원본을 그대로 끼워 넣기보다 공원 팔레트·비율·재질에 맞게 다듬고, 필요하면 자체 제작으로 바꾼다.
 
 ## Creator Store 검색·선별 전략
 
@@ -67,7 +67,7 @@ Creator Store 검색은 영어 검색어를 함께 사용해 후보 폭을 넓�
 
 ## 현재 직접 제작한 모델 원본
 
-`assets/models/parkpark/`에 입구 아치·간판, 고정 플랫폼, 회전 rotor, 폐허/복구 차양, 수리 콘솔을 분리한 OBJ 메시 원본과 공통 MTL 팔레트가 있다. `tools/generate_parkpark_meshes.py`는 표준 라이브러리만으로 메시를 재생성하고 material 참조, face 인덱스, 20,000-triangle 상한을 확인한다. Rotor와 두 차양은 같은 회전축 원점을 공유하도록 만들었다.
+`assets/models/parkpark/`에 입구 아치·간판, 회전목마 부품, 찻잔 라이드의 고정 플랫폼과 회전 rotor를 분리한 OBJ 메시 원본 및 공통 MTL 팔레트가 있다. `tools/generate_parkpark_meshes.py`는 표준 라이브러리만으로 메시를 재생성하고 material 참조, face 인덱스, 20,000-triangle 상한을 확인한다. 회전목마 rotor/차양은 공통 회전축을 사용하고 찻잔 rotor에는 여섯 개 컵과 중심 장식을 하나의 회전 메시로 담는다.
 
 | 메시 원본 | 삼각형 수 | 대략적인 크기 (studs) |
 | --- | ---: | --- |
@@ -78,12 +78,14 @@ Creator Store 검색은 영어 검색어를 함께 사용해 후보 폭을 넓�
 | `ParkParkStorybookEntrance.obj` | 2,792 | 약 17.44 × 16.99 × 2.96 |
 | `ParkParkEntranceSign.obj` | 356 | 7.4 × 1.25 × 0.42 |
 | `ParkParkRepairConsole.obj` | 856 | 약 1.88 × 2.94 × 1.88 |
+| `ParkParkTeacupsPlatform.obj` | 3,136 | 18.4 × 0.85 × 18.4 |
+| `ParkParkTeacupsRotor.obj` | 11,720 | 약 15.45 × 8.2 × 13.92 |
 
-복구 상태에서 입구 아치·간판·플랫폼·rotor·복구 차양·콘솔을 함께 쓰면 약 17.6K 삼각형이다. 폐허 차양은 복구 차양 대신 선택해 총량은 약 15.9K가 된다. 형상 검토용 이미지는 [`ParkParkModelPreview.png`](../assets/models/parkpark/ParkParkModelPreview.png)에서 볼 수 있다.
+복구 상태에서 입구 아치·간판·회전목마·콘솔을 함께 쓰면 약 17.6K 삼각형이며, 찻잔 라이드의 두 메시를 더하면 약 32.5K다. 폐허 차양은 복구 차양 대신 선택한다. 형상 검토용 이미지는 [`ParkParkModelPreview.png`](../assets/models/parkpark/ParkParkModelPreview.png)에서 볼 수 있다.
 
 이 파일들은 검토 가능한 커스텀 모델 원본이지만, Studio에서 import·조정·플레이 화면 검수를 마친 최종 에셋은 아니다. 기존 graybox를 최종 에셋으로 취급하지 않으며, 모델의 pivot과 형상을 확인한 뒤에만 게임 내 참조에 연결한다. import와 구도 검수 절차는 [`../assets/models/parkpark/README.md`](../assets/models/parkpark/README.md)를 따른다.
 
-`default.project.json`은 `assets/models/roblox/`를 `ReplicatedStorage/ParkParkAssets`로 매핑한다. Studio에서 승인한 `RuinedEntrance.rbxmx`와 `BrokenCarousel.rbxmx`를 이 폴더에 저장하면 `ParkBuilder`가 이를 clone하고, 없으면 graybox로 실행한다. `AssetManifest.luau`에는 `SignPanel`, `CarouselRotor/CenterPost`, `CanopyNeglected`, `CanopyRestored` 이름 규약이 정의되어 있다. 가져온 모델은 실행 스크립트 없이 그래픽만 포함한다.
+`default.project.json`은 `assets/models/roblox/`를 `ReplicatedStorage/ParkParkAssets`로 매핑한다. Studio에서 승인한 `RuinedEntrance.rbxmx`, `BrokenCarousel.rbxmx`, `EntranceDebris.rbxmx`, `TeacupsRide.rbxmx`를 이 폴더에 저장하면 `ParkBuilder`가 이를 clone하고, 누락된 템플릿은 graybox로 실행한다. `AssetManifest.luau`에는 `SignPanel`, `CarouselRotor/CenterPost`, `CanopyNeglected`, `CanopyRestored`, `TeacupsRotor/RotorCore` 이름 규약이 정의되어 있다. 가져온 모델은 실행 스크립트 없이 그래픽만 포함한다.
 
 ## 현재 코드 구조와 에셋 연결점
 
@@ -93,9 +95,9 @@ Creator Store 검색은 영어 검색어를 함께 사용해 후보 폭을 넓�
 | --- | --- |
 | `ParkBuilder` | 승인된 asset template이 있으면 clone하고, 없으면 임시 입구·회전목마 graybox를 구성한다. 상호작용 참조와 회전 rotor를 준비한다. |
 | `ParkProgressionService` | 서버에서 입구 정리 거리/생존 상태를 검증하고 잔해를 치운 뒤 회전목마 수리를 연다. |
-| `RideService` | 회전목마 수리 검증과 플레이어별 보상 처리, 복구 상태 복제, rotor 회전 시작. |
+| `RideService` | 회전목마 수리와 찻잔 라이드 코인 해금/수리를 서버에서 검증하고, 각 rotor 운행을 시작한다. |
 | `EconomyService` | 플레이어 코인 초기화와 검증된 서버 코인 지급·소비. |
 | `HUDController` | 코인 수 표시와 보상 시 짧은 시각 반응. |
-| `RepairFeedbackController` | 복구 상태 변경을 받아 짧은 완료/보상 안내 표시. |
+| `NoticeController` | 서버 검증 복구·해금·탑승 보상 안내 표시. |
 
-OBJ를 Studio에 연결할 때는 `Carousel` 아래에 고정 `RidePlatform`, 중심축을 pivot으로 사용하는 `CarouselRotor`, 그리고 동일한 위치에 정합된 `CanopyNeglected`/`CanopyRestored` 메시를 둔다. 수리 콘솔과 프롬프트는 rotor 밖의 고정 위치에 유지한다. 최종 적용에서는 graybox 전체 색상 변경을 canopy variant 토글로 대체하고, 모듈 경계를 유지한다.
+회전목마는 `Carousel` 아래에 고정 `RidePlatform`, 중심축 pivot인 `CarouselRotor`, 그리고 정합된 `CanopyNeglected`/`CanopyRestored` 메시를 둔다. 찻잔 템플릿은 `TeacupsRide` 아래에 고정 `RidePlatform`과 독립 회전 `TeacupsRotor/RotorCore`를 둔다. 수리 콘솔과 프롬프트는 rotor 밖에 두며, Studio에서 가져온 모델은 프롬프트·상태 로직 없이 그래픽만 포함한다.

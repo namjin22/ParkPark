@@ -30,6 +30,8 @@ WHITE = (255, 255, 255)
 # The carousel reads too small beside guests at 1:1, so its meshes render at this scale.
 # Keep in sync with GameConfig.CarouselScale, which places riders on the scaled horses.
 S = 1.6
+# Keep in sync with GameConfig.TeacupsScale, which places guests inside the cups.
+TEACUPS_SCALE = 1.0
 
 _referents = count(1)
 
@@ -199,6 +201,37 @@ def main() -> None:
         )
     else:
         print("skipped EntranceDebris: import ParkParkEntranceDebris.obj and record its mesh ID first")
+
+    teacups_meshes = ("ParkParkTeacupsPlatform", "ParkParkTeacupsRotor")
+    if all(name in ASSETS["meshes"] for name in teacups_meshes):
+        write(
+            "TeacupsRide",
+            model(
+                "TeacupsRide",
+                [
+                    mesh_part("RidePlatform", "ParkParkTeacupsPlatform", (0, 0, 0), 0, False, MINT, TEACUPS_SCALE),
+                    cylinder_collider("PlatformCollider", (0, 0.42, 0), 0.7, 18.4, TEACUPS_SCALE),
+                    mesh_part("TeacupsConsole", "ParkParkRepairConsole", (0, 0, 10.5), 180, True, CREAM),
+                    model(
+                        "TeacupsRotor",
+                        [
+                            mesh_part(
+                                "RotorCore",
+                                "ParkParkTeacupsRotor",
+                                (0, 0, 0),
+                                0,
+                                False,
+                                GOLD,
+                                TEACUPS_SCALE,
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        )
+    else:
+        missing = ", ".join(name for name in teacups_meshes if name not in ASSETS["meshes"])
+        print(f"skipped TeacupsRide: import {missing} and record their mesh IDs first")
 
 
 if __name__ == "__main__":

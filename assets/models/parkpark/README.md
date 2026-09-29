@@ -1,6 +1,6 @@
 # ParkPark 놀이공원 모델 소스
 
-이 폴더의 OBJ는 회전목마와 입구를 위한 **직접 제작한 저폴리 메시 원본**입니다. 기본 Part graybox를 최종 모델로 바꿔치기한 것이 아니라, 별도의 메시 지오메트리를 생성합니다.
+이 폴더의 OBJ는 입구와 놀이기구를 위한 **직접 제작한 저폴리 메시 원본**입니다. 기본 Part graybox를 최종 모델로 바꿔치기한 것이 아니라, 별도의 메시 지오메트리를 생성합니다.
 
 ![커스텀 메시 검토용 미리보기](ParkParkModelPreview.png)
 
@@ -12,6 +12,8 @@
 | `ParkParkCarouselRotor.obj` | 중앙축, 방사형 지지대, 목마 8개 |
 | `ParkParkCanopyRestored.obj` | 코랄·크림 차양, 금빛 장식, 피니얼 |
 | `ParkParkCanopyNeglected.obj` | 바랜 차양과 빠진 패널이 있는 폐허 상태 |
+| `ParkParkTeacupsPlatform.obj` | 찻잔 라이드의 고정 원형 플랫폼 |
+| `ParkParkTeacupsRotor.obj` | 중앙 장식, 회전 지지대, 손잡이 달린 찻잔 6개 |
 | `ParkParkStorybookEntrance.obj` | 둥근 아치와 장식 띠 |
 | `ParkParkEntranceSign.obj` | SurfaceGui 글자를 얹을 별도 간판 메시 |
 | `ParkParkRepairConsole.obj` | 수리 상호작용을 위한 작은 장식 콘솔 |
@@ -42,7 +44,7 @@ Studio의 OBJ 가져오기는 MTL의 `Kd` 색을 적용하지 않습니다(2026-
 python tools/build_parkpark_templates.py
 ```
 
-템플릿 규칙: 장식 메시는 PhysicsData 없이 `CollisionFidelity=Box`, `CanCollide=false`입니다. 대신 보이지 않는 원기둥 충돌체(`LeftPillarCollider`, `RightPillarCollider`, `PlatformCollider`)를 둡니다. `RepairConsole`만 Box 충돌을 사용합니다.
+템플릿 규칙: 장식 메시는 PhysicsData 없이 `CollisionFidelity=Box`, `CanCollide=false`입니다. 대신 보이지 않는 원기둥 충돌체(`LeftPillarCollider`, `RightPillarCollider`, 놀이기구별 `PlatformCollider`)를 둡니다. `RepairConsole`과 `TeacupsConsole`만 Box 충돌을 사용합니다.
 
 생성기는 저장 전에 연결된 부품마다 면 방향을 바깥쪽 반시계 방향으로 맞춥니다. Roblox는 반시계 방향 면만 앞면으로 그리므로, 이전 OBJ처럼 방향이 섞이면 Studio에서 일부 부품이 속이 빈 것처럼 보입니다.
 
@@ -54,6 +56,7 @@ Roblox Studio의 [3D Importer](https://create.roblox.com/docs/studio/importer)�
 
 - `RuinedEntrance` Model: 아치 메시와 `SignPanel` MeshPart를 포함하고, floor-center pivot을 사용합니다. `SignPanel`은 root 기준 `[0, 14.2, -1.35]`에 둡니다.
 - `BrokenCarousel` Model: 고정 `RidePlatform` MeshPart, 고정 `RepairConsole` MeshPart, `CarouselRotor` Model을 포함합니다. Platform은 root 원점에, 콘솔은 root 기준 `[13, 0, 0]`에 둡니다.
+- `TeacupsRide` Model: 고정 `RidePlatform` MeshPart와 `PlatformCollider`, `TeacupsRotor` Model 안의 회전 메시 `RotorCore`, 그리고 고정 `TeacupsConsole` MeshPart를 포함합니다. 모델 pivot은 플랫폼 중심 바닥에 둡니다. Console은 root 기준 `[0, 0, 10.5]`에 놓고 버튼 패널이 입구 쪽을 향하게 합니다.
 - `EntranceDebris` Model: 잔해 메시 하나를 `CleanupTarget` MeshPart로 둡니다(root 원점, OBJ 좌표 유지). `ParkBuilder`가 `(-12, 0, 8)`에 배치해 입구 모델 안에 넣고 정리 prompt를 붙입니다. 템플릿이 없으면 graybox 잔해를 씁니다.
 - `CarouselRotor` 안에는 회전축 메시 `CenterPost`와 `CanopyNeglected`/`CanopyRestored` canopy variant를 둡니다. `CenterPost` pivot은 회전목마 바닥 중심에 맞춥니다. 콘솔은 rotor 밖에 둡니다.
 
@@ -68,9 +71,13 @@ OBJ 이름과 모델 안 이름은 다음처럼 대응합니다. 아래 방향 �
 | `ParkParkCarouselRotor.obj` | `CenterPost` (중앙축·지지대·목마 전체) | `BrokenCarousel/CarouselRotor` |
 | `ParkParkCanopyNeglected.obj` | `CanopyNeglected` | `BrokenCarousel/CarouselRotor` |
 | `ParkParkCanopyRestored.obj` | `CanopyRestored` | `BrokenCarousel/CarouselRotor` |
+| `ParkParkTeacupsPlatform.obj` | `RidePlatform` | `TeacupsRide` |
+| `ParkParkTeacupsRotor.obj` | `RotorCore` (중앙 장식·지지대·찻잔 전체) | `TeacupsRide/TeacupsRotor` |
 
 방향 규약: 메시의 정면(간판 코랄 면, 콘솔 버튼 패널)은 Roblox Part와 같이 local `-Z`입니다. 게임에서 방문자는 `+Z` 쪽 스폰에서 `-Z` 방향의 회전목마로 걸어가므로, `ParkBuilder`는 입구 모델을 Y축 180° 돌려 배치해 아치 정면과 간판이 방문자를 향하게 합니다. 회전목마 모델은 회전하지 않으므로, `RepairConsole`만 모델 안에서 Y축 180° 돌려 버튼 패널이 root `+Z`(입구 쪽)를 보게 합니다. rotor·canopy·platform은 XZ 경계 상자 중심이 원점이라 Importer가 파트 중심을 경계 상자 중심으로 잡아도 회전축이 어긋나지 않습니다.
 
+찻잔 구조물은 OBJ 파일 두 개를 각각 가져옵니다. 두 메시의 XZ 중심은 원점이며, rotor 메시의 바닥 높이와 OBJ 경계 상자 중심은 게임 설정의 좌석 정렬 상수와 템플릿에서 함께 사용합니다. `TeacupsConsole` 프롬프트와 해금/수리 로직은 서버 코드가 만듭니다.
+
 모델에 스크립트를 넣지 않습니다. 수리 prompt, 잔해 상호작용, 상태 변경은 게임 코드가 관리합니다. 규약을 갖춘 모델이 없으면 `ParkBuilder`가 기존 graybox를 계속 생성합니다.
 
-OBJ는 현재 **메시 원본**이며 아직 Studio place에 들어간 모델이 아닙니다. Studio에서 import한 뒤 실루엣, 재질, 피벗, 입구에서 보이는 구도와 모바일 성능을 확인하고, 승인된 결과만 Rojo 경로에 연결합니다.
+OBJ는 편집 가능한 **메시 원본**입니다. 입구·회전목마·잔해는 Studio 검수를 거쳐 Rojo 템플릿으로 연결되어 있습니다. 새 찻잔 라이드 메시 두 개는 Studio에서 각각 import한 뒤 실루엣, 재질, 피벗과 모바일 구도를 확인하고, 승인된 결과만 `MeshAssets.json`과 Rojo 템플릿에 연결합니다.

@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PARK_FOLDER_NAME = "ParkParkWorld"
 local ENTRANCE_NAME = "RuinedEntrance"
 local CAROUSEL_NAME = "BrokenCarousel"
+local TEACUPS_NAME = "TeacupsRide"
 local ASSET_FOLDER_SYNC_TIMEOUT = 5
 local ASSET_MANIFEST_SYNC_TIMEOUT = 2
 -- Guests spawn on +Z and walk through the entrance toward the carousel on -Z.
@@ -14,6 +15,7 @@ local GUEST_APPROACH_DIRECTION = Vector3.new(0, 0, 1)
 local AUTHORED_ENTRANCE_PIVOT = CFrame.new(0, 0, 25) * CFrame.Angles(0, math.pi, 0)
 -- The authored carousel is scaled (GameConfig.CarouselScale), so its platform edge still meets the path.
 local AUTHORED_CAROUSEL_PIVOT = CFrame.new(0, 0, -19.5)
+local AUTHORED_TEACUPS_PIVOT = CFrame.new(-34, 0, -19.5)
 local GATE_Z = 25
 local DEBRIS_NAME = "EntranceDebris"
 -- Beside the path just inside the gate, so guests pass it on the way to the carousel.
@@ -24,6 +26,7 @@ type AssetManifest = {
 		Entrance: string,
 		Carousel: string,
 		Debris: string?,
+		Teacups: string?,
 	},
 	EntranceSign: string,
 	CarouselStates: {
@@ -42,6 +45,7 @@ local assetManifest: AssetManifest = {
 	Models = {
 		Entrance = ENTRANCE_NAME,
 		Carousel = CAROUSEL_NAME,
+		Teacups = TEACUPS_NAME,
 	},
 	EntranceSign = "SignPanel",
 	CarouselStates = {
@@ -82,6 +86,7 @@ local function getAssetFolder(): Folder?
 				type(candidate.Models) == "table"
 				and type(candidate.Models.Entrance) == "string"
 				and type(candidate.Models.Carousel) == "string"
+				and (candidate.Models.Teacups == nil or type(candidate.Models.Teacups) == "string")
 				and type(candidate.EntranceSign) == "string"
 				and type(candidate.CarouselStates) == "table"
 				and type(candidate.CarouselStates.NeglectedCanopy) == "string"
@@ -119,6 +124,11 @@ export type References = {
 	CarouselRotor: Model,
 	RepairConsole: BasePart,
 	RepairPrompt: ProximityPrompt,
+	TeacupsRide: Model,
+	TeacupsRotor: Model,
+	TeacupsConsole: BasePart,
+	TeacupsUnlockPrompt: ProximityPrompt,
+	TeacupsRepairPrompt: ProximityPrompt,
 	GateRope: Model,
 	GatePrompt: ProximityPrompt,
 }
@@ -174,7 +184,7 @@ local function ensureGrayboxApproach(parkFolder: Folder)
 		-- Extends past the carousel's back edge now that the default baseplate is hidden.
 		createPart(
 			"EntranceGround",
-			Vector3.new(80, 1, 96),
+			Vector3.new(96, 1, 96),
 			Vector3.new(0, -0.5, -1),
 			Color3.fromRGB(104, 122, 82),
 			parkFolder,
@@ -410,6 +420,36 @@ local function prepareCarouselRotor(rotor: Model): Model
 	return rotor
 end
 
+local function prepareTeacupsRotor(rotor: Model): Model
+	local root = rotor:FindFirstChild("RotorCore")
+	if root == nil or not root:IsA("BasePart") then
+		error("[ParkPark] TeacupsRotor.RotorCore must be a BasePart")
+	end
+
+	rotor.PrimaryPart = root
+	for _, descendant in rotor:GetDescendants() do
+		if descendant:IsA("BasePart") and descendant ~= root then
+			local existingWeld = descendant:FindFirstChild("TeacupsRotorWeld")
+			local weld: WeldConstraint
+			if existingWeld == nil then
+				local newWeld = Instance.new("WeldConstraint")
+				newWeld.Name = "TeacupsRotorWeld"
+				newWeld.Parent = descendant
+				weld = newWeld
+			elseif existingWeld:IsA("WeldConstraint") then
+				weld = existingWeld
+			else
+				error("[ParkPark] TeacupsRotorWeld must be a WeldConstraint")
+			end
+			weld.Part0 = root
+			weld.Part1 = descendant
+			descendant.Anchored = false
+		end
+	end
+	root.Anchored = true
+	return rotor
+end
+
 local function findAuthoredTemplate(name: string): Model?
 	local folder = getAssetFolder()
 	if folder == nil then
@@ -421,6 +461,8 @@ local function findAuthoredTemplate(name: string): Model?
 		assetName = assetManifest.Models.Entrance
 	elseif name == CAROUSEL_NAME then
 		assetName = assetManifest.Models.Carousel
+	elseif name == TEACUPS_NAME then
+		assetName = assetManifest.Models.Teacups
 	elseif name == DEBRIS_NAME then
 		assetName = assetManifest.Models.Debris
 	end
@@ -526,6 +568,26 @@ local function applyAuthoredCarouselState(carousel: Model, repaired: boolean)
 	setRestoredGlow(restored, repaired, 22)
 end
 
+local function applyTeacupsAppearance(ride: Model, repaired: boolean)
+	if ride:GetAttribute("IsGraybox") == true then
+		for _, descendant in ride:GetDescendants() do
+			if descendant:IsA("BasePart") then
+				descendant.Material = Enum.Material.SmoothPlastic
+				if descendant.Name == "RidePlatform" then
+					descendant.Color = if repaired then Color3.fromRGB(91, 186, 154) else Color3.fromRGB(106, 111, 104)
+				elseif descendant.Name == "Cup" then
+					descendant.Color = if repaired then Color3.fromRGB(235, 122, 108) else Color3.fromRGB(126, 113, 98)
+				elseif descendant.Name == "RotorCore" then
+					descendant.Color = if repaired then Color3.fromRGB(245, 193, 83) else Color3.fromRGB(119, 107, 91)
+				end
+			end
+		end
+	else
+		applyPalette(ride, repaired)
+	end
+	setRestoredGlow(ride:FindFirstChild("RotorCore", true), repaired, 18)
+end
+
 local function applyAuthoredEntranceState(entrance: Model, cleared: boolean)
 	if entrance:GetAttribute("IsGraybox") == true then
 		return
@@ -624,6 +686,124 @@ local function buildGrayboxCarousel(parkFolder: Folder): Model
 	return carousel
 end
 
+local function buildGrayboxTeacups(parkFolder: Folder): Model
+	local ride = Instance.new("Model")
+	ride.Name = TEACUPS_NAME
+	ride:SetAttribute("IsGraybox", true)
+	ride.Parent = parkFolder
+
+	local pivot = createPart("ParkPivot", Vector3.new(0.1, 0.1, 0.1), Vector3.zero, Color3.new(1, 1, 1), ride)
+	pivot.Transparency = 1
+	pivot.CanCollide = false
+	pivot.CanTouch = false
+	pivot.CanQuery = false
+	pivot.CastShadow = false
+	ride.PrimaryPart = pivot
+
+	local platform = createPart(
+		"RidePlatform",
+		Vector3.new(0.8, 18.4, 18.4),
+		Vector3.new(0, 0.42, 0),
+		Color3.fromRGB(105, 112, 98),
+		ride,
+		Enum.Material.Slate
+	)
+	platform.Shape = Enum.PartType.Cylinder
+	platform.CFrame = CFrame.new(0, 0.42, 0) * CFrame.Angles(0, 0, math.pi / 2)
+	platform.CanCollide = false
+
+	local collider =
+		createPart("PlatformCollider", Vector3.new(0.7, 18.4, 18.4), Vector3.new(0, 0.42, 0), Color3.new(1, 1, 1), ride)
+	collider.Shape = Enum.PartType.Cylinder
+	collider.CFrame = CFrame.new(0, 0.42, 0) * CFrame.Angles(0, 0, math.pi / 2)
+	collider.Transparency = 1
+	collider.CanTouch = false
+	collider.CanQuery = false
+	collider.CastShadow = false
+
+	local rotor = Instance.new("Model")
+	rotor.Name = "TeacupsRotor"
+	rotor.Parent = ride
+	createPart(
+		"RotorCore",
+		Vector3.new(1, 8.2, 1),
+		Vector3.new(0, 4.72, 0),
+		Color3.fromRGB(119, 107, 91),
+		rotor,
+		Enum.Material.Slate
+	)
+	local cupColors = {
+		Color3.fromRGB(126, 113, 98),
+		Color3.fromRGB(116, 120, 103),
+		Color3.fromRGB(133, 111, 95),
+	}
+	for cupIndex = 1, 6 do
+		local angle = (cupIndex - 1) * math.pi / 3
+		local x, z = 6 * math.cos(angle), 6 * math.sin(angle)
+		local cup = createPart(
+			"Cup",
+			Vector3.new(2.7, 1.4, 2.7),
+			Vector3.new(x, 1.9, z),
+			cupColors[(cupIndex - 1) % #cupColors + 1],
+			rotor,
+			Enum.Material.Slate
+		)
+		cup.Shape = Enum.PartType.Cylinder
+		cup.CFrame = CFrame.new(x, 1.9, z) * CFrame.Angles(0, 0, math.pi / 2)
+		cup.CanCollide = false
+		cup.CanTouch = false
+		cup.CanQuery = false
+
+		local armPosition = Vector3.new(x * 0.38, 3.7, z * 0.38)
+		local arm = createPart(
+			"Arm",
+			Vector3.new(0.22, 0.22, 4.7),
+			armPosition,
+			Color3.fromRGB(158, 132, 91),
+			rotor,
+			Enum.Material.Metal
+		)
+		arm.CFrame = CFrame.lookAt(armPosition, Vector3.new(x, 3.7, z))
+		arm.CanCollide = false
+		arm.CanTouch = false
+		arm.CanQuery = false
+	end
+	prepareTeacupsRotor(rotor)
+
+	local console =
+		createPart("TeacupsConsole", Vector3.new(2, 3, 2), Vector3.new(0, 1.5, 10.5), Color3.fromRGB(91, 87, 79), ride)
+	console.Material = Enum.Material.Slate
+	ride:PivotTo(AUTHORED_TEACUPS_PIVOT)
+	return ride
+end
+
+local function ensureTeacupsPrompt(
+	console: BasePart,
+	name: string,
+	actionText: string,
+	holdDuration: number
+): ProximityPrompt
+	local existing = console:FindFirstChild(name)
+	local prompt: ProximityPrompt
+	if existing == nil then
+		prompt = Instance.new("ProximityPrompt")
+		prompt.Name = name
+		prompt.Parent = console
+	elseif existing:IsA("ProximityPrompt") then
+		prompt = existing
+	else
+		error(string.format("[ParkPark] TeacupsConsole.%s must be a ProximityPrompt", name))
+	end
+
+	prompt.ActionText = actionText
+	prompt.ObjectText = "찻잔 라이드"
+	prompt.HoldDuration = holdDuration
+	prompt.MaxActivationDistance = 10
+	prompt.RequiresLineOfSight = false
+	prompt.Enabled = false
+	return prompt
+end
+
 local function getOrCreateParkFolder(): Folder
 	local existing = Workspace:FindFirstChild(PARK_FOLDER_NAME)
 	if existing ~= nil then
@@ -662,6 +842,8 @@ local function getOrCreateModel(parent: Instance, name: string, build: (Folder) 
 			model:PivotTo(AUTHORED_ENTRANCE_PIVOT)
 		elseif name == CAROUSEL_NAME then
 			model:PivotTo(AUTHORED_CAROUSEL_PIVOT)
+		elseif name == TEACUPS_NAME then
+			model:PivotTo(AUTHORED_TEACUPS_PIVOT)
 		end
 		return model
 	end
@@ -762,6 +944,32 @@ function ParkBuilder.Build(): References
 		applyAuthoredCarouselState(carousel, carousel:GetAttribute("IsRepaired") == true)
 	end
 
+	local teacupsRide = getOrCreateModel(parkFolder, TEACUPS_NAME, buildGrayboxTeacups)
+	if teacupsRide:GetAttribute("IsGraybox") == nil then
+		teacupsRide:SetAttribute("IsGraybox", true)
+	end
+	if teacupsRide:GetAttribute("IsUnlocked") == nil then
+		teacupsRide:SetAttribute("IsUnlocked", false)
+	end
+	if teacupsRide:GetAttribute("IsRepaired") == nil then
+		teacupsRide:SetAttribute("IsRepaired", false)
+	end
+	if teacupsRide:GetAttribute("IsOperating") == nil then
+		teacupsRide:SetAttribute("IsOperating", false)
+	end
+	local teacupsRotorInstance = teacupsRide:FindFirstChild("TeacupsRotor")
+	if teacupsRotorInstance == nil or not teacupsRotorInstance:IsA("Model") then
+		error("[ParkPark] TeacupsRide.TeacupsRotor must be a Model")
+	end
+	local teacupsRotor = prepareTeacupsRotor(teacupsRotorInstance)
+	local teacupsConsoleInstance = teacupsRide:FindFirstChild("TeacupsConsole")
+	if teacupsConsoleInstance == nil or not teacupsConsoleInstance:IsA("BasePart") then
+		error("[ParkPark] TeacupsRide.TeacupsConsole must be a BasePart")
+	end
+	local unlockPrompt = ensureTeacupsPrompt(teacupsConsoleInstance, "UnlockPrompt", "해금하기", 1.5)
+	local teacupsRepairPrompt = ensureTeacupsPrompt(teacupsConsoleInstance, "RepairPrompt", "수리하기", 2)
+	applyTeacupsAppearance(teacupsRide, teacupsRide:GetAttribute("IsRepaired") == true)
+
 	return {
 		ParkFolder = parkFolder,
 		Entrance = entrance,
@@ -772,6 +980,11 @@ function ParkBuilder.Build(): References
 		CarouselRotor = rotor,
 		RepairConsole = console,
 		RepairPrompt = repairPrompt,
+		TeacupsRide = teacupsRide,
+		TeacupsRotor = teacupsRotor,
+		TeacupsConsole = teacupsConsoleInstance,
+		TeacupsUnlockPrompt = unlockPrompt,
+		TeacupsRepairPrompt = teacupsRepairPrompt,
 		GateRope = gateRope,
 		GatePrompt = gatePrompt,
 	}
@@ -800,6 +1013,10 @@ function ParkBuilder.ApplyRepairedAppearance(carousel: Model)
 			end
 		end
 	end
+end
+
+function ParkBuilder.ApplyTeacupsRepairedAppearance(ride: Model)
+	applyTeacupsAppearance(ride, true)
 end
 
 return ParkBuilder

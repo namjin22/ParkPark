@@ -7,14 +7,29 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GameConfig =
 	require(ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("GameConfig"))
 
--- Once the park is open, guests walk in through the gate, ride the carousel, pay a fare to
--- every player in the park, and leave. Guests are server-owned R15 rigs with default avatars.
+-- Once the park is open, guests walk in through the gate, ride an operating attraction, pay a fare
+-- to every player in the park, and leave. Guests are server-owned R15 rigs with default avatars.
 local GuestService = {}
 
 type GuestReferences = {
 	ParkFolder: Folder,
 	Carousel: Model,
 	CarouselRotor: Model,
+	TeacupsRide: Model,
+	TeacupsRotor: Model,
+}
+
+type RideDefinition = {
+	name: string,
+	model: Model,
+	rotor: Model,
+	seatCount: number,
+	seatTaken: { [number]: boolean },
+	fare: number,
+	rideSeconds: number,
+	queuePoint: Vector3,
+	seatOffset: (number) -> CFrame,
+	noticeTitle: string,
 }
 
 type AwardCoins = (Player, number) -> boolean
@@ -113,7 +128,7 @@ local function walkTo(humanoid: Humanoid, point: Vector3): boolean
 end
 
 -- Seat transform relative to the rotor root (CenterPost), facing the direction of travel.
-local function seatOffset(index: number): CFrame
+local function carouselSeatOffset(index: number): CFrame
 	local scale = GameConfig.CarouselScale
 	local angle = (index - 1) * 2 * math.pi / GameConfig.CarouselSeatCount
 	local forward = Vector3.new(math.sin(angle), 0, -math.cos(angle))
@@ -123,40 +138,89 @@ local function seatOffset(index: number): CFrame
 	return CFrame.lookAt(position, position + forward)
 end
 
+local function teacupsSeatOffset(index: number): CFrame
+	local scale = GameConfig.TeacupsScale
+	local angle = (index - 1) * 2 * math.pi / GameConfig.TeacupsSeatCount
+	local outward = Vector3.new(math.cos(angle), 0, math.sin(angle))
+	local position = outward * GameConfig.TeacupsSeatRadius * scale
+		+ Vector3.new(
+			0,
+			(GameConfig.TeacupsSeatHeight - GameConfig.TeacupsRotorCenterHeight) * scale + GameConfig.TeacupsRiderHip,
+			0
+		)
+	return CFrame.lookAt(position, position + outward)
+end
+
 function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notify: Notify)
 	ensureCollisionGroup()
 
-	local guestFolder = park.ParkFolder:FindFirstChild("Guests")
-	if guestFolder == nil then
+	local guestFolderInstance = park.ParkFolder:FindFirstChild("Guests")
+	if guestFolderInstance == nil then
 		local folder = Instance.new("Folder")
 		folder.Name = "Guests"
 		folder.Parent = park.ParkFolder
-		guestFolder = folder
+		guestFolderInstance = folder
+	elseif not guestFolderInstance:IsA("Folder") then
+		error("[ParkPark] ParkParkWorld.Guests must be a Folder")
 	end
+	local guestFolder = guestFolderInstance :: Folder
 
-	local seatTaken: { [number]: boolean } = {}
 	local guestCount = 0
 	local carouselPivot = park.Carousel:GetPivot()
 	local platformFrontZ = carouselPivot.Position.Z + 12 * GameConfig.CarouselScale
+	local teacupsPivot = park.TeacupsRide:GetPivot().Position
+	local rides: { RideDefinition } = {
+		{
+			name = "Carousel",
+			model = park.Carousel,
+			rotor = park.CarouselRotor,
+			seatCount = GameConfig.CarouselSeatCount,
+			seatTaken = {},
+			fare = GameConfig.GuestRideFare,
+			rideSeconds = GameConfig.GuestRideSeconds,
+			queuePoint = Vector3.new(carouselPivot.Position.X, 0, platformFrontZ + 3),
+			seatOffset = carouselSeatOffset,
+			noticeTitle = "손님이 회전목마를 탔어요",
+		},
+		{
+			name = "Teacups",
+			model = park.TeacupsRide,
+			rotor = park.TeacupsRotor,
+			seatCount = GameConfig.TeacupsSeatCount,
+			seatTaken = {},
+			fare = GameConfig.TeacupsGuestRideFare,
+			rideSeconds = GameConfig.GuestRideSeconds,
+			queuePoint = Vector3.new(teacupsPivot.X, 0, teacupsPivot.Z + GameConfig.TeacupsPlatformRadius + 2.5),
+			seatOffset = teacupsSeatOffset,
+			noticeTitle = "손님이 찻잔을 탔어요",
+		},
+	}
 
-	local function takeSeat(): number?
-		for index = 1, GameConfig.CarouselSeatCount do
-			if not seatTaken[index] then
-				seatTaken[index] = true
-				return index
+	local function findAvailableRide(): (RideDefinition?, number?)
+		local candidates: { { Ride: RideDefinition, Seat: number } } = {}
+		for _, ride in rides do
+			if ride.model:GetAttribute("IsOperating") == true and ride.rotor.PrimaryPart ~= nil then
+				for seat = 1, ride.seatCount do
+					if not ride.seatTaken[seat] then
+						table.insert(candidates, { Ride = ride, Seat = seat })
+						break
+					end
+				end
 			end
 		end
-		return nil
+		if #candidates == 0 then
+			return nil, nil
+		end
+
+		local selected = candidates[math.random(1, #candidates)]
+		selected.Ride.seatTaken[selected.Seat] = true
+		return selected.Ride, selected.Seat
 	end
 
-	local function payFare()
+	local function payFare(ride: RideDefinition)
 		for _, player in Players:GetPlayers() do
-			if awardCoins(player, GameConfig.GuestRideFare) then
-				notify(
-					player,
-					"손님이 회전목마를 탔어요",
-					string.format("+%d %s", GameConfig.GuestRideFare, GameConfig.CurrencyDisplayName)
-				)
+			if awardCoins(player, ride.fare) then
+				notify(player, ride.noticeTitle, string.format("+%d %s", ride.fare, GameConfig.CurrencyDisplayName))
 			end
 		end
 	end
@@ -164,44 +228,60 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 	local function runGuest(guest: Model)
 		local humanoid = guest:FindFirstChildOfClass("Humanoid")
 		local root = guest:FindFirstChild("HumanoidRootPart")
-		local rotorRoot = park.CarouselRotor.PrimaryPart
-		if humanoid == nil or root == nil or not root:IsA("BasePart") or rotorRoot == nil then
+		if humanoid == nil or root == nil or not root:IsA("BasePart") then
 			return
 		end
 
 		local lane = math.random(-30, 30) / 10
 		walkTo(humanoid, Vector3.new(lane, 0, GATE_Z))
-		local queuePoint = Vector3.new(lane * 2, 0, platformFrontZ + 3 + math.random(0, 20) / 10)
-		walkTo(humanoid, queuePoint)
+		walkTo(humanoid, Vector3.new(lane * 2, 0, platformFrontZ + 3 + math.random(0, 20) / 10))
 
+		local ride: RideDefinition? = nil
 		local seat: number? = nil
 		local waited = 0
-		while seat == nil and waited < QUEUE_TIMEOUT and guest.Parent ~= nil do
-			if park.Carousel:GetAttribute("IsOperating") == true then
-				seat = takeSeat()
-			end
-			if seat == nil then
+		while ride == nil and waited < QUEUE_TIMEOUT and guest.Parent ~= nil do
+			ride, seat = findAvailableRide()
+			if ride == nil then
 				waited += task.wait(0.5)
 			end
 		end
 
-		if seat and guest.Parent ~= nil then
-			-- The rotor root is anchored, so the weld alone carries the rider around.
-			humanoid.Sit = true
-			root.CFrame = rotorRoot.CFrame * seatOffset(seat)
-			local weld = Instance.new("WeldConstraint")
-			weld.Name = "RideWeld"
-			weld.Part0 = rotorRoot
-			weld.Part1 = root
-			weld.Parent = root
+		if ride and seat and guest:IsDescendantOf(guestFolder) then
+			local queuePoint = ride.queuePoint
+			if ride.name == "Carousel" then
+				queuePoint += Vector3.new(lane * 2 + math.random(-8, 8) / 10, 0, math.random(0, 20) / 10)
+			else
+				queuePoint += Vector3.new(math.random(-20, 20) / 10, 0, math.random(-8, 8) / 10)
+			end
+			walkTo(humanoid, queuePoint)
 
-			task.wait(GameConfig.GuestRideSeconds)
-			weld:Destroy()
-			seatTaken[seat] = nil
-			humanoid.Sit = false
-			root.CFrame = CFrame.new(queuePoint + Vector3.new(0, 3, 0))
-			humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-			payFare()
+			local rotorRoot = ride.rotor.PrimaryPart
+			if rotorRoot then
+				-- The rotor root is anchored, so the weld alone carries the rider around.
+				humanoid.Sit = true
+				root.CFrame = rotorRoot.CFrame * ride.seatOffset(seat)
+				local weld = Instance.new("WeldConstraint")
+				weld.Name = "RideWeld"
+				weld.Part0 = rotorRoot
+				weld.Part1 = root
+				weld.Parent = root
+
+				task.wait(ride.rideSeconds)
+				if weld.Parent ~= nil then
+					weld:Destroy()
+				end
+				ride.seatTaken[seat] = nil
+				if guest:IsDescendantOf(guestFolder) and humanoid.Health > 0 then
+					humanoid.Sit = false
+					root.CFrame = CFrame.new(queuePoint + Vector3.new(0, 3, 0))
+					humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+					payFare(ride)
+				end
+			else
+				ride.seatTaken[seat] = nil
+			end
+		elseif ride and seat then
+			ride.seatTaken[seat] = nil
 		end
 
 		walkTo(humanoid, Vector3.new(if lane < 0 then -18 else 18, 0, ENTRY_Z))

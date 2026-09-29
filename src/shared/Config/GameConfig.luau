@@ -13,6 +13,19 @@ return {
 	CarouselScale = 1.6,
 	CarouselSeatCount = 8,
 
+	-- The teacups unlock after the park opens; both mesh scales must match the template builder.
+	TeacupsUnlockCost = 60,
+	TeacupsRepairCost = 35,
+	TeacupsGuestRideFare = 8,
+	TeacupsRotationSeconds = 12,
+	TeacupsScale = 1,
+	TeacupsPlatformRadius = 9.2,
+	TeacupsSeatCount = 6,
+	TeacupsSeatRadius = 6,
+	TeacupsSeatHeight = 1.28,
+	TeacupsRotorCenterHeight = 4.72,
+	TeacupsRiderHip = 1.05,
+
 	-- Guests arrive only after the park opens.
 	MaxGuests = 6,
 	GuestSpawnSeconds = 5,

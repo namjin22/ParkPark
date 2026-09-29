@@ -265,6 +265,7 @@ def add_vertical_cylinder(
     segments: int = 32,
     center_x: float = 0.0,
     center_z: float = 0.0,
+    transform: PointTransform = identity,
 ) -> None:
     bottom_ring = []
     top_ring = []
@@ -272,10 +273,10 @@ def add_vertical_cylinder(
         angle = TAU * segment / segments
         x = center_x + radius * math.cos(angle)
         z = center_z + radius * math.sin(angle)
-        bottom_ring.append(mesh.vertex((x, bottom, z)))
-        top_ring.append(mesh.vertex((x, top, z)))
-    bottom_center = mesh.vertex((center_x, bottom, center_z))
-    top_center = mesh.vertex((center_x, top, center_z))
+        bottom_ring.append(mesh.vertex(transform(x, bottom, z)))
+        top_ring.append(mesh.vertex(transform(x, top, z)))
+    bottom_center = mesh.vertex(transform(center_x, bottom, center_z))
+    top_center = mesh.vertex(transform(center_x, top, center_z))
     for segment in range(segments):
         following = (segment + 1) % segments
         mesh.face(material, bottom_ring[segment], bottom_ring[following], top_ring[following], top_ring[segment])
@@ -334,6 +335,7 @@ def add_torus(
     end_angle: float = TAU,
     center_x: float = 0.0,
     center_z: float = 0.0,
+    transform: PointTransform = identity,
 ) -> None:
     rings: list[list[int]] = []
     for segment in range(segments + (1 if end_angle != TAU else 0)):
@@ -345,7 +347,11 @@ def add_torus(
             ring_y = y + minor_radius * math.sin(tube_angle)
             ring.append(
                 mesh.vertex(
-                    (center_x + ring_radius * math.cos(angle), ring_y, center_z + ring_radius * math.sin(angle))
+                    transform(
+                        center_x + ring_radius * math.cos(angle),
+                        ring_y,
+                        center_z + ring_radius * math.sin(angle),
+                    )
                 )
             )
         rings.append(ring)
@@ -420,13 +426,18 @@ def make_platform() -> Mesh:
     return mesh
 
 
-def lathe(mesh: Mesh, profile: list[tuple[float, float, str]], segments: int = 32) -> None:
+def lathe(
+    mesh: Mesh,
+    profile: list[tuple[float, float, str]],
+    segments: int = 32,
+    transform: PointTransform = identity,
+) -> None:
     rings: list[list[int]] = []
     for radius, y, _ in profile:
         ring = []
         for segment in range(segments):
             angle = TAU * segment / segments
-            ring.append(mesh.vertex((radius * math.cos(angle), y, radius * math.sin(angle))))
+            ring.append(mesh.vertex(transform(radius * math.cos(angle), y, radius * math.sin(angle))))
         rings.append(ring)
     for profile_index in range(len(profile) - 1):
         material = profile[profile_index + 1][2]
@@ -472,6 +483,117 @@ def make_rotor() -> Mesh:
         add_cylinder_between(mesh, (0, 3.4, 0), (0, 11.9, 0), 0.105, 0.075, "cream", 8, transform)
         add_ellipsoid(mesh, (0, 3.43, 0), (0.22, 0.16, 0.22), "gold", transform, 8, 4)
         add_horse(mesh, angle, 6.6, "mint" if horse_index % 2 else "coral")
+    return mesh
+
+
+def make_teacups_platform() -> Mesh:
+    mesh = Mesh("ParkParkTeacupsPlatform")
+    lathe(
+        mesh,
+        [
+            (0.0, 0.08, "wood"),
+            (8.85, 0.08, "wood"),
+            (9.2, 0.25, "gold"),
+            (9.0, 0.48, "coral"),
+            (8.45, 0.7, "cream"),
+            (7.4, 0.76, "mint"),
+            (0.0, 0.76, "mint"),
+        ],
+        64,
+    )
+    add_torus(mesh, 8.62, 0.14, 0.7, "gold", segments=64, sides=8)
+    add_torus(mesh, 7.5, 0.08, 0.78, "coral", segments=56, sides=6)
+    for index in range(16):
+        angle = TAU * index / 16
+        x, z = 8.08 * math.cos(angle), 8.08 * math.sin(angle)
+        add_ellipsoid(mesh, (x, 0.83, z), (0.27, 0.1, 0.27), "cream" if index % 2 else "coral", slices=7, stacks=4)
+    return mesh
+
+
+def add_teacup(mesh: Mesh, angle: float, orbit_radius: float, palette: str) -> None:
+    origin = (orbit_radius * math.cos(angle), 0, orbit_radius * math.sin(angle))
+    transform = radial_transform(angle, origin)
+    lathe(
+        mesh,
+        [
+            (0.43, 1.06, "wood"),
+            (0.76, 1.08, "gold"),
+            (1.02, 1.3, palette),
+            (1.24, 1.78, palette),
+            (1.34, 2.32, palette),
+            (1.28, 2.43, "gold"),
+            (1.08, 2.38, "cream"),
+            (0.96, 1.66, "dark_glass"),
+            (0.64, 1.39, "dark_glass"),
+            (0.36, 1.34, "dark_glass"),
+        ],
+        28,
+        transform,
+    )
+    add_vertical_cylinder(mesh, 0.7, 1.05, 1.22, "dark_glass", segments=24, transform=transform)
+    add_torus(mesh, 0.94, 0.13, 1.13, "cream", segments=24, sides=6, transform=transform)
+
+    # Paired handles make each cup read clearly even at the entrance camera distance.
+    for side in (-1, 1):
+        points = (
+            (side * 1.18, 2.18, 0.0),
+            (side * 1.48, 2.17, 0.0),
+            (side * 1.67, 1.98, 0.0),
+            (side * 1.53, 1.78, 0.0),
+            (side * 1.21, 1.78, 0.0),
+        )
+        for start, end in zip(points, points[1:]):
+            add_cylinder_between(mesh, start, end, 0.075, 0.075, "gold", 6, transform)
+
+    for dot in range(8):
+        dot_angle = TAU * dot / 8
+        add_ellipsoid(
+            mesh,
+            (1.12 * math.cos(dot_angle), 2.18, 1.12 * math.sin(dot_angle)),
+            (0.11, 0.1, 0.11),
+            "cream",
+            transform,
+            6,
+            4,
+        )
+
+
+def make_teacups_rotor() -> Mesh:
+    mesh = Mesh("ParkParkTeacupsRotor")
+    lathe(
+        mesh,
+        [
+            (0.0, 0.62, "wood"),
+            (0.76, 0.62, "wood"),
+            (0.94, 0.9, "gold"),
+            (0.66, 1.2, "coral"),
+            (0.55, 4.0, "cream"),
+            (0.78, 4.2, "gold"),
+            (0.55, 4.48, "mint"),
+            (0.48, 7.18, "cream"),
+            (0.8, 7.42, "gold"),
+            (0.5, 7.68, "coral"),
+            (0.0, 7.82, "gold"),
+        ],
+        32,
+    )
+    for y, radius, material in ((1.02, 0.78, "cream"), (4.34, 0.7, "coral"), (7.52, 0.68, "gold")):
+        add_torus(mesh, radius, 0.11, y, material, segments=32, sides=7)
+
+    orbit_radius = 6.0
+    for cup_index in range(6):
+        angle = TAU * cup_index / 6
+        x, z = orbit_radius * math.cos(angle), orbit_radius * math.sin(angle)
+        material = ("coral", "mint", "cream")[cup_index % 3]
+        # Rotating saucer pedestals and spokes tie the six cups into one controllable rotor.
+        add_cylinder_between(mesh, (x, 0.77, z), (x, 1.12, z), 0.52, 0.39, "gold", 10)
+        add_cylinder_between(mesh, (0, 1.18, 0), (x, 1.18, z), 0.16, 0.11, "coral", 8)
+        add_cylinder_between(mesh, (0, 5.35, 0), (x * 0.72, 3.0, z * 0.72), 0.15, 0.09, "gold", 8)
+        add_cylinder_between(mesh, (0, 7.18, 0), (x * 0.78, 4.65, z * 0.78), 0.12, 0.075, "cream", 8)
+        add_teacup(mesh, angle, orbit_radius, material)
+
+    add_torus(mesh, 6.85, 0.11, 3.02, "gold", segments=48, sides=7)
+    add_star(mesh, 8.28, 0.54, "gold")
     return mesh
 
 
@@ -763,6 +885,8 @@ def main() -> None:
         make_rotor(),
         make_canopy(restored=False),
         make_canopy(restored=True),
+        make_teacups_platform(),
+        make_teacups_rotor(),
         make_entrance(),
         make_entrance_sign(),
         make_repair_console(),

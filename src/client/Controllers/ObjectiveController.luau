@@ -29,8 +29,10 @@ function ObjectiveController.Start()
 	local park = Workspace:WaitForChild("ParkParkWorld")
 	local entrance = park:WaitForChild("RuinedEntrance")
 	local carousel = park:WaitForChild("BrokenCarousel")
+	local teacups = park:WaitForChild("TeacupsRide")
 	local debrisTarget = entrance:WaitForChild("EntranceDebris"):WaitForChild("CleanupTarget")
 	local console = carousel:WaitForChild("RepairConsole")
+	local teacupsConsole = teacups:WaitForChild("TeacupsConsole")
 	local gateAnchor = park:WaitForChild("GateAnchor")
 	local coins = player:WaitForChild("leaderstats"):WaitForChild("Coins") :: IntValue
 	local currency = GameConfig.CurrencyDisplayName
@@ -114,9 +116,29 @@ function ObjectiveController.Start()
 				target = gateAnchor,
 			}
 		end
+		if teacups:GetAttribute("IsUnlocked") ~= true then
+			local cost = GameConfig.TeacupsUnlockCost
+			return {
+				title = "5. 찻잔 라이드 해금",
+				detail = if coins.Value >= cost
+					then string.format("콘솔에서 해금 · %d %s", cost, currency)
+					else string.format("%d %s 필요 · 지금 %d", cost, currency, coins.Value),
+				target = teacupsConsole,
+			}
+		end
+		if teacups:GetAttribute("IsRepaired") ~= true then
+			local cost = GameConfig.TeacupsRepairCost
+			return {
+				title = "6. 찻잔 라이드 수리",
+				detail = if coins.Value >= cost
+					then string.format("콘솔에서 수리 · %d %s", cost, currency)
+					else string.format("%d %s 필요 · 지금 %d", cost, currency, coins.Value),
+				target = teacupsConsole,
+			}
+		end
 		return {
-			title = "4. 손님을 맞이하세요",
-			detail = string.format("탑승 1회마다 +%d %s", GameConfig.GuestRideFare, currency),
+			title = "7. 찻잔 손님을 맞이하세요",
+			detail = string.format("탑승 1회마다 +%d %s", GameConfig.TeacupsGuestRideFare, currency),
 			target = nil,
 		}
 	end
@@ -134,6 +156,8 @@ function ObjectiveController.Start()
 	park:GetAttributeChangedSignal("EntranceCleared"):Connect(refresh)
 	park:GetAttributeChangedSignal("ParkOpen"):Connect(refresh)
 	carousel:GetAttributeChangedSignal("IsRepaired"):Connect(refresh)
+	teacups:GetAttributeChangedSignal("IsUnlocked"):Connect(refresh)
+	teacups:GetAttributeChangedSignal("IsRepaired"):Connect(refresh)
 	coins:GetPropertyChangedSignal("Value"):Connect(refresh)
 	refresh()
 end

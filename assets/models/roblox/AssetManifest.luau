@@ -5,6 +5,7 @@ return {
 		Entrance = "RuinedEntrance",
 		Carousel = "BrokenCarousel",
 		Debris = "EntranceDebris",
+		Teacups = "TeacupsRide",
 	},
 	EntranceSign = "SignPanel",
 	CarouselStates = {

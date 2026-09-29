@@ -18,12 +18,21 @@ rideService.Start(
 	economyService.SpendCoins,
 	economyService.GetCoins,
 	parkBuilder.ApplyRepairedAppearance,
+	parkBuilder.ApplyTeacupsRepairedAppearance,
 	noticeService.Send
 )
 guestService.Start(park, economyService.AwardCoins, noticeService.Send)
 
 local entranceSource = if park.Entrance:GetAttribute("IsGraybox") == true then "graybox" else "authored"
 local carouselSource = if park.Carousel:GetAttribute("IsGraybox") == true then "graybox" else "authored"
-print(string.format("[ParkPark] Park ready (entrance=%s, carousel=%s)", entranceSource, carouselSource))
+local teacupsSource = if park.TeacupsRide:GetAttribute("IsGraybox") == true then "graybox" else "authored"
+print(
+	string.format(
+		"[ParkPark] Park ready (entrance=%s, carousel=%s, teacups=%s)",
+		entranceSource,
+		carouselSource,
+		teacupsSource
+	)
+)
 
 print("[ParkPark] Server bootstrap loaded")

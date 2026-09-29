@@ -9,7 +9,9 @@
     "ParkParkCarouselRotor",
     "ParkParkCanopyNeglected",
     "ParkParkCanopyRestored",
-    "ParkParkEntranceDebris"
+    "ParkParkEntranceDebris",
+    "ParkParkTeacupsPlatform",
+    "ParkParkTeacupsRotor"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",
