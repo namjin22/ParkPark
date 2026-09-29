@@ -85,3 +85,5 @@ OBJ 이름과 모델 안 이름은 다음처럼 대응합니다. 아래 방향 �
 OBJ는 편집 가능한 **메시 원본**입니다. 입구·회전목마·잔해는 Studio 검수를 거쳐 Rojo 템플릿으로 연결되어 있습니다. 새 찻잔 라이드 메시 두 개는 Studio에서 각각 import한 뒤 실루엣, 재질, 피벗과 모바일 구도를 확인하고, 승인된 결과만 `MeshAssets.json`과 Rojo 템플릿에 연결합니다.
 
 `BumperCarsRide` 템플릿: `RidePlatform`(링크), `PlatformCollider`, `BumperConsole`, 그리고 `BumperCars` Model 안의 `BumperCar1`~`BumperCar4` MeshPart(전부 Anchored, 링 위 반지름 5.45 유닛에 접선 방향으로 배치)를 둡니다. 차는 서버(`BumperCarService`)가 매 프레임 CFrame으로 움직이고, 손님은 차에 용접됩니다. `BUMPER_SCALE`은 `GameConfig.BumperScale`과 같아야 합니다.
+
+템플릿에서 메시를 확대할 때 `Size`만 키우고 `InitialSize`는 OBJ의 원래 크기로 둡니다. Roblox는 `Size / InitialSize`로 메시를 확대하므로, 둘을 같은 값으로 저장하면 확대되지 않은 채 충돌 상자만 커집니다.

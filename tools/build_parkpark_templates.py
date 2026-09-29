@@ -92,8 +92,9 @@ def mesh_part(
     fallback: tuple[int, int, int],
     scale: float = 1.0,
 ) -> str:
-    center, size = obj_bounds(obj)
-    size = tuple(round(axis * scale, 4) for axis in size)
+    center, natural_size = obj_bounds(obj)
+    # Roblox scales the mesh by Size / InitialSize, so InitialSize must stay the mesh's natural size.
+    size = tuple(round(axis * scale, 4) for axis in natural_size)
     cosine, sine = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
     # scale * (origin * Ry(yaw) * center), about the template root
     position = tuple(
@@ -111,7 +112,7 @@ def mesh_part(
 <string name="Name">{name}</string>
 <Content name="MeshId"><url>{ASSETS["meshes"][obj]}</url></Content>
 <Content name="TextureID">{texture}</Content>
-{vector3("InitialSize", size)}
+{vector3("InitialSize", natural_size)}
 {vector3("size", size)}
 <CoordinateFrame name="CFrame">{cframe_body(position, rotation(yaw))}</CoordinateFrame>
 <bool name="Anchored">true</bool>

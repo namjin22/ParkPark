@@ -25,6 +25,8 @@
     "ParkParkCanopyRestored": "rbxassetid://132675346119260",
     "ParkParkEntranceDebris": "rbxassetid://103460329557231",
     "ParkParkTeacupsPlatform": "rbxassetid://139821469684572",
-    "ParkParkTeacupsRotor": "rbxassetid://77925486433523"
+    "ParkParkTeacupsRotor": "rbxassetid://77925486433523",
+    "ParkParkBumperPlatform": "rbxassetid://74084341659664",
+    "ParkParkBumperCar": "rbxassetid://110184473126899"
   }
 }
