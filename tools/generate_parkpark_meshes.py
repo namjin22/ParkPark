@@ -8,6 +8,8 @@ into the place. The script uses only Python's standard library.
 from __future__ import annotations
 
 import math
+import struct
+import zlib
 from collections import defaultdict
 from pathlib import Path
 from typing import Callable
@@ -29,6 +31,11 @@ MATERIALS = {
     "faded_mint": (0.33, 0.43, 0.38),
     "dark_glass": (0.20, 0.29, 0.29),
 }
+
+# One flat color cell per material in ParkParkPalette.png; faces sample the cell center.
+PALETTE_CELL = 32
+PALETTE_INDEX = {name: index for index, name in enumerate(MATERIALS)}
+PALETTE_UVS = {name: ((index + 0.5) / len(MATERIALS), 0.5) for name, index in PALETTE_INDEX.items()}
 
 
 class Mesh:
@@ -120,10 +127,14 @@ class Mesh:
             output.write(f"o {self.name}\n")
             for x, y, z in self.vertices:
                 output.write(f"v {x:.5f} {y:.5f} {z:.5f}\n")
+            # Studio's OBJ import ignores MTL colors, so every face also samples its palette cell.
+            for u, v in PALETTE_UVS.values():
+                output.write(f"vt {u:.5f} {v:.5f}\n")
             for material, faces in self.faces.items():
+                texture_index = PALETTE_INDEX[material] + 1
                 output.write(f"usemtl {material}\n")
                 for face in faces:
-                    output.write("f " + " ".join(str(index) for index in face) + "\n")
+                    output.write("f " + " ".join(f"{index}/{texture_index}" for index in face) + "\n")
         triangles = sum(max(1, len(face) - 2) for faces in self.faces.values() for face in faces)
         minimum = tuple(min(vertex[axis] for vertex in self.vertices) for axis in range(3))
         maximum = tuple(max(vertex[axis] for vertex in self.vertices) for axis in range(3))
@@ -654,13 +665,33 @@ def write_materials() -> None:
             output.write(f"Ka {red * 0.3:.4f} {green * 0.3:.4f} {blue * 0.3:.4f}\n")
             output.write(f"Kd {red:.4f} {green:.4f} {blue:.4f}\n")
             output.write("Ks 0.08 0.08 0.08\nNs 18\nd 1.0\nillum 2\n")
+            output.write("map_Kd ParkParkPalette.png\n")
             if index < len(items) - 1:
                 output.write("\n")
+
+
+def write_palette() -> None:
+    """Write the palette texture as an sRGB PNG using only the standard library."""
+    width, height = PALETTE_CELL * len(MATERIALS), PALETTE_CELL
+    row = b"".join(
+        bytes(round(channel * 255) for channel in diffuse) * PALETTE_CELL for diffuse in MATERIALS.values()
+    )
+    raw = b"".join(b"\x00" + row for _ in range(height))
+
+    def chunk(kind: bytes, data: bytes) -> bytes:
+        return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF)
+
+    png = b"\x89PNG\r\n\x1a\n"
+    png += chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0))
+    png += chunk(b"IDAT", zlib.compress(raw, 9))
+    png += chunk(b"IEND", b"")
+    (OUTPUT / "ParkParkPalette.png").write_bytes(png)
 
 
 def main() -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     write_materials()
+    write_palette()
     meshes = (
         make_platform(),
         make_rotor(),

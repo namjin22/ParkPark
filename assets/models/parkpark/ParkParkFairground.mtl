@@ -6,6 +6,7 @@ Ks 0.08 0.08 0.08
 Ns 18
 d 1.0
 illum 2
+map_Kd ParkParkPalette.png
 
 newmtl coral
 Ka 0.2730 0.1080 0.0960
@@ -14,6 +15,7 @@ Ks 0.08 0.08 0.08
 Ns 18
 d 1.0
 illum 2
+map_Kd ParkParkPalette.png
 
 newmtl mint
 Ka 0.0990 0.1950 0.1590
@@ -22,6 +24,7 @@ Ks 0.08 0.08 0.08
 Ns 18
 d 1.0
 illum 2
+map_Kd ParkParkPalette.png
 
 newmtl gold
 Ka 0.2760 0.2010 0.0810
@@ -30,6 +33,7 @@ Ks 0.08 0.08 0.08
 Ns 18
 d 1.0
 illum 2
+map_Kd ParkParkPalette.png
 
 newmtl wood
 Ka 0.1140 0.0660 0.0420
@@ -38,6 +42,7 @@ Ks 0.08 0.08 0.08
 Ns 18
 d 1.0
 illum 2
+map_Kd ParkParkPalette.png
 
 newmtl ink
 Ka 0.0360 0.0480 0.0510
@@ -46,6 +51,7 @@ Ks 0.08 0.08 0.08
 Ns 18
 d 1.0
 illum 2
+map_Kd ParkParkPalette.png
 
 newmtl faded_cream
 Ka 0.1950 0.1770 0.1440
@@ -54,6 +60,7 @@ Ks 0.08 0.08 0.08
 Ns 18
 d 1.0
 illum 2
+map_Kd ParkParkPalette.png
 
 newmtl faded_coral
 Ka 0.1590 0.0930 0.0870
@@ -62,6 +69,7 @@ Ks 0.08 0.08 0.08
 Ns 18
 d 1.0
 illum 2
+map_Kd ParkParkPalette.png
 
 newmtl faded_mint
 Ka 0.0990 0.1290 0.1140
@@ -70,6 +78,7 @@ Ks 0.08 0.08 0.08
 Ns 18
 d 1.0
 illum 2
+map_Kd ParkParkPalette.png
 
 newmtl dark_glass
 Ka 0.0600 0.0870 0.0870
@@ -78,3 +87,4 @@ Ks 0.08 0.08 0.08
 Ns 18
 d 1.0
 illum 2
+map_Kd ParkParkPalette.png

@@ -1,0 +1,13 @@
+{
+  "palette": "rbxassetid://101072742922175",
+  "textured": [],
+  "meshes": {
+    "ParkParkStorybookEntrance": "rbxassetid://109035910330939",
+    "ParkParkEntranceSign": "rbxassetid://133415551145181",
+    "ParkParkCarouselPlatform": "rbxassetid://122207676065127",
+    "ParkParkRepairConsole": "rbxassetid://123450996824302",
+    "ParkParkCarouselRotor": "rbxassetid://120721888425785",
+    "ParkParkCanopyNeglected": "rbxassetid://110217409143624",
+    "ParkParkCanopyRestored": "rbxassetid://126411160087132"
+  }
+}
