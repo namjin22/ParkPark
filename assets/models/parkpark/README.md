@@ -33,17 +33,15 @@ python tools/render_parkpark_mesh_preview.py
 
 Studio의 OBJ 가져오기는 MTL의 `Kd` 색을 적용하지 않습니다(2026-09-29 확인: 파일마다 회색 MeshPart 하나). 그래서 생성기는 10색 `ParkParkPalette.png`(칸 하나에 32px)를 함께 만들고, 모든 면의 UV를 해당 재질 칸의 중앙으로 지정합니다. MTL에는 `map_Kd`로 팔레트를 연결해 둡니다. 가져온 MeshPart의 `TextureID`에는 업로드한 팔레트 `rbxassetid://101072742922175`를 지정합니다.
 
-가져온 메시 자산:
+현재 사용하는 메시 자산 ID는 `MeshAssets.json`에 기록합니다. 두 번째 가져오기(팔레트 UV 포함)부터는 Importer가 `map_Kd`를 읽어 모델마다 텍스처도 함께 올렸습니다. 템플릿은 그 텍스처 대신 공용 팔레트 하나를 씁니다. 첫 가져오기(UV 없음)의 메시는 더 이상 사용하지 않습니다.
 
-| 모델 파트 | 1차(UV 없음, 단색 임시) | 2차(팔레트 UV) |
-| --- | --- | --- |
-| `EntranceArch` | `rbxassetid://109035910330939` | 가져오기 대기 |
-| `SignPanel` | `rbxassetid://133415551145181` | 가져오기 대기 |
-| `RidePlatform` | `rbxassetid://122207676065127` | 가져오기 대기 |
-| `RepairConsole` | `rbxassetid://123450996824302` | 가져오기 대기 |
-| `CenterPost` | `rbxassetid://120721888425785` | 가져오기 대기 |
-| `CanopyNeglected` | `rbxassetid://110217409143624` | 가져오기 대기 |
-| `CanopyRestored` | `rbxassetid://126411160087132` | 가져오기 대기 |
+메시를 다시 가져오면 `MeshAssets.json`의 ID를 바꾸고, 저장소 루트에서 템플릿을 다시 만듭니다.
+
+```powershell
+python tools/build_parkpark_templates.py
+```
+
+템플릿 규칙: 장식 메시는 PhysicsData 없이 `CollisionFidelity=Box`, `CanCollide=false`입니다. 대신 보이지 않는 원기둥 충돌체(`LeftPillarCollider`, `RightPillarCollider`, `PlatformCollider`)를 둡니다. `RepairConsole`만 Box 충돌을 사용합니다.
 
 생성기는 저장 전에 연결된 부품마다 면 방향을 바깥쪽 반시계 방향으로 맞춥니다. Roblox는 반시계 방향 면만 앞면으로 그리므로, 이전 OBJ처럼 방향이 섞이면 Studio에서 일부 부품이 속이 빈 것처럼 보입니다.
 

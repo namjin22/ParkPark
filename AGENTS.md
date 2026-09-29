@@ -96,10 +96,16 @@ This file is the persistent project context and current roadmap for OpenCode. Re
      - **Templates:** Claude wrote `assets/models/roblox/RuinedEntrance.rbxmx` and `BrokenCarousel.rbxmx` from those IDs, following the README contract. Pivots sit at the floor-center origin with no scripts. Invisible cylinder colliders cover the pillars and platform; decorative meshes are non-colliding with Box fidelity (no PhysicsData). Interim single part colors stand in until textures arrive. Rojo live sync kept `MeshId`, and `verify.ps1` builds them.
      - **Rojo duplicate bug:** Rojo live-sync added each new `.rbxmx` twice, and both copies received later patches, so Rojo serve was restarted and the Studio duplicates were deleted. The Studio Rojo plugin must reconnect.
      - **Palette colors:** the generator now writes `ParkParkPalette.png`, palette UVs on every face, and `map_Kd` in the MTL. The palette is uploaded as `rbxassetid://101072742922175` through Studio MCP `upload_image`, served from a temporary localhost HTTP server. The imported models were removed from Workspace.
+     **Textured authored slice (2026-09-29):**
+     - **Import:** the user reconnected Rojo and re-imported the palette-UV OBJs. The importer read `map_Kd` and uploaded textures, so the colors render correctly.
+     - **Templates:** `MeshAssets.json` holds the new mesh IDs, and `tools/build_parkpark_templates.py` rebuilt both templates with the shared palette texture. Each template synced once, and the imported copies were removed from Workspace.
+     - **Play:** Output shows `Park ready (entrance=authored, carousel=authored)` and the bootstrap lines, with no warnings. Real navigation plus held E cleared the debris (2 tickets) and repaired the carousel (12 tickets, toast). The rotor turned (yaw 38°→107°) with the canopy swap, and the pillar and platform colliders let the player walk through the gate and onto the console path.
+     - **Review:** `verify.ps1` passed. Desktop wide and phone-portrait crops show the arch framing the carousel with `PARK PARK` readable from the spawn.
+     - **Weak contrast:** only the canopy changes between states. The entrance, platform, and horses are already bright before repair, which falls short of the art direction's faded → lively contrast.
    - **Next:**
-     - (1) User: in Studio, click Connect in the Rojo plugin (port 34872). Then run the 3D Importer once more for the seven regenerated OBJs (now with UVs), leaving the results in Workspace.
-     - (2) Claude: read the new MeshIds, regenerate the templates with `TextureID` set to the palette (`make_rbxmx` with a texture map), remove the imported copies, and confirm a single copy of each template syncs.
-     - (3) Play for `entrance=authored, carousel=authored`, collisions, canopy swap, rotor weld/rotation, and before/after in wide and portrait.
+     - (1) Strengthen the neglected state: faded variants or a SurfaceAppearance/Color treatment for the arch, platform, and horses; overgrowth/debris meshes to replace the graybox crates; and a lit/bulb restoration beat.
+     - (2) Replace the graybox ground and path with authored ground, and recheck mobile portrait on a real device.
+     - (3) Then ask the user to approve the slice visually before phase 4.
      - (4) Play for `authored` sources, canopy swap, rotor weld/rotation, and wide/portrait composition. Recheck portrait framing with the narrower authored arch, and decide whether `CrackedPath` (z 1..21) should run through the gate from the spawn.
 4. **First-session loop — after slice approval:** tutorial the cleanup-to-ride flow, open the gate, bring in guests, let them ride, and show how ride use earns tickets.
 5. **MVP park content — after the first loop works:** add teacups, bumper cars, a snack stand, park-rating/area unlocks, and one short event such as a power outage.

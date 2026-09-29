@@ -5,8 +5,8 @@
 </Properties>
 <Item class="MeshPart" referent="RBX6"><Properties>
 <string name="Name">RidePlatform</string>
-<Content name="MeshId"><url>rbxassetid://122207676065127</url></Content>
-<Content name="TextureID"><null></null></Content>
+<Content name="MeshId"><url>rbxassetid://72831097305391</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
 <Vector3 name="InitialSize"><X>24.0</X><Y>0.69</Y><Z>24.0</Z></Vector3>
 <Vector3 name="size"><X>24.0</X><Y>0.69</Y><Z>24.0</Z></Vector3>
 <CoordinateFrame name="CFrame"><X>0.0</X><Y>0.425</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
@@ -17,7 +17,7 @@
 <token name="CollisionFidelity">2</token>
 <token name="RenderFidelity">0</token>
 <token name="Material">272</token>
-<Color3uint8 name="Color3uint8">4283737735</Color3uint8>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
 </Properties></Item><Item class="Part" referent="RBX7"><Properties>
 <string name="Name">PlatformCollider</string>
 <token name="shape">2</token>
@@ -31,8 +31,8 @@
 <float name="Transparency">1</float>
 </Properties></Item><Item class="MeshPart" referent="RBX8"><Properties>
 <string name="Name">RepairConsole</string>
-<Content name="MeshId"><url>rbxassetid://123450996824302</url></Content>
-<Content name="TextureID"><null></null></Content>
+<Content name="MeshId"><url>rbxassetid://137595459068722</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
 <Vector3 name="InitialSize"><X>1.88</X><Y>2.94</Y><Z>1.88</Z></Vector3>
 <Vector3 name="size"><X>1.88</X><Y>2.94</Y><Z>1.88</Z></Vector3>
 <CoordinateFrame name="CFrame"><X>13.0</X><Y>1.55</Y><Z>0.0</Z><R00>-1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>-1.0</R22></CoordinateFrame>
@@ -43,15 +43,15 @@
 <token name="CollisionFidelity">2</token>
 <token name="RenderFidelity">0</token>
 <token name="Material">272</token>
-<Color3uint8 name="Color3uint8">4294302123</Color3uint8>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
 </Properties></Item><Item class="Model" referent="RBX12"><Properties>
 <string name="Name">CarouselRotor</string>
 <OptionalCoordinateFrame name="WorldPivotData"><CFrame><X>0.0</X><Y>0.0</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CFrame></OptionalCoordinateFrame>
 </Properties>
 <Item class="MeshPart" referent="RBX9"><Properties>
 <string name="Name">CenterPost</string>
-<Content name="MeshId"><url>rbxassetid://120721888425785</url></Content>
-<Content name="TextureID"><null></null></Content>
+<Content name="MeshId"><url>rbxassetid://130083848830205</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
 <Vector3 name="InitialSize"><X>17.508</X><Y>11.7</Y><Z>17.508</Z></Vector3>
 <Vector3 name="size"><X>17.508</X><Y>11.7</Y><Z>17.508</Z></Vector3>
 <CoordinateFrame name="CFrame"><X>0.0</X><Y>6.35</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
@@ -62,11 +62,11 @@
 <token name="CollisionFidelity">2</token>
 <token name="RenderFidelity">0</token>
 <token name="Material">272</token>
-<Color3uint8 name="Color3uint8">4293634885</Color3uint8>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
 </Properties></Item><Item class="MeshPart" referent="RBX10"><Properties>
 <string name="Name">CanopyNeglected</string>
-<Content name="MeshId"><url>rbxassetid://110217409143624</url></Content>
-<Content name="TextureID"><null></null></Content>
+<Content name="MeshId"><url>rbxassetid://134904738284039</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
 <Vector3 name="InitialSize"><X>18.697</X><Y>5.1853</Y><Z>18.697</Z></Vector3>
 <Vector3 name="size"><X>18.697</X><Y>5.1853</Y><Z>18.697</Z></Vector3>
 <CoordinateFrame name="CFrame"><X>0.0</X><Y>14.7774</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
@@ -77,11 +77,11 @@
 <token name="CollisionFidelity">2</token>
 <token name="RenderFidelity">0</token>
 <token name="Material">272</token>
-<Color3uint8 name="Color3uint8">4287057738</Color3uint8>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
 </Properties></Item><Item class="MeshPart" referent="RBX11"><Properties>
 <string name="Name">CanopyRestored</string>
-<Content name="MeshId"><url>rbxassetid://126411160087132</url></Content>
-<Content name="TextureID"><null></null></Content>
+<Content name="MeshId"><url>rbxassetid://132675346119260</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
 <Vector3 name="InitialSize"><X>18.74</X><Y>5.52</Y><Z>18.74</Z></Vector3>
 <Vector3 name="size"><X>18.74</X><Y>5.52</Y><Z>18.74</Z></Vector3>
 <CoordinateFrame name="CFrame"><X>0.0</X><Y>14.61</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
@@ -92,7 +92,7 @@
 <token name="CollisionFidelity">2</token>
 <token name="RenderFidelity">0</token>
 <token name="Material">272</token>
-<Color3uint8 name="Color3uint8">4293418066</Color3uint8>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
 </Properties></Item>
 </Item>
 </Item>

@@ -5,8 +5,8 @@
 </Properties>
 <Item class="MeshPart" referent="RBX1"><Properties>
 <string name="Name">EntranceArch</string>
-<Content name="MeshId"><url>rbxassetid://109035910330939</url></Content>
-<Content name="TextureID"><null></null></Content>
+<Content name="MeshId"><url>rbxassetid://128949435785416</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
 <Vector3 name="InitialSize"><X>17.44</X><Y>16.99</Y><Z>2.96</Z></Vector3>
 <Vector3 name="size"><X>17.44</X><Y>16.99</Y><Z>2.96</Z></Vector3>
 <CoordinateFrame name="CFrame"><X>0.0</X><Y>8.575</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
@@ -17,11 +17,11 @@
 <token name="CollisionFidelity">2</token>
 <token name="RenderFidelity">0</token>
 <token name="Material">272</token>
-<Color3uint8 name="Color3uint8">4294302123</Color3uint8>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
 </Properties></Item><Item class="MeshPart" referent="RBX2"><Properties>
 <string name="Name">SignPanel</string>
-<Content name="MeshId"><url>rbxassetid://133415551145181</url></Content>
-<Content name="TextureID"><null></null></Content>
+<Content name="MeshId"><url>rbxassetid://103081984848080</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
 <Vector3 name="InitialSize"><X>7.4</X><Y>1.25</Y><Z>0.42</Z></Vector3>
 <Vector3 name="size"><X>7.4</X><Y>1.25</Y><Z>0.42</Z></Vector3>
 <CoordinateFrame name="CFrame"><X>0.0</X><Y>14.2</Y><Z>-1.41</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
@@ -32,7 +32,7 @@
 <token name="CollisionFidelity">2</token>
 <token name="RenderFidelity">0</token>
 <token name="Material">272</token>
-<Color3uint8 name="Color3uint8">4293418066</Color3uint8>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
 </Properties></Item><Item class="Part" referent="RBX3"><Properties>
 <string name="Name">LeftPillarCollider</string>
 <token name="shape">2</token>
