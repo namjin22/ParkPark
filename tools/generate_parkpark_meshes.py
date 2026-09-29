@@ -57,8 +57,63 @@ class Mesh:
                 if len(face) < 3 or any(index < 1 or index > len(self.vertices) for index in face):
                     raise ValueError(f"{self.name} contains an invalid face: {face}")
 
+    def orient_outward(self) -> int:
+        """Wind every connected part counter-clockwise from outside, as Roblox renders front faces.
+
+        The primitive helpers emit mixed windings, which Studio showed as inside-out parts.
+        Parts are joined through shared positions, and a part with a negative signed volume
+        about its own centroid has all of its faces reversed. Returns the number of flipped parts.
+        """
+        weld: dict[tuple[int, int, int], int] = {}
+        position_id = [
+            weld.setdefault(tuple(round(c * 1000) for c in vertex), len(weld)) for vertex in self.vertices
+        ]
+        parent = list(range(len(weld)))
+
+        def find(item: int) -> int:
+            while parent[item] != item:
+                parent[item] = parent[parent[item]]
+                item = parent[item]
+            return item
+
+        all_faces = [(material, index) for material, faces in self.faces.items() for index in range(len(faces))]
+        for material, index in all_faces:
+            face = self.faces[material][index]
+            for a, b in zip(face, face[1:]):
+                root_a, root_b = find(position_id[a - 1]), find(position_id[b - 1])
+                if root_a != root_b:
+                    parent[root_a] = root_b
+
+        parts: dict[int, list[tuple[str, int]]] = defaultdict(list)
+        for material, index in all_faces:
+            parts[find(position_id[self.faces[material][index][0] - 1])].append((material, index))
+
+        flipped = 0
+        for members in parts.values():
+            used = {vertex for material, index in members for vertex in self.faces[material][index]}
+            centroid = tuple(sum(self.vertices[v - 1][axis] for v in used) / len(used) for axis in range(3))
+            volume = 0.0
+            for material, index in members:
+                points = [
+                    tuple(self.vertices[v - 1][axis] - centroid[axis] for axis in range(3))
+                    for v in self.faces[material][index]
+                ]
+                for k in range(1, len(points) - 1):
+                    a, b, c = points[0], points[k], points[k + 1]
+                    volume += (
+                        a[0] * (b[1] * c[2] - b[2] * c[1])
+                        + a[1] * (b[2] * c[0] - b[0] * c[2])
+                        + a[2] * (b[0] * c[1] - b[1] * c[0])
+                    )
+            if volume < 0:
+                flipped += 1
+                for material, index in members:
+                    self.faces[material][index] = tuple(reversed(self.faces[material][index]))
+        return flipped
+
     def write(self, path: Path) -> tuple[int, int, tuple[float, float, float], tuple[float, float, float]]:
         self.validate()
+        self.orient_outward()
         with path.open("w", encoding="utf-8", newline="\n") as output:
             output.write(f"# {self.name} — ParkPark original fairground mesh\n")
             output.write("mtllib ParkParkFairground.mtl\n")

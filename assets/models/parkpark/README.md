@@ -31,6 +31,8 @@ python tools/generate_parkpark_meshes.py
 python tools/render_parkpark_mesh_preview.py
 ```
 
+생성기는 저장 전에 연결된 부품마다 면 방향을 바깥쪽 반시계 방향으로 맞춥니다. Roblox는 반시계 방향 면만 앞면으로 그리므로, 이전 OBJ처럼 방향이 섞이면 Studio에서 일부 부품이 속이 빈 것처럼 보입니다.
+
 미리보기는 형상 배치를 빠르게 살펴보는 용도이며 Roblox Studio의 재질·조명 결과를 대신하지 않습니다.
 
 Roblox Studio의 [3D Importer](https://create.roblox.com/docs/studio/importer)에서 OBJ를 가져올 때 `ParkParkFairground.mtl`을 같은 폴더에 두세요. 차양 두 버전은 같은 원점·크기를 사용하며, broken/restored 중 한쪽만 표시하도록 구성합니다. 회전목마 rotor의 원점은 바닥 중앙 회전축에 맞췄습니다.
