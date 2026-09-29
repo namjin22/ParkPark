@@ -5,7 +5,7 @@
       "type": "local",
       "command": ["cmd.exe", "/c", "%LOCALAPPDATA%\\Roblox\\mcp.bat"],
       "enabled": true,
-      "timeout": 30000
+      "timeout": 60000
     }
   }
 }

@@ -8,6 +8,11 @@ local ENTRANCE_NAME = "RuinedEntrance"
 local CAROUSEL_NAME = "BrokenCarousel"
 local ASSET_FOLDER_SYNC_TIMEOUT = 5
 local ASSET_TEMPLATE_SYNC_TIMEOUT = 2
+-- Guests spawn on +Z and walk through the entrance toward the carousel on -Z.
+local GUEST_APPROACH_DIRECTION = Vector3.new(0, 0, 1)
+-- Authored meshes use -Z as their front, so turn the entrance toward arriving guests.
+local AUTHORED_ENTRANCE_PIVOT = CFrame.new(0, 0, 25) * CFrame.Angles(0, math.pi, 0)
+local AUTHORED_CAROUSEL_PIVOT = CFrame.new(0, 0, -12)
 
 type AssetManifest = {
 	Models: {
@@ -124,7 +129,9 @@ local function createEntranceSign(panel: BasePart)
 
 	local sign = Instance.new("SurfaceGui")
 	sign.Name = "EntranceSign"
-	sign.Face = Enum.NormalId.Front
+	sign.Face = if panel.CFrame.LookVector:Dot(GUEST_APPROACH_DIRECTION) > 0
+		then Enum.NormalId.Front
+		else Enum.NormalId.Back
 	sign.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
 	sign.PixelsPerStud = 60
 	sign.Parent = panel
@@ -142,10 +149,11 @@ end
 
 local function ensureGrayboxApproach(parkFolder: Folder)
 	if parkFolder:FindFirstChild("EntranceGround") == nil then
+		-- Extends past the carousel's back edge now that the default baseplate is hidden.
 		createPart(
 			"EntranceGround",
-			Vector3.new(70, 1, 60),
-			Vector3.new(0, -0.5, 10),
+			Vector3.new(70, 1, 80),
+			Vector3.new(0, -0.5, 4),
 			Color3.fromRGB(95, 95, 90),
 			parkFolder
 		)
@@ -475,9 +483,9 @@ local function getOrCreateModel(parent: Instance, name: string, build: (Folder) 
 		model:SetAttribute("IsGraybox", false)
 		model.Parent = parent
 		if name == ENTRANCE_NAME then
-			model:PivotTo(CFrame.new(0, 0, 25))
+			model:PivotTo(AUTHORED_ENTRANCE_PIVOT)
 		elseif name == CAROUSEL_NAME then
-			model:PivotTo(CFrame.new(0, 0, -12))
+			model:PivotTo(AUTHORED_CAROUSEL_PIVOT)
 		end
 		return model
 	end

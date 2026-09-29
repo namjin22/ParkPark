@@ -41,6 +41,20 @@ Roblox Studio의 [3D Importer](https://create.roblox.com/docs/studio/importer)�
 - `BrokenCarousel` Model: 고정 `RidePlatform` MeshPart, 고정 `RepairConsole` MeshPart, `CarouselRotor` Model을 포함합니다. Platform은 root 원점에, 콘솔은 root 기준 `[13, 0, 0]`에 둡니다.
 - `CarouselRotor` 안에는 회전축 메시 `CenterPost`와 `CanopyNeglected`/`CanopyRestored` canopy variant를 둡니다. `CenterPost` pivot은 회전목마 바닥 중심에 맞춥니다. 콘솔은 rotor 밖에 둡니다.
 
+OBJ 이름과 모델 안 이름은 다음처럼 대응합니다. 아래 방향 규약의 `RepairConsole`을 제외한 MeshPart는 OBJ 좌표 방향을 그대로 유지하고, 모두 `Anchored`로 저장합니다. rotor 쪽 파트는 게임 코드가 `CenterPost`에 weld한 뒤 unanchor합니다.
+
+| OBJ | Studio 이름 | 부모 |
+| --- | --- | --- |
+| `ParkParkStorybookEntrance.obj` | `EntranceArch` | `RuinedEntrance` |
+| `ParkParkEntranceSign.obj` | `SignPanel` | `RuinedEntrance` |
+| `ParkParkCarouselPlatform.obj` | `RidePlatform` | `BrokenCarousel` |
+| `ParkParkRepairConsole.obj` | `RepairConsole` | `BrokenCarousel` |
+| `ParkParkCarouselRotor.obj` | `CenterPost` (중앙축·지지대·목마 전체) | `BrokenCarousel/CarouselRotor` |
+| `ParkParkCanopyNeglected.obj` | `CanopyNeglected` | `BrokenCarousel/CarouselRotor` |
+| `ParkParkCanopyRestored.obj` | `CanopyRestored` | `BrokenCarousel/CarouselRotor` |
+
+방향 규약: 메시의 정면(간판 코랄 면, 콘솔 버튼 패널)은 Roblox Part와 같이 local `-Z`입니다. 게임에서 방문자는 `+Z` 쪽 스폰에서 `-Z` 방향의 회전목마로 걸어가므로, `ParkBuilder`는 입구 모델을 Y축 180° 돌려 배치해 아치 정면과 간판이 방문자를 향하게 합니다. 회전목마 모델은 회전하지 않으므로, `RepairConsole`만 모델 안에서 Y축 180° 돌려 버튼 패널이 root `+Z`(입구 쪽)를 보게 합니다. rotor·canopy·platform은 XZ 경계 상자 중심이 원점이라 Importer가 파트 중심을 경계 상자 중심으로 잡아도 회전축이 어긋나지 않습니다.
+
 모델에 스크립트를 넣지 않습니다. 수리 prompt, 잔해 상호작용, 상태 변경은 게임 코드가 관리합니다. 규약을 갖춘 모델이 없으면 `ParkBuilder`가 기존 graybox를 계속 생성합니다.
 
 OBJ는 현재 **메시 원본**이며 아직 Studio place에 들어간 모델이 아닙니다. Studio에서 import한 뒤 실루엣, 재질, 피벗, 입구에서 보이는 구도와 모바일 성능을 확인하고, 승인된 결과만 Rojo 경로에 연결합니다.
