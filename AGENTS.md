@@ -6,7 +6,7 @@ This file is the persistent project context and current roadmap for OpenCode. Re
 
 - **Working name:** ParkPark
 - **Concept:** restore a closed-down amusement park, reopen rides, welcome guests, and grow the park.
-- **Primary play pattern:** clear/repair → open → guests visit → earn tickets → expand.
+- **Primary play pattern:** clean up trash for coins → spend coins to repair rides → open → guests ride and pay coins → expand.
 - **Audience hypothesis:** casual Roblox players, mobile-first, easy to enjoy with friends.
 - The current prototype is a technical graybox only. Its primitive geometry and temporary HUD are not the target quality; the user has said the current quality is far below expectations.
 
@@ -42,8 +42,8 @@ This file is the persistent project context and current roadmap for OpenCode. Re
 ## Current source and known prototype state
 
 - `src/server/Bootstrap.server.luau` starts `ParkBuilder`, `ParkProgressionService`, `EconomyService`, and `RideService`; `ParkBuilder` can clone imported templates and still falls back to temporary graybox when they are absent. `EconomyService` initializes first so `leaderstats` exists before the build. The builder waits up to five seconds only when the whole asset folder is missing; absent templates are not waited on, because Play copies the already-synced edit DataModel. Bootstrap logs whether the entrance and carousel came from authored models or the fallback. Separate custom OBJ source meshes for the entrance, rides, and repair console are in `assets/models/parkpark/` and are not yet imported into the place.
-- `src/client/Bootstrap.client.luau` starts `HUDController` and `RepairFeedbackController` for ticket and restoration feedback.
-- `src/shared/Config/GameConfig.luau` holds starter ticket settings.
+- `src/client/Bootstrap.client.luau` starts `HUDController` (coins), `NoticeController` (server notices), and `ObjectiveController` (first-session steps).
+- `src/shared/Config/GameConfig.luau` holds the coin economy, carousel, and guest settings.
 - The final scene is not visually approved yet. Finish its authored entrance/carousel and compare the before/after states before adding gameplay breadth.
 - The user initially reported a broad plain area. A later Play run showed server/client bootstraps and graybox structures, but also a `ParkParkAssets` sync warning and default-baseplate grid/z-fighting. The Rojo server was restarted, a bounded startup wait added, and the default baseplate surface hidden while keeping its collision; the fallback spawn is moved to the entrance. The 2026-09-29 Studio Play check confirmed these changes (see the current phase's Verification).
 
@@ -66,7 +66,7 @@ This file is the persistent project context and current roadmap for OpenCode. Re
 ## Architecture and engineering rules
 
 - Separate responsibilities into small modules as the prototype grows, such as `ParkBuilder`, `RideService`, `EconomyService`, and client-side controllers.
-- Server owns tickets, repair state, ownership, and progression. Validate player distance/state on the server; never trust client-supplied currency or prices.
+- Server owns coins, repair state, ownership, and progression. Validate player distance/state on the server; never trust client-supplied currency or prices.
 - Keep new code type-checked with Luau and consistent with existing names and paths. Avoid adding packages until there is a concrete need.
 - Before editing, inspect the relevant existing files and preserve working behavior unless the task explicitly replaces it.
 - After each task, state changed files, how to test in Studio, and anything that could not be verified. Do not claim an unrun test passed.
@@ -77,7 +77,7 @@ This file is the persistent project context and current roadmap for OpenCode. Re
 2. **Visual direction and asset plan — complete:**
    - **Result:** `docs/ART_DIRECTION.md` records the storybook fairground direction, palette, shape/material rules, mobile lighting/camera and entrance-to-carousel composition. `docs/ASSET_PLAN.md` lists MVP assets, per-item creation/refinement recommendations, Creator Store search/review criteria, and the planned module split. Graybox geometry remains temporary and is not a final-art target.
    - **Verification:** Reviewed the README, game design, Rojo mapping, and source; manually checked the design documents and local references. This documentation phase had no code or Studio checks.
-3. **Polished vertical slice — in progress (current phase):** one entrance area and one memorable carousel, with clear cleanup/repair interactions, ticket feedback, and a visible before/after state.
+3. **Polished vertical slice — complete (approved 2026-09-29):** one entrance area and one memorable carousel, with clear cleanup/repair interactions, currency feedback, and a visible before/after state. Entries below that mention tickets predate the switch to coins.
    - **Result:** Server logic is split across `ParkBuilder`, `ParkProgressionService`, `RideService`, and `EconomyService`; client feedback is handled by HUD and repair controllers. Seven custom OBJ mesh sources and a preview are in `assets/models/parkpark/`. `ParkBuilder` can clone named `.rbxmx` templates from `ReplicatedStorage/ParkParkAssets`, toggle authored canopy variants, and retain graybox fallback. The scene still renders as rough graybox (the old baseplate grid is gone as of 2026-09-29). A 2026-09-29 contract review found that the meshes face local `-Z` while guests arrive from the `+Z` spawn, so the entrance sign would face the carousel and sit behind the arch (the graybox `PARK PARK` SurfaceGui already faced away from the spawn). `ParkBuilder` now turns the authored entrance 180° and puts the sign SurfaceGui on the face toward arriving guests; the graybox ground now spans z -36..44 so the carousel platform no longer overhangs the hidden baseplate. `assets/models/parkpark/README.md` maps each OBJ to its Studio name and parent (the whole rotor mesh is `CenterPost`) and documents the facing rule (`RepairConsole` turned 180° inside `BrokenCarousel`). Rotor, canopy, and platform meshes are XZ-centered at the origin, so the rotation axis holds even if the importer centers parts on their bounding boxes.
    - **Verification:** `verify.ps1` passes StyLua, Selene (0 warnings), Luau analysis, and Rojo build. Python regenerated all seven OBJ sources and confirmed each is under 7,500 triangles. The last supplied Output showed both bootstraps but also `ParkParkAssets` missing; Rojo was restarted, the asset wait is bounded, the baseplate surface is hidden, and the spawn is moved to the entrance. Those latest changes have not been Play-tested. On 2026-09-29 the mesh generator and `verify.ps1` passed again; RobloxStudioBeta and its MCP launcher were present, but this session exposed only UnityMCP, so Roblox Play, screenshot, and Output checks remain pending. Later on 2026-09-29 (Claude Code), `verify.ps1` passed after the sign-facing and ground changes (StyLua, Selene 0 warnings, Luau analysis with the known `didChangeWatchedFiles` warning, Rojo sourcemap/build). **Studio Play check (2026-09-29, via Studio MCP):**
      - **Startup:** the latest startup changes work. Output shows no `ParkParkAssets` warning, `[ParkPark] Building park world`, `Park ready (entrance=graybox, carousel=graybox)`, `Server bootstrap loaded`, and `Client bootstrap loaded`. The baseplate grid is gone, the spawn sits at the entrance, `PARK PARK` now reads from the spawn, and the carousel sits on visible ground.
@@ -119,15 +119,25 @@ This file is the persistent project context and current roadmap for OpenCode. Re
      - **Import:** the user imported the debris mesh (`rbxassetid://103460329557231`). `EntranceDebris.rbxmx` was built, and the imported copy was removed.
      - **Play check:** the pile renders with the neglected palette beside the path. Real navigation plus held E cleared it (hidden, 2 tickets), and the entrance → carousel restoration continued to 12 tickets, both glows, and rotation. Output is clean and `verify.ps1` passes.
      - **Known Rojo issue:** Rojo 7.7 live sync again added the new `.rbxmx` twice. One Studio copy was deleted by hand. After adding a new template file, check `ParkParkAssets` for duplicates, or restart `rojo serve` and reconnect.
+   - **Approval (2026-09-29):** the user liked the restored look and approved moving on, with two changes carried into phase 4: switch the currency to coins, and fix the undersized carousel whose horses faced outward. Future structures should be authored one at a time the same way (generator OBJ → Studio 3D Import → template).
+4. **First-session loop — in progress (current phase):** tutorial the cleanup-to-ride flow, open the gate, bring in guests, let them ride, and show how ride use earns coins.
+   - **Result (2026-09-29):**
+     - **Coins economy:** `leaderstats.Coins` replaces tickets (`GameConfig`: `EntranceCleanupReward` 30, `CarouselRepairCost` 25, `GuestRideFare` 5). `EconomyService` has `AwardCoins`/`SpendCoins`/`GetCoins`; the repair spends coins server-side, and a player short on coins gets a notice.
+     - **Opening:** once the carousel is repaired, a rope across the gate (`GateRope`, non-colliding) and an `OpenPrompt` on the invisible `GateAnchor` enable. Opening sets `ParkFolder.ParkOpen` and removes the rope.
+     - **Guests:** `GuestService` spawns up to 6 default R15 guests (`Players:CreateHumanoidModelFromDescription`, own non-self-colliding group) while the park is open. Each walks through the gate to the queue, welds to a free horse seat on the rotor for `GuestRideSeconds`, then pays `GuestRideFare` to every player and leaves.
+     - **Client:** `NoticeController` shows server notices from `ReplicatedStorage.ParkParkEvents.Notice` and replaces `RepairFeedbackController`. `ObjectiveController` shows a 4-step objective card under the coin HUD and outlines the next target with a `Highlight`.
+     - **Carousel scale:** the carousel renders 1.6× (`S` in the template tool, which must match `GameConfig.CarouselScale`). It is pivoted at z=-19.5 with the console at x=20.4, and the ground was widened to 80×96.
+     - **Horse facing:** the generator now points the horses along the direction of travel.
+   - **Verification:** `verify.ps1` passes. In a Studio Play check with real navigation and held E:
+     - Coins went 0 → 30 (cleanup) → 5 (repair) → gate open → 15 → 35 as guests rode (5 guests, 3 seated at once). Output showed only the bootstrap lines, and captures show the objective card, notices, the rope, guests walking through the gate, and riders.
+     - One guest was found fallen after a ride. `Massless` on all parts was removed and the rider now gets up on dismount; this fix has not been Play-rechecked.
+     - Rojo again duplicated newly added script files; the duplicates were deleted in Studio and Rojo serve was restarted, so the Studio plugin must reconnect.
+     - The rotor still uses the old outward-facing mesh until the user re-imports it.
    - **Next:**
-     - (1) The user reviews the full slice in Studio (and on a phone if possible) and gives visual approval or feedback. On approval, mark phase 3 complete and start phase 4 (first-session loop).
-     - (3) Ask the user for visual approval of the slice before phase 4.
-     - (2) Replace the graybox ground and path with authored ground, and recheck mobile portrait on a real device.
-     - (3) Then ask the user to approve the slice visually before phase 4.
-     - (4) Play for `authored` sources, canopy swap, rotor weld/rotation, and wide/portrait composition. Recheck portrait framing with the narrower authored arch, and decide whether `CrackedPath` (z 1..21) should run through the gate from the spawn.
-4. **First-session loop — after slice approval:** tutorial the cleanup-to-ride flow, open the gate, bring in guests, let them ride, and show how ride use earns tickets.
+     - (1) User: reconnect the Rojo plugin and 3D-import the regenerated `ParkParkCarouselRotor.obj`.
+     - (2) Record its mesh ID in `MeshAssets.json`, run `python tools/build_parkpark_templates.py`, remove the imported copy, and Play-check rider seat height and facing on the new horses, dismount behavior, and portrait framing of the larger carousel.
 5. **MVP park content — after the first loop works:** add teacups, bumper cars, a snack stand, park-rating/area unlocks, and one short event such as a power outage.
-6. **Progress and saves:** add server-authoritative persistence for tickets, park state, ride unlocks, and restoration progress; verify reconnect and failure cases before adding more content.
+6. **Progress and saves:** add server-authoritative persistence for coins, park state, ride unlocks, and restoration progress; verify reconnect and failure cases before adding more content.
 7. **Social and live-game polish:** friend visits, event cadence, mobile accessibility/performance, onboarding clarity, and error/edge-case cleanup.
 8. **Cosmetics and monetization — last:** park expression, cosmetics, and optional purchases only after the core loop and retention are enjoyable; prioritize cosmetics over gameplay power.
 

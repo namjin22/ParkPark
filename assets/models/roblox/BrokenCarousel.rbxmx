@@ -7,9 +7,9 @@
 <string name="Name">RidePlatform</string>
 <Content name="MeshId"><url>rbxassetid://72831097305391</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
-<Vector3 name="InitialSize"><X>24.0</X><Y>0.69</Y><Z>24.0</Z></Vector3>
-<Vector3 name="size"><X>24.0</X><Y>0.69</Y><Z>24.0</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>0.0</X><Y>0.425</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<Vector3 name="InitialSize"><X>38.4</X><Y>1.104</Y><Z>38.4</Z></Vector3>
+<Vector3 name="size"><X>38.4</X><Y>1.104</Y><Z>38.4</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>0.68</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">false</bool>
 <bool name="CanTouch">false</bool>
@@ -21,8 +21,8 @@
 </Properties></Item><Item class="Part" referent="RBX7"><Properties>
 <string name="Name">PlatformCollider</string>
 <token name="shape">2</token>
-<Vector3 name="size"><X>0.7</X><Y>24</Y><Z>24</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>0.0</X><Y>0.42</Y><Z>0.0</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<Vector3 name="size"><X>1.1199999999999999</X><Y>38.400000000000006</Y><Z>38.400000000000006</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>0.672</Y><Z>0.0</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">true</bool>
 <bool name="CanTouch">false</bool>
@@ -35,7 +35,7 @@
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
 <Vector3 name="InitialSize"><X>1.88</X><Y>2.94</Y><Z>1.88</Z></Vector3>
 <Vector3 name="size"><X>1.88</X><Y>2.94</Y><Z>1.88</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>13.0</X><Y>1.55</Y><Z>0.0</Z><R00>-1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>-1.0</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>20.4</X><Y>1.55</Y><Z>0.0</Z><R00>-1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>-1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">true</bool>
 <bool name="CanTouch">false</bool>
@@ -52,9 +52,9 @@
 <string name="Name">CenterPost</string>
 <Content name="MeshId"><url>rbxassetid://130083848830205</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
-<Vector3 name="InitialSize"><X>17.508</X><Y>11.7</Y><Z>17.508</Z></Vector3>
-<Vector3 name="size"><X>17.508</X><Y>11.7</Y><Z>17.508</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>0.0</X><Y>6.35</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<Vector3 name="InitialSize"><X>28.0128</X><Y>18.72</Y><Z>28.0128</Z></Vector3>
+<Vector3 name="size"><X>28.0128</X><Y>18.72</Y><Z>28.0128</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>10.16</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">false</bool>
 <bool name="CanTouch">false</bool>
@@ -67,9 +67,9 @@
 <string name="Name">CanopyNeglected</string>
 <Content name="MeshId"><url>rbxassetid://134904738284039</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
-<Vector3 name="InitialSize"><X>18.697</X><Y>5.1853</Y><Z>18.697</Z></Vector3>
-<Vector3 name="size"><X>18.697</X><Y>5.1853</Y><Z>18.697</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>0.0</X><Y>14.7774</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<Vector3 name="InitialSize"><X>29.9152</X><Y>8.2965</Y><Z>29.9152</Z></Vector3>
+<Vector3 name="size"><X>29.9152</X><Y>8.2965</Y><Z>29.9152</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>23.6438</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">false</bool>
 <bool name="CanTouch">false</bool>
@@ -82,9 +82,9 @@
 <string name="Name">CanopyRestored</string>
 <Content name="MeshId"><url>rbxassetid://132675346119260</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
-<Vector3 name="InitialSize"><X>18.74</X><Y>5.52</Y><Z>18.74</Z></Vector3>
-<Vector3 name="size"><X>18.74</X><Y>5.52</Y><Z>18.74</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>0.0</X><Y>14.61</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<Vector3 name="InitialSize"><X>29.984</X><Y>8.832</Y><Z>29.984</Z></Vector3>
+<Vector3 name="size"><X>29.984</X><Y>8.832</Y><Z>29.984</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>23.376</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">false</bool>
 <bool name="CanTouch">false</bool>

@@ -27,6 +27,9 @@ ASSETS = json.loads((SOURCES / "MeshAssets.json").read_text(encoding="utf-8"))
 CREAM, CORAL, MINT, GOLD = (245, 217, 171), (232, 92, 82), (84, 166, 135), (235, 171, 69)
 FADED_CORAL = (135, 79, 74)
 WHITE = (255, 255, 255)
+# The carousel reads too small beside guests at 1:1, so its meshes render at this scale.
+# Keep in sync with GameConfig.CarouselScale, which places riders on the scaled horses.
+S = 1.6
 
 _referents = count(1)
 
@@ -74,15 +77,25 @@ def obj_bounds(obj: str) -> tuple[Vector, Vector]:
 
 
 def mesh_part(
-    name: str, obj: str, origin: Vector, yaw: float, can_collide: bool, fallback: tuple[int, int, int]
+    name: str,
+    obj: str,
+    origin: Vector,
+    yaw: float,
+    can_collide: bool,
+    fallback: tuple[int, int, int],
+    scale: float = 1.0,
 ) -> str:
     center, size = obj_bounds(obj)
+    size = tuple(round(axis * scale, 4) for axis in size)
     cosine, sine = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
-    # origin * Ry(yaw) * center
-    position = (
-        origin[0] + cosine * center[0] + sine * center[2],
-        origin[1] + center[1],
-        origin[2] - sine * center[0] + cosine * center[2],
+    # scale * (origin * Ry(yaw) * center), about the template root
+    position = tuple(
+        round(axis * scale, 4)
+        for axis in (
+            origin[0] + cosine * center[0] + sine * center[2],
+            origin[1] + center[1],
+            origin[2] - sine * center[0] + cosine * center[2],
+        )
     )
     textured = obj in ASSETS.get("textured", []) and ASSETS.get("palette")
     texture = f"<url>{ASSETS['palette']}</url>" if textured else "<null></null>"
@@ -105,8 +118,10 @@ def mesh_part(
 </Properties></Item>"""
 
 
-def cylinder_collider(name: str, center: Vector, height: float, diameter: float) -> str:
+def cylinder_collider(name: str, center: Vector, height: float, diameter: float, scale: float = 1.0) -> str:
     # Cylinder parts run along X, so roll them 90 degrees to stand upright.
+    center = tuple(round(axis * scale, 4) for axis in center)
+    height, diameter = round(height * scale, 4), round(diameter * scale, 4)
     return f"""<Item class="Part" referent="RBX{next(_referents)}"><Properties>
 <string name="Name">{name}</string>
 <token name="shape">2</token>
@@ -155,15 +170,16 @@ def main() -> None:
         model(
             "BrokenCarousel",
             [
-                mesh_part("RidePlatform", "ParkParkCarouselPlatform", (0, 0, 0), 0, False, MINT),
-                cylinder_collider("PlatformCollider", (0, 0.42, 0), 0.7, 24),
-                mesh_part("RepairConsole", "ParkParkRepairConsole", (13, 0, 0), 180, True, CREAM),
+                mesh_part("RidePlatform", "ParkParkCarouselPlatform", (0, 0, 0), 0, False, MINT, S),
+                cylinder_collider("PlatformCollider", (0, 0.42, 0), 0.7, 24, S),
+                # The console keeps its authored size and sits just outside the scaled platform.
+                mesh_part("RepairConsole", "ParkParkRepairConsole", (12 * S + 1.2, 0, 0), 180, True, CREAM),
                 model(
                     "CarouselRotor",
                     [
-                        mesh_part("CenterPost", "ParkParkCarouselRotor", (0, 0, 0), 0, False, GOLD),
-                        mesh_part("CanopyNeglected", "ParkParkCanopyNeglected", (0, 0, 0), 0, False, FADED_CORAL),
-                        mesh_part("CanopyRestored", "ParkParkCanopyRestored", (0, 0, 0), 0, False, CORAL),
+                        mesh_part("CenterPost", "ParkParkCarouselRotor", (0, 0, 0), 0, False, GOLD, S),
+                        mesh_part("CanopyNeglected", "ParkParkCanopyNeglected", (0, 0, 0), 0, False, FADED_CORAL, S),
+                        mesh_part("CanopyRestored", "ParkParkCanopyRestored", (0, 0, 0), 0, False, CORAL, S),
                     ],
                 ),
             ],

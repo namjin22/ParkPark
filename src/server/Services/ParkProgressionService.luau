@@ -6,6 +6,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GameConfig =
 	require(ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("GameConfig"))
 
+-- First-session order: clean the entrance (earn coins) -> repair the carousel (spend coins,
+-- RideService) -> open the park at the gate (GuestService then brings guests in).
 local ParkProgressionService = {}
 
 type ParkReferences = {
@@ -15,13 +17,17 @@ type ParkReferences = {
 	CleanupTarget: BasePart,
 	CleanupPrompt: ProximityPrompt,
 	RepairPrompt: ProximityPrompt,
+	Carousel: Model,
+	GateRope: Model,
+	GatePrompt: ProximityPrompt,
 }
 
-type AwardTickets = (Player, number) -> boolean
+type AwardCoins = (Player, number) -> boolean
 type ApplyEntranceRestored = (Model) -> ()
+type Notify = (Player, string, string) -> ()
 
-local function hideDebris(debris: Model)
-	for _, descendant in debris:GetDescendants() do
+local function hideModel(model: Model)
+	for _, descendant in model:GetDescendants() do
 		if descendant:IsA("BasePart") then
 			descendant.Transparency = 1
 			descendant.CanCollide = false
@@ -48,15 +54,19 @@ end
 
 function ParkProgressionService.Start(
 	park: ParkReferences,
-	awardTickets: AwardTickets,
-	applyEntranceRestored: ApplyEntranceRestored
+	awardCoins: AwardCoins,
+	applyEntranceRestored: ApplyEntranceRestored,
+	notify: Notify
 )
 	local entranceCleared = park.ParkFolder:GetAttribute("EntranceCleared") == true
-	park.CleanupPrompt.Enabled = not entranceCleared
-	park.RepairPrompt.Enabled = entranceCleared
+	if park.ParkFolder:GetAttribute("ParkOpen") == nil then
+		park.ParkFolder:SetAttribute("ParkOpen", false)
+	end
 
+	park.CleanupPrompt.Enabled = not entranceCleared
+	park.RepairPrompt.Enabled = entranceCleared and park.Carousel:GetAttribute("IsRepaired") ~= true
 	if entranceCleared then
-		hideDebris(park.Debris)
+		hideModel(park.Debris)
 		park.CleanupPrompt.ActionText = "정리 완료"
 	end
 
@@ -64,18 +74,54 @@ function ParkProgressionService.Start(
 		if entranceCleared or not canUsePrompt(player, park.CleanupTarget, park.CleanupPrompt) then
 			return
 		end
-		if not awardTickets(player, GameConfig.EntranceCleanupReward) then
+		if not awardCoins(player, GameConfig.EntranceCleanupReward) then
 			return
 		end
 
 		entranceCleared = true
 		park.ParkFolder:SetAttribute("EntranceCleared", true)
 		park.Debris:SetAttribute("IsCleared", true)
-		hideDebris(park.Debris)
+		hideModel(park.Debris)
 		applyEntranceRestored(park.Entrance)
 		park.CleanupPrompt.ActionText = "정리 완료"
 		park.CleanupPrompt.Enabled = false
 		park.RepairPrompt.Enabled = true
+		notify(
+			player,
+			"입구 청소 완료!",
+			string.format("+%d %s", GameConfig.EntranceCleanupReward, GameConfig.CurrencyDisplayName)
+		)
+	end)
+
+	-- Opening needs a working ride; the gate prompt appears once the carousel is repaired.
+	local function refreshGatePrompt()
+		park.GatePrompt.Enabled = park.Carousel:GetAttribute("IsRepaired") == true
+			and park.ParkFolder:GetAttribute("ParkOpen") ~= true
+	end
+	park.Carousel:GetAttributeChangedSignal("IsRepaired"):Connect(refreshGatePrompt)
+	refreshGatePrompt()
+	if park.ParkFolder:GetAttribute("ParkOpen") == true then
+		hideModel(park.GateRope)
+	end
+
+	local gateAnchor = park.GatePrompt.Parent
+	park.GatePrompt.Triggered:Connect(function(player: Player)
+		if
+			park.ParkFolder:GetAttribute("ParkOpen") == true
+			or park.Carousel:GetAttribute("IsRepaired") ~= true
+			or gateAnchor == nil
+			or not gateAnchor:IsA("BasePart")
+			or not canUsePrompt(player, gateAnchor, park.GatePrompt)
+		then
+			return
+		end
+
+		park.ParkFolder:SetAttribute("ParkOpen", true)
+		hideModel(park.GateRope)
+		park.GatePrompt.Enabled = false
+		for _, other in Players:GetPlayers() do
+			notify(other, "파크 파크 개장!", "손님이 곧 도착해요")
+		end
 	end)
 end
 

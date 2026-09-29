@@ -1,9 +1,11 @@
 --!strict
 
 local hudController = require(script.Parent.Controllers.HUDController)
-local repairFeedbackController = require(script.Parent.Controllers.RepairFeedbackController)
+local noticeController = require(script.Parent.Controllers.NoticeController)
+local objectiveController = require(script.Parent.Controllers.ObjectiveController)
 
 hudController.Start()
-repairFeedbackController.Start()
+task.spawn(noticeController.Start)
+task.spawn(objectiveController.Start)
 
 print("[ParkPark] Client bootstrap loaded")

@@ -8,18 +8,22 @@ local GameConfig =
 
 local EconomyService = {}
 
-local function getTicketsValue(player: Player): IntValue?
+local function isValidAmount(amount: number): boolean
+	return amount == amount and amount > 0 and amount % 1 == 0
+end
+
+local function getCoinsValue(player: Player): IntValue?
 	local leaderstats = player:FindFirstChild("leaderstats")
 	if leaderstats == nil or not leaderstats:IsA("Folder") then
 		return nil
 	end
 
-	local tickets = leaderstats:FindFirstChild("Tickets")
-	if tickets == nil or not tickets:IsA("IntValue") then
+	local coins = leaderstats:FindFirstChild("Coins")
+	if coins == nil or not coins:IsA("IntValue") then
 		return nil
 	end
 
-	return tickets
+	return coins
 end
 
 function EconomyService.SetupPlayer(player: Player)
@@ -37,18 +41,18 @@ function EconomyService.SetupPlayer(player: Player)
 		return
 	end
 
-	local tickets = leaderstats:FindFirstChild("Tickets")
-	if tickets ~= nil then
-		if not tickets:IsA("IntValue") then
-			warn("[ParkPark] Tickets must be an IntValue for " .. player.Name)
+	local coins = leaderstats:FindFirstChild("Coins")
+	if coins ~= nil then
+		if not coins:IsA("IntValue") then
+			warn("[ParkPark] Coins must be an IntValue for " .. player.Name)
 		end
 		return
 	end
 
-	local ticketValue = Instance.new("IntValue")
-	ticketValue.Name = "Tickets"
-	ticketValue.Value = GameConfig.StartingTickets
-	ticketValue.Parent = leaderstats
+	local coinValue = Instance.new("IntValue")
+	coinValue.Name = "Coins"
+	coinValue.Value = GameConfig.StartingCoins
+	coinValue.Parent = leaderstats
 end
 
 function EconomyService.Initialize()
@@ -58,17 +62,37 @@ function EconomyService.Initialize()
 	end
 end
 
-function EconomyService.AwardTickets(player: Player, amount: number): boolean
-	if player.Parent ~= Players or amount ~= amount or amount <= 0 or amount % 1 ~= 0 then
+function EconomyService.GetCoins(player: Player): number
+	local coins = getCoinsValue(player)
+	return if coins then coins.Value else 0
+end
+
+function EconomyService.AwardCoins(player: Player, amount: number): boolean
+	if player.Parent ~= Players or not isValidAmount(amount) then
 		return false
 	end
 
-	local tickets = getTicketsValue(player)
-	if tickets == nil then
+	local coins = getCoinsValue(player)
+	if coins == nil then
 		return false
 	end
 
-	tickets.Value += amount
+	coins.Value += amount
+	return true
+end
+
+-- Deducts only when the player can afford the whole amount.
+function EconomyService.SpendCoins(player: Player, amount: number): boolean
+	if player.Parent ~= Players or not isValidAmount(amount) then
+		return false
+	end
+
+	local coins = getCoinsValue(player)
+	if coins == nil or coins.Value < amount then
+		return false
+	end
+
+	coins.Value -= amount
 	return true
 end
 

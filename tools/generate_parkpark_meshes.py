@@ -382,7 +382,9 @@ def add_star(mesh: Mesh, center_y: float, radius: float, material: str) -> None:
 
 def add_horse(mesh: Mesh, angle: float, orbit_radius: float, palette: str) -> None:
     origin = (orbit_radius * math.cos(angle), 0, orbit_radius * math.sin(angle))
-    transform = radial_transform(angle, origin)
+    # The rotor turns with positive Roblox yaw, so a horse at `angle` travels toward
+    # (sin a, 0, -cos a). Point its head (+X) along that tangent instead of outward.
+    transform = radial_transform(angle - math.pi / 2, origin)
     add_ellipsoid(mesh, (0, 2.15, 0), (1.15, 0.63, 0.53), palette, transform)
     add_ellipsoid(mesh, (0.82, 2.46, 0), (0.42, 0.45, 0.38), "cream", transform, 8, 5)
     add_cylinder_between(mesh, (0.49, 2.28, 0), (0.83, 3.1, 0), 0.26, 0.16, palette, 8, transform)

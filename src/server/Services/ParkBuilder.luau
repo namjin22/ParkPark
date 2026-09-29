@@ -12,7 +12,9 @@ local ASSET_MANIFEST_SYNC_TIMEOUT = 2
 local GUEST_APPROACH_DIRECTION = Vector3.new(0, 0, 1)
 -- Authored meshes use -Z as their front, so turn the entrance toward arriving guests.
 local AUTHORED_ENTRANCE_PIVOT = CFrame.new(0, 0, 25) * CFrame.Angles(0, math.pi, 0)
-local AUTHORED_CAROUSEL_PIVOT = CFrame.new(0, 0, -12)
+-- The authored carousel is scaled (GameConfig.CarouselScale), so its platform edge still meets the path.
+local AUTHORED_CAROUSEL_PIVOT = CFrame.new(0, 0, -19.5)
+local GATE_Z = 25
 local DEBRIS_NAME = "EntranceDebris"
 -- Beside the path just inside the gate, so guests pass it on the way to the carousel.
 local DEBRIS_PIVOT = CFrame.new(-12, 0, 8)
@@ -117,6 +119,8 @@ export type References = {
 	CarouselRotor: Model,
 	RepairConsole: BasePart,
 	RepairPrompt: ProximityPrompt,
+	GateRope: Model,
+	GatePrompt: ProximityPrompt,
 }
 
 local function createPart(
@@ -170,8 +174,8 @@ local function ensureGrayboxApproach(parkFolder: Folder)
 		-- Extends past the carousel's back edge now that the default baseplate is hidden.
 		createPart(
 			"EntranceGround",
-			Vector3.new(70, 1, 80),
-			Vector3.new(0, -0.5, 4),
+			Vector3.new(80, 1, 96),
+			Vector3.new(0, -0.5, -1),
 			Color3.fromRGB(104, 122, 82),
 			parkFolder,
 			Enum.Material.Grass
@@ -188,6 +192,82 @@ local function ensureGrayboxApproach(parkFolder: Folder)
 			Enum.Material.Cobblestone
 		)
 	end
+end
+
+-- A rope across the gate shows the park is still closed; guests are only let in after opening.
+-- The rope never blocks the player, who has to reach the debris and the carousel first.
+local function ensureGate(parkFolder: Folder): (Model, ProximityPrompt)
+	local existing = parkFolder:FindFirstChild("GateRope")
+	local rope: Model
+	if existing and existing:IsA("Model") then
+		rope = existing
+	else
+		rope = Instance.new("Model")
+		rope.Name = "GateRope"
+		for _, x in { -5.2, 5.2 } do
+			local post = createPart(
+				"RopePost",
+				Vector3.new(3.4, 0.5, 0.5),
+				Vector3.new(x, 1.7, GATE_Z + 2),
+				Color3.fromRGB(235, 171, 69),
+				rope,
+				Enum.Material.SmoothPlastic
+			)
+			post.Shape = Enum.PartType.Cylinder
+			post.CFrame = CFrame.new(x, 1.7, GATE_Z + 2) * CFrame.Angles(0, 0, math.pi / 2)
+		end
+		local cord = createPart(
+			"Rope",
+			Vector3.new(10.4, 0.28, 0.28),
+			Vector3.new(0, 2.8, GATE_Z + 2),
+			Color3.fromRGB(232, 92, 82),
+			rope,
+			Enum.Material.Fabric
+		)
+		cord.Shape = Enum.PartType.Cylinder
+		for _, descendant in rope:GetDescendants() do
+			if descendant:IsA("BasePart") then
+				descendant.CanCollide = false
+				descendant.CanQuery = false
+				descendant.CanTouch = false
+			end
+		end
+		rope.Parent = parkFolder
+	end
+
+	local anchor = parkFolder:FindFirstChild("GateAnchor")
+	if anchor == nil then
+		local newAnchor = createPart(
+			"GateAnchor",
+			Vector3.new(4, 4, 1),
+			Vector3.new(0, 2.5, GATE_Z + 2),
+			Color3.new(1, 1, 1),
+			parkFolder
+		)
+		newAnchor.Transparency = 1
+		newAnchor.CanCollide = false
+		newAnchor.CanTouch = false
+		newAnchor.CanQuery = false
+		anchor = newAnchor
+	end
+	if not (anchor :: Instance):IsA("BasePart") then
+		error("[ParkPark] ParkParkWorld.GateAnchor must be a BasePart")
+	end
+
+	local prompt = (anchor :: Instance):FindFirstChild("OpenPrompt")
+	if prompt and prompt:IsA("ProximityPrompt") then
+		return rope, prompt
+	end
+	local openPrompt = Instance.new("ProximityPrompt")
+	openPrompt.Name = "OpenPrompt"
+	openPrompt.ActionText = "개장하기"
+	openPrompt.ObjectText = "파크 파크"
+	openPrompt.HoldDuration = 1
+	openPrompt.MaxActivationDistance = 12
+	openPrompt.RequiresLineOfSight = false
+	openPrompt.Enabled = false
+	openPrompt.Parent = anchor
+	return rope, openPrompt
 end
 
 local function hideDefaultBaseplate()
@@ -244,8 +324,8 @@ end
 local function addCleanupPrompt(target: BasePart)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "CleanupPrompt"
-	prompt.ActionText = "잔해 치우기"
-	prompt.ObjectText = "입구 잔해"
+	prompt.ActionText = "쓰레기 치우기"
+	prompt.ObjectText = "입구 쓰레기"
 	prompt.HoldDuration = 1.5
 	prompt.MaxActivationDistance = 10
 	prompt.RequiresLineOfSight = false
@@ -596,6 +676,7 @@ function ParkBuilder.Build(): References
 	local parkFolder = getOrCreateParkFolder()
 	local entrance = getOrCreateModel(parkFolder, ENTRANCE_NAME, buildGrayboxEntrance)
 	ensureGrayboxApproach(parkFolder)
+	local gateRope, gatePrompt = ensureGate(parkFolder)
 	if entrance:GetAttribute("IsGraybox") == nil then
 		entrance:SetAttribute("IsGraybox", true)
 	end
@@ -691,6 +772,8 @@ function ParkBuilder.Build(): References
 		CarouselRotor = rotor,
 		RepairConsole = console,
 		RepairPrompt = repairPrompt,
+		GateRope = gateRope,
+		GatePrompt = gatePrompt,
 	}
 end
 

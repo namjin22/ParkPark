@@ -30,7 +30,7 @@ function HUDController.Start()
 	screenGui.Parent = playerGui
 
 	local shadow = Instance.new("Frame")
-	shadow.Name = "TicketCardShadow"
+	shadow.Name = "CoinCardShadow"
 	shadow.Position = UDim2.fromOffset(18, 22)
 	shadow.Size = UDim2.fromOffset(210, 64)
 	shadow.BackgroundColor3 = GameConfig.Palette.Ink
@@ -40,7 +40,7 @@ function HUDController.Start()
 	addCorner(shadow, 18)
 
 	local card = Instance.new("Frame")
-	card.Name = "TicketCard"
+	card.Name = "CoinCard"
 	card.Position = UDim2.fromOffset(16, 18)
 	card.Size = UDim2.fromOffset(210, 64)
 	card.BackgroundColor3 = GameConfig.Palette.Cream
@@ -70,9 +70,9 @@ function HUDController.Start()
 	layout.Parent = card
 
 	local icon = Instance.new("Frame")
-	icon.Name = "TicketIcon"
+	icon.Name = "CoinIcon"
 	icon.Size = UDim2.fromOffset(38, 38)
-	icon.BackgroundColor3 = GameConfig.Palette.Coral
+	icon.BackgroundColor3 = GameConfig.Palette.Gold
 	icon.BorderSizePixel = 0
 	icon.LayoutOrder = 1
 	icon.Parent = card
@@ -85,31 +85,31 @@ function HUDController.Start()
 	iconText.Font = Enum.Font.GothamBold
 	-- GothamBold has no glyph for "✦"; "★" renders in Studio Play.
 	iconText.Text = "★"
-	iconText.TextColor3 = GameConfig.Palette.Cream
+	iconText.TextColor3 = GameConfig.Palette.Ink
 	iconText.TextSize = 22
 	iconText.Parent = icon
 
 	local textColumn = Instance.new("Frame")
-	textColumn.Name = "TicketText"
+	textColumn.Name = "CoinText"
 	textColumn.Size = UDim2.new(1, -49, 1, 0)
 	textColumn.BackgroundTransparency = 1
 	textColumn.LayoutOrder = 2
 	textColumn.Parent = card
 
 	local title = Instance.new("TextLabel")
-	title.Name = "TicketTitle"
+	title.Name = "CoinTitle"
 	title.Position = UDim2.fromOffset(0, 9)
 	title.Size = UDim2.new(1, 0, 0, 16)
 	title.BackgroundTransparency = 1
 	title.Font = Enum.Font.GothamMedium
-	title.Text = GameConfig.TicketDisplayName
+	title.Text = GameConfig.CurrencyDisplayName
 	title.TextColor3 = GameConfig.Palette.Ink
 	title.TextSize = 12
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.Parent = textColumn
 
 	local count = Instance.new("TextLabel")
-	count.Name = "TicketCount"
+	count.Name = "CoinCount"
 	count.Position = UDim2.fromOffset(0, 25)
 	count.Size = UDim2.new(1, 0, 0, 28)
 	count.BackgroundTransparency = 1
@@ -121,16 +121,16 @@ function HUDController.Start()
 	count.Parent = textColumn
 
 	local leaderstats = player:WaitForChild("leaderstats")
-	local tickets = leaderstats:WaitForChild("Tickets") :: IntValue
-	local displayedTickets = tickets.Value
-	count.Text = tostring(displayedTickets)
+	local coins = leaderstats:WaitForChild("Coins") :: IntValue
+	local displayedCoins = coins.Value
+	count.Text = tostring(displayedCoins)
 
-	tickets:GetPropertyChangedSignal("Value"):Connect(function()
-		count.Text = tostring(tickets.Value)
-		if tickets.Value == displayedTickets then
+	coins:GetPropertyChangedSignal("Value"):Connect(function()
+		count.Text = tostring(coins.Value)
+		if coins.Value == displayedCoins then
 			return
 		end
-		displayedTickets = tickets.Value
+		displayedCoins = coins.Value
 
 		TweenService
 			:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1.06 })

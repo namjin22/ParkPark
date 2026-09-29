@@ -13,14 +13,14 @@ Clear debris → repair a ride → open the park → earn from guests → unlock
 1. Clean the entrance area.
 2. Repair and open the carousel.
 3. Let guests arrive and ride it.
-4. Earn tickets and use them to unlock the teacup ride.
+4. Earn coins from rides and use them to unlock the teacup ride.
 
 ## MVP scope
 
 - One small park plot.
 - Three rides: carousel, teacups, bumper cars.
 - One snack stand.
-- Tickets as the main currency; park rating unlocks new areas.
+- Coins as the main currency: cleanup earns them, repairs and unlocks spend them, guest rides pay them back; park rating unlocks new areas.
 - One short event, such as a power outage.
 - Mobile-first controls and a short first-session tutorial.
 
