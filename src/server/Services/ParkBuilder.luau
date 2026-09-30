@@ -16,6 +16,7 @@ local SNACK_NAME = "SnackStand"
 local FERRIS_NAME = "FerrisWheelRide"
 local SWING_NAME = "SwingRide"
 local PIRATE_NAME = "PirateRide"
+local HAUNTED_NAME = "HauntedHouse"
 local ASSET_FOLDER_SYNC_TIMEOUT = 5
 local ASSET_MANIFEST_SYNC_TIMEOUT = 2
 -- Guests spawn on +Z and walk through the entrance toward the rides on -Z (see ParkLayout).
@@ -30,6 +31,7 @@ local AUTHORED_BUMPER_PIVOT = CFrame.new(ParkLayout.Rides.Bumper.Pivot)
 local GRAYBOX_SNACK_PIVOT = CFrame.new(ParkLayout.Rides.Snack.Pivot)
 local AUTHORED_SNACK_PIVOT = GRAYBOX_SNACK_PIVOT * CFrame.Angles(0, -math.pi / 2, 0)
 -- The wheel is modelled with its axle along local Z; turned a quarter it turns in the YZ plane, facing the path.
+local HAUNTED_PIVOT = CFrame.new(ParkLayout.Rides.Haunted.Pivot)
 local PIRATE_PIVOT = CFrame.new(ParkLayout.Rides.Pirate.Pivot)
 local SWING_PIVOT = CFrame.new(ParkLayout.Rides.Swing.Pivot)
 local FERRIS_PIVOT = CFrame.new(ParkLayout.Rides.Ferris.Pivot) * CFrame.Angles(0, math.pi / 2, 0)
@@ -51,6 +53,7 @@ type AssetManifest = {
 		Ferris: string?,
 		Swing: string?,
 		Pirate: string?,
+		Haunted: string?,
 		Litter: string?,
 	},
 	EntranceSign: string,
@@ -76,6 +79,7 @@ local assetManifest: AssetManifest = {
 		Ferris = FERRIS_NAME,
 		Swing = SWING_NAME,
 		Pirate = PIRATE_NAME,
+		Haunted = HAUNTED_NAME,
 		Litter = "Litter",
 	},
 	EntranceSign = "SignPanel",
@@ -123,6 +127,7 @@ local function getAssetFolder(): Folder?
 				and (candidate.Models.Ferris == nil or type(candidate.Models.Ferris) == "string")
 				and (candidate.Models.Swing == nil or type(candidate.Models.Swing) == "string")
 				and (candidate.Models.Pirate == nil or type(candidate.Models.Pirate) == "string")
+				and (candidate.Models.Haunted == nil or type(candidate.Models.Haunted) == "string")
 				and (candidate.Models.Litter == nil or type(candidate.Models.Litter) == "string")
 				and type(candidate.EntranceSign) == "string"
 				and type(candidate.CarouselStates) == "table"
@@ -205,6 +210,9 @@ export type References = {
 	PirateRide: Model,
 	PirateShip: BasePart,
 	PirateConsole: BasePart,
+	HauntedHouse: Model,
+	HauntedBody: BasePart,
+	HauntedConsole: BasePart,
 	GateRope: Model,
 	GatePrompt: ProximityPrompt,
 }
@@ -305,6 +313,20 @@ local function ensureGrayboxApproach(parkFolder: Folder)
 			"FerrisPath",
 			Vector3.new(outerX - innerX, 0.2, ParkLayout.SnackPathHalfWidth * 2),
 			Vector3.new((innerX + outerX) / 2, 0.1, ParkLayout.FerrisZ),
+			pathColor,
+			parkFolder,
+			Enum.Material.Cobblestone
+		)
+	end
+	if parkFolder:FindFirstChild("HauntedPath") == nil then
+		-- A branch north off the side path to the haunted house's line.
+		local haunted = ParkLayout.Rides.Haunted
+		local startZ = ParkLayout.SidePathZ + ParkLayout.SidePathHalfWidth - 1
+		local endZ = haunted.QueueHead.Z + 8
+		createPart(
+			"HauntedPath",
+			Vector3.new(ParkLayout.SnackPathHalfWidth * 2, 0.2, endZ - startZ),
+			Vector3.new(haunted.QueueHead.X, 0.1, (startZ + endZ) / 2),
 			pathColor,
 			parkFolder,
 			Enum.Material.Cobblestone
@@ -593,6 +615,8 @@ local function findAuthoredTemplate(name: string): Model?
 		assetName = assetManifest.Models.Swing
 	elseif name == PIRATE_NAME then
 		assetName = assetManifest.Models.Pirate
+	elseif name == HAUNTED_NAME then
+		assetName = assetManifest.Models.Haunted
 	elseif name == DEBRIS_NAME then
 		assetName = assetManifest.Models.Debris
 	end
@@ -814,6 +838,23 @@ local function applyPirateAppearance(ride: Model, repaired: boolean)
 		applyPalette(ride, repaired)
 	end
 	setRestoredGlow(ride:FindFirstChild("Ship", true), repaired, 60)
+end
+
+local function applyHauntedAppearance(ride: Model, repaired: boolean)
+	if ride:GetAttribute("IsGraybox") == true then
+		for _, descendant in ride:GetDescendants() do
+			if descendant:IsA("BasePart") and descendant.Name ~= "ParkPivot" and descendant.Transparency < 1 then
+				descendant.Material = Enum.Material.SmoothPlastic
+				if descendant.Name == "Roof" or descendant.Name == "TowerCap" then
+					descendant.Color = if repaired then Color3.fromRGB(57, 67, 72) else Color3.fromRGB(96, 92, 88)
+				elseif descendant.Name == "HouseBody" or descendant.Name == "Tower" then
+					descendant.Color = if repaired then Color3.fromRGB(96, 178, 146) else Color3.fromRGB(104, 112, 106)
+				end
+			end
+		end
+	else
+		applyPalette(ride, repaired)
+	end
 end
 
 local function applyAuthoredEntranceState(entrance: Model, cleared: boolean)
@@ -1358,6 +1399,74 @@ local function buildGrayboxPirate(parkFolder: Folder): Model
 	return ride
 end
 
+-- Graybox haunted house in the template's local frame: a block with a roof and a round tower, plus the
+-- invisible WindowLight markers HauntedService flickers.
+local function buildGrayboxHaunted(parkFolder: Folder): Model
+	local ride = Instance.new("Model")
+	ride.Name = HAUNTED_NAME
+	ride:SetAttribute("IsGraybox", true)
+	ride.Parent = parkFolder
+
+	local pivot = createPart("ParkPivot", Vector3.new(0.1, 0.1, 0.1), Vector3.zero, Color3.new(1, 1, 1), ride)
+	pivot.Transparency = 1
+	pivot.CanCollide = false
+	pivot.CanTouch = false
+	pivot.CanQuery = false
+	pivot.CastShadow = false
+	ride.PrimaryPart = pivot
+
+	local scale = GameConfig.HauntedScale
+	local grey = Color3.fromRGB(104, 112, 106)
+	createPart("HouseBody", Vector3.new(12, 6, 9) * scale, Vector3.new(0, 3.6 * scale, 0), grey, ride)
+	createPart(
+		"Roof",
+		Vector3.new(13, 3.4, 9.8) * scale,
+		Vector3.new(0, 7.9 * scale, 0),
+		Color3.fromRGB(96, 92, 88),
+		ride
+	)
+	local tower = createPart(
+		"Tower",
+		Vector3.new(12, 3.6, 3.6) * scale,
+		Vector3.new(5.4 * scale, 6.3 * scale, -1.5 * scale),
+		grey,
+		ride,
+		Enum.Material.SmoothPlastic
+	)
+	tower.Shape = Enum.PartType.Cylinder
+	tower.CFrame = CFrame.new(5.4 * scale, 6.3 * scale, -1.5 * scale) * CFrame.Angles(0, 0, math.pi / 2)
+	for index, offset in
+		{
+			Vector3.new(-3.9, 2.9, -5.1),
+			Vector3.new(3.9, 2.9, -5.1),
+			Vector3.new(-3.9, 5.0, -5.1),
+			Vector3.new(3.9, 5.0, -5.1),
+		}
+	do
+		local light = createPart(
+			string.format("WindowLight%d", index),
+			Vector3.new(1.5, 1.5, 0.3) * scale,
+			offset * scale,
+			Color3.fromRGB(245, 193, 83),
+			ride,
+			Enum.Material.Neon
+		)
+		light.CanCollide = false
+	end
+
+	-- West of the house, away from the line that forms south of it.
+	local console = createPart(
+		"HauntedConsole",
+		Vector3.new(2, 3, 2),
+		Vector3.new(-9 * scale - 8, 1.5, -4 * scale),
+		Color3.fromRGB(91, 87, 79),
+		ride
+	)
+	console.Material = Enum.Material.Slate
+	ride:PivotTo(HAUNTED_PIVOT)
+	return ride
+end
+
 local function ensureRidePrompt(
 	console: BasePart,
 	name: string,
@@ -1457,6 +1566,8 @@ local function getOrCreateModel(parent: Instance, name: string, build: (Folder) 
 			model:PivotTo(SWING_PIVOT)
 		elseif name == PIRATE_NAME then
 			model:PivotTo(PIRATE_PIVOT)
+		elseif name == HAUNTED_NAME then
+			model:PivotTo(HAUNTED_PIVOT)
 		end
 		return model
 	end
@@ -1764,6 +1875,25 @@ function ParkBuilder.Build(): References
 	end
 	applyPirateAppearance(pirateRide, pirateRide:GetAttribute("IsRepaired") == true)
 
+	local hauntedHouse = getOrCreateModel(parkFolder, HAUNTED_NAME, buildGrayboxHaunted)
+	if hauntedHouse:GetAttribute("IsGraybox") == nil then
+		hauntedHouse:SetAttribute("IsGraybox", true)
+	end
+	for _, attribute in { "IsUnlocked", "IsRepaired", "IsOperating" } do
+		if hauntedHouse:GetAttribute(attribute) == nil then
+			hauntedHouse:SetAttribute(attribute, false)
+		end
+	end
+	local hauntedBodyInstance = hauntedHouse:FindFirstChild("HouseBody", true)
+	if hauntedBodyInstance == nil or not hauntedBodyInstance:IsA("BasePart") then
+		error("[ParkPark] HauntedHouse.HouseBody must be a BasePart")
+	end
+	local hauntedConsoleInstance = hauntedHouse:FindFirstChild("HauntedConsole", true)
+	if hauntedConsoleInstance == nil or not hauntedConsoleInstance:IsA("BasePart") then
+		error("[ParkPark] HauntedHouse.HauntedConsole must be a BasePart")
+	end
+	applyHauntedAppearance(hauntedHouse, hauntedHouse:GetAttribute("IsRepaired") == true)
+
 	return {
 		ParkFolder = parkFolder,
 		Entrance = entrance,
@@ -1817,6 +1947,9 @@ function ParkBuilder.Build(): References
 		PirateRide = pirateRide,
 		PirateShip = pirateShipInstance,
 		PirateConsole = pirateConsoleInstance,
+		HauntedHouse = hauntedHouse,
+		HauntedBody = hauntedBodyInstance,
+		HauntedConsole = hauntedConsoleInstance,
 		GateRope = gateRope,
 		GatePrompt = gatePrompt,
 	}
@@ -1883,6 +2016,10 @@ end
 
 function ParkBuilder.ApplyPirateRepairedAppearance(ride: Model)
 	applyPirateAppearance(ride, true)
+end
+
+function ParkBuilder.ApplyHauntedRepairedAppearance(ride: Model)
+	applyHauntedAppearance(ride, true)
 end
 
 return ParkBuilder

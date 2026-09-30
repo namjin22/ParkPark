@@ -64,6 +64,7 @@ SWING_PLATFORM = config_number("SwingPlatformRadius")
 PIRATE_SCALE = config_number("PirateScale")
 PIRATE_HUB = config_number("PirateHubHeight")
 PIRATE_PLATFORM = config_number("PiratePlatformRadius")
+HAUNTED_SCALE = config_number("HauntedScale")
 TEACUP_COUNT = int(config_number("TeacupCupCount"))
 TEACUP_RING_RADIUS = config_number("TeacupRingRadius")
 TEACUP_BASE_HEIGHT = config_number("TeacupCupBaseHeight")
@@ -287,6 +288,7 @@ def main() -> None:
     build_ferris_wheel()
     build_swing_ride()
     build_pirate_ship()
+    build_haunted_house()
 
 
 def build_teacups() -> None:
@@ -529,6 +531,51 @@ def build_pirate_ship() -> None:
                 *colliders,
                 # South of the platform (local +Z), away from the queue that forms along the path to the west.
                 console("PirateConsole", 0, PIRATE_PLATFORM * PIRATE_SCALE + 8),
+            ],
+        ),
+    )
+
+
+def marker(name: str, center: Vector, size: Vector, scale: float = 1.0) -> str:
+    """An invisible, non-solid part that game code uses as a position (for example a window light)."""
+    center = tuple(round(axis * scale, 4) for axis in center)
+    size = tuple(round(axis * scale, 4) for axis in size)
+    return f"""<Item class="Part" referent="RBX{next(_referents)}"><Properties>
+<string name="Name">{name}</string>
+{vector3("size", size)}
+<CoordinateFrame name="CFrame">{cframe_body(center, rotation())}</CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item>"""
+
+
+def build_haunted_house() -> None:
+    if missing_meshes(("ParkParkHauntedHouse",)):
+        print("skipped HauntedHouse: import ParkParkHauntedHouse.obj and record its mesh ID first")
+        return
+
+    # Yaw applied to the imported mesh only; imported meshes have shown up turned 180 degrees from the OBJ's
+    # -Z front, so check the door faces the queue (world -Z) in Play and adjust this if needed.
+    body_yaw = 0
+    windows = [
+        marker(f"WindowLight{index + 1}", (x, y, -5.1), (1.5, 1.5, 0.3), HAUNTED_SCALE)
+        for index, (x, y) in enumerate(((-3.9, 2.9), (3.9, 2.9), (-3.9, 5.0), (3.9, 5.0)))
+    ]
+    write(
+        "HauntedHouse",
+        model(
+            "HauntedHouse",
+            [
+                mesh_part("HouseBody", "ParkParkHauntedHouse", (0, 0, 0), body_yaw, False, CREAM, HAUNTED_SCALE),
+                box_collider("BodyCollider", (0, 3.6, 0), (12.0, 7.0, 9.0), 0, HAUNTED_SCALE),
+                cylinder_collider("TowerCollider", (5.4, 6.0, -1.5), 12.0, 3.6, HAUNTED_SCALE),
+                *windows,
+                # West of the house, away from the line that forms south of it.
+                console("HauntedConsole", -9 * HAUNTED_SCALE - 8, -4 * HAUNTED_SCALE),
             ],
         ),
     )

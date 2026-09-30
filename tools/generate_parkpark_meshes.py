@@ -1343,6 +1343,83 @@ def make_pirate_ship() -> Mesh:
     return mesh
 
 
+def make_haunted_house() -> Mesh:
+    """A crooked storybook mansion (front, with the door, is -Z): gabled roof, round tower, chimney, porch."""
+    mesh = Mesh("ParkParkHauntedHouse")
+    add_box(mesh, (0, 0.3, 0), (12.8, 0.6, 9.8), "wood")
+    add_box(mesh, (0, 3.6, 0), (12.0, 6.0, 9.0), "mint")
+    add_box(mesh, (0, 0.9, -4.55), (12.2, 0.6, 0.2), "faded_mint")
+    # Gabled roof over the main block, ridge along Z, with gable ends filled in.
+    for sign in (-1, 1):
+        add_slab(
+            mesh,
+            [
+                (sign * 6.5, 6.2, -4.9),
+                (0.0, 9.5, -4.9),
+                (0.0, 9.85, -4.9),
+                (sign * 6.6, 6.55, -4.9),
+                (sign * 6.5, 6.2, 4.9),
+                (0.0, 9.5, 4.9),
+                (0.0, 9.85, 4.9),
+                (sign * 6.6, 6.55, 4.9),
+            ],
+            "ink",
+        )
+    for z in (-4.5, 4.5):
+        add_slab(
+            mesh,
+            [(-6.0, 6.0, z - 0.1), (6.0, 6.0, z - 0.1), (0.0, 9.4, z - 0.1), (0.0, 9.4, z - 0.1), (-6.0, 6.0, z + 0.1), (6.0, 6.0, z + 0.1), (0.0, 9.4, z + 0.1), (0.0, 9.4, z + 0.1)],
+            "faded_mint",
+        )
+    # Round tower with a pointed cap, and a chimney with smoke puffs.
+    lathe(
+        mesh,
+        [
+            (0.0, 0.6, "wood"),
+            (1.9, 0.6, "wood"),
+            (1.75, 1.0, "faded_mint"),
+            (1.7, 11.0, "mint"),
+            (2.1, 11.2, "gold"),
+            (2.2, 11.5, "ink"),
+            (1.0, 13.6, "ink"),
+            (0.0, 15.4, "ink"),
+        ],
+        20,
+        transform=lambda x, y, z: (x + 5.4, y, z - 1.5),
+    )
+    add_star(mesh, 15.9, 0.35, "gold")
+    add_box(mesh, (-3.9, 9.9, 1.3), (1.3, 3.0, 1.3), "wood")
+    add_box(mesh, (-3.9, 11.5, 1.3), (1.6, 0.25, 1.6), "gold")
+    for x, y, z, r in ((-3.9, 12.3, 1.3, 0.5), (-3.6, 13.1, 1.4, 0.65), (-3.2, 14.1, 1.5, 0.75)):
+        add_ellipsoid(mesh, (x, y, z), (r, r * 0.8, r), "faded_cream", slices=8, stacks=5)
+    # Door with a gold arch frame and steps.
+    add_box(mesh, (0, 2.2, -4.6), (2.4, 3.6, 0.3), "wood")
+    add_box(mesh, (0, 4.15, -4.65), (3.2, 0.4, 0.4), "gold")
+    for x in (-1.5, 1.5):
+        add_box(mesh, (x, 2.2, -4.65), (0.35, 3.8, 0.4), "gold")
+    add_ellipsoid(mesh, (0, 4.1, -4.7), (1.3, 0.55, 0.3), "gold", slices=10, stacks=4)
+    add_ellipsoid(mesh, (0.7, 2.1, -4.8), (0.13, 0.13, 0.1), "gold", slices=6, stacks=4)
+    for index, (width, y) in enumerate(((3.6, 0.15), (3.0, 0.35), (2.6, 0.55))):
+        add_box(mesh, (0, y + 0.1, -5.3 - (2 - index) * 0.6 + 0.0), (width, 0.2, 0.7), "faded_cream")
+    # Four glowing windows with gold frames on the front, two more on each side.
+    for x in (-3.9, 3.9):
+        for y in (2.9, 5.0):
+            add_box(mesh, (x, y, -4.55), (1.9, 1.9, 0.2), "gold")
+            add_box(mesh, (x, y, -4.65), (1.5, 1.5, 0.2), "dark_glass")
+            add_box(mesh, (x, y, -4.72), (1.5, 0.12, 0.1), "gold")
+            add_box(mesh, (x, y, -4.72), (0.12, 1.5, 0.1), "gold")
+    for side in (-1, 1):
+        for z in (-1.5, 1.8):
+            add_box(mesh, (side * 6.05, 3.6, z), (0.2, 1.9, 1.9), "gold")
+            add_box(mesh, (side * 6.15, 3.6, z), (0.2, 1.5, 1.5), "dark_glass")
+    # A crooked little fence and two gravestones out front.
+    for x in (-5.8, -4.6, -3.4, 3.4, 4.6, 5.8):
+        add_box(mesh, (0, 0, 0), (0.35, 1.4, 0.35), "wood", tilted_transform((x, 0.9, -6.8), 0, 6 if x > 0 else -6))
+    add_box(mesh, (-5.2, 0.6, -6.8), (3.4, 0.2, 0.2), "wood")
+    add_box(mesh, (5.2, 0.6, -6.8), (3.4, 0.2, 0.2), "wood")
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -1431,6 +1508,7 @@ def main() -> None:
         make_swing_seat(),
         make_pirate_base(),
         make_pirate_ship(),
+        make_haunted_house(),
         make_bumper_platform(),
         make_bumper_car(),
         make_entrance(),

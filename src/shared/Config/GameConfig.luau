@@ -48,6 +48,7 @@ return {
 	FerrisScale = 2.6,
 	SwingScale = 3,
 	PirateScale = 3,
+	HauntedScale = 3.2,
 
 	Rides = {
 		Carousel = {
@@ -137,9 +138,22 @@ return {
 			StaffCosts = { 450, 800, 1300 },
 			RideSeconds = 30,
 		},
+		Haunted = {
+			DisplayName = "유령의 집",
+			ModelName = "HauntedHouse",
+			ConsoleName = "HauntedConsole",
+			UnlockCost = 650,
+			RepairCost = 300,
+			BaseFare = 55,
+			Requires = "Pirate",
+			IncomePerLevel = 18,
+			IncomeCosts = { 400, 800, 1300, 2000 },
+			StaffCosts = { 600, 1000, 1600 },
+			RideSeconds = 20,
+		},
 	} :: { [string]: RideEconomy },
 	-- The order attractions unlock in (each needs the one before it repaired).
-	RideChain = { "Carousel", "Teacups", "Snack", "Bumper", "Ferris", "Swing", "Pirate" },
+	RideChain = { "Carousel", "Teacups", "Snack", "Bumper", "Ferris", "Swing", "Pirate", "Haunted" },
 	-- Seconds between automatic boardings for staff level 1, 2, 3 (0 staff means players accept guests).
 	StaffIntervals = { 10, 6, 3 },
 
@@ -227,6 +241,11 @@ return {
 	PirateCycleSeconds = 30,
 	PirateMinAngle = 24,
 	PirateMaxAngle = 62,
+
+	-- Haunted house: guests walk in through the door and are out of sight while they are inside (up to
+	-- HauntedSeatCount at once). The windows flicker while anyone is in there. Model numbers are unscaled OBJ
+	-- units from ParkParkHauntedHouse.obj.
+	HauntedSeatCount = 8,
 
 	-- Janitors: hired at the cleaning cart by the entrance path, they walk to litter and clear it for free.
 	-- Costs are for the 1st, 2nd, ... janitor.

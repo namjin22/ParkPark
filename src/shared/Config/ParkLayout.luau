@@ -88,6 +88,14 @@ ParkLayout.Rides = {
 		QueueHead = Vector3.new(150, 0, ParkLayout.SidePathZ),
 		QueueDirection = Vector3.new(-1, 0, 0),
 	},
+	-- The haunted house stands north of the side path on a branch path at x = -125; its line runs south along
+	-- the branch to the side path (guests reach the branch by the ordinary side-path route).
+	Haunted = {
+		Pivot = Vector3.new(-125, 0, 64),
+		PlatformRadius = 26,
+		QueueHead = Vector3.new(-125, 0, 34),
+		QueueDirection = Vector3.new(0, 0, -1),
+	},
 	Ferris = {
 		Pivot = FERRIS_PIVOT,
 		PlatformRadius = 20,

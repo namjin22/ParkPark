@@ -34,6 +34,8 @@ type RideReferences = {
 	SwingConsole: BasePart,
 	PirateRide: Model,
 	PirateConsole: BasePart,
+	HauntedHouse: Model,
+	HauntedConsole: BasePart,
 }
 
 type SpendCoins = (Player, number) -> boolean
@@ -186,6 +188,7 @@ function RideService.Start(
 	applyFerrisRepaired: ApplyRepairedAppearance,
 	applySwingRepaired: ApplyRepairedAppearance,
 	applyPirateRepaired: ApplyRepairedAppearance,
+	applyHauntedRepaired: ApplyRepairedAppearance,
 	notify: Notify
 )
 	local currency = GameConfig.CurrencyDisplayName
@@ -197,6 +200,7 @@ function RideService.Start(
 		Ferris = park.FerrisRide,
 		Swing = park.SwingRide,
 		Pirate = park.PirateRide,
+		Haunted = park.HauntedHouse,
 	}
 	local actions: { [string]: { [string]: (Player) -> () } } = {}
 
@@ -609,6 +613,19 @@ function RideService.Start(
 			park.PirateRide:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
 		end,
 		applyRepairedAppearance = applyPirateRepaired,
+	})
+
+	-- HauntedService flickers the windows while the house operates and has guests inside.
+	setupRide({
+		key = "Haunted",
+		model = park.HauntedHouse,
+		console = park.HauntedConsole,
+		isAvailable = parkOpen,
+		signals = { parkOpenSignal },
+		start = function()
+			park.HauntedHouse:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
+		end,
+		applyRepairedAppearance = applyHauntedRepaired,
 	})
 end
 

@@ -31,6 +31,8 @@ type GuestReferences = {
 	SwingSeats: Model,
 	PirateRide: Model,
 	PirateShip: BasePart,
+	HauntedHouse: Model,
+	HauntedBody: BasePart,
 }
 
 type Guest = {
@@ -59,6 +61,8 @@ type Ride = {
 	service: boolean,
 	-- Optional extra condition for a seat, e.g. the Ferris wheel only lets guests on at the bottom.
 	canBoard: ((number) -> boolean)?,
+	-- Guests go inside a building for the ride and are out of sight until it ends (the haunted house).
+	hidden: boolean?,
 	seatTaken: { [number]: boolean },
 	queue: { Guest },
 	lastStaffBoarding: number,
@@ -69,6 +73,8 @@ type Notify = (Player, string, string) -> ()
 type Popup = (Vector3, string) -> ()
 
 local GUEST_COLLISION_GROUP = "ParkParkGuests"
+-- Guests inside the haunted house wait here, far below the park, standing still.
+local HIDDEN_ORIGIN = Vector3.new(0, -400, 0)
 local ARRIVAL_DISTANCE = 4.5
 local QUEUE_TICK = 0.4
 
@@ -323,8 +329,16 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		newRide("Pirate", park.PirateRide, function()
 			return park.PirateShip
 		end, pirateSeatOffset, GameConfig.PirateSeatCount, false),
+		newRide("Haunted", park.HauntedHouse, function()
+			return park.HauntedBody
+		end, function()
+			return CFrame.identity
+		end, GameConfig.HauntedSeatCount, false),
 	}
 	for _, rideInfo in rides do
+		if rideInfo.key == "Haunted" then
+			rideInfo.hidden = true
+		end
 		if rideInfo.key == "Ferris" then
 			-- Only a cabin near the bottom of its turn can be boarded.
 			rideInfo.canBoard = function(seat: number): boolean
@@ -441,6 +455,38 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 				eating += task.wait(0.5)
 			end
 			rideInfo.seatTaken[seat] = nil
+			return
+		end
+
+		if rideInfo.hidden then
+			-- The guest walks in through the door and is out of sight until the tour ends.
+			guest.root.Anchored = true
+			guest.model:PivotTo(CFrame.new(HIDDEN_ORIGIN + Vector3.new(seat * 6, 0, 0)))
+			local function countInside()
+				local inside = 0
+				for _, taken in rideInfo.seatTaken do
+					if taken then
+						inside += 1
+					end
+				end
+				rideInfo.model:SetAttribute("Occupants", inside)
+			end
+			countInside()
+
+			local inside = 0
+			local tourSeconds = GameConfig.Rides[rideInfo.key].RideSeconds or GameConfig.GuestRideSeconds
+			while guest.alive and inside < tourSeconds do
+				inside += task.wait(0.5)
+			end
+			rideInfo.seatTaken[seat] = nil
+			countInside()
+			if guest.alive and guest.humanoid.Health > 0 then
+				guest.model:PivotTo(
+					CFrame.new(ParkLayout.QueueSlot(rideInfo.key, 0, guest.jitter * 2) + Vector3.new(0, 4, 0))
+				)
+				guest.root.Anchored = false
+				guest.humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+			end
 			return
 		end
 
