@@ -22,6 +22,7 @@ type PowerReferences = {
 	SnackStand: Model,
 	FerrisRide: Model,
 	SwingRide: Model,
+	PirateRide: Model,
 }
 
 type AwardCoins = (Player, number) -> boolean
@@ -109,7 +110,15 @@ local function buildGenerator(parkFolder: Folder): (BasePart, BasePart, Proximit
 end
 
 function PowerService.Start(park: PowerReferences, awardCoins: AwardCoins, notify: Notify, popup: Popup)
-	local rides = { park.Carousel, park.TeacupsRide, park.BumperRide, park.SnackStand, park.FerrisRide, park.SwingRide }
+	local rides = {
+		park.Carousel,
+		park.TeacupsRide,
+		park.BumperRide,
+		park.SnackStand,
+		park.FerrisRide,
+		park.SwingRide,
+		park.PirateRide,
+	}
 	local _, lamp, prompt = buildGenerator(park.ParkFolder)
 	local lampLight = lamp:FindFirstChildOfClass("PointLight")
 	local currency = GameConfig.CurrencyDisplayName

@@ -61,6 +61,9 @@ SWING_ANCHOR_RADIUS = config_number("SwingAnchorRadius")
 SWING_ANCHOR_Y = config_number("SwingAnchorY")
 SWING_SEATS = int(config_number("SwingSeatCount"))
 SWING_PLATFORM = config_number("SwingPlatformRadius")
+PIRATE_SCALE = config_number("PirateScale")
+PIRATE_HUB = config_number("PirateHubHeight")
+PIRATE_PLATFORM = config_number("PiratePlatformRadius")
 TEACUP_COUNT = int(config_number("TeacupCupCount"))
 TEACUP_RING_RADIUS = config_number("TeacupRingRadius")
 TEACUP_BASE_HEIGHT = config_number("TeacupCupBaseHeight")
@@ -283,6 +286,7 @@ def main() -> None:
     build_snack_stand()
     build_ferris_wheel()
     build_swing_ride()
+    build_pirate_ship()
 
 
 def build_teacups() -> None:
@@ -492,6 +496,39 @@ def build_swing_ride() -> None:
                 cylinder_collider("ColumnCollider", (0, SWING_TOWER / 2, 0), SWING_TOWER, 2.0, SWING_SCALE),
                 # South of the platform (local +Z), away from the queue that forms along the path to the east.
                 console("SwingConsole", 0, SWING_PLATFORM * SWING_SCALE + 8),
+            ],
+        ),
+    )
+
+
+def build_pirate_ship() -> None:
+    needed = ("ParkParkPirateBase", "ParkParkPirateShip")
+    missing = missing_meshes(needed)
+    if missing:
+        print(f"skipped PirateRide: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    # The ship mesh's origin is the axle, so the part's origin here is the axle height; PirateService swings it.
+    colliders = [cylinder_collider("PlatformCollider", (0, 0.3, 0), 0.6, PIRATE_PLATFORM * 2, PIRATE_SCALE)]
+    # The tower legs lean along Z toward the apex, so approximate each with a few upright posts.
+    for x in (-4.4, 4.4):
+        for side in (-1, 1):
+            for t in (0.0, 0.4, 0.75):
+                z = side * 4.6 * (1 - t)
+                y = 0.6 + (PIRATE_HUB - 0.6) * t
+                colliders.append(
+                    cylinder_collider(f"LegCollider_{x:+.1f}_{side:+d}_{int(t * 100)}", (x, y + 1.6, z), 3.2, 1.3, PIRATE_SCALE)
+                )
+    write(
+        "PirateRide",
+        model(
+            "PirateRide",
+            [
+                mesh_part("PirateBase", "ParkParkPirateBase", (0, 0, 0), 0, False, CREAM, PIRATE_SCALE),
+                mesh_part("Ship", "ParkParkPirateShip", (0, PIRATE_HUB, 0), 0, False, CORAL, PIRATE_SCALE),
+                *colliders,
+                # South of the platform (local +Z), away from the queue that forms along the path to the west.
+                console("PirateConsole", 0, PIRATE_PLATFORM * PIRATE_SCALE + 8),
             ],
         ),
     )

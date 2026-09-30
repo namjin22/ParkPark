@@ -53,6 +53,7 @@ local carouselRadius = GameConfig.CarouselPlatformRadius * GameConfig.CarouselSc
 local teacupsRadius = GameConfig.TeacupsPlatformRadius * GameConfig.TeacupsScale
 local bumperRadius = GameConfig.BumperPlatformRadius * GameConfig.BumperScale
 local swingRadius = GameConfig.SwingPlatformRadius * GameConfig.SwingScale
+local pirateRadius = GameConfig.PiratePlatformRadius * GameConfig.PirateScale
 
 ParkLayout.Rides = {
 	Carousel = {
@@ -79,6 +80,13 @@ ParkLayout.Rides = {
 		PlatformRadius = swingRadius,
 		QueueHead = Vector3.new(-150, 0, ParkLayout.SidePathZ),
 		QueueDirection = Vector3.new(1, 0, 0),
+	},
+	-- The pirate ship stands at the east end of the side path, mirroring the swing ride.
+	Pirate = {
+		Pivot = Vector3.new(150 + pirateRadius + 6, 0, ParkLayout.SidePathZ),
+		PlatformRadius = pirateRadius,
+		QueueHead = Vector3.new(150, 0, ParkLayout.SidePathZ),
+		QueueDirection = Vector3.new(-1, 0, 0),
 	},
 	Ferris = {
 		Pivot = FERRIS_PIVOT,

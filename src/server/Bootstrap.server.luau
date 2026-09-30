@@ -2,6 +2,7 @@
 
 local parkBuilder = require(script.Parent.Services.ParkBuilder)
 local bumperCarService = require(script.Parent.Services.BumperCarService)
+local pirateService = require(script.Parent.Services.PirateService)
 local swingService = require(script.Parent.Services.SwingService)
 local ferrisService = require(script.Parent.Services.FerrisService)
 local economyService = require(script.Parent.Services.EconomyService)
@@ -30,12 +31,14 @@ rideService.Start(
 	parkBuilder.ApplySnackRepairedAppearance,
 	parkBuilder.ApplyFerrisRepairedAppearance,
 	parkBuilder.ApplySwingRepairedAppearance,
+	parkBuilder.ApplyPirateRepairedAppearance,
 	noticeService.Send
 )
 bumperCarService.Start(park)
 teacupService.Start(park)
 ferrisService.Start(park)
 swingService.Start(park)
+pirateService.Start(park)
 powerService.Start(park, economyService.AwardCoins, noticeService.Send, noticeService.Popup)
 guestService.Start(park, economyService.AwardCoins, noticeService.Send, noticeService.Popup)
 local litter = litterService.Start(park, economyService.AwardCoins, noticeService.Popup, parkBuilder.FindLitterTemplate)
@@ -55,7 +58,7 @@ end
 
 print(
 	string.format(
-		"[ParkPark] Park ready (entrance=%s, carousel=%s, teacups=%s%s, bumper=%s, snack=%s, ferris=%s, swing=%s)",
+		"[ParkPark] Park ready (entrance=%s, carousel=%s, teacups=%s%s, bumper=%s, snack=%s, ferris=%s, swing=%s, pirate=%s)",
 		source(park.Entrance),
 		source(park.Carousel),
 		source(park.TeacupsRide),
@@ -63,7 +66,8 @@ print(
 		source(park.BumperRide),
 		source(park.SnackStand),
 		source(park.FerrisRide),
-		source(park.SwingRide)
+		source(park.SwingRide),
+		source(park.PirateRide)
 	)
 )
 

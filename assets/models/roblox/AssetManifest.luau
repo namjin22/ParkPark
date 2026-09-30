@@ -10,6 +10,7 @@ return {
 		Snack = "SnackStand",
 		Ferris = "FerrisWheelRide",
 		Swing = "SwingRide",
+		Pirate = "PirateRide",
 		Litter = "Litter",
 	},
 	EntranceSign = "SignPanel",

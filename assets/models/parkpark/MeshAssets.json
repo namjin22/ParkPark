@@ -23,7 +23,9 @@
     "ParkParkFerrisCabin",
     "ParkParkSwingBase",
     "ParkParkSwingCrown",
-    "ParkParkSwingSeat"
+    "ParkParkSwingSeat",
+    "ParkParkPirateBase",
+    "ParkParkPirateShip"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",

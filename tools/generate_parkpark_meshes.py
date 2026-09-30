@@ -1270,6 +1270,79 @@ def make_swing_seat() -> Mesh:
     return mesh
 
 
+PIRATE_HUB_HEIGHT = 9.0
+PIRATE_ARM_DROP = 6.4
+
+
+def add_plane(mesh: Mesh, corners: list[tuple[float, float, float]], material: str) -> None:
+    """A flat quad drawn on both sides (for thin sails)."""
+    ids = [mesh.vertex(point) for point in corners]
+    mesh.face(material, *ids)
+    mesh.face(material, *reversed(ids))
+
+
+def make_pirate_base() -> Mesh:
+    """Round boarding platform and two A-frame towers carrying the axle; origin is the ground center."""
+    mesh = Mesh("ParkParkPirateBase")
+    add_vertical_cylinder(mesh, 8.0, 0.05, 0.6, "cream", 48)
+    add_vertical_cylinder(mesh, 8.02, 0.05, 0.4, "wood", 48)
+    add_torus(mesh, 7.85, 0.12, 0.62, "gold", segments=48, sides=6)
+    for index in range(16):
+        angle = TAU * index / 16
+        add_ellipsoid(mesh, (7.4 * math.cos(angle), 0.75, 7.4 * math.sin(angle)), (0.14, 0.14, 0.14), "gold" if index % 2 else "cream", slices=6, stacks=3)
+    apex_y = PIRATE_HUB_HEIGHT
+    for x in (-4.4, 4.4):
+        apex = (x, apex_y, 0.0)
+        for foot_z in (-4.6, 4.6):
+            add_cylinder_between(mesh, (x, 0.6, foot_z), apex, 0.34, 0.26, "wood", 8)
+            add_box(mesh, (x, 0.75, foot_z), (1.0, 0.3, 1.0), "gold")
+        add_cylinder_between(mesh, (x, 3.6, -2.6), (x, 3.6, 2.6), 0.16, 0.16, "cream", 6)
+        add_ellipsoid(mesh, apex, (0.5, 0.5, 0.5), "gold", slices=10, stacks=5)
+    # Axle beam between the towers, and pennants on top.
+    add_cylinder_between(mesh, (-5.4, apex_y, 0), (5.4, apex_y, 0), 0.3, 0.3, "gold", 10)
+    for x in (-4.4, 4.4):
+        add_cylinder_between(mesh, (x, apex_y + 0.4, 0), (x, apex_y + 2.4, 0), 0.08, 0.06, "wood", 6)
+        add_plane(mesh, [(x, apex_y + 2.4, 0), (x, apex_y + 1.5, 0), (x + 1.3 * (1 if x > 0 else -1), apex_y + 1.95, 0)], "coral")
+    return mesh
+
+
+def make_pirate_ship() -> Mesh:
+    """The swinging ship, hanging from its axle at the origin (axle along X): arms, a double-ended hull with
+    four benches, a mast with a striped sail, and a figurehead at each end. Symmetric front to back."""
+    mesh = Mesh("ParkParkPirateShip")
+    add_cylinder_between(mesh, (-3.4, 0, 0), (3.4, 0, 0), 0.36, 0.36, "gold", 12)
+    for x in (-2.6, 2.6):
+        add_cylinder_between(mesh, (x, 0, 0), (x, -PIRATE_ARM_DROP, 0), 0.2, 0.2, "wood", 8)
+        add_ellipsoid(mesh, (x, 0, 0), (0.4, 0.4, 0.4), "gold", slices=8, stacks=4)
+    floor_y = -7.3
+    # Deck and hull: floor, two side walls, and raised prows at both ends.
+    add_box(mesh, (0, floor_y, 0), (4.6, 0.3, 9.0), "wood")
+    add_box(mesh, (0, floor_y - 0.4, 0), (3.6, 0.5, 8.0), "coral")
+    for x in (-2.3, 2.3):
+        add_box(mesh, (x, floor_y + 0.6, 0), (0.28, 1.2, 9.0), "coral")
+        add_box(mesh, (x, floor_y + 1.28, 0), (0.36, 0.16, 9.2), "gold")
+    for sign in (-1, 1):
+        # Prow: a wall that rises and curls, ending in a gold figurehead.
+        add_box(mesh, (0, floor_y + 0.9, sign * 4.5), (4.6, 1.8, 0.3), "coral")
+        add_box(mesh, (0, floor_y + 1.9, sign * 4.5), (4.7, 0.2, 0.42), "gold")
+        add_cylinder_between(mesh, (0, floor_y + 0.9, sign * 4.5), (0, floor_y + 2.4, sign * 5.5), 0.3, 0.2, "wood", 8)
+        add_ellipsoid(mesh, (0, floor_y + 2.6, sign * 5.7), (0.45, 0.5, 0.6), "gold", slices=8, stacks=5)
+        add_ellipsoid(mesh, (0, floor_y + 2.75, sign * 6.1), (0.16, 0.16, 0.2), "ink", slices=6, stacks=3)
+    # Four benches, back to back around the mast (seat tops at y = floor_y + 0.65).
+    for z in (-3.4, -1.9, 1.9, 3.4):
+        add_box(mesh, (0, floor_y + 0.5, z), (3.6, 0.3, 0.9), "mint")
+        add_box(mesh, (0, floor_y + 0.3, z), (3.2, 0.3, 0.7), "wood")
+    # Mast hooked to the axle, with a striped sail and a flag.
+    add_cylinder_between(mesh, (0, floor_y + 0.2, 0), (0, -0.4, 0), 0.2, 0.16, "wood", 8)
+    stripe = 4
+    for index in range(stripe):
+        x0 = -1.5 + 3.0 * index / stripe
+        x1 = -1.5 + 3.0 * (index + 1) / stripe
+        add_plane(mesh, [(x0, -1.5, 0.02), (x1, -1.5, 0.02), (x1 * 0.85, -5.6, 0.02), (x0 * 0.85, -5.6, 0.02)], "coral" if index % 2 == 0 else "cream")
+    add_star(mesh, -0.9, 0.0001 + 0.45, "gold")
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -1356,6 +1429,8 @@ def main() -> None:
         make_swing_base(),
         make_swing_crown(),
         make_swing_seat(),
+        make_pirate_base(),
+        make_pirate_ship(),
         make_bumper_platform(),
         make_bumper_car(),
         make_entrance(),

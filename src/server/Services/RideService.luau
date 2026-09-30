@@ -32,6 +32,8 @@ type RideReferences = {
 	FerrisConsole: BasePart,
 	SwingRide: Model,
 	SwingConsole: BasePart,
+	PirateRide: Model,
+	PirateConsole: BasePart,
 }
 
 type SpendCoins = (Player, number) -> boolean
@@ -183,6 +185,7 @@ function RideService.Start(
 	applySnackRepaired: ApplyRepairedAppearance,
 	applyFerrisRepaired: ApplyRepairedAppearance,
 	applySwingRepaired: ApplyRepairedAppearance,
+	applyPirateRepaired: ApplyRepairedAppearance,
 	notify: Notify
 )
 	local currency = GameConfig.CurrencyDisplayName
@@ -193,6 +196,7 @@ function RideService.Start(
 		Bumper = park.BumperRide,
 		Ferris = park.FerrisRide,
 		Swing = park.SwingRide,
+		Pirate = park.PirateRide,
 	}
 	local actions: { [string]: { [string]: (Player) -> () } } = {}
 
@@ -593,6 +597,18 @@ function RideService.Start(
 			park.SwingRide:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
 		end,
 		applyRepairedAppearance = applySwingRepaired,
+	})
+
+	setupRide({
+		key = "Pirate",
+		model = park.PirateRide,
+		console = park.PirateConsole,
+		isAvailable = parkOpen,
+		signals = { parkOpenSignal },
+		start = function()
+			park.PirateRide:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
+		end,
+		applyRepairedAppearance = applyPirateRepaired,
 	})
 end
 

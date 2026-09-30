@@ -47,6 +47,7 @@ return {
 	SnackScale = 3,
 	FerrisScale = 2.6,
 	SwingScale = 3,
+	PirateScale = 3,
 
 	Rides = {
 		Carousel = {
@@ -123,9 +124,22 @@ return {
 			StaffCosts = { 300, 560, 900 },
 			RideSeconds = 30,
 		},
+		Pirate = {
+			DisplayName = "해적선",
+			ModelName = "PirateRide",
+			ConsoleName = "PirateConsole",
+			UnlockCost = 450,
+			RepairCost = 220,
+			BaseFare = 40,
+			Requires = "Swing",
+			IncomePerLevel = 14,
+			IncomeCosts = { 300, 600, 1000, 1600 },
+			StaffCosts = { 450, 800, 1300 },
+			RideSeconds = 30,
+		},
 	} :: { [string]: RideEconomy },
 	-- The order attractions unlock in (each needs the one before it repaired).
-	RideChain = { "Carousel", "Teacups", "Snack", "Bumper", "Ferris", "Swing" },
+	RideChain = { "Carousel", "Teacups", "Snack", "Bumper", "Ferris", "Swing", "Pirate" },
 	-- Seconds between automatic boardings for staff level 1, 2, 3 (0 staff means players accept guests).
 	StaffIntervals = { 10, 6, 3 },
 
@@ -196,6 +210,23 @@ return {
 	SwingSeatTop = -5.26,
 	SwingRiderHip = 1.25,
 	SwingSeatFlip = true,
+
+	-- Pirate ship (unscaled OBJ units from ParkParkPirateBase/Ship.obj). The ship hangs from an axle along X and
+	-- swings back and forth along Z; the swing widens and narrows over PirateCycleSeconds. PirateShipCenterY is
+	-- the ship mesh's bounding-box centre below its axle (the OBJ origin), PirateSeatTop the bench height below
+	-- the axle, PirateBenchZ the four bench rows, and PirateSeatColumnX the two seats on each bench.
+	PirateSeatCount = 8,
+	PirateHubHeight = 9,
+	PiratePlatformRadius = 8,
+	PirateShipCenterY = -3.775,
+	PirateSeatTop = -6.65,
+	PirateBenchZ = { -3.4, -1.9, 1.9, 3.4 },
+	PirateSeatColumnX = 0.9,
+	PirateRiderHip = 1.25,
+	PirateSwingSeconds = 4.6,
+	PirateCycleSeconds = 30,
+	PirateMinAngle = 24,
+	PirateMaxAngle = 62,
 
 	-- Janitors: hired at the cleaning cart by the entrance path, they walk to litter and clear it for free.
 	-- Costs are for the 1st, 2nd, ... janitor.

@@ -29,6 +29,8 @@ type GuestReferences = {
 	FerrisCabins: Model,
 	SwingRide: Model,
 	SwingSeats: Model,
+	PirateRide: Model,
+	PirateShip: BasePart,
 }
 
 type Guest = {
@@ -224,6 +226,21 @@ local function swingSeatOffset(_: number): CFrame
 	return CFrame.new(x, y, z)
 end
 
+-- Pirate ship benches run across the deck: the four rows sit back to back around the mast, two guests on each,
+-- the front rows facing one end and the back rows the other. The offset is relative to the ship part's centre.
+local function pirateSeatOffset(seat: number): CFrame
+	local scale = GameConfig.PirateScale
+	local row = (seat - 1) // 2 + 1
+	local column = if (seat - 1) % 2 == 0 then -1 else 1
+	local benchZ = GameConfig.PirateBenchZ[row]
+	local position = Vector3.new(
+		column * GameConfig.PirateSeatColumnX * scale,
+		(GameConfig.PirateSeatTop - GameConfig.PirateShipCenterY) * scale + GameConfig.PirateRiderHip,
+		benchZ * scale
+	)
+	return if benchZ > 0 then CFrame.new(position) * CFrame.Angles(0, math.pi, 0) else CFrame.new(position)
+end
+
 -- Bumper cars face local -Z, so a rider with an identity rotation looks along the car's travel.
 local function bumperSeatOffset(_: number): CFrame
 	local scale = GameConfig.BumperCarScale
@@ -303,6 +320,9 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			local swingSeat = park.SwingSeats:FindFirstChild(string.format("SwingSeat%d", seat))
 			return if swingSeat and swingSeat:IsA("BasePart") then swingSeat else nil
 		end, swingSeatOffset, GameConfig.SwingSeatCount, false),
+		newRide("Pirate", park.PirateRide, function()
+			return park.PirateShip
+		end, pirateSeatOffset, GameConfig.PirateSeatCount, false),
 	}
 	for _, rideInfo in rides do
 		if rideInfo.key == "Ferris" then
