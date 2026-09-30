@@ -21,6 +21,8 @@ ParkLayout.GateZ = 25
 ParkLayout.MainPathHalfWidth = 10
 ParkLayout.SidePathZ = -12
 ParkLayout.SidePathHalfWidth = 9
+ParkLayout.SnackZ = 4
+ParkLayout.SnackPathHalfWidth = 8
 ParkLayout.GroundHalfWidth = 190
 ParkLayout.GroundMinZ = -170
 ParkLayout.GroundMaxZ = 115
@@ -28,6 +30,8 @@ ParkLayout.GroundMaxZ = 115
 local CAROUSEL_PIVOT = Vector3.new(0, 0, -95)
 local TEACUPS_PIVOT = Vector3.new(-105, 0, -60)
 local BUMPER_PIVOT = Vector3.new(105, 0, -60)
+-- The snack stand stands at the end of a short spur off the main path, its counter facing +X.
+local SNACK_PIVOT = Vector3.new(-50, 0, ParkLayout.SnackZ)
 
 local carouselRadius = GameConfig.CarouselPlatformRadius * GameConfig.CarouselScale
 local teacupsRadius = GameConfig.TeacupsPlatformRadius * GameConfig.TeacupsScale
@@ -52,6 +56,12 @@ ParkLayout.Rides = {
 		QueueHead = Vector3.new(BUMPER_PIVOT.X, 0, BUMPER_PIVOT.Z + bumperRadius + 5),
 		QueueDirection = Vector3.new(-1, 0, 0),
 	},
+	Snack = {
+		Pivot = SNACK_PIVOT,
+		PlatformRadius = 10,
+		QueueHead = Vector3.new(SNACK_PIVOT.X + 10, 0, ParkLayout.SnackZ),
+		QueueDirection = Vector3.new(1, 0, 0),
+	},
 } :: { [string]: RideSite }
 
 -- Position of the guest standing in line slot `index` (0 is the head of the line).
@@ -73,6 +83,11 @@ function ParkLayout.ToCrossing(fromKey: string?, from: Vector3, lane: number): {
 		table.insert(route, Vector3.new(lane, 0, ParkLayout.EntryZ))
 		table.insert(route, Vector3.new(lane, 0, ParkLayout.GateZ + 14))
 		table.insert(route, Vector3.new(lane, 0, ParkLayout.GateZ - 14))
+	elseif fromKey == "Snack" then
+		-- Back along the spur to the main path; the caller continues from there.
+		table.insert(route, Vector3.new(-8, 0, ParkLayout.SnackZ + lane * 0.3))
+		table.insert(route, Vector3.new(lane, 0, ParkLayout.SnackZ))
+		return route
 	elseif fromKey == "Carousel" then
 		table.insert(route, Vector3.new(lane, 0, from.Z))
 	else
@@ -90,6 +105,45 @@ function ParkLayout.CrossingToRide(rideKey: string, lane: number, slot: Vector3)
 		table.insert(route, Vector3.new(slot.X, 0, ParkLayout.SidePathZ + lane * 0.6))
 	end
 	table.insert(route, slot)
+	return route
+end
+
+-- The full walk from where a guest is (`fromKey` is the line they are leaving, or nil for a new arrival)
+-- to the head of another attraction's line. The snack stand sits north of the crossing, so it is reached
+-- before the crossing rather than after it.
+function ParkLayout.RouteToRide(
+	fromKey: string?,
+	from: Vector3,
+	lane: number,
+	rideKey: string,
+	slot: Vector3
+): { Vector3 }
+	local route: { Vector3 } = {}
+	if rideKey == "Snack" then
+		if fromKey == nil then
+			table.insert(route, Vector3.new(lane, 0, ParkLayout.EntryZ))
+			table.insert(route, Vector3.new(lane, 0, ParkLayout.GateZ + 14))
+			table.insert(route, Vector3.new(lane, 0, ParkLayout.GateZ - 14))
+		else
+			for _, point in ParkLayout.ToCrossing(fromKey, from, lane) do
+				table.insert(route, point)
+			end
+		end
+		table.insert(route, Vector3.new(lane, 0, ParkLayout.SnackZ))
+		table.insert(route, Vector3.new(-8, 0, ParkLayout.SnackZ + lane * 0.3))
+		table.insert(route, slot)
+		return route
+	end
+
+	for _, point in ParkLayout.ToCrossing(fromKey, from, lane) do
+		table.insert(route, point)
+	end
+	if fromKey == "Snack" then
+		table.insert(route, Vector3.new(lane, 0, ParkLayout.SidePathZ))
+	end
+	for _, point in ParkLayout.CrossingToRide(rideKey, lane, slot) do
+		table.insert(route, point)
+	end
 	return route
 end
 

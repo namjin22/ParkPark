@@ -23,6 +23,8 @@ type GuestReferences = {
 	TeacupCups: Model?,
 	BumperRide: Model,
 	BumperCars: Model,
+	SnackStand: Model,
+	SnackCounter: BasePart,
 }
 
 type Guest = {
@@ -47,6 +49,8 @@ type Ride = {
 	seatPart: (number) -> BasePart?,
 	seatOffset: (number) -> CFrame,
 	seatCount: number,
+	-- A shop serves guests where they stand instead of seating them on the ride.
+	service: boolean,
 	seatTaken: { [number]: boolean },
 	queue: { Guest },
 	lastStaffBoarding: number,
@@ -223,7 +227,8 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		model: Model,
 		seatPart: (number) -> BasePart?,
 		seatOffset: (number) -> CFrame,
-		seatCount: number
+		seatCount: number,
+		service: boolean
 	): Ride
 		return {
 			key = key,
@@ -232,6 +237,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			seatPart = seatPart,
 			seatOffset = seatOffset,
 			seatCount = seatCount,
+			service = service,
 			seatTaken = {},
 			queue = {},
 			lastStaffBoarding = os.clock(),
@@ -242,19 +248,24 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 	local rides: { Ride } = {
 		newRide("Carousel", park.Carousel, function()
 			return park.CarouselRotor.PrimaryPart
-		end, carouselSeatOffset, GameConfig.CarouselSeatCount),
+		end, carouselSeatOffset, GameConfig.CarouselSeatCount, false),
 		if cups
 			then newRide("Teacups", park.TeacupsRide, function(seat: number)
 				local cup = cups:FindFirstChild(string.format("TeacupCup%d", seat))
 				return if cup and cup:IsA("BasePart") then cup else nil
-			end, cupSeatOffset, GameConfig.TeacupCupCount)
+			end, cupSeatOffset, GameConfig.TeacupCupCount, false)
 			else newRide("Teacups", park.TeacupsRide, function()
 				return park.TeacupsRotor.PrimaryPart
-			end, legacyTeacupsSeatOffset, GameConfig.TeacupsSeatCount),
+			end, legacyTeacupsSeatOffset, GameConfig.TeacupsSeatCount, false),
 		newRide("Bumper", park.BumperRide, function(seat: number)
 			local car = park.BumperCars:FindFirstChild(string.format("BumperCar%d", seat))
 			return if car and car:IsA("BasePart") then car else nil
-		end, bumperSeatOffset, GameConfig.BumperSeatCount),
+		end, bumperSeatOffset, GameConfig.BumperSeatCount, false),
+		newRide("Snack", park.SnackStand, function()
+			return park.SnackCounter
+		end, function()
+			return CFrame.identity
+		end, GameConfig.SnackCounterSeats, true),
 	}
 
 	local function fareOf(ride: Ride): number
@@ -352,6 +363,16 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			return
 		end
 
+		if rideInfo.service then
+			-- The guest is served where they stand and eats for a moment before making room.
+			local eating = 0
+			while guest.alive and eating < GameConfig.SnackServeSeconds do
+				eating += task.wait(0.5)
+			end
+			rideInfo.seatTaken[seat] = nil
+			return
+		end
+
 		-- The seat part (rotor root, cup, or bumper car) is anchored, so the weld alone carries the rider.
 		guest.humanoid.Sit = true
 		guest.root.CFrame = part.CFrame * rideInfo.seatOffset(seat)
@@ -396,8 +417,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			table.insert(chosen.queue, guest)
 			updateQueue(chosen)
 
-			followRoute(guest, ParkLayout.ToCrossing(fromKey, fromPosition, guest.lane))
-			followRoute(guest, ParkLayout.CrossingToRide(chosen.key, guest.lane, guest.slot))
+			followRoute(guest, ParkLayout.RouteToRide(fromKey, fromPosition, guest.lane, chosen.key, guest.slot))
 
 			-- Wait in line, stepping forward as the guests ahead board, until let on or out of patience.
 			local waited = 0
@@ -521,6 +541,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 					local isHead = index == 1
 					guest.prompt.Enabled = isHead and guest.arrived and operating and hasSeat
 					if isHead then
+						guest.prompt.ActionText = if rideInfo.service then "서빙하기" else "태우기"
 						guest.prompt.ObjectText =
 							string.format("%s 손님 · +%d %s", rideInfo.displayName, fare, currency)
 					end

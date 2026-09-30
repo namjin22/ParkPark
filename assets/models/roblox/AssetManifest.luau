@@ -7,6 +7,7 @@ return {
 		Debris = "EntranceDebris",
 		Teacups = "TeacupsRide",
 		Bumper = "BumperCarsRide",
+		Snack = "SnackStand",
 		Litter = "Litter",
 	},
 	EntranceSign = "SignPanel",

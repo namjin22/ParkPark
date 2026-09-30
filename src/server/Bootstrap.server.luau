@@ -23,6 +23,7 @@ rideService.Start(
 	parkBuilder.ApplyRepairedAppearance,
 	parkBuilder.ApplyTeacupsRepairedAppearance,
 	parkBuilder.ApplyBumperRepairedAppearance,
+	parkBuilder.ApplySnackRepairedAppearance,
 	noticeService.Send
 )
 bumperCarService.Start(park)
@@ -36,12 +37,13 @@ end
 
 print(
 	string.format(
-		"[ParkPark] Park ready (entrance=%s, carousel=%s, teacups=%s%s, bumper=%s)",
+		"[ParkPark] Park ready (entrance=%s, carousel=%s, teacups=%s%s, bumper=%s, snack=%s)",
 		source(park.Entrance),
 		source(park.Carousel),
 		source(park.TeacupsRide),
 		if park.TeacupCups then "+cups" else "",
-		source(park.BumperRide)
+		source(park.BumperRide),
+		source(park.SnackStand)
 	)
 )
 

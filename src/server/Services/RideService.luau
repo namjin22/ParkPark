@@ -31,6 +31,12 @@ type RideReferences = {
 	BumperRepairPrompt: ProximityPrompt,
 	BumperIncomePrompt: ProximityPrompt,
 	BumperStaffPrompt: ProximityPrompt,
+	SnackStand: Model,
+	SnackConsole: BasePart,
+	SnackUnlockPrompt: ProximityPrompt,
+	SnackRepairPrompt: ProximityPrompt,
+	SnackIncomePrompt: ProximityPrompt,
+	SnackStaffPrompt: ProximityPrompt,
 }
 
 type SpendCoins = (Player, number) -> boolean
@@ -130,6 +136,7 @@ function RideService.Start(
 	applyCarouselRepaired: ApplyRepairedAppearance,
 	applyTeacupsRepaired: ApplyRepairedAppearance,
 	applyBumperRepaired: ApplyRepairedAppearance,
+	applySnackRepaired: ApplyRepairedAppearance,
 	notify: Notify
 )
 	local currency = GameConfig.CurrencyDisplayName
@@ -165,6 +172,9 @@ function RideService.Start(
 		local config = GameConfig.Rides[ride.key]
 		local model = ride.model
 		local displayName = config.DisplayName
+		-- A shop serves its guests; a ride seats them.
+		local boardNoun = if config.IsShop == true then "서빙" else "탑승"
+		local staffAction = if config.IsShop == true then "서빙해요" else "태워요"
 		local started = false
 
 		local function start()
@@ -231,10 +241,11 @@ function RideService.Start(
 				local interval = (model:GetAttribute("StaffInterval") :: number?) or 0
 				queueLine.Text = if interval > 0
 					then string.format(
-						"대기 %d/%d · 직원이 %d초마다 태워요",
+						"대기 %d/%d · 직원이 %d초마다 %s",
 						queueLength,
 						GameConfig.QueueMax,
-						interval
+						interval,
+						staffAction
 					)
 					else string.format(
 						"대기 %d/%d · 손님에게 다가가 허용하세요",
@@ -280,11 +291,12 @@ function RideService.Start(
 			if staffNext then
 				ride.staffPrompt.ActionText = string.format("직원 고용 Lv%d→%d", staff, staff + 1)
 				ride.staffPrompt.ObjectText = string.format(
-					"%s · %d %s · %d초마다 자동 탑승",
+					"%s · %d %s · %d초마다 자동 %s",
 					displayName,
 					staffNext,
 					currency,
-					GameConfig.StaffIntervals[staff + 1]
+					GameConfig.StaffIntervals[staff + 1],
+					boardNoun
 				)
 			end
 			refreshBoard()
@@ -400,10 +412,11 @@ function RideService.Start(
 				player,
 				string.format("%s 직원 고용!", displayName),
 				string.format(
-					"-%d %s · %d초마다 자동으로 태워요",
+					"-%d %s · %d초마다 자동으로 %s",
 					cost,
 					currency,
-					GameConfig.StaffIntervals[level + 1]
+					GameConfig.StaffIntervals[level + 1],
+					staffAction
 				)
 			)
 		end)
@@ -473,6 +486,25 @@ function RideService.Start(
 			park.BumperRide:SetAttribute("IsOperating", true)
 		end,
 		applyRepairedAppearance = applyBumperRepaired,
+	})
+
+	-- The snack stand is a shop: guests buy a snack at the counter instead of taking a seat.
+	setupRide({
+		key = "Snack",
+		model = park.SnackStand,
+		console = park.SnackConsole,
+		unlockPrompt = park.SnackUnlockPrompt,
+		repairPrompt = park.SnackRepairPrompt,
+		incomePrompt = park.SnackIncomePrompt,
+		staffPrompt = park.SnackStaffPrompt,
+		isAvailable = function()
+			return park.ParkFolder:GetAttribute("ParkOpen") == true
+		end,
+		signals = { park.ParkFolder:GetAttributeChangedSignal("ParkOpen") },
+		start = function()
+			park.SnackStand:SetAttribute("IsOperating", true)
+		end,
+		applyRepairedAppearance = applySnackRepaired,
 	})
 end
 

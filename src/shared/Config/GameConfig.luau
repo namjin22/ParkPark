@@ -11,6 +11,8 @@ export type RideEconomy = {
 	-- Cost of buying income level 1, 2, ... and staff level 1, 2, ...
 	IncomeCosts: { number },
 	StaffCosts: { number },
+	-- A shop serves guests at a counter instead of seating them on a moving ride.
+	IsShop: boolean?,
 }
 
 return {
@@ -35,6 +37,7 @@ return {
 	BumperScale = 3.7,
 	BumperCarScale = 3.2,
 	ConsoleScale = 3,
+	SnackScale = 3,
 
 	Rides = {
 		Carousel = {
@@ -63,6 +66,16 @@ return {
 			IncomePerLevel = 6,
 			IncomeCosts = { 90, 190, 320, 500 },
 			StaffCosts = { 140, 280, 450 },
+		},
+		Snack = {
+			DisplayName = "간식 판매대",
+			UnlockCost = 40,
+			RepairCost = 30,
+			BaseFare = 4,
+			IncomePerLevel = 2,
+			IncomeCosts = { 30, 70, 130, 220 },
+			StaffCosts = { 60, 120, 220 },
+			IsShop = true,
 		},
 	} :: { [string]: RideEconomy },
 	-- Seconds between automatic boardings for staff level 1, 2, 3 (0 staff means players accept guests).
@@ -102,6 +115,10 @@ return {
 	BumperSeatHeight = 1.29,
 	BumperSeatZ = 0.5,
 	BumperRiderHip = 1.05,
+
+	-- Snack stand: guests at the counter buy a snack and eat it for a few seconds.
+	SnackCounterSeats = 3,
+	SnackServeSeconds = 4,
 
 	-- Guests arrive only after the park opens, walk along the paths, queue at a ride, and wait for a
 	-- player (or that ride's staff) to let them on.

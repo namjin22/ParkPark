@@ -12,6 +12,7 @@ local ENTRANCE_NAME = "RuinedEntrance"
 local CAROUSEL_NAME = "BrokenCarousel"
 local TEACUPS_NAME = "TeacupsRide"
 local BUMPER_NAME = "BumperCarsRide"
+local SNACK_NAME = "SnackStand"
 local ASSET_FOLDER_SYNC_TIMEOUT = 5
 local ASSET_MANIFEST_SYNC_TIMEOUT = 2
 -- Guests spawn on +Z and walk through the entrance toward the rides on -Z (see ParkLayout).
@@ -22,6 +23,9 @@ local AUTHORED_ENTRANCE_PIVOT = CFrame.new(0, 0, GATE_Z) * CFrame.Angles(0, math
 local AUTHORED_CAROUSEL_PIVOT = CFrame.new(ParkLayout.Rides.Carousel.Pivot)
 local AUTHORED_TEACUPS_PIVOT = CFrame.new(ParkLayout.Rides.Teacups.Pivot)
 local AUTHORED_BUMPER_PIVOT = CFrame.new(ParkLayout.Rides.Bumper.Pivot)
+-- The graybox stand is built facing +X (toward the path); authored meshes face -Z, so they turn a quarter.
+local GRAYBOX_SNACK_PIVOT = CFrame.new(ParkLayout.Rides.Snack.Pivot)
+local AUTHORED_SNACK_PIVOT = GRAYBOX_SNACK_PIVOT * CFrame.Angles(0, -math.pi / 2, 0)
 local DEBRIS_NAME = "EntranceDebris"
 -- Beside the path between the spawn and the gate, so the first job is right in front of the player.
 local DEBRIS_PIVOT = CFrame.new(-32, 0, 52)
@@ -36,6 +40,7 @@ type AssetManifest = {
 		Debris: string?,
 		Teacups: string?,
 		Bumper: string?,
+		Snack: string?,
 		Litter: string?,
 	},
 	EntranceSign: string,
@@ -57,6 +62,7 @@ local assetManifest: AssetManifest = {
 		Carousel = CAROUSEL_NAME,
 		Teacups = TEACUPS_NAME,
 		Bumper = BUMPER_NAME,
+		Snack = SNACK_NAME,
 		Litter = "Litter",
 	},
 	EntranceSign = "SignPanel",
@@ -100,6 +106,7 @@ local function getAssetFolder(): Folder?
 				and type(candidate.Models.Carousel) == "string"
 				and (candidate.Models.Teacups == nil or type(candidate.Models.Teacups) == "string")
 				and (candidate.Models.Bumper == nil or type(candidate.Models.Bumper) == "string")
+				and (candidate.Models.Snack == nil or type(candidate.Models.Snack) == "string")
 				and (candidate.Models.Litter == nil or type(candidate.Models.Litter) == "string")
 				and type(candidate.EntranceSign) == "string"
 				and type(candidate.CarouselStates) == "table"
@@ -156,6 +163,13 @@ export type References = {
 	BumperRepairPrompt: ProximityPrompt,
 	BumperIncomePrompt: ProximityPrompt,
 	BumperStaffPrompt: ProximityPrompt,
+	SnackStand: Model,
+	SnackCounter: BasePart,
+	SnackConsole: BasePart,
+	SnackUnlockPrompt: ProximityPrompt,
+	SnackRepairPrompt: ProximityPrompt,
+	SnackIncomePrompt: ProximityPrompt,
+	SnackStaffPrompt: ProximityPrompt,
 	GateRope: Model,
 	GatePrompt: ProximityPrompt,
 }
@@ -228,6 +242,20 @@ local function ensureGrayboxApproach(parkFolder: Folder)
 			"CrackedPath",
 			Vector3.new(ParkLayout.MainPathHalfWidth * 2, 0.2, startZ - frontEdge),
 			Vector3.new(0, 0.1, (startZ + frontEdge) / 2),
+			pathColor,
+			parkFolder,
+			Enum.Material.Cobblestone
+		)
+	end
+	if parkFolder:FindFirstChild("SnackPath") == nil then
+		-- A spur off the main path to the snack stand; its queue forms along it.
+		local snack = ParkLayout.Rides.Snack
+		local innerX = -ParkLayout.MainPathHalfWidth + 1
+		local outerX = snack.Pivot.X + 2
+		createPart(
+			"SnackPath",
+			Vector3.new(innerX - outerX, 0.2, ParkLayout.SnackPathHalfWidth * 2),
+			Vector3.new((innerX + outerX) / 2, 0.1, ParkLayout.SnackZ),
 			pathColor,
 			parkFolder,
 			Enum.Material.Cobblestone
@@ -508,6 +536,8 @@ local function findAuthoredTemplate(name: string): Model?
 		assetName = assetManifest.Models.Teacups
 	elseif name == BUMPER_NAME then
 		assetName = assetManifest.Models.Bumper
+	elseif name == SNACK_NAME then
+		assetName = assetManifest.Models.Snack
 	elseif name == DEBRIS_NAME then
 		assetName = assetManifest.Models.Debris
 	end
@@ -649,6 +679,28 @@ local function applyBumperAppearance(ride: Model, repaired: boolean)
 		applyPalette(ride, repaired)
 	end
 	setRestoredGlow(ride:FindFirstChild("RidePlatform"), repaired, 45)
+end
+
+local function applySnackAppearance(stand: Model, repaired: boolean)
+	if stand:GetAttribute("IsGraybox") == true then
+		for _, descendant in stand:GetDescendants() do
+			if descendant:IsA("BasePart") and descendant.Name ~= "ParkPivot" then
+				descendant.Material = Enum.Material.SmoothPlastic
+				if descendant.Name == "Awning" then
+					descendant.Color = if repaired then Color3.fromRGB(235, 122, 108) else Color3.fromRGB(124, 114, 104)
+				elseif descendant.Name == "SnackCounter" or descendant.Name == "BackWall" then
+					descendant.Color = if repaired then Color3.fromRGB(255, 232, 190) else Color3.fromRGB(112, 104, 94)
+				elseif descendant.Name == "Post" then
+					descendant.Color = if repaired then Color3.fromRGB(245, 193, 83) else Color3.fromRGB(96, 88, 78)
+				elseif descendant.Name == "SnackSign" then
+					descendant.Color = if repaired then Color3.fromRGB(245, 193, 83) else Color3.fromRGB(110, 102, 90)
+				end
+			end
+		end
+	else
+		applyPalette(stand, repaired)
+	end
+	setRestoredGlow(stand:FindFirstChild("Awning", true) or stand:FindFirstChild("SnackCounter", true), repaired, 30)
 end
 
 local function applyAuthoredEntranceState(entrance: Model, cleared: boolean)
@@ -901,6 +953,75 @@ local function buildGrayboxBumperCars(parkFolder: Folder): Model
 	return ride
 end
 
+local function buildGrayboxSnackStand(parkFolder: Folder): Model
+	local stand = Instance.new("Model")
+	stand.Name = SNACK_NAME
+	stand:SetAttribute("IsGraybox", true)
+	stand.Parent = parkFolder
+
+	local pivot = createPart("ParkPivot", Vector3.new(0.1, 0.1, 0.1), Vector3.zero, Color3.new(1, 1, 1), stand)
+	pivot.Transparency = 1
+	pivot.CanCollide = false
+	pivot.CanTouch = false
+	pivot.CanQuery = false
+	pivot.CastShadow = false
+	stand.PrimaryPart = pivot
+
+	local grey = Color3.fromRGB(112, 104, 94)
+	-- The counter faces +X, toward the path; the guests stand in line in front of it.
+	createPart("BackWall", Vector3.new(1, 10, 16), Vector3.new(-4, 5, 0), grey, stand, Enum.Material.SmoothPlastic)
+	createPart(
+		"SnackCounter",
+		Vector3.new(4, 3.4, 16),
+		Vector3.new(3, 1.7, 0),
+		grey,
+		stand,
+		Enum.Material.SmoothPlastic
+	)
+	for _, z in { -7.5, 7.5 } do
+		createPart("Post", Vector3.new(1.2, 10, 1.2), Vector3.new(5.5, 5, z), grey, stand, Enum.Material.SmoothPlastic)
+	end
+	local awning = createPart(
+		"Awning",
+		Vector3.new(12, 0.6, 18),
+		Vector3.new(1, 10.3, 0),
+		grey,
+		stand,
+		Enum.Material.SmoothPlastic
+	)
+	awning.CanCollide = false
+	local sign = createPart(
+		"SnackSign",
+		Vector3.new(0.6, 2.6, 10),
+		Vector3.new(6.2, 12, 0),
+		grey,
+		stand,
+		Enum.Material.SmoothPlastic
+	)
+	sign.CanCollide = false
+	local gui = Instance.new("SurfaceGui")
+	gui.Name = "SnackSignText"
+	gui.Face = Enum.NormalId.Right
+	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	gui.PixelsPerStud = 60
+	gui.Parent = sign
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 1
+	label.Text = "SNACKS"
+	label.TextColor3 = Color3.fromRGB(57, 67, 72)
+	label.TextScaled = true
+	label.Font = Enum.Font.GothamBold
+	label.Parent = gui
+
+	local console =
+		createPart("SnackConsole", Vector3.new(2, 3, 2), Vector3.new(-7, 1.5, -9.5), Color3.fromRGB(91, 87, 79), stand)
+	console.Material = Enum.Material.Slate
+	-- Local +X is the front, so the graybox needs no turn.
+	stand:PivotTo(GRAYBOX_SNACK_PIVOT)
+	return stand
+end
+
 local function ensureRidePrompt(
 	console: BasePart,
 	name: string,
@@ -992,6 +1113,8 @@ local function getOrCreateModel(parent: Instance, name: string, build: (Folder) 
 			model:PivotTo(AUTHORED_TEACUPS_PIVOT)
 		elseif name == BUMPER_NAME then
 			model:PivotTo(AUTHORED_BUMPER_PIVOT)
+		elseif name == SNACK_NAME then
+			model:PivotTo(AUTHORED_SNACK_PIVOT)
 		end
 		return model
 	end
@@ -1169,6 +1292,30 @@ function ParkBuilder.Build(): References
 	local bumperIncomePrompt, bumperStaffPrompt = ensureUpgradePrompts(bumperConsoleInstance, "범퍼카")
 	applyBumperAppearance(bumperRide, bumperRide:GetAttribute("IsRepaired") == true)
 
+	local snackStand = getOrCreateModel(parkFolder, SNACK_NAME, buildGrayboxSnackStand)
+	if snackStand:GetAttribute("IsGraybox") == nil then
+		snackStand:SetAttribute("IsGraybox", true)
+	end
+	for _, attribute in { "IsUnlocked", "IsRepaired", "IsOperating" } do
+		if snackStand:GetAttribute(attribute) == nil then
+			snackStand:SetAttribute(attribute, false)
+		end
+	end
+	local snackCounterInstance = snackStand:FindFirstChild("SnackCounter", true)
+	if snackCounterInstance == nil or not snackCounterInstance:IsA("BasePart") then
+		error("[ParkPark] SnackStand.SnackCounter must be a BasePart")
+	end
+	local snackConsoleInstance = snackStand:FindFirstChild("SnackConsole", true)
+	if snackConsoleInstance == nil or not snackConsoleInstance:IsA("BasePart") then
+		error("[ParkPark] SnackStand.SnackConsole must be a BasePart")
+	end
+	local snackUnlockPrompt =
+		ensureRidePrompt(snackConsoleInstance, "UnlockPrompt", "해금하기", 1.5, "간식 판매대", nil, nil)
+	local snackRepairPrompt =
+		ensureRidePrompt(snackConsoleInstance, "RepairPrompt", "수리하기", 2, "간식 판매대", nil, nil)
+	local snackIncomePrompt, snackStaffPrompt = ensureUpgradePrompts(snackConsoleInstance, "간식 판매대")
+	applySnackAppearance(snackStand, snackStand:GetAttribute("IsRepaired") == true)
+
 	return {
 		ParkFolder = parkFolder,
 		Entrance = entrance,
@@ -1196,6 +1343,13 @@ function ParkBuilder.Build(): References
 		BumperRepairPrompt = bumperRepairPrompt,
 		BumperIncomePrompt = bumperIncomePrompt,
 		BumperStaffPrompt = bumperStaffPrompt,
+		SnackStand = snackStand,
+		SnackCounter = snackCounterInstance,
+		SnackConsole = snackConsoleInstance,
+		SnackUnlockPrompt = snackUnlockPrompt,
+		SnackRepairPrompt = snackRepairPrompt,
+		SnackIncomePrompt = snackIncomePrompt,
+		SnackStaffPrompt = snackStaffPrompt,
 		GateRope = gateRope,
 		GatePrompt = gatePrompt,
 	}
@@ -1246,6 +1400,10 @@ end
 
 function ParkBuilder.ApplyBumperRepairedAppearance(ride: Model)
 	applyBumperAppearance(ride, true)
+end
+
+function ParkBuilder.ApplySnackRepairedAppearance(stand: Model)
+	applySnackAppearance(stand, true)
 end
 
 return ParkBuilder

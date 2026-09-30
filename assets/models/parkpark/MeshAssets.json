@@ -16,7 +16,8 @@
     "ParkParkBumperCar",
     "ParkParkTeacupsHub",
     "ParkParkTeacup",
-    "ParkParkLitter"
+    "ParkParkLitter",
+    "ParkParkSnackStand"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",

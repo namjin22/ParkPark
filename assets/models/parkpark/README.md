@@ -22,6 +22,7 @@
 | `ParkParkBumperCar.obj` | 범퍼카 1대(정면 -Z): 범퍼 링, 보닛, 좌석, 스파크 폴. 템플릿에서 4대로 복제 |
 | `ParkParkTeacupsHub.obj` | 찻잔 회전판: 데크, 받침 6개, 중앙 기둥, 작은 지붕(컵 없음) |
 | `ParkParkTeacup.obj` | 찻잔 1개(바닥 y=0, 넓고 얕은 컵). 템플릿에서 6개로 복제되어 각자 회전 |
+| `ParkParkSnackStand.obj` | 간식 판매대: 줄무늬 차양, 카운터, 팝콘 기계와 사탕 병, 지붕의 팝콘 통 장식(정면 -Z). 템플릿 `SnackStand`의 `StandBody` |
 | `ParkParkLitter.obj` | 바닥에 생기는 쓰레기 한 무더기(컵, 포장지, 팝콘 통, 사과 속) |
 | `ParkParkFairground.mtl` | 공통 재질 팔레트 |
 

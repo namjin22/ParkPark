@@ -985,6 +985,73 @@ def make_teacup() -> Mesh:
     return mesh
 
 
+def add_slab(mesh: Mesh, corners: list[tuple[float, float, float]], material: str) -> None:
+    """A hexahedron from eight corners (four on the -Z face, then the same four on the +Z face)."""
+    ids = [mesh.vertex(point) for point in corners]
+    for face in ((0, 3, 2, 1), (4, 5, 6, 7), (0, 4, 7, 3), (1, 2, 6, 5), (0, 1, 5, 4), (3, 7, 6, 2)):
+        mesh.face(material, *(ids[index] for index in face))
+
+
+def make_snack_stand() -> Mesh:
+    """A striped-awning snack stall (front is -Z): counter, popcorn machine, posts, and a popcorn-tub crest."""
+    mesh = Mesh("ParkParkSnackStand")
+    add_box(mesh, (0, 0.1, 0), (6.6, 0.2, 4.2), "wood")
+    # Back wall and side panels.
+    add_box(mesh, (0, 1.7, 1.5), (5.6, 3.0, 0.15), "cream")
+    add_box(mesh, (-2.75, 1.7, 0.2), (0.15, 3.0, 2.8), "cream")
+    add_box(mesh, (2.75, 1.7, 0.2), (0.15, 3.0, 2.8), "cream")
+    # Counter with a wooden top and coral front panels.
+    add_box(mesh, (0, 0.65, -1.1), (5.4, 0.9, 1.0), "coral")
+    add_box(mesh, (0, 1.16, -1.1), (5.7, 0.12, 1.3), "wood")
+    for x in (-1.8, 0.0, 1.8):
+        add_box(mesh, (x, 0.65, -1.62), (1.4, 0.6, 0.06), "cream")
+    # Corner posts.
+    for x in (-2.85, 2.85):
+        for z in (-1.7, 1.6):
+            add_vertical_cylinder(mesh, 0.1, 0.2, 3.5, "gold", 10, center_x=x, center_z=z)
+    # Striped, sloping awning with a scalloped valance along its low front edge.
+    stripes = 6
+    width = 6.4 / stripes
+    for index in range(stripes):
+        x0 = -3.2 + index * width
+        x1 = x0 + width
+        material = "coral" if index % 2 == 0 else "cream"
+        add_slab(
+            mesh,
+            [
+                (x0, 3.15, -2.1),
+                (x1, 3.15, -2.1),
+                (x1, 3.27, -2.1),
+                (x0, 3.27, -2.1),
+                (x0, 3.7, 1.8),
+                (x1, 3.7, 1.8),
+                (x1, 3.82, 1.8),
+                (x0, 3.82, 1.8),
+            ],
+            material,
+        )
+        add_box(mesh, ((x0 + x1) / 2, 3.0, -2.12), (width, 0.32, 0.06), material)
+    # Popcorn-tub crest on the roof, with puffs of popcorn.
+    add_cylinder_between(mesh, (0, 3.85, 0.3), (0, 4.65, 0.3), 0.42, 0.62, "coral", 12)
+    add_cylinder_between(mesh, (0, 4.0, 0.3), (0, 4.3, 0.3), 0.5, 0.56, "cream", 12)
+    for x, y, z, radius in ((-0.3, 4.85, 0.15, 0.3), (0.3, 4.9, 0.45, 0.28), (0.0, 5.1, 0.3, 0.32), (0.35, 4.75, 0.05, 0.22)):
+        add_ellipsoid(mesh, (x, y, z), (radius, radius * 0.9, radius), "cream", slices=8, stacks=5)
+    add_star(mesh, 5.55, 0.25, "gold")
+    # Popcorn machine on the counter (left) and candy jars (right).
+    add_box(mesh, (-1.6, 1.52, -1.0), (1.0, 0.6, 0.8), "coral")
+    add_box(mesh, (-1.6, 2.05, -1.0), (0.9, 0.5, 0.7), "dark_glass")
+    add_box(mesh, (-1.6, 2.36, -1.0), (1.05, 0.12, 0.85), "gold")
+    add_ellipsoid(mesh, (-1.6, 2.05, -1.0), (0.3, 0.2, 0.25), "cream", slices=8, stacks=4)
+    for x, material in ((1.2, "mint"), (1.65, "coral"), (2.1, "gold")):
+        add_vertical_cylinder(mesh, 0.2, 1.22, 1.75, material, 10, center_x=x, center_z=-1.0)
+        add_vertical_cylinder(mesh, 0.22, 1.75, 1.82, "cream", 10, center_x=x, center_z=-1.0)
+    # A barrel and a crate beside the stand.
+    add_vertical_cylinder(mesh, 0.42, 0.2, 1.1, "wood", 12, center_x=3.95, center_z=-0.4)
+    add_vertical_cylinder(mesh, 0.44, 0.55, 0.65, "gold", 12, center_x=3.95, center_z=-0.4)
+    add_box(mesh, (3.95, 0.5, 0.75), (0.9, 0.6, 0.8), "wood", tilted_transform((0, 0, 0), 12))
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -1064,6 +1131,7 @@ def main() -> None:
         make_teacups_hub(),
         make_teacup(),
         make_litter(),
+        make_snack_stand(),
         make_bumper_platform(),
         make_bumper_car(),
         make_entrance(),
