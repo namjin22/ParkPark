@@ -1,0 +1,74 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" version="4">
+<Item class="Model" referent="RBX166"><Properties>
+<string name="Name">DropRide</string>
+<OptionalCoordinateFrame name="WorldPivotData"><CFrame><X>0.0</X><Y>0.0</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CFrame></OptionalCoordinateFrame>
+</Properties>
+<Item class="MeshPart" referent="RBX161"><Properties>
+<string name="Name">DropTower</string>
+<Content name="MeshId"><url>rbxassetid://131508759598276</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>12.04</X><Y>20.7</Y><Z>12.04</Z></Vector3>
+<Vector3 name="size"><X>36.12</X><Y>62.1</Y><Z>36.12</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>31.2</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item><Item class="MeshPart" referent="RBX162"><Properties>
+<string name="Name">DropGondola</string>
+<Content name="MeshId"><url>rbxassetid://133540812301881</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>6.4</X><Y>1.3202</Y><Z>6.4</Z></Vector3>
+<Vector3 name="size"><X>19.2</X><Y>3.9606</Y><Z>19.2</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>4.9047</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item><Item class="Part" referent="RBX163"><Properties>
+<string name="Name">BaseCollider</string>
+<token name="shape">2</token>
+<Vector3 name="size"><X>1.8</X><Y>36.0</Y><Z>36.0</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>0.9</Y><Z>0.0</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX164"><Properties>
+<string name="Name">TowerCollider</string>
+<Vector3 name="size"><X>7.8</X><Y>60.0</Y><Z>7.8</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>30.0</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="MeshPart" referent="RBX165"><Properties>
+<string name="Name">DropConsole</string>
+<Content name="MeshId"><url>rbxassetid://137595459068722</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>1.88</X><Y>2.94</Y><Z>1.88</Z></Vector3>
+<Vector3 name="size"><X>5.64</X><Y>8.82</Y><Z>5.64</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>-24.0</X><Y>4.65</Y><Z>22.0</Z><R00>-1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>-1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">true</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item>
+</Item>
+</roblox>

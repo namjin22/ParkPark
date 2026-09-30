@@ -1,9 +1,9 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" version="4">
-<Item class="Model" referent="RBX173"><Properties>
+<Item class="Model" referent="RBX179"><Properties>
 <string name="Name">DecorTree</string>
 <OptionalCoordinateFrame name="WorldPivotData"><CFrame><X>0.0</X><Y>0.0</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CFrame></OptionalCoordinateFrame>
 </Properties>
-<Item class="MeshPart" referent="RBX172"><Properties>
+<Item class="MeshPart" referent="RBX178"><Properties>
 <string name="Name">Piece</string>
 <Content name="MeshId"><url>rbxassetid://80862845179141</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
@@ -18,7 +18,7 @@
 <token name="RenderFidelity">0</token>
 <token name="Material">272</token>
 <Color3uint8 name="Color3uint8">4294967295</Color3uint8>
-</Properties></Item><Item class="Part" referent="RBX168"><Properties>
+</Properties></Item><Item class="Part" referent="RBX174"><Properties>
 <string name="Name">Collider</string>
 <token name="shape">2</token>
 <Vector3 name="size"><X>6.84</X><Y>2.47</Y><Z>2.47</Z></Vector3>
