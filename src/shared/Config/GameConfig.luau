@@ -15,6 +15,8 @@ export type RideEconomy = {
 	IsShop: boolean?,
 	-- How long a guest stays aboard; rides without it use GuestRideSeconds.
 	RideSeconds: number?,
+	-- Park rating (stars) needed before this attraction can be unlocked; 1 (or nil) means from the start.
+	RequiredStars: number?,
 }
 
 return {
@@ -66,6 +68,7 @@ return {
 			UnlockCost = 120,
 			RepairCost = 60,
 			BaseFare = 12,
+			RequiredStars = 2,
 			IncomePerLevel = 6,
 			IncomeCosts = { 90, 190, 320, 500 },
 			StaffCosts = { 140, 280, 450 },
@@ -85,6 +88,7 @@ return {
 			UnlockCost = 200,
 			RepairCost = 100,
 			BaseFare = 20,
+			RequiredStars = 3,
 			IncomePerLevel = 8,
 			IncomeCosts = { 150, 300, 520, 800 },
 			StaffCosts = { 220, 420, 700 },
@@ -142,6 +146,23 @@ return {
 	FerrisRiderHip = 1.25,
 	-- A cabin can be boarded while it is within this fraction of the wheel radius above its lowest point.
 	FerrisBoardingWindow = 0.15,
+
+	-- Park rating: one point per repaired attraction, plus a clean-park bonus and guest milestones. The
+	-- score reaches star n once it is at least RatingScoreForStar[n]. More stars mean more, faster guests.
+	RatingScoreForStar = { 0, 2, 4, 6, 8 },
+	RatingCleanLitter = 4,
+	RatingDirtyLitter = 10,
+	RatingGuestMilestones = { 30, 100 },
+	GuestsPerStar = 3,
+	SpawnRatePerStar = 0.2,
+
+	-- Power outage: now and then the park loses power. Every attraction stops and the lights dim until a
+	-- player switches the generator by the entrance back on; it also comes back on its own after a while.
+	PowerOutageMinSeconds = 240,
+	PowerOutageMaxSeconds = 360,
+	PowerOutageTimeoutSeconds = 60,
+	PowerRestoreReward = 40,
+	PowerOutageMinRides = 3,
 
 	-- Snack stand: guests at the counter buy a snack and eat it for a few seconds.
 	SnackCounterSeats = 3,

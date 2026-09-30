@@ -22,6 +22,10 @@ local MIN_SPACING = 9
 local PICKUP_DISTANCE = 18
 
 local function isNearRide(x: number, z: number): boolean
+	local generator = ParkLayout.GeneratorPosition
+	if math.abs(x - generator.X) < 14 and math.abs(z - generator.Z) < 14 then
+		return true
+	end
 	for _, site in ParkLayout.Rides do
 		local dx, dz = x - site.Pivot.X, z - site.Pivot.Z
 		if math.sqrt(dx * dx + dz * dz) < site.PlatformRadius + 6 then

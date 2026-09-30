@@ -24,6 +24,8 @@ ParkLayout.SidePathHalfWidth = 9
 ParkLayout.SnackZ = 4
 ParkLayout.SnackPathHalfWidth = 8
 ParkLayout.FerrisZ = 16
+-- The power generator beside the path between the spawn and the gate; litter keeps clear of it.
+ParkLayout.GeneratorPosition = Vector3.new(24, 0, 52)
 ParkLayout.GroundHalfWidth = 190
 ParkLayout.GroundMinZ = -170
 ParkLayout.GroundMaxZ = 115

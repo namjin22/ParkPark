@@ -155,21 +155,34 @@ function RideService.Start(
 			return
 		end
 
-		ride:SetAttribute("IsOperating", true)
+		ride:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
 		local baseCFrame = rotorRoot.CFrame
 		task.spawn(function()
 			local angle = 0
 			local quarterTurnDuration = rotationSeconds / 4
 			while rotorRoot.Parent ~= nil and ride:GetAttribute("IsRepaired") == true do
-				angle = (angle + math.pi / 2) % (math.pi * 2)
+				-- No power, no turning: wait here until the ride operates again.
+				if ride:GetAttribute("IsOperating") ~= true then
+					task.wait(0.25)
+					continue
+				end
+
+				local target = (angle + math.pi / 2) % (math.pi * 2)
 				local tween = TweenService:Create(
 					rotorRoot,
 					TweenInfo.new(quarterTurnDuration, Enum.EasingStyle.Linear),
-					{ CFrame = baseCFrame * CFrame.Angles(0, angle, 0) }
+					{ CFrame = baseCFrame * CFrame.Angles(0, target, 0) }
 				)
+				local stopper = ride:GetAttributeChangedSignal("IsOperating"):Connect(function()
+					if ride:GetAttribute("IsOperating") ~= true then
+						tween:Cancel()
+					end
+				end)
 				tween:Play()
-				if tween.Completed:Wait() ~= Enum.PlaybackState.Completed then
-					return
+				local state = tween.Completed:Wait()
+				stopper:Disconnect()
+				if state == Enum.PlaybackState.Completed then
+					angle = target
 				end
 			end
 		end)
@@ -180,9 +193,18 @@ function RideService.Start(
 		local model = ride.model
 		local displayName = config.DisplayName
 		-- A shop serves its guests; a ride seats them.
+		local requiredStars = config.RequiredStars or 1
 		local boardNoun = if config.IsShop == true then "서빙" else "탑승"
 		local staffAction = if config.IsShop == true then "서빙해요" else "태워요"
 		local started = false
+
+		local function starsOk(): boolean
+			return ((park.ParkFolder:GetAttribute("Rating") :: number?) or 1) >= requiredStars
+		end
+		-- The console works once the park is ready for the ride and the park rating is high enough.
+		local function isReady(): boolean
+			return ride.isAvailable() and starsOk()
+		end
 
 		local function start()
 			if started then
@@ -230,7 +252,9 @@ function RideService.Start(
 			if not unlocked then
 				fareLine.Text = string.format("손님당 +%d %s", config.BaseFare, currency)
 				detailLine.Text = string.format("해금 %d %s", config.UnlockCost, currency)
-				queueLine.Text = "잠겨 있어요"
+				queueLine.Text = if starsOk()
+					then "잠겨 있어요"
+					else string.format("별점 %d단계에 해금", requiredStars)
 			elseif not repaired then
 				fareLine.Text = string.format("손님당 +%d %s", config.BaseFare, currency)
 				detailLine.Text = string.format("수리 %d %s", config.RepairCost, currency)
@@ -263,7 +287,7 @@ function RideService.Start(
 		end
 
 		local function refreshPrompts()
-			local available = ride.isAvailable()
+			local available = isReady()
 			if ride.unlockPrompt then
 				ride.unlockPrompt.ObjectText = string.format(
 					"%s · %d %s · 손님당 +%d",
@@ -312,6 +336,7 @@ function RideService.Start(
 		for _, signal in ride.signals do
 			signal:Connect(refreshPrompts)
 		end
+		park.ParkFolder:GetAttributeChangedSignal("Rating"):Connect(refreshPrompts)
 		for _, attribute in { "QueueLength", "IncomeLevel", "StaffLevel" } do
 			model:GetAttributeChangedSignal(attribute):Connect(function()
 				publishRates()
@@ -336,7 +361,7 @@ function RideService.Start(
 			ride.unlockPrompt.Triggered:Connect(function(player: Player)
 				if
 					unlocked
-					or not ride.isAvailable()
+					or not isReady()
 					or not canUsePrompt(player, ride.console, ride.unlockPrompt :: ProximityPrompt)
 				then
 					return
@@ -361,7 +386,7 @@ function RideService.Start(
 			if
 				not unlocked
 				or repaired
-				or not ride.isAvailable()
+				or not isReady()
 				or not canUsePrompt(player, ride.console, ride.repairPrompt)
 			then
 				return
@@ -471,7 +496,7 @@ function RideService.Start(
 		applyRepairedAppearance = applyTeacupsRepaired,
 	})
 
-	-- The bumper cars unlock only after the teacups run; BumperCarService moves the cars while
+	-- The bumper cars need a park rating of 2 stars; BumperCarService moves the cars while
 	-- IsOperating is true, so starting this ride only flips that attribute.
 	setupRide({
 		key = "Bumper",
@@ -483,12 +508,8 @@ function RideService.Start(
 		staffPrompt = park.BumperStaffPrompt,
 		isAvailable = function()
 			return park.ParkFolder:GetAttribute("ParkOpen") == true
-				and park.TeacupsRide:GetAttribute("IsRepaired") == true
 		end,
-		signals = {
-			park.ParkFolder:GetAttributeChangedSignal("ParkOpen"),
-			park.TeacupsRide:GetAttributeChangedSignal("IsRepaired"),
-		},
+		signals = { park.ParkFolder:GetAttributeChangedSignal("ParkOpen") },
 		start = function()
 			park.BumperRide:SetAttribute("IsOperating", true)
 		end,
@@ -514,7 +535,7 @@ function RideService.Start(
 		applyRepairedAppearance = applySnackRepaired,
 	})
 
-	-- The Ferris wheel unlocks once the bumper cars run; FerrisService turns it while IsOperating is true.
+	-- The Ferris wheel needs a park rating of 3 stars; FerrisService turns it while IsOperating is true.
 	setupRide({
 		key = "Ferris",
 		model = park.FerrisRide,
@@ -525,12 +546,8 @@ function RideService.Start(
 		staffPrompt = park.FerrisStaffPrompt,
 		isAvailable = function()
 			return park.ParkFolder:GetAttribute("ParkOpen") == true
-				and park.BumperRide:GetAttribute("IsRepaired") == true
 		end,
-		signals = {
-			park.ParkFolder:GetAttributeChangedSignal("ParkOpen"),
-			park.BumperRide:GetAttributeChangedSignal("IsRepaired"),
-		},
+		signals = { park.ParkFolder:GetAttributeChangedSignal("ParkOpen") },
 		start = function()
 			park.FerrisRide:SetAttribute("IsOperating", true)
 		end,
