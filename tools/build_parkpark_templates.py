@@ -561,9 +561,9 @@ def build_haunted_house() -> None:
         print("skipped HauntedHouse: import ParkParkHauntedHouse.obj and record its mesh ID first")
         return
 
-    # Yaw applied to the imported mesh only; imported meshes have shown up turned 180 degrees from the OBJ's
-    # -Z front, so check the door faces the queue (world -Z) in Play and adjust this if needed.
-    body_yaw = 0
+    # Yaw applied to the imported mesh only. The imported house showed its blank back to the queue (world -Z),
+    # like the snack stand, so it is turned 180 degrees; colliders and markers use OBJ coordinates and stay put.
+    body_yaw = 180
     windows = [
         marker(f"WindowLight{index + 1}", (x, y, -5.1), (1.5, 1.5, 0.3), HAUNTED_SCALE)
         for index, (x, y) in enumerate(((-3.9, 2.9), (3.9, 2.9), (-3.9, 5.0), (3.9, 5.0)))
@@ -575,7 +575,8 @@ def build_haunted_house() -> None:
             [
                 mesh_part("HouseBody", "ParkParkHauntedHouse", (0, 0, 0), body_yaw, False, CREAM, HAUNTED_SCALE),
                 box_collider("BodyCollider", (0, 3.6, 0), (12.0, 7.0, 9.0), 0, HAUNTED_SCALE),
-                cylinder_collider("TowerCollider", (5.4, 6.0, -1.5), 12.0, 3.6, HAUNTED_SCALE),
+                # Turned with the mesh: the tower is at (+5.4, -1.5) in the OBJ, so at (-5.4, +1.5) once the house is yawed 180.
+                cylinder_collider("TowerCollider", (-5.4, 6.0, 1.5), 12.0, 3.6, HAUNTED_SCALE),
                 *windows,
                 # West of the house, away from the line that forms south of it.
                 console("HauntedConsole", -9 * HAUNTED_SCALE - 8, -4 * HAUNTED_SCALE),

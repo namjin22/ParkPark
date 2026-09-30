@@ -1,0 +1,83 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" version="4">
+<Item class="Model" referent="RBX153"><Properties>
+<string name="Name">CoasterRide</string>
+<OptionalCoordinateFrame name="WorldPivotData"><CFrame><X>0.0</X><Y>0.0</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CFrame></OptionalCoordinateFrame>
+</Properties>
+<Item class="MeshPart" referent="RBX149"><Properties>
+<string name="Name">CoasterTrack</string>
+<Content name="MeshId"><url>rbxassetid://137439725574920</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>38.4535</X><Y>15.7088</Y><Z>20.4943</Z></Vector3>
+<Vector3 name="size"><X>115.3605</X><Y>47.1264</Y><Z>61.4829</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>-2.6133</X><Y>23.5632</Y><Z>-0.4587</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item><Item class="Part" referent="RBX150"><Properties>
+<string name="Name">Station</string>
+<Vector3 name="size"><X>60.0</X><Y>2.1</Y><Z>13.2</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>1.05</Y><Z>-24.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Model" referent="RBX151"><Properties>
+<string name="Name">CoasterCars</string>
+<OptionalCoordinateFrame name="WorldPivotData"><CFrame><X>0.0</X><Y>0.0</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CFrame></OptionalCoordinateFrame>
+</Properties>
+<Item class="MeshPart" referent="RBX147"><Properties>
+<string name="Name">CoasterCar1</string>
+<Content name="MeshId"><url>rbxassetid://119683478283420</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>2.2</X><Y>1.59</Y><Z>3.9598</Z></Vector3>
+<Vector3 name="size"><X>6.6</X><Y>4.77</Y><Z>11.8794</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>4.755</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item><Item class="MeshPart" referent="RBX148"><Properties>
+<string name="Name">CoasterCar2</string>
+<Content name="MeshId"><url>rbxassetid://119683478283420</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>2.2</X><Y>1.59</Y><Z>3.9598</Z></Vector3>
+<Vector3 name="size"><X>6.6</X><Y>4.77</Y><Z>11.8794</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>4.755</Y><Z>13.8</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item>
+</Item><Item class="MeshPart" referent="RBX152"><Properties>
+<string name="Name">CoasterConsole</string>
+<Content name="MeshId"><url>rbxassetid://137595459068722</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>1.88</X><Y>2.94</Y><Z>1.88</Z></Vector3>
+<Vector3 name="size"><X>5.64</X><Y>8.82</Y><Z>5.64</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>-45.0</X><Y>4.65</Y><Z>-30.0</Z><R00>-1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>-1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">true</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item>
+</Item>
+</roblox>
