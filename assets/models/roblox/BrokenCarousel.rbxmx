@@ -61,7 +61,7 @@
 </Properties>
 <Item class="MeshPart" referent="RBX10"><Properties>
 <string name="Name">CenterPost</string>
-<Content name="MeshId"><url>rbxassetid://100711276425051</url></Content>
+<Content name="MeshId"><url>rbxassetid://104245922466891</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
 <Vector3 name="InitialSize"><X>17.508</X><Y>11.7</Y><Z>17.508</Z></Vector3>
 <Vector3 name="size"><X>56.0256</X><Y>37.44</Y><Z>56.0256</Z></Vector3>

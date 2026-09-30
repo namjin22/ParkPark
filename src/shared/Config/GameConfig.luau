@@ -33,7 +33,7 @@ return {
 	CarouselScale = 3.2,
 	TeacupsScale = 4.2,
 	BumperScale = 3.7,
-	BumperCarScale = 2.4,
+	BumperCarScale = 3.2,
 	ConsoleScale = 3,
 
 	Rides = {

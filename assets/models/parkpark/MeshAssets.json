@@ -23,13 +23,16 @@
     "ParkParkEntranceSign": "rbxassetid://103081984848080",
     "ParkParkCarouselPlatform": "rbxassetid://72831097305391",
     "ParkParkRepairConsole": "rbxassetid://137595459068722",
-    "ParkParkCarouselRotor": "rbxassetid://100711276425051",
+    "ParkParkCarouselRotor": "rbxassetid://104245922466891",
     "ParkParkCanopyNeglected": "rbxassetid://134904738284039",
     "ParkParkCanopyRestored": "rbxassetid://132675346119260",
     "ParkParkEntranceDebris": "rbxassetid://103460329557231",
     "ParkParkTeacupsPlatform": "rbxassetid://139821469684572",
     "ParkParkTeacupsRotor": "rbxassetid://77925486433523",
-    "ParkParkBumperPlatform": "rbxassetid://74084341659664",
-    "ParkParkBumperCar": "rbxassetid://110184473126899"
+    "ParkParkBumperPlatform": "rbxassetid://72175810248631",
+    "ParkParkBumperCar": "rbxassetid://110184473126899",
+    "ParkParkTeacupsHub": "rbxassetid://74461536824444",
+    "ParkParkTeacup": "rbxassetid://121524735680970",
+    "ParkParkLitter": "rbxassetid://126452709798845"
   }
 }
