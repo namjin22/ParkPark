@@ -35,6 +35,8 @@ type GuestReferences = {
 	HauntedBody: BasePart,
 	CoasterRide: Model,
 	CoasterCars: Model,
+	FlumeRide: Model,
+	FlumeCars: Model,
 }
 
 type Guest = {
@@ -249,18 +251,23 @@ local function pirateSeatOffset(seat: number): CFrame
 	return if benchZ > 0 then CFrame.new(position) * CFrame.Angles(0, math.pi, 0) else CFrame.new(position)
 end
 
--- Coaster cars carry two rows of two; every seat faces the direction of travel (the car's -Z). The offset is
--- relative to the car part's centre.
-local function coasterSeatOffset(seat: number): CFrame
-	local scale = GameConfig.CoasterScale
-	local index = (seat - 1) % 4
-	local row = if index < 2 then -1 else 1
-	local column = if index % 2 == 0 then -1 else 1
-	return CFrame.new(
-		column * GameConfig.CoasterColumnX * scale,
-		(GameConfig.CoasterSeatTop - GameConfig.CoasterCarCenterY) * scale + GameConfig.CoasterRiderHip,
-		row * GameConfig.CoasterRowZ * scale
-	)
+-- Track-ride cars (coaster, flume) carry two rows of two; every seat faces the direction of travel (the car's
+-- -Z). The offset is relative to the car part's centre, from the ride's `<Prefix>...` numbers in GameConfig.
+local TRACK_RIDES: { [string]: boolean } = { Coaster = true, Flume = true }
+
+local function trackSeatOffset(prefix: string): (number) -> CFrame
+	local settings = GameConfig :: any
+	return function(seat: number): CFrame
+		local scale = settings[prefix .. "Scale"]
+		local index = (seat - 1) % 4
+		local row = if index < 2 then -1 else 1
+		local column = if index % 2 == 0 then -1 else 1
+		return CFrame.new(
+			column * settings[prefix .. "ColumnX"] * scale,
+			(settings[prefix .. "SeatTop"] - settings[prefix .. "CarCenterY"]) * scale + settings[prefix .. "RiderHip"],
+			row * settings[prefix .. "RowZ"] * scale
+		)
+	end
 end
 
 -- Bumper cars face local -Z, so a rider with an identity rotation looks along the car's travel.
@@ -353,13 +360,17 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		newRide("Coaster", park.CoasterRide, function(seat: number)
 			local car = park.CoasterCars:FindFirstChild(string.format("CoasterCar%d", (seat - 1) // 4 + 1))
 			return if car and car:IsA("BasePart") then car else nil
-		end, coasterSeatOffset, GameConfig.CoasterSeatCount, false),
+		end, trackSeatOffset("Coaster"), GameConfig.CoasterSeatCount, false),
+		newRide("Flume", park.FlumeRide, function(seat: number)
+			local car = park.FlumeCars:FindFirstChild(string.format("FlumeCar%d", (seat - 1) // 4 + 1))
+			return if car and car:IsA("BasePart") then car else nil
+		end, trackSeatOffset("Flume"), GameConfig.FlumeSeatCount, false),
 	}
 	for _, rideInfo in rides do
 		if rideInfo.key == "Haunted" then
 			rideInfo.hidden = true
 		end
-		if rideInfo.key == "Coaster" then
+		if TRACK_RIDES[rideInfo.key] then
 			-- Guests board only while the train is docked.
 			rideInfo.canBoard = function(): boolean
 				return rideInfo.model:GetAttribute("Docked") == true
@@ -528,7 +539,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		local elapsed = 0
 		local rideSeconds = GameConfig.Rides[rideInfo.key].RideSeconds or GameConfig.GuestRideSeconds
 		-- The coaster's trip lasts until the train next docks (`Laps` goes up); RideSeconds is only a safety limit.
-		local startLaps = if rideInfo.key == "Coaster"
+		local startLaps = if TRACK_RIDES[rideInfo.key]
 			then (rideInfo.model:GetAttribute("Laps") :: number?) or 0
 			else nil
 		while guest.alive and elapsed < rideSeconds do

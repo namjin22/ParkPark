@@ -67,6 +67,10 @@ PIRATE_PLATFORM = config_number("PiratePlatformRadius")
 HAUNTED_SCALE = config_number("HauntedScale")
 COASTER_SCALE = config_number("CoasterScale")
 COASTER_CARS = int(config_number("CoasterCarCount"))
+FLUME_SCALE = config_number("FlumeScale")
+FLUME_CARS = int(config_number("FlumeCarCount"))
+FLUME_SCALE = config_number("FlumeScale")
+FLUME_CARS = int(config_number("FlumeCarCount"))
 TREE_SCALE = config_number("TreeScale")
 BUSH_SCALE = config_number("BushScale")
 LAMP_SCALE = config_number("LampScale")
@@ -298,6 +302,8 @@ def main() -> None:
     build_pirate_ship()
     build_haunted_house()
     build_coaster()
+    build_flume()
+    build_flume()
     build_decor()
 
 
@@ -541,6 +547,35 @@ def build_pirate_ship() -> None:
                 *colliders,
                 # South of the platform (local +Z), away from the queue that forms along the path to the west.
                 console("PirateConsole", 0, PIRATE_PLATFORM * PIRATE_SCALE + 8),
+            ],
+        ),
+    )
+
+
+def build_flume() -> None:
+    needed = ("ParkParkFlumeTrack", "ParkParkFlumeBoat")
+    missing = missing_meshes(needed)
+    if missing:
+        print(f"skipped FlumeRide: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    # TrackService places the boats along the generated path when the game starts; the template only needs them
+    # to exist with the right names and size.
+    boats = [
+        mesh_part(f"FlumeCar{index + 1}", "ParkParkFlumeBoat", (0, 1.0, index * 5.0), 0, False, CORAL, FLUME_SCALE)
+        for index in range(FLUME_CARS)
+    ]
+    write(
+        "FlumeRide",
+        model(
+            "FlumeRide",
+            [
+                mesh_part("FlumeTrack", "ParkParkFlumeTrack", (0, 0, 0), 0, False, MINT, FLUME_SCALE),
+                # The station dock is solid, so guests and players cannot walk through it.
+                box_collider("Station", (0, 0.35, -8.0), (20.0, 0.7, 4.4), 0, FLUME_SCALE),
+                model("FlumeCars", boats),
+                # The ride is turned half a turn in the world, so this lands beside the station near its line.
+                console("FlumeConsole", 18, -33, 0),
             ],
         ),
     )

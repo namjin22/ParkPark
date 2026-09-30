@@ -3,31 +3,47 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local Config = ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config")
-local GameConfig = require(Config:WaitForChild("GameConfig"))
-local CoasterPath = require(Config:WaitForChild("CoasterPath"))
+local GameConfig =
+	require(ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("GameConfig"))
 
--- Runs the roller coaster train round its track while the ride operates. The train is `CoasterCarCount` cars
--- following one centre line (the generated CoasterPath, in unscaled OBJ units). It docks at the station for
--- CoasterDockSeconds, lets guests board only then (`Docked` on the ride), climbs the lift at a steady crawl, and
--- otherwise rolls like a real coaster: its speed comes from its height below the top of the lift. Each time the
--- train docks it bumps `Laps`, which is how riders know their trip is over.
-local CoasterService = {}
+-- Runs a train of cars round a closed track while a ride operates: the roller coaster, and any other ride that
+-- follows a generated centre line (the log flume). The cars follow the path (points in unscaled OBJ units),
+-- dock at the station for `DockSeconds` (guests board only then: `Docked` on the ride), climb the lift at a steady
+-- crawl, and otherwise roll like a real coaster, with speed from their height below the top of the lift.
+-- Each time the train docks it bumps `Laps`, which is how riders know their trip is over.
+local TrackService = {}
 
-type CoasterReferences = {
-	CoasterRide: Model,
-	CoasterCars: Model,
+export type TrackPath = {
+	StationIndex: number,
+	LiftStartIndex: number,
+	LiftEndIndex: number,
+	Points: { Vector3 },
+}
+
+-- The car model's parts are named `<CarPrefix>1 .. <CarPrefix>N`; numbers are read from GameConfig as
+-- `<ConfigPrefix>Scale`, `<ConfigPrefix>CarCount`, and so on.
+export type TrackDefinition = {
+	Ride: Model,
+	Cars: Model,
+	Path: TrackPath,
+	CarPrefix: string,
+	ConfigPrefix: string,
 }
 
 local MAX_STEP = 0.1
 local ACCELERATION = 30
 
-function CoasterService.Start(park: CoasterReferences)
-	local ride = park.CoasterRide
-	local scale = GameConfig.CoasterScale
+local function setting(prefix: string, name: string): number
+	return (GameConfig :: any)[prefix .. name]
+end
+
+function TrackService.Start(definition: TrackDefinition)
+	local ride = definition.Ride
+	local prefix = definition.ConfigPrefix
+	local scale = setting(prefix, "Scale")
 	local origin = ride:GetPivot()
 	local points: { Vector3 } = {}
-	for _, point in CoasterPath.Points do
+	for _, point in definition.Path.Points do
 		table.insert(points, point * scale)
 	end
 	local count = #points
@@ -59,32 +75,38 @@ function CoasterService.Start(park: CoasterReferences)
 		return from:Lerp(to, fraction), (to - from).Unit, low
 	end
 
-	local stationDistance = lengthAt[CoasterPath.StationIndex]
-	local liftStart = lengthAt[CoasterPath.LiftStartIndex]
-	local liftEnd = lengthAt[CoasterPath.LiftEndIndex]
-	local topHeight = GameConfig.CoasterTopHeight * scale
+	local stationDistance = lengthAt[definition.Path.StationIndex]
+	local liftStart = lengthAt[definition.Path.LiftStartIndex]
+	local liftEnd = lengthAt[definition.Path.LiftEndIndex]
+	local topHeight = setting(prefix, "TopHeight") * scale
+	local liftSpeed = setting(prefix, "LiftSpeed")
+	local stationSpeed = setting(prefix, "StationSpeed")
+	local minSpeed = setting(prefix, "MinSpeed")
+	local gravity = setting(prefix, "Gravity")
+	local dockSeconds = setting(prefix, "DockSeconds")
 
 	local cars: { BasePart } = {}
-	for index = 1, GameConfig.CoasterCarCount do
-		local car = park.CoasterCars:FindFirstChild(string.format("CoasterCar%d", index))
+	for index = 1, setting(prefix, "CarCount") do
+		local car = definition.Cars:FindFirstChild(string.format("%s%d", definition.CarPrefix, index))
 		if car and car:IsA("BasePart") then
 			table.insert(cars, car)
 		else
-			warn(string.format("[ParkPark] CoasterCars is missing CoasterCar%d", index))
+			warn(string.format("[ParkPark] %s is missing %s%d", definition.Cars.Name, definition.CarPrefix, index))
 		end
 	end
 	if #cars == 0 then
 		return
 	end
 
-	local spacing = GameConfig.CoasterCarSpacing * scale
+	local spacing = setting(prefix, "CarSpacing") * scale
+	local centerY = setting(prefix, "CarCenterY") * scale
 	local function place(leadDistance: number)
 		for index, car in cars do
 			local position, tangent = pointAt(leadDistance - (index - 1) * spacing)
 			local world = origin:PointToWorldSpace(position)
 			local look = origin:VectorToWorldSpace(tangent)
 			local frame = CFrame.lookAt(world, world + look)
-			car.CFrame = frame * CFrame.new(0, GameConfig.CoasterCarCenterY * scale, 0)
+			car.CFrame = frame * CFrame.new(0, centerY, 0)
 		end
 	end
 
@@ -92,7 +114,7 @@ function CoasterService.Start(park: CoasterReferences)
 	local distance = stationDistance
 	local speed = 0
 	local docked = true
-	local dockedUntil = os.clock() + GameConfig.CoasterDockSeconds
+	local dockedUntil = os.clock() + dockSeconds
 	local laps = 0
 	place(distance)
 	ride:SetAttribute("Docked", true)
@@ -103,12 +125,11 @@ function CoasterService.Start(park: CoasterReferences)
 		local height = points[index].Y
 		-- Ahead of the station the train brakes to a crawl so it stops exactly at the dock.
 		local toStation = (stationDistance - distance) % total
-		local approach = GameConfig.CoasterStationSpeed + toStation * 0.7
+		local approach = stationSpeed + toStation * 0.7
 		if distance >= liftStart and distance <= liftEnd then
-			return GameConfig.CoasterLiftSpeed
+			return liftSpeed
 		end
-		local rolling =
-			math.sqrt(GameConfig.CoasterMinSpeed ^ 2 + 2 * GameConfig.CoasterGravity * math.max(0, topHeight - height))
+		local rolling = math.sqrt(minSpeed ^ 2 + 2 * gravity * math.max(0, topHeight - height))
 		return math.min(rolling, approach)
 	end
 
@@ -138,7 +159,7 @@ function CoasterService.Start(park: CoasterReferences)
 			distance = stationDistance
 			speed = 0
 			docked = true
-			dockedUntil = os.clock() + GameConfig.CoasterDockSeconds
+			dockedUntil = os.clock() + dockSeconds
 			laps += 1
 			ride:SetAttribute("Laps", laps)
 			ride:SetAttribute("Docked", true)
@@ -147,4 +168,4 @@ function CoasterService.Start(park: CoasterReferences)
 	end)
 end
 
-return CoasterService
+return TrackService

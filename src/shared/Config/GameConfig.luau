@@ -16,6 +16,8 @@ export type RideEconomy = {
 	StaffCosts: { number },
 	-- A shop serves guests at a counter instead of seating them on a moving ride.
 	IsShop: boolean?,
+	-- The zone this attraction belongs to ("Water"): it can be unlocked only once that zone has been opened.
+	Zone: string?,
 	-- How long a guest stays aboard; rides without it use GuestRideSeconds.
 	RideSeconds: number?,
 	-- The attraction that must be repaired before this one can be unlocked (the chain runs in this order).
@@ -50,6 +52,7 @@ return {
 	PirateScale = 3,
 	HauntedScale = 3.2,
 	CoasterScale = 3,
+	FlumeScale = 2.6,
 	TreeScale = 1.9,
 	BushScale = 1.7,
 	LampScale = 2,
@@ -171,9 +174,27 @@ return {
 			StaffCosts = { 900, 1500, 2400 },
 			RideSeconds = 90,
 		},
+		Flume = {
+			DisplayName = "통나무 급류",
+			ModelName = "FlumeRide",
+			ConsoleName = "FlumeConsole",
+			UnlockCost = 1300,
+			RepairCost = 600,
+			BaseFare = 95,
+			Requires = "Coaster",
+			Zone = "Water",
+			IncomePerLevel = 30,
+			IncomeCosts = { 800, 1500, 2500, 4000 },
+			StaffCosts = { 1100, 1800, 2900 },
+			RideSeconds = 90,
+		},
 	} :: { [string]: RideEconomy },
 	-- The order attractions unlock in (each needs the one before it repaired).
-	RideChain = { "Carousel", "Teacups", "Snack", "Bumper", "Ferris", "Swing", "Pirate", "Haunted", "Coaster" },
+	RideChain = { "Carousel", "Teacups", "Snack", "Bumper", "Ferris", "Swing", "Pirate", "Haunted", "Coaster", "Flume" },
+	-- Zones beyond the first: what opening each costs (paid at its gate once the park's last attraction of the
+	-- previous zone is repaired) and how it is named.
+	ZoneCosts = { Water = 2500 } :: { [string]: number },
+	ZoneNames = { Water = "물 구역" } :: { [string]: string },
 	-- Seconds between automatic boardings for staff level 1, 2, 3 (0 staff means players accept guests).
 	StaffIntervals = { 10, 6, 3 },
 
@@ -285,6 +306,24 @@ return {
 	CoasterRowZ = 0.65,
 	CoasterColumnX = 0.5,
 	CoasterRiderHip = 1.25,
+
+	-- Log flume (unscaled OBJ units from ParkParkFlumeTrack/Boat.obj; the channel's centre line is the generated
+	-- FlumePath). It runs through TrackService like the roller coaster: boats dock at the station, climb the lift,
+	-- and plunge. FlumeCarCenterY is the boat mesh's bounding-box centre above the water, FlumeSeatTop the bench top.
+	FlumeSeatCount = 8,
+	FlumeCarCount = 2,
+	FlumeCarSpacing = 5,
+	FlumeDockSeconds = 9,
+	FlumeLiftSpeed = 8,
+	FlumeStationSpeed = 8,
+	FlumeMinSpeed = 8,
+	FlumeGravity = 9,
+	FlumeTopHeight = 11,
+	FlumeCarCenterY = 0.4,
+	FlumeSeatTop = 0.65,
+	FlumeRowZ = 0.7,
+	FlumeColumnX = 0.5,
+	FlumeRiderHip = 1.25,
 
 	-- Janitors: hired at the cleaning cart by the entrance path, they walk to litter and clear it for free.
 	-- Costs are for the 1st, 2nd, ... janitor.

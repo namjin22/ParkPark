@@ -38,6 +38,8 @@ type RideReferences = {
 	HauntedConsole: BasePart,
 	CoasterRide: Model,
 	CoasterConsole: BasePart,
+	FlumeRide: Model,
+	FlumeConsole: BasePart,
 }
 
 type SpendCoins = (Player, number) -> boolean
@@ -192,6 +194,7 @@ function RideService.Start(
 	applyPirateRepaired: ApplyRepairedAppearance,
 	applyHauntedRepaired: ApplyRepairedAppearance,
 	applyCoasterRepaired: ApplyRepairedAppearance,
+	applyFlumeRepaired: ApplyRepairedAppearance,
 	notify: Notify
 )
 	local currency = GameConfig.CurrencyDisplayName
@@ -205,6 +208,7 @@ function RideService.Start(
 		Pirate = park.PirateRide,
 		Haunted = park.HauntedHouse,
 		Coaster = park.CoasterRide,
+		Flume = park.FlumeRide,
 	}
 	local actions: { [string]: { [string]: (Player) -> () } } = {}
 
@@ -287,6 +291,9 @@ function RideService.Start(
 		local function blockedReason(): string
 			if not prerequisiteDone() then
 				return string.format("먼저 %s 수리", GameConfig.Rides[requiresKey :: string].DisplayName)
+			end
+			if config.Zone and park.ParkFolder:GetAttribute("Zone_" .. config.Zone) ~= true then
+				return string.format("먼저 %s을 여세요", GameConfig.ZoneNames[config.Zone])
 			end
 			if not ride.isAvailable() then
 				return if ride.key == "Carousel"
@@ -643,6 +650,21 @@ function RideService.Start(
 			park.CoasterRide:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
 		end,
 		applyRepairedAppearance = applyCoasterRepaired,
+	})
+
+	-- The flume lies in the water zone: it needs the park open and that zone's gate opened (ZoneService).
+	setupRide({
+		key = "Flume",
+		model = park.FlumeRide,
+		console = park.FlumeConsole,
+		isAvailable = function()
+			return parkOpen() and park.ParkFolder:GetAttribute("Zone_Water") == true
+		end,
+		signals = { parkOpenSignal, park.ParkFolder:GetAttributeChangedSignal("Zone_Water") },
+		start = function()
+			park.FlumeRide:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
+		end,
+		applyRepairedAppearance = applyFlumeRepaired,
 	})
 end
 

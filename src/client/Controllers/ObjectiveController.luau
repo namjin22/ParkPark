@@ -157,6 +157,18 @@ function ObjectiveController.Start()
 		local key, model, target = nextRide()
 		if key and model then
 			local config = GameConfig.Rides[key]
+			-- A ride in a zone that is still closed: the next job is opening the zone at its gate.
+			if config.Zone and park:GetAttribute("Zone_" .. config.Zone) ~= true then
+				local zoneName = GameConfig.ZoneNames[config.Zone]
+				return {
+					title = string.format("5. %s 열기", zoneName),
+					detail = need(
+						GameConfig.ZoneCosts[config.Zone],
+						string.format("게이트에서 E · %d %s", GameConfig.ZoneCosts[config.Zone], currency)
+					),
+					target = park:FindFirstChild("ZoneGate"),
+				}
+			end
 			local unlocked = model:GetAttribute("IsUnlocked") == true
 			local cost = if unlocked then config.RepairCost else config.UnlockCost
 			return {
@@ -196,6 +208,9 @@ function ObjectiveController.Start()
 		end)
 	end
 	park:GetAttributeChangedSignal("GuestsBoarded"):Connect(refresh)
+	for zone in GameConfig.ZoneCosts do
+		park:GetAttributeChangedSignal("Zone_" .. zone):Connect(refresh)
+	end
 	coins:GetPropertyChangedSignal("Value"):Connect(refresh)
 	refresh()
 end

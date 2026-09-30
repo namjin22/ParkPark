@@ -4,7 +4,12 @@ local persistenceService = require(script.Parent.Services.PersistenceService)
 local parkBuilder = require(script.Parent.Services.ParkBuilder)
 local bumperCarService = require(script.Parent.Services.BumperCarService)
 local decorService = require(script.Parent.Services.DecorService)
-local coasterService = require(script.Parent.Services.CoasterService)
+local trackService = require(script.Parent.Services.TrackService)
+local configFolder = game:GetService("ReplicatedStorage"):WaitForChild("ParkRebornShared"):WaitForChild("Config")
+local gameConfig = require(configFolder:WaitForChild("GameConfig"))
+local coasterPath = require(configFolder:WaitForChild("CoasterPath"))
+local flumePath = require(configFolder:WaitForChild("FlumePath"))
+local zoneService = require(script.Parent.Services.ZoneService)
 local hauntedService = require(script.Parent.Services.HauntedService)
 local pirateService = require(script.Parent.Services.PirateService)
 local swingService = require(script.Parent.Services.SwingService)
@@ -42,6 +47,7 @@ rideService.Start(
 	parkBuilder.ApplyPirateRepairedAppearance,
 	parkBuilder.ApplyHauntedRepairedAppearance,
 	parkBuilder.ApplyCoasterRepairedAppearance,
+	parkBuilder.ApplyFlumeRepairedAppearance,
 	noticeService.Send
 )
 bumperCarService.Start(park)
@@ -50,7 +56,21 @@ ferrisService.Start(park)
 swingService.Start(park)
 pirateService.Start(park)
 hauntedService.Start(park)
-coasterService.Start(park)
+trackService.Start({
+	Ride = park.CoasterRide,
+	Cars = park.CoasterCars,
+	Path = coasterPath,
+	CarPrefix = "CoasterCar",
+	ConfigPrefix = "Coaster",
+})
+trackService.Start({
+	Ride = park.FlumeRide,
+	Cars = park.FlumeCars,
+	Path = flumePath,
+	CarPrefix = "FlumeCar",
+	ConfigPrefix = "Flume",
+})
+zoneService.Start(park, economyService.SpendCoins, economyService.GetCoins, noticeService.Send)
 decorService.Start(park, parkBuilder.FindDecorTemplate)
 powerService.Start(park, economyService.AwardCoins, noticeService.Send, noticeService.Popup)
 guestService.Start(park, economyService.AwardCoins, noticeService.Send, noticeService.Popup)
@@ -77,6 +97,7 @@ local rideModels: { [string]: Model } = {
 	Pirate = park.PirateRide,
 	Haunted = park.HauntedHouse,
 	Coaster = park.CoasterRide,
+	Flume = park.FlumeRide,
 }
 local watched: { Instance } = { park.ParkFolder }
 for _, model in rideModels do
@@ -92,12 +113,16 @@ persistenceService.Start(function()
 			StaffLevel = (model:GetAttribute("StaffLevel") :: number?) or 0,
 		}
 	end
+	local parkState: { [string]: any } = {
+		EntranceCleared = park.ParkFolder:GetAttribute("EntranceCleared") == true,
+		ParkOpen = park.ParkFolder:GetAttribute("ParkOpen") == true,
+		GuestsBoarded = (park.ParkFolder:GetAttribute("GuestsBoarded") :: number?) or 0,
+	}
+	for zone in gameConfig.ZoneCosts do
+		parkState["Zone_" .. zone] = park.ParkFolder:GetAttribute("Zone_" .. zone) == true
+	end
 	return {
-		Park = {
-			EntranceCleared = park.ParkFolder:GetAttribute("EntranceCleared") == true,
-			ParkOpen = park.ParkFolder:GetAttribute("ParkOpen") == true,
-			GuestsBoarded = (park.ParkFolder:GetAttribute("GuestsBoarded") :: number?) or 0,
-		},
+		Park = parkState :: any,
 		Rides = rides,
 		Janitors = (park.ParkFolder:GetAttribute("Janitors") :: number?) or 0,
 	}

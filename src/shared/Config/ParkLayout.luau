@@ -25,6 +25,13 @@ ParkLayout.SnackZ = 4
 ParkLayout.SnackPathHalfWidth = 8
 ParkLayout.FerrisZ = 16
 -- The power generator beside the path between the spawn and the gate; litter keeps clear of it.
+-- The water zone lies beyond the carousel, past a fence across z = ZoneBoundaryZ. Its road (x = ZoneRoadX)
+-- branches north off the side path; each ride there has a branch path at ZoneBranchZ[key] leading to its line.
+ParkLayout.ZoneBoundaryZ = -168
+ParkLayout.ZoneGroundMinZ = -480
+ParkLayout.ZoneRoadX = 52
+ParkLayout.ZoneRoadHalfWidth = 8
+ParkLayout.ZoneBranchZ = { Flume = -205 } :: { [string]: number }
 ParkLayout.GeneratorPosition = Vector3.new(24, 0, 52)
 -- The cleaning cart where janitors are hired, on the other side of the same path.
 ParkLayout.JanitorCartPosition = Vector3.new(-24, 0, 52)
@@ -103,6 +110,13 @@ ParkLayout.Rides = {
 		QueueHead = Vector3.new(135, 0, 46),
 		QueueDirection = Vector3.new(0, 0, -1),
 	},
+	-- Zone rides face the road, so the model is turned half a turn and its line runs toward +Z.
+	Flume = {
+		Pivot = Vector3.new(-20, 0, -270),
+		PlatformRadius = 45,
+		QueueHead = Vector3.new(-20, 0, -239),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
 	Ferris = {
 		Pivot = FERRIS_PIVOT,
 		PlatformRadius = 20,
@@ -136,6 +150,12 @@ function ParkLayout.ToCrossing(fromKey: string?, from: Vector3, lane: number): {
 		table.insert(route, Vector3.new(lane, 0, ParkLayout.EntryZ))
 		table.insert(route, Vector3.new(lane, 0, ParkLayout.GateZ + 14))
 		table.insert(route, Vector3.new(lane, 0, ParkLayout.GateZ - 14))
+	elseif ParkLayout.ZoneBranchZ[fromKey] then
+		-- Back along the branch to the zone road and down it to the side path.
+		local branchZ = ParkLayout.ZoneBranchZ[fromKey]
+		table.insert(route, Vector3.new(from.X, 0, branchZ + lane * 0.3))
+		table.insert(route, Vector3.new(ParkLayout.ZoneRoadX + lane * 0.6, 0, branchZ + lane * 0.3))
+		table.insert(route, Vector3.new(ParkLayout.ZoneRoadX + lane * 0.6, 0, ParkLayout.SidePathZ))
 	elseif SPURS[fromKey] then
 		-- Back along the spur to the main path; the caller continues from there.
 		local spur = SPURS[fromKey]
@@ -173,6 +193,21 @@ function ParkLayout.RouteToRide(
 	slot: Vector3
 ): { Vector3 }
 	local route: { Vector3 } = {}
+	local branchZ = ParkLayout.ZoneBranchZ[rideKey]
+	if branchZ then
+		for _, point in ParkLayout.ToCrossing(fromKey, from, lane) do
+			table.insert(route, point)
+		end
+		if fromKey ~= nil and SPURS[fromKey] then
+			table.insert(route, Vector3.new(lane, 0, ParkLayout.SidePathZ))
+		end
+		table.insert(route, Vector3.new(ParkLayout.ZoneRoadX + lane * 0.6, 0, ParkLayout.SidePathZ))
+		table.insert(route, Vector3.new(ParkLayout.ZoneRoadX + lane * 0.6, 0, branchZ + lane * 0.3))
+		table.insert(route, Vector3.new(slot.X, 0, branchZ + lane * 0.3))
+		table.insert(route, slot)
+		return route
+	end
+
 	local targetSpur = SPURS[rideKey]
 	if targetSpur then
 		if fromKey == nil then

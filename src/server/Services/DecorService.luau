@@ -35,6 +35,7 @@ local RECTS: { Rect } = {
 	{ -133, -117, -3, 42 },
 	{ 127, 143, -3, 54 },
 	{ -24, 24, 18, 36 },
+	{ 44, 60, -170, -21 },
 }
 
 local function inRect(x: number, z: number, rect: Rect, margin: number): boolean

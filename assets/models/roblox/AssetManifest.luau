@@ -13,6 +13,7 @@ return {
 		Pirate = "PirateRide",
 		Haunted = "HauntedHouse",
 		Coaster = "CoasterRide",
+		Flume = "FlumeRide",
 		Litter = "Litter",
 	},
 	EntranceSign = "SignPanel",
