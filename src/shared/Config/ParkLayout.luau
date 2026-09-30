@@ -96,6 +96,13 @@ ParkLayout.Rides = {
 		QueueHead = Vector3.new(-125, 0, 34),
 		QueueDirection = Vector3.new(0, 0, -1),
 	},
+	-- The roller coaster stands north of the side path on a branch at x = 135, with its station facing the line.
+	Coaster = {
+		Pivot = Vector3.new(135, 0, 80),
+		PlatformRadius = 42,
+		QueueHead = Vector3.new(135, 0, 46),
+		QueueDirection = Vector3.new(0, 0, -1),
+	},
 	Ferris = {
 		Pivot = FERRIS_PIVOT,
 		PlatformRadius = 20,

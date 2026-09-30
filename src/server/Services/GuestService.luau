@@ -33,6 +33,8 @@ type GuestReferences = {
 	PirateShip: BasePart,
 	HauntedHouse: Model,
 	HauntedBody: BasePart,
+	CoasterRide: Model,
+	CoasterCars: Model,
 }
 
 type Guest = {
@@ -247,6 +249,20 @@ local function pirateSeatOffset(seat: number): CFrame
 	return if benchZ > 0 then CFrame.new(position) * CFrame.Angles(0, math.pi, 0) else CFrame.new(position)
 end
 
+-- Coaster cars carry two rows of two; every seat faces the direction of travel (the car's -Z). The offset is
+-- relative to the car part's centre.
+local function coasterSeatOffset(seat: number): CFrame
+	local scale = GameConfig.CoasterScale
+	local index = (seat - 1) % 4
+	local row = if index < 2 then -1 else 1
+	local column = if index % 2 == 0 then -1 else 1
+	return CFrame.new(
+		column * GameConfig.CoasterColumnX * scale,
+		(GameConfig.CoasterSeatTop - GameConfig.CoasterCarCenterY) * scale + GameConfig.CoasterRiderHip,
+		row * GameConfig.CoasterRowZ * scale
+	)
+end
+
 -- Bumper cars face local -Z, so a rider with an identity rotation looks along the car's travel.
 local function bumperSeatOffset(_: number): CFrame
 	local scale = GameConfig.BumperCarScale
@@ -334,10 +350,20 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		end, function()
 			return CFrame.identity
 		end, GameConfig.HauntedSeatCount, false),
+		newRide("Coaster", park.CoasterRide, function(seat: number)
+			local car = park.CoasterCars:FindFirstChild(string.format("CoasterCar%d", (seat - 1) // 4 + 1))
+			return if car and car:IsA("BasePart") then car else nil
+		end, coasterSeatOffset, GameConfig.CoasterSeatCount, false),
 	}
 	for _, rideInfo in rides do
 		if rideInfo.key == "Haunted" then
 			rideInfo.hidden = true
+		end
+		if rideInfo.key == "Coaster" then
+			-- Guests board only while the train is docked.
+			rideInfo.canBoard = function(): boolean
+				return rideInfo.model:GetAttribute("Docked") == true
+			end
 		end
 		if rideInfo.key == "Ferris" then
 			-- Only a cabin near the bottom of its turn can be boarded.
@@ -501,8 +527,15 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 
 		local elapsed = 0
 		local rideSeconds = GameConfig.Rides[rideInfo.key].RideSeconds or GameConfig.GuestRideSeconds
+		-- The coaster's trip lasts until the train next docks (`Laps` goes up); RideSeconds is only a safety limit.
+		local startLaps = if rideInfo.key == "Coaster"
+			then (rideInfo.model:GetAttribute("Laps") :: number?) or 0
+			else nil
 		while guest.alive and elapsed < rideSeconds do
 			elapsed += task.wait(0.5)
+			if startLaps and ((rideInfo.model:GetAttribute("Laps") :: number?) or 0) > startLaps then
+				break
+			end
 		end
 
 		if weld.Parent ~= nil then

@@ -49,6 +49,7 @@ return {
 	SwingScale = 3,
 	PirateScale = 3,
 	HauntedScale = 3.2,
+	CoasterScale = 3,
 
 	Rides = {
 		Carousel = {
@@ -151,9 +152,22 @@ return {
 			StaffCosts = { 600, 1000, 1600 },
 			RideSeconds = 20,
 		},
+		Coaster = {
+			DisplayName = "롤러코스터",
+			ModelName = "CoasterRide",
+			ConsoleName = "CoasterConsole",
+			UnlockCost = 900,
+			RepairCost = 400,
+			BaseFare = 75,
+			Requires = "Haunted",
+			IncomePerLevel = 25,
+			IncomeCosts = { 600, 1200, 2000, 3200 },
+			StaffCosts = { 900, 1500, 2400 },
+			RideSeconds = 90,
+		},
 	} :: { [string]: RideEconomy },
 	-- The order attractions unlock in (each needs the one before it repaired).
-	RideChain = { "Carousel", "Teacups", "Snack", "Bumper", "Ferris", "Swing", "Pirate", "Haunted" },
+	RideChain = { "Carousel", "Teacups", "Snack", "Bumper", "Ferris", "Swing", "Pirate", "Haunted", "Coaster" },
 	-- Seconds between automatic boardings for staff level 1, 2, 3 (0 staff means players accept guests).
 	StaffIntervals = { 10, 6, 3 },
 
@@ -246,6 +260,25 @@ return {
 	-- HauntedSeatCount at once). The windows flicker while anyone is in there. Model numbers are unscaled OBJ
 	-- units from ParkParkHauntedHouse.obj.
 	HauntedSeatCount = 8,
+
+	-- Roller coaster (unscaled OBJ units from ParkParkCoasterTrack/Car.obj; the track's centre line is the generated
+	-- CoasterPath). The train docks at the station for CoasterDockSeconds, guests board only then, and a trip ends
+	-- when the train next docks. Speeds are in studs per second: the lift is a crawl, and elsewhere the speed
+	-- comes from the height below CoasterTopHeight (units) with CoasterGravity, never below CoasterMinSpeed.
+	CoasterSeatCount = 8,
+	CoasterCarCount = 2,
+	CoasterCarSpacing = 4.6,
+	CoasterDockSeconds = 9,
+	CoasterLiftSpeed = 7,
+	CoasterStationSpeed = 8,
+	CoasterMinSpeed = 9,
+	CoasterGravity = 12,
+	CoasterTopHeight = 15,
+	CoasterCarCenterY = 0.585,
+	CoasterSeatTop = 0.86,
+	CoasterRowZ = 0.65,
+	CoasterColumnX = 0.5,
+	CoasterRiderHip = 1.25,
 
 	-- Janitors: hired at the cleaning cart by the entrance path, they walk to litter and clear it for free.
 	-- Costs are for the 1st, 2nd, ... janitor.

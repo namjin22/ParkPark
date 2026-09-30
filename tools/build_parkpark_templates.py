@@ -65,6 +65,8 @@ PIRATE_SCALE = config_number("PirateScale")
 PIRATE_HUB = config_number("PirateHubHeight")
 PIRATE_PLATFORM = config_number("PiratePlatformRadius")
 HAUNTED_SCALE = config_number("HauntedScale")
+COASTER_SCALE = config_number("CoasterScale")
+COASTER_CARS = int(config_number("CoasterCarCount"))
 TEACUP_COUNT = int(config_number("TeacupCupCount"))
 TEACUP_RING_RADIUS = config_number("TeacupRingRadius")
 TEACUP_BASE_HEIGHT = config_number("TeacupCupBaseHeight")
@@ -289,6 +291,7 @@ def main() -> None:
     build_swing_ride()
     build_pirate_ship()
     build_haunted_house()
+    build_coaster()
 
 
 def build_teacups() -> None:
@@ -576,6 +579,35 @@ def build_haunted_house() -> None:
                 *windows,
                 # West of the house, away from the line that forms south of it.
                 console("HauntedConsole", -9 * HAUNTED_SCALE - 8, -4 * HAUNTED_SCALE),
+            ],
+        ),
+    )
+
+
+def build_coaster() -> None:
+    needed = ("ParkParkCoasterTrack", "ParkParkCoasterCar")
+    missing = missing_meshes(needed)
+    if missing:
+        print(f"skipped CoasterRide: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    # CoasterService places the cars along the generated path when the game starts, so their template
+    # positions do not matter; they only need to exist with the right names and size.
+    cars = [
+        mesh_part(f"CoasterCar{index + 1}", "ParkParkCoasterCar", (0, 1.0, index * 4.6), 0, False, MINT, COASTER_SCALE)
+        for index in range(COASTER_CARS)
+    ]
+    write(
+        "CoasterRide",
+        model(
+            "CoasterRide",
+            [
+                mesh_part("CoasterTrack", "ParkParkCoasterTrack", (0, 0, 0), 0, False, CORAL, COASTER_SCALE),
+                # The station platform is solid, so guests and players cannot walk through it.
+                box_collider("Station", (0, 0.35, -8.0), (20.0, 0.7, 4.4), 0, COASTER_SCALE),
+                model("CoasterCars", cars),
+                # West of the station, away from the line that forms south of it.
+                console("CoasterConsole", -15 * COASTER_SCALE, -10 * COASTER_SCALE),
             ],
         ),
     )

@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config")
 local GameConfig = require(Config:WaitForChild("GameConfig"))
 local ParkLayout = require(Config:WaitForChild("ParkLayout"))
+local CoasterPath = require(Config:WaitForChild("CoasterPath"))
 
 local PARK_FOLDER_NAME = "ParkParkWorld"
 local ENTRANCE_NAME = "RuinedEntrance"
@@ -17,6 +18,7 @@ local FERRIS_NAME = "FerrisWheelRide"
 local SWING_NAME = "SwingRide"
 local PIRATE_NAME = "PirateRide"
 local HAUNTED_NAME = "HauntedHouse"
+local COASTER_NAME = "CoasterRide"
 local ASSET_FOLDER_SYNC_TIMEOUT = 5
 local ASSET_MANIFEST_SYNC_TIMEOUT = 2
 -- Guests spawn on +Z and walk through the entrance toward the rides on -Z (see ParkLayout).
@@ -31,6 +33,7 @@ local AUTHORED_BUMPER_PIVOT = CFrame.new(ParkLayout.Rides.Bumper.Pivot)
 local GRAYBOX_SNACK_PIVOT = CFrame.new(ParkLayout.Rides.Snack.Pivot)
 local AUTHORED_SNACK_PIVOT = GRAYBOX_SNACK_PIVOT * CFrame.Angles(0, -math.pi / 2, 0)
 -- The wheel is modelled with its axle along local Z; turned a quarter it turns in the YZ plane, facing the path.
+local COASTER_PIVOT = CFrame.new(ParkLayout.Rides.Coaster.Pivot)
 local HAUNTED_PIVOT = CFrame.new(ParkLayout.Rides.Haunted.Pivot)
 local PIRATE_PIVOT = CFrame.new(ParkLayout.Rides.Pirate.Pivot)
 local SWING_PIVOT = CFrame.new(ParkLayout.Rides.Swing.Pivot)
@@ -54,6 +57,7 @@ type AssetManifest = {
 		Swing: string?,
 		Pirate: string?,
 		Haunted: string?,
+		Coaster: string?,
 		Litter: string?,
 	},
 	EntranceSign: string,
@@ -80,6 +84,7 @@ local assetManifest: AssetManifest = {
 		Swing = SWING_NAME,
 		Pirate = PIRATE_NAME,
 		Haunted = HAUNTED_NAME,
+		Coaster = COASTER_NAME,
 		Litter = "Litter",
 	},
 	EntranceSign = "SignPanel",
@@ -128,6 +133,7 @@ local function getAssetFolder(): Folder?
 				and (candidate.Models.Swing == nil or type(candidate.Models.Swing) == "string")
 				and (candidate.Models.Pirate == nil or type(candidate.Models.Pirate) == "string")
 				and (candidate.Models.Haunted == nil or type(candidate.Models.Haunted) == "string")
+				and (candidate.Models.Coaster == nil or type(candidate.Models.Coaster) == "string")
 				and (candidate.Models.Litter == nil or type(candidate.Models.Litter) == "string")
 				and type(candidate.EntranceSign) == "string"
 				and type(candidate.CarouselStates) == "table"
@@ -213,6 +219,9 @@ export type References = {
 	HauntedHouse: Model,
 	HauntedBody: BasePart,
 	HauntedConsole: BasePart,
+	CoasterRide: Model,
+	CoasterCars: Model,
+	CoasterConsole: BasePart,
 	GateRope: Model,
 	GatePrompt: ProximityPrompt,
 }
@@ -327,6 +336,20 @@ local function ensureGrayboxApproach(parkFolder: Folder)
 			"HauntedPath",
 			Vector3.new(ParkLayout.SnackPathHalfWidth * 2, 0.2, endZ - startZ),
 			Vector3.new(haunted.QueueHead.X, 0.1, (startZ + endZ) / 2),
+			pathColor,
+			parkFolder,
+			Enum.Material.Cobblestone
+		)
+	end
+	if parkFolder:FindFirstChild("CoasterPath") == nil then
+		-- A branch north off the side path to the roller coaster's line and station.
+		local coaster = ParkLayout.Rides.Coaster
+		local startZ = ParkLayout.SidePathZ + ParkLayout.SidePathHalfWidth - 1
+		local endZ = coaster.QueueHead.Z + 8
+		createPart(
+			"CoasterPath",
+			Vector3.new(ParkLayout.SnackPathHalfWidth * 2, 0.2, endZ - startZ),
+			Vector3.new(coaster.QueueHead.X, 0.1, (startZ + endZ) / 2),
 			pathColor,
 			parkFolder,
 			Enum.Material.Cobblestone
@@ -617,6 +640,8 @@ local function findAuthoredTemplate(name: string): Model?
 		assetName = assetManifest.Models.Pirate
 	elseif name == HAUNTED_NAME then
 		assetName = assetManifest.Models.Haunted
+	elseif name == COASTER_NAME then
+		assetName = assetManifest.Models.Coaster
 	elseif name == DEBRIS_NAME then
 		assetName = assetManifest.Models.Debris
 	end
@@ -855,6 +880,24 @@ local function applyHauntedAppearance(ride: Model, repaired: boolean)
 	else
 		applyPalette(ride, repaired)
 	end
+end
+
+local function applyCoasterAppearance(ride: Model, repaired: boolean)
+	if ride:GetAttribute("IsGraybox") == true then
+		for _, descendant in ride:GetDescendants() do
+			if descendant:IsA("BasePart") and descendant.Name ~= "ParkPivot" then
+				descendant.Material = Enum.Material.SmoothPlastic
+				if descendant.Name == "TrackSegment" or descendant.Name == "Station" then
+					descendant.Color = if repaired then Color3.fromRGB(235, 122, 108) else Color3.fromRGB(112, 104, 94)
+				elseif string.match(descendant.Name, "^CoasterCar%d+$") then
+					descendant.Color = if repaired then Color3.fromRGB(96, 178, 146) else Color3.fromRGB(126, 113, 98)
+				end
+			end
+		end
+	else
+		applyPalette(ride, repaired)
+	end
+	setRestoredGlow(ride:FindFirstChild("Station", true) or ride:FindFirstChild("CoasterTrack", true), repaired, 60)
 end
 
 local function applyAuthoredEntranceState(entrance: Model, cleared: boolean)
@@ -1467,6 +1510,73 @@ local function buildGrayboxHaunted(parkFolder: Folder): Model
 	return ride
 end
 
+-- Graybox roller coaster: a chain of track segments along the generated centre line, a station slab, and
+-- two boxes for the cars (CoasterService moves them).
+local function buildGrayboxCoaster(parkFolder: Folder): Model
+	local ride = Instance.new("Model")
+	ride.Name = COASTER_NAME
+	ride:SetAttribute("IsGraybox", true)
+	ride.Parent = parkFolder
+
+	local pivot = createPart("ParkPivot", Vector3.new(0.1, 0.1, 0.1), Vector3.zero, Color3.new(1, 1, 1), ride)
+	pivot.Transparency = 1
+	pivot.CanCollide = false
+	pivot.CanTouch = false
+	pivot.CanQuery = false
+	pivot.CastShadow = false
+	ride.PrimaryPart = pivot
+
+	local scale = GameConfig.CoasterScale
+	local grey = Color3.fromRGB(112, 104, 94)
+	local points = CoasterPath.Points
+	for index = 1, #points, 2 do
+		local from = points[index] * scale
+		local to = points[index % #points + 1 + 1 > #points and 1 or index + 2] * scale
+		local length = (to - from).Magnitude
+		if length > 0.1 then
+			local segment = createPart(
+				"TrackSegment",
+				Vector3.new(1.6 * scale, 0.5 * scale, length + 0.3),
+				(from + to) / 2,
+				grey,
+				ride
+			)
+			segment.CFrame = CFrame.lookAt((from + to) / 2, to)
+			segment.CanCollide = false
+		end
+	end
+	createPart("Station", Vector3.new(20, 0.7, 4.4) * scale, Vector3.new(0, 0.35 * scale, -8 * scale), grey, ride)
+
+	local cars = Instance.new("Model")
+	cars.Name = "CoasterCars"
+	cars.Parent = ride
+	for index = 1, GameConfig.CoasterCarCount do
+		local car = createPart(
+			string.format("CoasterCar%d", index),
+			Vector3.new(2.2, 1.59, 3.96) * scale,
+			points[CoasterPath.StationIndex] * scale,
+			grey,
+			cars,
+			Enum.Material.SmoothPlastic
+		)
+		car.CanCollide = false
+		car.CanTouch = false
+		car.CanQuery = false
+	end
+
+	-- West of the station, away from the line that forms south of it.
+	local console = createPart(
+		"CoasterConsole",
+		Vector3.new(2, 3, 2),
+		Vector3.new(-15 * scale, 1.5, -10 * scale),
+		Color3.fromRGB(91, 87, 79),
+		ride
+	)
+	console.Material = Enum.Material.Slate
+	ride:PivotTo(COASTER_PIVOT)
+	return ride
+end
+
 local function ensureRidePrompt(
 	console: BasePart,
 	name: string,
@@ -1568,6 +1678,8 @@ local function getOrCreateModel(parent: Instance, name: string, build: (Folder) 
 			model:PivotTo(PIRATE_PIVOT)
 		elseif name == HAUNTED_NAME then
 			model:PivotTo(HAUNTED_PIVOT)
+		elseif name == COASTER_NAME then
+			model:PivotTo(COASTER_PIVOT)
 		end
 		return model
 	end
@@ -1894,6 +2006,34 @@ function ParkBuilder.Build(): References
 	end
 	applyHauntedAppearance(hauntedHouse, hauntedHouse:GetAttribute("IsRepaired") == true)
 
+	local coasterRide = getOrCreateModel(parkFolder, COASTER_NAME, buildGrayboxCoaster)
+	if coasterRide:GetAttribute("IsGraybox") == nil then
+		coasterRide:SetAttribute("IsGraybox", true)
+	end
+	for _, attribute in { "IsUnlocked", "IsRepaired", "IsOperating" } do
+		if coasterRide:GetAttribute(attribute) == nil then
+			coasterRide:SetAttribute(attribute, false)
+		end
+	end
+	local coasterCarsInstance = coasterRide:FindFirstChild("CoasterCars", true)
+	if coasterCarsInstance == nil or not coasterCarsInstance:IsA("Model") then
+		error("[ParkPark] CoasterRide.CoasterCars must be a Model")
+	end
+	-- CoasterService moves the cars every frame, so they stay anchored and non-solid.
+	for _, descendant in coasterCarsInstance:GetDescendants() do
+		if descendant:IsA("BasePart") then
+			descendant.Anchored = true
+			descendant.CanCollide = false
+			descendant.CanTouch = false
+			descendant.CanQuery = false
+		end
+	end
+	local coasterConsoleInstance = coasterRide:FindFirstChild("CoasterConsole", true)
+	if coasterConsoleInstance == nil or not coasterConsoleInstance:IsA("BasePart") then
+		error("[ParkPark] CoasterRide.CoasterConsole must be a BasePart")
+	end
+	applyCoasterAppearance(coasterRide, coasterRide:GetAttribute("IsRepaired") == true)
+
 	return {
 		ParkFolder = parkFolder,
 		Entrance = entrance,
@@ -1950,6 +2090,9 @@ function ParkBuilder.Build(): References
 		HauntedHouse = hauntedHouse,
 		HauntedBody = hauntedBodyInstance,
 		HauntedConsole = hauntedConsoleInstance,
+		CoasterRide = coasterRide,
+		CoasterCars = coasterCarsInstance,
+		CoasterConsole = coasterConsoleInstance,
 		GateRope = gateRope,
 		GatePrompt = gatePrompt,
 	}
@@ -2020,6 +2163,10 @@ end
 
 function ParkBuilder.ApplyHauntedRepairedAppearance(ride: Model)
 	applyHauntedAppearance(ride, true)
+end
+
+function ParkBuilder.ApplyCoasterRepairedAppearance(ride: Model)
+	applyCoasterAppearance(ride, true)
 end
 
 return ParkBuilder

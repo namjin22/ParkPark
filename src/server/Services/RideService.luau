@@ -36,6 +36,8 @@ type RideReferences = {
 	PirateConsole: BasePart,
 	HauntedHouse: Model,
 	HauntedConsole: BasePart,
+	CoasterRide: Model,
+	CoasterConsole: BasePart,
 }
 
 type SpendCoins = (Player, number) -> boolean
@@ -189,6 +191,7 @@ function RideService.Start(
 	applySwingRepaired: ApplyRepairedAppearance,
 	applyPirateRepaired: ApplyRepairedAppearance,
 	applyHauntedRepaired: ApplyRepairedAppearance,
+	applyCoasterRepaired: ApplyRepairedAppearance,
 	notify: Notify
 )
 	local currency = GameConfig.CurrencyDisplayName
@@ -201,6 +204,7 @@ function RideService.Start(
 		Swing = park.SwingRide,
 		Pirate = park.PirateRide,
 		Haunted = park.HauntedHouse,
+		Coaster = park.CoasterRide,
 	}
 	local actions: { [string]: { [string]: (Player) -> () } } = {}
 
@@ -626,6 +630,19 @@ function RideService.Start(
 			park.HauntedHouse:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
 		end,
 		applyRepairedAppearance = applyHauntedRepaired,
+	})
+
+	-- CoasterService runs the train while IsOperating is true.
+	setupRide({
+		key = "Coaster",
+		model = park.CoasterRide,
+		console = park.CoasterConsole,
+		isAvailable = parkOpen,
+		signals = { parkOpenSignal },
+		start = function()
+			park.CoasterRide:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
+		end,
+		applyRepairedAppearance = applyCoasterRepaired,
 	})
 end
 

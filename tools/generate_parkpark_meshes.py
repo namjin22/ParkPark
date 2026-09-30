@@ -1420,6 +1420,171 @@ def make_haunted_house() -> Mesh:
     return mesh
 
 
+COASTER_CONTROL_POINTS = [
+    # x, height, z: the station straight runs along +X on the south side, then the lift climbs round the
+    # east end, the train crests on the north side, dips and climbs a second hill, and returns by the west.
+    (-8.0, 1.2, -8.0),
+    (0.0, 1.2, -8.0),
+    (8.0, 1.2, -8.0),
+    (14.0, 3.0, -6.0),
+    (17.5, 8.0, 0.0),
+    (14.0, 14.0, 7.0),
+    (6.0, 15.0, 9.0),
+    (-2.0, 7.0, 9.0),
+    (-8.0, 3.0, 8.5),
+    (-14.0, 9.0, 9.0),
+    (-19.0, 6.0, 4.0),
+    (-18.0, 3.0, -2.0),
+    (-14.0, 2.0, -6.5),
+]
+COASTER_SAMPLES = 160
+COASTER_STATION_POINT = 1
+COASTER_LIFT_START_POINT = 3
+COASTER_LIFT_END_POINT = 6
+COASTER_GAUGE = 0.75
+
+
+def coaster_path() -> tuple[list[tuple[float, float, float]], dict[str, int]]:
+    """Sample the closed Catmull-Rom loop through the control points at equal arc length."""
+    control = COASTER_CONTROL_POINTS
+    count = len(control)
+    dense: list[tuple[float, float, float]] = []
+    dense_control: list[int] = []
+    for index in range(count):
+        p0, p1, p2, p3 = (control[(index + offset) % count] for offset in (-1, 0, 1, 2))
+        for step in range(40):
+            t = step / 40
+            point = tuple(
+                0.5
+                * (
+                    2 * p1[axis]
+                    + (-p0[axis] + p2[axis]) * t
+                    + (2 * p0[axis] - 5 * p1[axis] + 4 * p2[axis] - p3[axis]) * t * t
+                    + (-p0[axis] + 3 * p1[axis] - 3 * p2[axis] + p3[axis]) * t**3
+                )
+                for axis in range(3)
+            )
+            dense.append(point)
+            dense_control.append(index)
+    lengths = [0.0]
+    for index in range(len(dense)):
+        a, b = dense[index], dense[(index + 1) % len(dense)]
+        lengths.append(lengths[-1] + math.dist(a, b))
+    total = lengths[-1]
+    samples: list[tuple[float, float, float]] = []
+    marks: dict[str, int] = {}
+    cursor = 0
+    for sample in range(COASTER_SAMPLES):
+        target = total * sample / COASTER_SAMPLES
+        while lengths[cursor + 1] < target:
+            cursor += 1
+        a, b = dense[cursor], dense[(cursor + 1) % len(dense)]
+        span = lengths[cursor + 1] - lengths[cursor]
+        fraction = 0.0 if span == 0 else (target - lengths[cursor]) / span
+        samples.append(tuple(a[axis] + (b[axis] - a[axis]) * fraction for axis in range(3)))
+        for name, point_index in (
+            ("station", COASTER_STATION_POINT),
+            ("liftStart", COASTER_LIFT_START_POINT),
+            ("liftEnd", COASTER_LIFT_END_POINT),
+        ):
+            if dense_control[cursor] == point_index and name not in marks:
+                marks[name] = sample
+    return samples, marks
+
+
+def make_coaster_track() -> Mesh:
+    """Rails, ties, chain teeth on the lift, supports, and a striped station; origin is the ground centre."""
+    mesh = Mesh("ParkParkCoasterTrack")
+    samples, marks = coaster_path()
+    count = len(samples)
+    for index in range(count):
+        here, following = samples[index], samples[(index + 1) % count]
+        tangent = tuple(following[axis] - here[axis] for axis in range(3))
+        flat = math.hypot(tangent[0], tangent[2]) or 1.0
+        lateral = (tangent[2] / flat, 0.0, -tangent[0] / flat)
+        for side in (-1, 1):
+            start = tuple(here[axis] + lateral[axis] * COASTER_GAUGE * side for axis in range(3))
+            end = tuple(following[axis] + lateral[axis] * COASTER_GAUGE * side for axis in range(3))
+            add_cylinder_between(mesh, start, end, 0.13, 0.13, "coral", 5)
+        if index % 2 == 0:
+            add_cylinder_between(
+                mesh,
+                tuple(here[axis] - lateral[axis] * (COASTER_GAUGE + 0.1) for axis in range(3)),
+                tuple(here[axis] + lateral[axis] * (COASTER_GAUGE + 0.1) for axis in range(3)),
+                0.07,
+                0.07,
+                "wood",
+                4,
+            )
+        if marks["liftStart"] <= index <= marks["liftEnd"] and index % 2 == 0:
+            add_box(mesh, (here[0], here[1] + 0.12, here[2]), (0.5, 0.14, 0.18), "gold")
+        if index % 6 == 0 and here[1] > 2.2:
+            add_cylinder_between(mesh, (here[0], 0.1, here[2]), (here[0], here[1] - 0.15, here[2]), 0.2, 0.16, "cream", 6)
+            add_box(mesh, (here[0], 0.15, here[2]), (0.8, 0.3, 0.8), "gold")
+    # Station: platform along the straight, four posts, and a striped roof.
+    add_box(mesh, (0, 0.35, -8.0), (20.0, 0.7, 4.4), "cream")
+    add_box(mesh, (0, 0.72, -8.0), (20.4, 0.1, 4.8), "gold")
+    for x in (-9.0, -3.0, 3.0, 9.0):
+        for z in (-9.8, -6.2):
+            add_cylinder_between(mesh, (x, 0.7, z), (x, 4.6, z), 0.16, 0.16, "gold", 6)
+    stripes = 8
+    for index in range(stripes):
+        x0 = -10.5 + 21.0 * index / stripes
+        x1 = -10.5 + 21.0 * (index + 1) / stripes
+        add_slab(
+            mesh,
+            [
+                (x0, 4.5, -10.3),
+                (x1, 4.5, -10.3),
+                (x1, 4.65, -10.3),
+                (x0, 4.65, -10.3),
+                (x0, 5.3, -5.7),
+                (x1, 5.3, -5.7),
+                (x1, 5.45, -5.7),
+                (x0, 5.45, -5.7),
+            ],
+            "coral" if index % 2 == 0 else "cream",
+        )
+    add_star(mesh, 6.3, 0.5, "gold")
+    return mesh
+
+
+def make_coaster_car() -> Mesh:
+    """One coaster car (origin at rail level, centred under the body); symmetric front to back, two rows of two."""
+    mesh = Mesh("ParkParkCoasterCar")
+    add_box(mesh, (0, 0.3, 0), (1.9, 0.5, 3.0), "coral")
+    for x in (-0.82, 0.82):
+        for z in (-1.0, 1.0):
+            add_cylinder_between(mesh, (x - 0.12, 0.05, z), (x + 0.12, 0.05, z), 0.26, 0.26, "ink", 8)
+    for x in (-1.0, 1.0):
+        add_box(mesh, (x, 0.85, 0), (0.14, 0.9, 2.9), "coral")
+        add_box(mesh, (x, 1.33, 0), (0.2, 0.1, 3.0), "gold")
+    for z in (-0.65, 0.65):
+        add_box(mesh, (0, 0.72, z), (1.7, 0.28, 0.9), "mint")
+    for z in (-1.6, 1.6):
+        add_ellipsoid(mesh, (0, 0.6, z), (0.75, 0.5, 0.42), "gold", slices=10, stacks=5)
+    return mesh
+
+
+def write_coaster_path() -> None:
+    samples, marks = coaster_path()
+    lines = [
+        "--!strict",
+        "",
+        "-- Generated by tools/generate_parkpark_meshes.py: the roller coaster's centre line in unscaled OBJ units",
+        "-- (x, height, z), sampled at equal arc length round the closed loop. Do not edit by hand.",
+        "return {",
+        f"\tStationIndex = {marks['station'] + 1},",
+        f"\tLiftStartIndex = {marks['liftStart'] + 1},",
+        f"\tLiftEndIndex = {marks['liftEnd'] + 1},",
+        "\tPoints = {",
+    ]
+    for x, y, z in samples:
+        lines.append(f"\t\tVector3.new({x:.4f}, {y:.4f}, {z:.4f}),")
+    lines += ["\t},", "}", ""]
+    (ROOT / "src" / "shared" / "Config" / "CoasterPath.luau").write_text("\n".join(lines), encoding="utf-8", newline="\n")
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -1509,6 +1674,8 @@ def main() -> None:
         make_pirate_base(),
         make_pirate_ship(),
         make_haunted_house(),
+        make_coaster_track(),
+        make_coaster_car(),
         make_bumper_platform(),
         make_bumper_car(),
         make_entrance(),
@@ -1516,6 +1683,7 @@ def main() -> None:
         make_repair_console(),
         make_entrance_debris(),
     )
+    write_coaster_path()
     for mesh in meshes:
         path = OUTPUT / f"{mesh.name}.obj"
         vertices, triangles, minimum, maximum = mesh.write(path)
