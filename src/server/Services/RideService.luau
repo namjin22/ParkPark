@@ -7,6 +7,12 @@ local TweenService = game:GetService("TweenService")
 local GameConfig =
 	require(ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("GameConfig"))
 
+-- Runs every attraction's economy: unlock, repair, then income and staff upgrades. Players do all of it
+-- from one "관리" prompt on each console, which opens the client's manage panel; the panel sends
+-- `RideAction` (ride key, action) and this service validates and performs it. A fixed sign above each
+-- console shows the ride's state at a glance. The state the panel needs is published as attributes on the
+-- ride model (IsUnlocked, IsRepaired, IncomeLevel, StaffLevel, Fare, StaffInterval, QueueLength, and
+-- BlockedReason, the text that says why unlocking or repairing is not possible yet).
 local RideService = {}
 
 type RideReferences = {
@@ -14,41 +20,18 @@ type RideReferences = {
 	Carousel: Model,
 	CarouselRotor: Model,
 	RepairConsole: BasePart,
-	RepairPrompt: ProximityPrompt,
-	CarouselIncomePrompt: ProximityPrompt,
-	CarouselStaffPrompt: ProximityPrompt,
 	TeacupsRide: Model,
 	TeacupsRotor: Model,
 	TeacupCups: Model?,
 	TeacupsConsole: BasePart,
-	TeacupsUnlockPrompt: ProximityPrompt,
-	TeacupsRepairPrompt: ProximityPrompt,
-	TeacupsIncomePrompt: ProximityPrompt,
-	TeacupsStaffPrompt: ProximityPrompt,
 	BumperRide: Model,
 	BumperConsole: BasePart,
-	BumperUnlockPrompt: ProximityPrompt,
-	BumperRepairPrompt: ProximityPrompt,
-	BumperIncomePrompt: ProximityPrompt,
-	BumperStaffPrompt: ProximityPrompt,
 	SnackStand: Model,
 	SnackConsole: BasePart,
-	SnackUnlockPrompt: ProximityPrompt,
-	SnackRepairPrompt: ProximityPrompt,
-	SnackIncomePrompt: ProximityPrompt,
-	SnackStaffPrompt: ProximityPrompt,
 	FerrisRide: Model,
 	FerrisConsole: BasePart,
-	FerrisUnlockPrompt: ProximityPrompt,
-	FerrisRepairPrompt: ProximityPrompt,
-	FerrisIncomePrompt: ProximityPrompt,
-	FerrisStaffPrompt: ProximityPrompt,
 	SwingRide: Model,
 	SwingConsole: BasePart,
-	SwingUnlockPrompt: ProximityPrompt,
-	SwingRepairPrompt: ProximityPrompt,
-	SwingIncomePrompt: ProximityPrompt,
-	SwingStaffPrompt: ProximityPrompt,
 }
 
 type SpendCoins = (Player, number) -> boolean
@@ -56,23 +39,24 @@ type GetCoins = (Player) -> number
 type ApplyRepairedAppearance = (Model) -> ()
 type Notify = (Player, string, string) -> ()
 
--- One ride's economy: an optional unlock, a repair, then income and staff upgrades that raise what
--- each guest pays and let staff board guests automatically. `isAvailable` says when the console works.
+-- One attraction: `isAvailable` says when the park is ready for it (the entrance is clean, the park is open),
+-- `signals` fire when that may have changed, and `start` sets it running once repaired.
 type RideDefinition = {
 	key: string,
 	model: Model,
 	console: BasePart,
-	unlockPrompt: ProximityPrompt?,
-	repairPrompt: ProximityPrompt,
-	incomePrompt: ProximityPrompt,
-	staffPrompt: ProximityPrompt,
 	isAvailable: () -> boolean,
 	signals: { RBXScriptSignal },
 	start: () -> (),
 	applyRepairedAppearance: ApplyRepairedAppearance,
 }
 
-local function canUsePrompt(player: Player, target: BasePart, prompt: ProximityPrompt): boolean
+local ACTION_DISTANCE = 26
+local ACTIONS = { Unlock = true, Repair = true, Income = true, Staff = true }
+local SIGN_SIZE = Vector3.new(12, 6.4, 0.5)
+local SIGN_CANVAS = Vector2.new(1200, 640)
+
+local function isNear(player: Player, target: BasePart): boolean
 	if player.Parent ~= Players then
 		return false
 	end
@@ -84,61 +68,109 @@ local function canUsePrompt(player: Player, target: BasePart, prompt: ProximityP
 		return false
 	end
 
-	return (rootPart.Position - target.Position).Magnitude <= prompt.MaxActivationDistance + 4
+	return (rootPart.Position - target.Position).Magnitude <= ACTION_DISTANCE
 end
 
-local function createLabel(parent: Instance, name: string, y: number, height: number, size: number, bold: boolean)
+local function signLabel(parent: Instance, y: number, height: number, size: number, bold: boolean, color: Color3)
 	local label = Instance.new("TextLabel")
-	label.Name = name
-	label.Position = UDim2.fromOffset(12, y)
-	label.Size = UDim2.new(1, -24, 0, height)
+	label.Position = UDim2.fromOffset(30, y)
+	label.Size = UDim2.new(1, -60, 0, height)
 	label.BackgroundTransparency = 1
 	label.Font = if bold then Enum.Font.GothamBold else Enum.Font.GothamMedium
-	label.TextColor3 = GameConfig.Palette.Ink
+	label.TextColor3 = color
 	label.TextSize = size
-	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.TextXAlignment = Enum.TextXAlignment.Center
 	label.TextTruncate = Enum.TextTruncate.AtEnd
 	label.Parent = parent
 	return label
 end
 
--- A sign over the console that shows the ride's state, what each guest pays, and its upgrade levels.
-local function createInfoBoard(console: BasePart, displayName: string): (TextLabel, TextLabel, TextLabel)
-	local existing = console:FindFirstChild("RideInfo")
-	if existing then
-		existing:Destroy()
+-- A signboard on a post above the console, readable from both sides: the ride's name, what each guest pays,
+-- its upgrade levels, and its line. It replaces the small floating panel, whose text was hard to read.
+-- Returns a function that rewrites the three changing lines.
+local function createInfoSign(console: BasePart, ride: Model, displayName: string): (string, string, string) -> ()
+	local parent = console.Parent or ride
+	local old = parent:FindFirstChild("InfoSign")
+	if old then
+		old:Destroy()
 	end
 
-	local board = Instance.new("BillboardGui")
-	board.Name = "RideInfo"
-	board.Size = UDim2.fromOffset(330, 112)
-	board.StudsOffsetWorldSpace = Vector3.new(0, 9, 0)
-	board.MaxDistance = 95
-	board.LightInfluence = 0
-	board.ResetOnSpawn = false
-	board.Parent = console
+	local sign = Instance.new("Model")
+	sign.Name = "InfoSign"
 
-	local card = Instance.new("Frame")
-	card.Size = UDim2.fromScale(1, 1)
-	card.BackgroundColor3 = GameConfig.Palette.Cream
-	card.BackgroundTransparency = 0.06
-	card.BorderSizePixel = 0
-	card.Parent = board
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 16)
-	corner.Parent = card
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = GameConfig.Palette.Gold
-	stroke.Thickness = 2
-	stroke.Parent = card
+	local outward =
+		Vector3.new(console.Position.X - ride:GetPivot().Position.X, 0, console.Position.Z - ride:GetPivot().Position.Z)
+	outward = if outward.Magnitude > 1 then outward.Unit else Vector3.new(0, 0, 1)
+	local postHeight = 3
+	local top = console.Position + Vector3.new(0, console.Size.Y / 2, 0)
+	local boardCenter = top + Vector3.new(0, postHeight + SIGN_SIZE.Y / 2, 0)
 
-	local title = createLabel(card, "Title", 8, 26, 21, true)
-	title.Text = displayName
-	local fareLine = createLabel(card, "Fare", 38, 24, 17, true)
-	local detailLine = createLabel(card, "Detail", 64, 20, 14, false)
-	local queueLine = createLabel(card, "Queue", 86, 20, 14, false)
-	queueLine.TextTransparency = 0.15
-	return fareLine, detailLine, queueLine
+	local post = Instance.new("Part")
+	post.Name = "SignPost"
+	post.Shape = Enum.PartType.Cylinder
+	post.Size = Vector3.new(postHeight + 0.5, 0.7, 0.7)
+	post.CFrame = CFrame.new(top + Vector3.new(0, postHeight / 2, 0)) * CFrame.Angles(0, 0, math.pi / 2)
+	post.Color = GameConfig.Palette.Gold
+	post.Material = Enum.Material.SmoothPlastic
+	post.Anchored = true
+	post.CanCollide = false
+	post.CanQuery = false
+	post.CanTouch = false
+	post.Parent = sign
+
+	local board = Instance.new("Part")
+	board.Name = "SignBoard"
+	board.Size = SIGN_SIZE
+	board.CFrame = CFrame.lookAt(boardCenter, boardCenter + outward)
+	board.Color = GameConfig.Palette.Cream
+	board.Material = Enum.Material.SmoothPlastic
+	board.Anchored = true
+	board.CanCollide = false
+	board.CanQuery = false
+	board.CanTouch = false
+	board.Parent = sign
+
+	local frame = Instance.new("Part")
+	frame.Name = "SignFrame"
+	frame.Size = SIGN_SIZE + Vector3.new(0.6, 0.6, -0.2)
+	frame.CFrame = board.CFrame
+	frame.Color = GameConfig.Palette.Gold
+	frame.Material = Enum.Material.SmoothPlastic
+	frame.Anchored = true
+	frame.CanCollide = false
+	frame.CanQuery = false
+	frame.CanTouch = false
+	frame.Parent = sign
+
+	local faces: { { fare: TextLabel, detail: TextLabel, queue: TextLabel } } = {}
+	for _, face in { Enum.NormalId.Front, Enum.NormalId.Back } do
+		local gui = Instance.new("SurfaceGui")
+		gui.Face = face
+		gui.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
+		gui.CanvasSize = SIGN_CANVAS
+		gui.LightInfluence = 0
+		gui.Parent = board
+
+		local ink = GameConfig.Palette.Ink
+		local title = signLabel(gui, 24, 130, 116, true, ink)
+		title.Text = displayName
+		table.insert(faces, {
+			fare = signLabel(gui, 160, 112, 92, true, Color3.fromRGB(206, 78, 64)),
+			detail = signLabel(gui, 290, 90, 64, true, ink),
+			queue = signLabel(gui, 385, 90, 64, true, ink),
+		})
+		local hint = signLabel(gui, 510, 100, 62, true, Color3.fromRGB(52, 128, 100))
+		hint.Text = "콘솔에서 E · 관리"
+	end
+	sign.Parent = parent
+
+	return function(fare: string, detail: string, queue: string)
+		for _, face in faces do
+			face.fare.Text = fare
+			face.detail.Text = detail
+			face.queue.Text = queue
+		end
+	end
 end
 
 function RideService.Start(
@@ -162,6 +194,7 @@ function RideService.Start(
 		Ferris = park.FerrisRide,
 		Swing = park.SwingRide,
 	}
+	local actions: { [string]: { [string]: (Player) -> () } } = {}
 
 	local function startRotation(ride: Model, rotor: Model, rotationSeconds: number, name: string)
 		local rotorRoot = rotor.PrimaryPart
@@ -207,12 +240,29 @@ function RideService.Start(
 		local config = GameConfig.Rides[ride.key]
 		local model = ride.model
 		local displayName = config.DisplayName
-		-- A shop serves its guests; a ride seats them.
 		local requiresKey = config.Requires
 		local requiredModel = if requiresKey then rideModels[requiresKey] else nil
-		local boardNoun = if config.IsShop == true then "서빙" else "탑승"
+		-- A shop serves its guests; a ride seats them.
 		local staffAction = if config.IsShop == true then "서빙해요" else "태워요"
 		local started = false
+
+		-- The old per-action prompts are gone: everything is done from the manage panel.
+		for _, legacy in { "UnlockPrompt", "RepairPrompt", "IncomePrompt", "StaffPrompt" } do
+			local prompt = ride.console:FindFirstChild(legacy)
+			if prompt then
+				prompt:Destroy()
+			end
+		end
+		local manage = Instance.new("ProximityPrompt")
+		manage.Name = "ManagePrompt"
+		manage.ActionText = "관리"
+		manage.ObjectText = displayName
+		manage.HoldDuration = 0
+		manage.MaxActivationDistance = 18
+		manage.RequiresLineOfSight = false
+		manage.KeyboardKeyCode = Enum.KeyCode.E
+		manage:SetAttribute("RideKey", ride.key)
+		manage.Parent = ride.console
 
 		-- Each attraction opens up only after the one before it in the chain has been repaired.
 		local function prerequisiteDone(): boolean
@@ -220,6 +270,18 @@ function RideService.Start(
 		end
 		local function isReady(): boolean
 			return ride.isAvailable() and prerequisiteDone()
+		end
+		-- Why the ride cannot be unlocked or repaired yet ("" when it can).
+		local function blockedReason(): string
+			if not prerequisiteDone() then
+				return string.format("먼저 %s 수리", GameConfig.Rides[requiresKey :: string].DisplayName)
+			end
+			if not ride.isAvailable() then
+				return if ride.key == "Carousel"
+					then "입구 쓰레기를 먼저 치우세요"
+					else "공원을 먼저 개장하세요"
+			end
+			return ""
 		end
 
 		local function start()
@@ -253,7 +315,7 @@ function RideService.Start(
 			return config.BaseFare + level * config.IncomePerLevel
 		end
 
-		-- GuestService reads these two attributes each time a guest boards.
+		-- GuestService reads Fare and StaffInterval each time a guest boards; the panel reads them too.
 		local function publishRates()
 			model:SetAttribute("Fare", fareForLevel(incomeLevel()))
 			local level = staffLevel()
@@ -261,109 +323,67 @@ function RideService.Start(
 		end
 		publishRates()
 
-		local fareLine, detailLine, queueLine = createInfoBoard(ride.console, displayName)
+		local setSign = createInfoSign(ride.console, model, displayName)
 
 		local function refreshBoard()
+			model:SetAttribute("BlockedReason", blockedReason())
 			local fare = fareForLevel(incomeLevel())
 			if not unlocked then
-				fareLine.Text = string.format("손님당 +%d %s", config.BaseFare, currency)
-				detailLine.Text = string.format("해금 %d %s", config.UnlockCost, currency)
-				queueLine.Text = if prerequisiteDone()
-					then "잠겨 있어요"
-					else string.format("먼저 %s 수리", GameConfig.Rides[requiresKey :: string].DisplayName)
-			elseif not repaired then
-				fareLine.Text = string.format("손님당 +%d %s", config.BaseFare, currency)
-				detailLine.Text = string.format("수리 %d %s", config.RepairCost, currency)
-				queueLine.Text = "고장 났어요"
-			else
-				fareLine.Text = string.format("손님당 +%d %s", fare, currency)
-				detailLine.Text = string.format(
-					"요금 Lv %d/%d · 직원 Lv %d/%d",
-					incomeLevel(),
-					#config.IncomeCosts,
-					staffLevel(),
-					#config.StaffCosts
+				local reason = blockedReason()
+				setSign(
+					string.format("손님당 +%d %s", config.BaseFare, currency),
+					string.format("해금 %d %s", config.UnlockCost, currency),
+					if reason == "" then "잠겨 있어요" else reason
 				)
+			elseif not repaired then
+				setSign(
+					string.format("손님당 +%d %s", config.BaseFare, currency),
+					string.format("수리 %d %s", config.RepairCost, currency),
+					"고장 났어요"
+				)
+			else
 				local queueLength = (model:GetAttribute("QueueLength") :: number?) or 0
 				local interval = (model:GetAttribute("StaffInterval") :: number?) or 0
-				queueLine.Text = if interval > 0
-					then string.format(
-						"대기 %d/%d · 직원이 %d초마다 %s",
-						queueLength,
-						GameConfig.QueueMax,
-						interval,
-						staffAction
-					)
-					else string.format(
-						"대기 %d/%d · 손님에게 다가가 허용하세요",
-						queueLength,
-						GameConfig.QueueMax
-					)
-			end
-		end
-
-		local function refreshPrompts()
-			local available = isReady()
-			if ride.unlockPrompt then
-				ride.unlockPrompt.ObjectText = string.format(
-					"%s · %d %s · 손님당 +%d",
-					displayName,
-					config.UnlockCost,
-					currency,
-					config.BaseFare
-				)
-				ride.unlockPrompt.Enabled = available and not unlocked
-			end
-			ride.repairPrompt.ObjectText =
-				string.format("%s · %d %s · 손님당 +%d", displayName, config.RepairCost, currency, config.BaseFare)
-			ride.repairPrompt.Enabled = available and unlocked and not repaired
-
-			local income = incomeLevel()
-			local staff = staffLevel()
-			local incomeNext = config.IncomeCosts[income + 1]
-			local staffNext = config.StaffCosts[staff + 1]
-			ride.incomePrompt.Enabled = repaired and incomeNext ~= nil
-			if incomeNext then
-				ride.incomePrompt.ActionText = string.format("요금 올리기 Lv%d→%d", income, income + 1)
-				ride.incomePrompt.ObjectText = string.format(
-					"%s · %d %s · 손님당 +%d → +%d",
-					displayName,
-					incomeNext,
-					currency,
-					fareForLevel(income),
-					fareForLevel(income + 1)
+				setSign(
+					string.format("손님당 +%d %s", fare, currency),
+					string.format(
+						"요금 Lv %d/%d · 직원 Lv %d/%d",
+						incomeLevel(),
+						#config.IncomeCosts,
+						staffLevel(),
+						#config.StaffCosts
+					),
+					if interval > 0
+						then string.format(
+							"대기 %d/%d · 직원이 %d초마다 %s",
+							queueLength,
+							GameConfig.QueueMax,
+							interval,
+							staffAction
+						)
+						else string.format(
+							"대기 %d/%d · 손님에게 다가가 허용",
+							queueLength,
+							GameConfig.QueueMax
+						)
 				)
 			end
-			ride.staffPrompt.Enabled = repaired and staffNext ~= nil
-			if staffNext then
-				ride.staffPrompt.ActionText = string.format("직원 고용 Lv%d→%d", staff, staff + 1)
-				ride.staffPrompt.ObjectText = string.format(
-					"%s · %d %s · %d초마다 자동 %s",
-					displayName,
-					staffNext,
-					currency,
-					GameConfig.StaffIntervals[staff + 1],
-					boardNoun
-				)
-			end
-			refreshBoard()
 		end
 
 		for _, signal in ride.signals do
-			signal:Connect(refreshPrompts)
+			signal:Connect(refreshBoard)
 		end
 		if requiredModel then
-			requiredModel:GetAttributeChangedSignal("IsRepaired"):Connect(refreshPrompts)
+			requiredModel:GetAttributeChangedSignal("IsRepaired"):Connect(refreshBoard)
 		end
 		for _, attribute in { "QueueLength", "IncomeLevel", "StaffLevel" } do
 			model:GetAttributeChangedSignal(attribute):Connect(function()
 				publishRates()
-				refreshPrompts()
+				refreshBoard()
 			end)
 		end
-		refreshPrompts()
+		refreshBoard()
 		if repaired then
-			ride.repairPrompt.ActionText = "수리 완료"
 			start()
 		end
 
@@ -375,38 +395,27 @@ function RideService.Start(
 			)
 		end
 
-		if ride.unlockPrompt then
-			ride.unlockPrompt.Triggered:Connect(function(player: Player)
-				if
-					unlocked
-					or not isReady()
-					or not canUsePrompt(player, ride.console, ride.unlockPrompt :: ProximityPrompt)
-				then
-					return
-				end
-				if not spendCoins(player, config.UnlockCost) then
-					notEnough(player, config.UnlockCost, "해금")
-					return
-				end
+		local function unlock(player: Player)
+			if unlocked or config.UnlockCost == 0 or not isReady() or not isNear(player, ride.console) then
+				return
+			end
+			if not spendCoins(player, config.UnlockCost) then
+				notEnough(player, config.UnlockCost, "해금")
+				return
+			end
 
-				unlocked = true
-				model:SetAttribute("IsUnlocked", true)
-				refreshPrompts()
-				notify(
-					player,
-					string.format("%s 해금!", displayName),
-					string.format("-%d %s · 이제 수리하세요", config.UnlockCost, currency)
-				)
-			end)
+			unlocked = true
+			model:SetAttribute("IsUnlocked", true)
+			refreshBoard()
+			notify(
+				player,
+				string.format("%s 해금!", displayName),
+				string.format("-%d %s · 이제 수리하세요", config.UnlockCost, currency)
+			)
 		end
 
-		ride.repairPrompt.Triggered:Connect(function(player: Player)
-			if
-				not unlocked
-				or repaired
-				or not isReady()
-				or not canUsePrompt(player, ride.console, ride.repairPrompt)
-			then
+		local function repair(player: Player)
+			if not unlocked or repaired or not isReady() or not isNear(player, ride.console) then
 				return
 			end
 			if not spendCoins(player, config.RepairCost) then
@@ -417,20 +426,19 @@ function RideService.Start(
 			repaired = true
 			ride.applyRepairedAppearance(model)
 			model:SetAttribute("IsRepaired", true)
-			ride.repairPrompt.ActionText = "수리 완료"
-			refreshPrompts()
+			refreshBoard()
 			notify(
 				player,
 				string.format("%s 복구 완료!", displayName),
 				string.format("-%d %s · 손님당 +%d %s", config.RepairCost, currency, config.BaseFare, currency)
 			)
 			start()
-		end)
+		end
 
-		ride.incomePrompt.Triggered:Connect(function(player: Player)
+		local function income(player: Player)
 			local level = incomeLevel()
 			local cost = config.IncomeCosts[level + 1]
-			if not repaired or cost == nil or not canUsePrompt(player, ride.console, ride.incomePrompt) then
+			if not repaired or cost == nil or not isNear(player, ride.console) then
 				return
 			end
 			if not spendCoins(player, cost) then
@@ -444,12 +452,12 @@ function RideService.Start(
 				string.format("%s 요금 인상!", displayName),
 				string.format("-%d %s · 손님당 +%d %s", cost, currency, fareForLevel(level + 1), currency)
 			)
-		end)
+		end
 
-		ride.staffPrompt.Triggered:Connect(function(player: Player)
+		local function staff(player: Player)
 			local level = staffLevel()
 			local cost = config.StaffCosts[level + 1]
-			if not repaired or cost == nil or not canUsePrompt(player, ride.console, ride.staffPrompt) then
+			if not repaired or cost == nil or not isNear(player, ride.console) then
 				return
 			end
 			if not spendCoins(player, cost) then
@@ -469,18 +477,41 @@ function RideService.Start(
 					staffAction
 				)
 			)
-		end)
+		end
+
+		actions[ride.key] = { Unlock = unlock, Repair = repair, Income = income, Staff = staff }
 	end
+
+	local events = ReplicatedStorage:WaitForChild("ParkParkEvents")
+	local actionEvent = events:FindFirstChild("RideAction")
+	if actionEvent == nil then
+		actionEvent = Instance.new("RemoteEvent")
+		actionEvent.Name = "RideAction"
+		actionEvent.Parent = events
+	end
+	local lastAction: { [Player]: number } = {}
+	(actionEvent :: RemoteEvent).OnServerEvent:Connect(function(player: Player, key: unknown, action: unknown)
+		if type(key) ~= "string" or type(action) ~= "string" or not ACTIONS[action] then
+			return
+		end
+		local handlers = actions[key]
+		if handlers == nil then
+			return
+		end
+		-- One action at a time per player, so a mashed button cannot buy twice in a frame.
+		local now = os.clock()
+		if now - (lastAction[player] or 0) < 0.15 then
+			return
+		end
+		lastAction[player] = now
+		handlers[action](player)
+	end)
 
 	local carouselRotationSeconds = GameConfig.CarouselRotationSeconds
 	setupRide({
 		key = "Carousel",
 		model = park.Carousel,
 		console = park.RepairConsole,
-		unlockPrompt = nil,
-		repairPrompt = park.RepairPrompt,
-		incomePrompt = park.CarouselIncomePrompt,
-		staffPrompt = park.CarouselStaffPrompt,
 		isAvailable = function()
 			return park.ParkFolder:GetAttribute("EntranceCleared") == true
 		end,
@@ -491,18 +522,17 @@ function RideService.Start(
 		applyRepairedAppearance = applyCarouselRepaired,
 	})
 
+	local function parkOpen(): boolean
+		return park.ParkFolder:GetAttribute("ParkOpen") == true
+	end
+	local parkOpenSignal = park.ParkFolder:GetAttributeChangedSignal("ParkOpen")
+
 	setupRide({
 		key = "Teacups",
 		model = park.TeacupsRide,
 		console = park.TeacupsConsole,
-		unlockPrompt = park.TeacupsUnlockPrompt,
-		repairPrompt = park.TeacupsRepairPrompt,
-		incomePrompt = park.TeacupsIncomePrompt,
-		staffPrompt = park.TeacupsStaffPrompt,
-		isAvailable = function()
-			return park.ParkFolder:GetAttribute("ParkOpen") == true
-		end,
-		signals = { park.ParkFolder:GetAttributeChangedSignal("ParkOpen") },
+		isAvailable = parkOpen,
+		signals = { parkOpenSignal },
 		start = function()
 			if park.TeacupCups then
 				-- TeacupService turns the hub and spins the cups while IsOperating is true.
@@ -514,77 +544,51 @@ function RideService.Start(
 		applyRepairedAppearance = applyTeacupsRepaired,
 	})
 
-	-- The bumper cars need the snack stand repaired first; BumperCarService moves the cars while
-	-- IsOperating is true, so starting this ride only flips that attribute.
-	setupRide({
-		key = "Bumper",
-		model = park.BumperRide,
-		console = park.BumperConsole,
-		unlockPrompt = park.BumperUnlockPrompt,
-		repairPrompt = park.BumperRepairPrompt,
-		incomePrompt = park.BumperIncomePrompt,
-		staffPrompt = park.BumperStaffPrompt,
-		isAvailable = function()
-			return park.ParkFolder:GetAttribute("ParkOpen") == true
-		end,
-		signals = { park.ParkFolder:GetAttributeChangedSignal("ParkOpen") },
-		start = function()
-			park.BumperRide:SetAttribute("IsOperating", true)
-		end,
-		applyRepairedAppearance = applyBumperRepaired,
-	})
-
 	-- The snack stand is a shop: guests buy a snack at the counter instead of taking a seat.
 	setupRide({
 		key = "Snack",
 		model = park.SnackStand,
 		console = park.SnackConsole,
-		unlockPrompt = park.SnackUnlockPrompt,
-		repairPrompt = park.SnackRepairPrompt,
-		incomePrompt = park.SnackIncomePrompt,
-		staffPrompt = park.SnackStaffPrompt,
-		isAvailable = function()
-			return park.ParkFolder:GetAttribute("ParkOpen") == true
-		end,
-		signals = { park.ParkFolder:GetAttributeChangedSignal("ParkOpen") },
+		isAvailable = parkOpen,
+		signals = { parkOpenSignal },
 		start = function()
 			park.SnackStand:SetAttribute("IsOperating", true)
 		end,
 		applyRepairedAppearance = applySnackRepaired,
 	})
 
-	-- The Ferris wheel needs the bumper cars repaired first; FerrisService turns it while IsOperating is true.
+	-- The rest run through their own services (BumperCarService, FerrisService, SwingService), which move
+	-- them while IsOperating is true, so starting one only flips that attribute.
+	setupRide({
+		key = "Bumper",
+		model = park.BumperRide,
+		console = park.BumperConsole,
+		isAvailable = parkOpen,
+		signals = { parkOpenSignal },
+		start = function()
+			park.BumperRide:SetAttribute("IsOperating", true)
+		end,
+		applyRepairedAppearance = applyBumperRepaired,
+	})
+
 	setupRide({
 		key = "Ferris",
 		model = park.FerrisRide,
 		console = park.FerrisConsole,
-		unlockPrompt = park.FerrisUnlockPrompt,
-		repairPrompt = park.FerrisRepairPrompt,
-		incomePrompt = park.FerrisIncomePrompt,
-		staffPrompt = park.FerrisStaffPrompt,
-		isAvailable = function()
-			return park.ParkFolder:GetAttribute("ParkOpen") == true
-		end,
-		signals = { park.ParkFolder:GetAttributeChangedSignal("ParkOpen") },
+		isAvailable = parkOpen,
+		signals = { parkOpenSignal },
 		start = function()
 			park.FerrisRide:SetAttribute("IsOperating", true)
 		end,
 		applyRepairedAppearance = applyFerrisRepaired,
 	})
 
-	-- The swing ride follows the Ferris wheel; SwingService turns the crown while IsOperating is true.
 	setupRide({
 		key = "Swing",
 		model = park.SwingRide,
 		console = park.SwingConsole,
-		unlockPrompt = park.SwingUnlockPrompt,
-		repairPrompt = park.SwingRepairPrompt,
-		incomePrompt = park.SwingIncomePrompt,
-		staffPrompt = park.SwingStaffPrompt,
-		isAvailable = function()
-			return park.ParkFolder:GetAttribute("ParkOpen") == true
-		end,
-		signals = { park.ParkFolder:GetAttributeChangedSignal("ParkOpen") },
+		isAvailable = parkOpen,
+		signals = { parkOpenSignal },
 		start = function()
 			park.SwingRide:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
 		end,

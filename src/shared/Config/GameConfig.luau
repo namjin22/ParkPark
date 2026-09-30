@@ -2,6 +2,9 @@
 
 export type RideEconomy = {
 	DisplayName: string,
+	-- The ride's model in the park folder and the console players manage it from.
+	ModelName: string,
+	ConsoleName: string,
 	-- 0 means the ride starts unlocked (only the first ride).
 	UnlockCost: number,
 	RepairCost: number,
@@ -48,6 +51,8 @@ return {
 	Rides = {
 		Carousel = {
 			DisplayName = "회전목마",
+			ModelName = "BrokenCarousel",
+			ConsoleName = "RepairConsole",
 			UnlockCost = 0,
 			RepairCost = 25,
 			BaseFare = 5,
@@ -57,6 +62,8 @@ return {
 		},
 		Teacups = {
 			DisplayName = "찻잔 라이드",
+			ModelName = "TeacupsRide",
+			ConsoleName = "TeacupsConsole",
 			UnlockCost = 60,
 			RepairCost = 35,
 			BaseFare = 8,
@@ -67,6 +74,8 @@ return {
 		},
 		Bumper = {
 			DisplayName = "범퍼카",
+			ModelName = "BumperCarsRide",
+			ConsoleName = "BumperConsole",
 			UnlockCost = 120,
 			RepairCost = 60,
 			BaseFare = 12,
@@ -77,6 +86,8 @@ return {
 		},
 		Snack = {
 			DisplayName = "간식 판매대",
+			ModelName = "SnackStand",
+			ConsoleName = "SnackConsole",
 			UnlockCost = 40,
 			RepairCost = 30,
 			BaseFare = 4,
@@ -88,6 +99,8 @@ return {
 		},
 		Ferris = {
 			DisplayName = "관람차",
+			ModelName = "FerrisWheelRide",
+			ConsoleName = "FerrisConsole",
 			UnlockCost = 200,
 			RepairCost = 100,
 			BaseFare = 20,
@@ -99,6 +112,8 @@ return {
 		},
 		Swing = {
 			DisplayName = "회전 그네",
+			ModelName = "SwingRide",
+			ConsoleName = "SwingConsole",
 			UnlockCost = 300,
 			RepairCost = 150,
 			BaseFare = 28,
@@ -109,6 +124,8 @@ return {
 			RideSeconds = 30,
 		},
 	} :: { [string]: RideEconomy },
+	-- The order attractions unlock in (each needs the one before it repaired).
+	RideChain = { "Carousel", "Teacups", "Snack", "Bumper", "Ferris", "Swing" },
 	-- Seconds between automatic boardings for staff level 1, 2, 3 (0 staff means players accept guests).
 	StaffIntervals = { 10, 6, 3 },
 

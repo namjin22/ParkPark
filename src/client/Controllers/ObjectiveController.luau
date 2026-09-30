@@ -29,12 +29,10 @@ function ObjectiveController.Start()
 	local park = Workspace:WaitForChild("ParkParkWorld")
 	local entrance = park:WaitForChild("RuinedEntrance")
 	local carousel = park:WaitForChild("BrokenCarousel")
-	local teacups = park:WaitForChild("TeacupsRide")
-	local bumper = park:WaitForChild("BumperCarsRide")
-	local debrisTarget = entrance:WaitForChild("EntranceDebris"):WaitForChild("CleanupTarget")
+	-- The debris arrives with the entrance, a moment after the park folder; a timeout avoids the yield warning.
+	local debris = entrance:WaitForChild("EntranceDebris", 30)
+	local debrisTarget = if debris then debris:WaitForChild("CleanupTarget", 30) else nil
 	local console = carousel:WaitForChild("RepairConsole")
-	local teacupsConsole = teacups:WaitForChild("TeacupsConsole")
-	local bumperConsole = bumper:WaitForChild("BumperConsole")
 	local gateAnchor = park:WaitForChild("GateAnchor")
 	local coins = player:WaitForChild("leaderstats"):WaitForChild("Coins") :: IntValue
 	local currency = GameConfig.CurrencyDisplayName
@@ -109,10 +107,21 @@ function ObjectiveController.Start()
 		return GameConfig.Rides[key].BaseFare
 	end
 
+	-- The next attraction in the unlock chain that is not yet repaired, with its console.
+	local function nextRide(): (string?, Model?, BasePart?)
+		for _, key in GameConfig.RideChain do
+			local config = GameConfig.Rides[key]
+			local model = park:FindFirstChild(config.ModelName)
+			if model and model:IsA("Model") and model:GetAttribute("IsRepaired") ~= true then
+				local consolePart = model:FindFirstChild(config.ConsoleName, true)
+				return key, model, if consolePart and consolePart:IsA("BasePart") then consolePart else nil
+			end
+		end
+		return nil, nil, nil
+	end
+
 	local function currentStep(): Step
 		local carouselConfig = GameConfig.Rides.Carousel
-		local teacupsConfig = GameConfig.Rides.Teacups
-		local bumperConfig = GameConfig.Rides.Bumper
 		if park:GetAttribute("EntranceCleared") ~= true then
 			return {
 				title = "1. 입구 쓰레기를 치우세요",
@@ -125,12 +134,7 @@ function ObjectiveController.Start()
 				title = "2. 회전목마를 수리하세요",
 				detail = need(
 					carouselConfig.RepairCost,
-					string.format(
-						"콘솔에서 수리 · %d %s · 손님당 +%d",
-						carouselConfig.RepairCost,
-						currency,
-						fare("Carousel")
-					)
+					string.format("콘솔에서 E · 수리 %d %s", carouselConfig.RepairCost, currency)
 				),
 				target = console,
 			}
@@ -145,67 +149,28 @@ function ObjectiveController.Start()
 		if ((park:GetAttribute("GuestsBoarded") :: number?) or 0) < 1 then
 			return {
 				title = "4. 줄 선 손님을 태워주세요",
-				detail = string.format(
-					"맨 앞 손님 앞에서 태우기 · 손님당 +%d %s",
-					fare("Carousel"),
-					currency
-				),
+				detail = string.format("맨 앞 손님 앞에서 E · 손님당 +%d %s", fare("Carousel"), currency),
 				target = nil,
 			}
 		end
-		if teacups:GetAttribute("IsUnlocked") ~= true then
+
+		local key, model, target = nextRide()
+		if key and model then
+			local config = GameConfig.Rides[key]
+			local unlocked = model:GetAttribute("IsUnlocked") == true
+			local cost = if unlocked then config.RepairCost else config.UnlockCost
 			return {
-				title = "5. 찻잔 라이드 해금",
+				title = string.format("5. %s %s", config.DisplayName, if unlocked then "수리" else "해금"),
 				detail = need(
-					teacupsConfig.UnlockCost,
-					string.format(
-						"콘솔에서 해금 · %d %s · 손님당 +%d",
-						teacupsConfig.UnlockCost,
-						currency,
-						fare("Teacups")
-					)
+					cost,
+					string.format("콘솔에서 E · %d %s · 손님당 +%d", cost, currency, fare(key))
 				),
-				target = teacupsConsole,
-			}
-		end
-		if teacups:GetAttribute("IsRepaired") ~= true then
-			return {
-				title = "6. 찻잔 라이드 수리",
-				detail = need(
-					teacupsConfig.RepairCost,
-					string.format("콘솔에서 수리 · %d %s", teacupsConfig.RepairCost, currency)
-				),
-				target = teacupsConsole,
-			}
-		end
-		if bumper:GetAttribute("IsUnlocked") ~= true then
-			return {
-				title = "7. 범퍼카 해금",
-				detail = need(
-					bumperConfig.UnlockCost,
-					string.format(
-						"콘솔에서 해금 · %d %s · 손님당 +%d",
-						bumperConfig.UnlockCost,
-						currency,
-						fare("Bumper")
-					)
-				),
-				target = bumperConsole,
-			}
-		end
-		if bumper:GetAttribute("IsRepaired") ~= true then
-			return {
-				title = "8. 범퍼카 수리",
-				detail = need(
-					bumperConfig.RepairCost,
-					string.format("콘솔에서 수리 · %d %s", bumperConfig.RepairCost, currency)
-				),
-				target = bumperConsole,
+				target = target,
 			}
 		end
 		return {
-			title = "9. 놀이기구를 키우세요",
-			detail = "콘솔에서 요금 올리기(E) · 직원 고용(F)",
+			title = "6. 놀이기구를 키우세요",
+			detail = "콘솔에서 E · 요금 올리기와 직원 고용",
 			target = nil,
 		}
 	end
@@ -223,11 +188,14 @@ function ObjectiveController.Start()
 	park:GetAttributeChangedSignal("EntranceCleared"):Connect(refresh)
 	park:GetAttributeChangedSignal("ParkOpen"):Connect(refresh)
 	carousel:GetAttributeChangedSignal("IsRepaired"):Connect(refresh)
-	teacups:GetAttributeChangedSignal("IsUnlocked"):Connect(refresh)
-	teacups:GetAttributeChangedSignal("IsRepaired"):Connect(refresh)
+	for _, key in GameConfig.RideChain do
+		task.spawn(function()
+			local model = park:WaitForChild(GameConfig.Rides[key].ModelName)
+			model:GetAttributeChangedSignal("IsUnlocked"):Connect(refresh)
+			model:GetAttributeChangedSignal("IsRepaired"):Connect(refresh)
+		end)
+	end
 	park:GetAttributeChangedSignal("GuestsBoarded"):Connect(refresh)
-	bumper:GetAttributeChangedSignal("IsUnlocked"):Connect(refresh)
-	bumper:GetAttributeChangedSignal("IsRepaired"):Connect(refresh)
 	coins:GetPropertyChangedSignal("Value"):Connect(refresh)
 	refresh()
 end
