@@ -178,7 +178,7 @@ return {
 	SwingSeatCenterZ = -0.065,
 	SwingSeatTop = -5.26,
 	SwingRiderHip = 1.25,
-	SwingSeatFlip = false,
+	SwingSeatFlip = true,
 
 	-- Janitors: hired at the cleaning cart by the entrance path, they walk to litter and clear it for free.
 	-- Costs are for the 1st, 2nd, ... janitor.

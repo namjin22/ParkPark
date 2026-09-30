@@ -44,6 +44,9 @@
     "ParkParkSnackStand": "rbxassetid://124711749463757",
     "ParkParkFerrisBase": "rbxassetid://97401878191247",
     "ParkParkFerrisCabin": "rbxassetid://101590622757213",
-    "ParkParkFerrisWheel": "rbxassetid://126686784045591"
+    "ParkParkFerrisWheel": "rbxassetid://126686784045591",
+    "ParkParkSwingBase": "rbxassetid://136260011024952",
+    "ParkParkSwingCrown": "rbxassetid://138364222220730",
+    "ParkParkSwingSeat": "rbxassetid://74458303658419"
   }
 }
