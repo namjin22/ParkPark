@@ -38,6 +38,7 @@ guestService.Start(park, economyService.AwardCoins, noticeService.Send, noticeSe
 local litter = litterService.Start(park, economyService.AwardCoins, noticeService.Popup, parkBuilder.FindLitterTemplate)
 janitorService.Start(
 	park,
+	economyService.AwardCoins,
 	economyService.SpendCoins,
 	economyService.GetCoins,
 	noticeService.Send,

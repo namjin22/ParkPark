@@ -10,10 +10,11 @@ local ParkLayout = require(Config:WaitForChild("ParkLayout"))
 
 -- A cleaning cart beside the entrance path sells janitors. Each hired janitor is a small R15 character in a
 -- green outfit who walks to the nearest unclaimed piece of litter, sweeps it away after a moment, and
--- repeats; when nothing is left, they wait near the cart. Janitors clear litter for free, so they trade the
--- small coin reward a player gets for picking it up against not having to do it.
+-- repeats; when nothing is left, they wait near the cart. Each piece a janitor clears pays its coin reward to
+-- every player, just as if they had picked it up themselves.
 local JanitorService = {}
 
+type AwardCoins = (Player, number) -> boolean
 type SpendCoins = (Player, number) -> boolean
 type GetCoins = (Player) -> number
 type Notify = (Player, string, string) -> ()
@@ -150,6 +151,7 @@ end
 
 function JanitorService.Start(
 	park: JanitorReferences,
+	awardCoins: AwardCoins,
 	spendCoins: SpendCoins,
 	getCoins: GetCoins,
 	notify: Notify,
@@ -171,11 +173,12 @@ function JanitorService.Start(
 		prompt.Enabled = cost ~= nil
 		if cost then
 			prompt.ObjectText = string.format(
-				"청소원 %d/%d · %d %s · 쓰레기를 알아서 치워요",
+				"청소원 %d/%d · %d %s · 치울 때마다 +%d",
 				hired + 1,
 				#GameConfig.JanitorCosts,
 				cost,
-				currency
+				currency,
+				GameConfig.LitterReward
 			)
 		end
 		park.ParkFolder:SetAttribute("Janitors", hired)
@@ -227,7 +230,10 @@ function JanitorService.Start(
 					-- A moment of sweeping, then the litter is gone.
 					task.wait(GameConfig.JanitorCleanSeconds)
 					if litter.Remove(target) then
-						popup(spot + Vector3.new(0, 5, 0), "쓱쓱!")
+						for _, other in Players:GetPlayers() do
+							awardCoins(other, GameConfig.LitterReward)
+						end
+						popup(spot + Vector3.new(0, 5, 0), string.format("+%d %s", GameConfig.LitterReward, currency))
 					end
 				end
 			end
@@ -280,7 +286,7 @@ function JanitorService.Start(
 			player,
 			"청소원을 고용했어요!",
 			string.format(
-				"-%d %s · 쓰레기를 알아서 치워요 (%d/%d)",
+				"-%d %s · 치운 쓰레기마다 코인을 받아요 (%d/%d)",
 				cost,
 				currency,
 				hired,
