@@ -28,7 +28,13 @@
     "ParkParkPirateShip",
     "ParkParkHauntedHouse",
     "ParkParkCoasterTrack",
-    "ParkParkCoasterCar"
+    "ParkParkCoasterCar",
+    "ParkParkDecorTree",
+    "ParkParkDecorBush",
+    "ParkParkDecorLamp",
+    "ParkParkDecorBench",
+    "ParkParkDecorFountain",
+    "ParkParkDecorBalloons"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",

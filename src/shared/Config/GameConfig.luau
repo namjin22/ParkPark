@@ -50,6 +50,12 @@ return {
 	PirateScale = 3,
 	HauntedScale = 3.2,
 	CoasterScale = 3,
+	TreeScale = 1.9,
+	BushScale = 1.7,
+	LampScale = 2,
+	BenchScale = 1.9,
+	FountainScale = 2.6,
+	BalloonScale = 2,
 
 	Rides = {
 		Carousel = {

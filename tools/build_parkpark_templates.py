@@ -67,6 +67,12 @@ PIRATE_PLATFORM = config_number("PiratePlatformRadius")
 HAUNTED_SCALE = config_number("HauntedScale")
 COASTER_SCALE = config_number("CoasterScale")
 COASTER_CARS = int(config_number("CoasterCarCount"))
+TREE_SCALE = config_number("TreeScale")
+BUSH_SCALE = config_number("BushScale")
+LAMP_SCALE = config_number("LampScale")
+BENCH_SCALE = config_number("BenchScale")
+FOUNTAIN_SCALE = config_number("FountainScale")
+BALLOON_SCALE = config_number("BalloonScale")
 TEACUP_COUNT = int(config_number("TeacupCupCount"))
 TEACUP_RING_RADIUS = config_number("TeacupRingRadius")
 TEACUP_BASE_HEIGHT = config_number("TeacupCupBaseHeight")
@@ -292,6 +298,7 @@ def main() -> None:
     build_pirate_ship()
     build_haunted_house()
     build_coaster()
+    build_decor()
 
 
 def build_teacups() -> None:
@@ -612,6 +619,26 @@ def build_coaster() -> None:
             ],
         ),
     )
+
+
+def build_decor() -> None:
+    """Scenery templates: one mesh (`Piece`, origin at the ground point) plus an optional solid collider."""
+    pieces = (
+        ("DecorTree", "ParkParkDecorTree", TREE_SCALE, cylinder_collider("Collider", (0, 1.8, 0), 3.6, 1.3, TREE_SCALE)),
+        ("DecorBush", "ParkParkDecorBush", BUSH_SCALE, None),
+        ("DecorLamp", "ParkParkDecorLamp", LAMP_SCALE, cylinder_collider("Collider", (0, 3.0, 0), 6.0, 0.6, LAMP_SCALE)),
+        ("DecorBench", "ParkParkDecorBench", BENCH_SCALE, box_collider("Collider", (0, 0.9, 0.2), (2.8, 1.8, 1.1), 0, BENCH_SCALE)),
+        ("DecorFountain", "ParkParkDecorFountain", FOUNTAIN_SCALE, cylinder_collider("Collider", (0, 0.6, 0), 1.2, 9.0, FOUNTAIN_SCALE)),
+        ("DecorBalloons", "ParkParkDecorBalloons", BALLOON_SCALE, None),
+    )
+    for name, obj, scale, collider in pieces:
+        if missing_meshes((obj,)):
+            print(f"skipped {name}: import {obj}.obj and record its mesh ID first")
+            continue
+        children = [mesh_part("Piece", obj, (0, 0, 0), 0, False, MINT, scale)]
+        if collider:
+            children.append(collider)
+        write(name, model(name, children))
 
 
 if __name__ == "__main__":

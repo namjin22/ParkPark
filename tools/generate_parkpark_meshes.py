@@ -1585,6 +1585,110 @@ def write_coaster_path() -> None:
     (ROOT / "src" / "shared" / "Config" / "CoasterPath.luau").write_text("\n".join(lines), encoding="utf-8", newline="\n")
 
 
+def make_decor_tree() -> Mesh:
+    """A round storybook tree (origin at the base of the trunk): tapered trunk, lumpy canopy, a few fruits."""
+    mesh = Mesh("ParkParkDecorTree")
+    lathe(mesh, [(0.0, 0.0, "wood"), (0.66, 0.0, "wood"), (0.52, 1.4, "wood"), (0.42, 3.4, "wood"), (0.0, 3.4, "wood")], 12)
+    add_ellipsoid(mesh, (0, 5.0, 0), (2.7, 2.2, 2.7), "mint", slices=12, stacks=6)
+    add_ellipsoid(mesh, (1.5, 6.0, 0.6), (1.9, 1.7, 1.9), "mint", slices=10, stacks=5)
+    add_ellipsoid(mesh, (-1.4, 6.3, -0.7), (1.8, 1.6, 1.8), "mint", slices=10, stacks=5)
+    add_ellipsoid(mesh, (0.2, 7.1, -0.3), (1.5, 1.2, 1.5), "mint", slices=10, stacks=5)
+    for x, y, z in ((2.2, 4.6, 1.2), (-2.3, 5.0, -0.4), (0.6, 3.9, -2.3), (-0.8, 6.9, 1.4), (1.9, 6.6, -1.1)):
+        add_ellipsoid(mesh, (x, y, z), (0.24, 0.24, 0.24), "coral", slices=6, stacks=4)
+    return mesh
+
+
+def make_decor_bush() -> Mesh:
+    mesh = Mesh("ParkParkDecorBush")
+    add_ellipsoid(mesh, (0, 0.85, 0), (1.5, 1.0, 1.4), "mint", slices=10, stacks=5)
+    add_ellipsoid(mesh, (1.1, 0.6, 0.5), (1.0, 0.7, 1.0), "mint", slices=9, stacks=5)
+    add_ellipsoid(mesh, (-1.0, 0.55, -0.3), (0.9, 0.65, 0.9), "mint", slices=9, stacks=5)
+    for x, y, z, material in ((0.5, 1.7, 0.4, "coral"), (-0.6, 1.5, -0.5, "gold"), (1.5, 1.2, 0.9, "coral"), (-1.4, 1.1, -0.4, "gold")):
+        add_ellipsoid(mesh, (x, y, z), (0.2, 0.2, 0.2), material, slices=6, stacks=4)
+    return mesh
+
+
+def make_decor_lamp() -> Mesh:
+    """A gaslight-style lamp post with a cream lantern and a coral cap (origin at the base)."""
+    mesh = Mesh("ParkParkDecorLamp")
+    lathe(
+        mesh,
+        [
+            (0.0, 0.0, "wood"),
+            (0.75, 0.0, "wood"),
+            (0.55, 0.45, "gold"),
+            (0.3, 0.8, "cream"),
+            (0.22, 5.2, "cream"),
+            (0.42, 5.4, "gold"),
+            (0.0, 5.4, "gold"),
+        ],
+        14,
+    )
+    add_box(mesh, (0, 6.15, 0), (0.95, 1.3, 0.95), "cream")
+    for x, z in ((-0.5, -0.5), (0.5, -0.5), (-0.5, 0.5), (0.5, 0.5)):
+        add_cylinder_between(mesh, (x, 5.5, z), (x, 6.8, z), 0.06, 0.06, "gold", 5)
+    lathe(mesh, [(0.85, 6.8, "coral"), (0.0, 7.6, "coral")], 8)
+    add_ellipsoid(mesh, (0, 7.75, 0), (0.16, 0.16, 0.16), "gold", slices=6, stacks=4)
+    return mesh
+
+
+def make_decor_bench() -> Mesh:
+    """A park bench (front, where sitters look, is -Z; origin at the ground centre)."""
+    mesh = Mesh("ParkParkDecorBench")
+    for z in (-0.36, 0.0, 0.36):
+        add_box(mesh, (0, 0.95, z), (2.8, 0.12, 0.3), "wood")
+    for y in (1.5, 1.85):
+        add_box(mesh, (0, y, 0.6), (2.8, 0.26, 0.1), "wood")
+    for x in (-1.3, 1.3):
+        add_box(mesh, (x, 0.5, 0.0), (0.16, 1.0, 1.1), "coral")
+        add_box(mesh, (x, 1.1, 0.0), (0.2, 0.12, 1.1), "gold")
+        add_box(mesh, (x, 1.7, 0.6), (0.16, 1.0, 0.16), "coral")
+    return mesh
+
+
+def make_decor_fountain() -> Mesh:
+    """A three-tier plaza fountain with a coral rim and a gold finial (origin at the ground centre)."""
+    mesh = Mesh("ParkParkDecorFountain")
+    add_vertical_cylinder(mesh, 4.4, 0.0, 0.9, "cream", 40)
+    add_vertical_cylinder(mesh, 4.5, 0.55, 1.05, "coral", 40)
+    add_torus(mesh, 4.45, 0.13, 1.08, "gold", segments=40, sides=6)
+    add_vertical_cylinder(mesh, 3.95, 0.86, 0.9, "dark_glass", 40)
+    lathe(
+        mesh,
+        [
+            (0.0, 0.88, "cream"),
+            (1.1, 0.88, "cream"),
+            (0.75, 1.6, "gold"),
+            (0.45, 2.6, "cream"),
+            (1.7, 2.75, "coral"),
+            (1.45, 3.1, "cream"),
+            (0.35, 3.2, "cream"),
+            (0.3, 4.2, "gold"),
+            (0.0, 4.4, "gold"),
+        ],
+        24,
+    )
+    add_star(mesh, 4.9, 0.4, "gold")
+    return mesh
+
+
+def make_decor_balloons() -> Mesh:
+    """A weighted bunch of balloons on strings (origin at the base)."""
+    mesh = Mesh("ParkParkDecorBalloons")
+    add_box(mesh, (0, 0.25, 0), (0.9, 0.5, 0.9), "wood")
+    for x, y, z, material in (
+        (0.0, 5.6, 0.0, "coral"),
+        (1.1, 4.8, 0.5, "gold"),
+        (-1.1, 4.9, -0.4, "mint"),
+        (0.5, 4.3, -1.0, "cream"),
+        (-0.4, 4.4, 1.0, "coral"),
+    ):
+        add_cylinder_between(mesh, (0, 0.5, 0), (x, y - 0.75, z), 0.03, 0.03, "ink", 4)
+        add_ellipsoid(mesh, (x, y, z), (0.62, 0.78, 0.62), material, slices=9, stacks=6)
+        add_ellipsoid(mesh, (x, y - 0.82, z), (0.1, 0.09, 0.1), material, slices=5, stacks=3)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -1676,6 +1780,12 @@ def main() -> None:
         make_haunted_house(),
         make_coaster_track(),
         make_coaster_car(),
+        make_decor_tree(),
+        make_decor_bush(),
+        make_decor_lamp(),
+        make_decor_bench(),
+        make_decor_fountain(),
+        make_decor_balloons(),
         make_bumper_platform(),
         make_bumper_car(),
         make_entrance(),

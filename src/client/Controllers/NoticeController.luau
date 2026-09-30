@@ -31,8 +31,8 @@ function NoticeController.Start()
 	local card = Instance.new("Frame")
 	card.Name = "NoticeToast"
 	card.AnchorPoint = Vector2.new(0.5, 0)
-	card.Position = UDim2.new(0.5, 0, 0, 60)
-	card.Size = UDim2.new(0.7, 0, 0, 58)
+	card.Position = UDim2.new(0.5, 0, 0, 152)
+	card.Size = UDim2.new(0.9, 0, 0, 66)
 	card.BackgroundColor3 = GameConfig.Palette.Cream
 	card.BackgroundTransparency = 1
 	card.BorderSizePixel = 0
@@ -41,8 +41,8 @@ function NoticeController.Start()
 	addCorner(card, 18)
 
 	local sizeConstraint = Instance.new("UISizeConstraint")
-	sizeConstraint.MinSize = Vector2.new(220, 58)
-	sizeConstraint.MaxSize = Vector2.new(300, 58)
+	sizeConstraint.MinSize = Vector2.new(240, 66)
+	sizeConstraint.MaxSize = Vector2.new(360, 66)
 	sizeConstraint.Parent = card
 
 	local outline = Instance.new("UIStroke")
@@ -54,7 +54,7 @@ function NoticeController.Start()
 	local accent = Instance.new("Frame")
 	accent.Name = "Accent"
 	accent.Position = UDim2.fromOffset(0, 10)
-	accent.Size = UDim2.fromOffset(5, 38)
+	accent.Size = UDim2.fromOffset(5, 46)
 	accent.BackgroundColor3 = GameConfig.Palette.Coral
 	accent.BackgroundTransparency = 1
 	accent.BorderSizePixel = 0
@@ -64,23 +64,23 @@ function NoticeController.Start()
 	local title = Instance.new("TextLabel")
 	title.Name = "Title"
 	title.Position = UDim2.fromOffset(16, 8)
-	title.Size = UDim2.new(1, -34, 0, 22)
+	title.Size = UDim2.new(1, -34, 0, 26)
 	title.BackgroundTransparency = 1
 	title.Font = Enum.Font.GothamBold
 	title.TextColor3 = GameConfig.Palette.Ink
-	title.TextSize = 15
+	title.TextSize = 18
 	title.TextTransparency = 1
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.Parent = card
 
 	local detail = Instance.new("TextLabel")
 	detail.Name = "Detail"
-	detail.Position = UDim2.fromOffset(16, 31)
-	detail.Size = UDim2.new(1, -34, 0, 18)
+	detail.Position = UDim2.fromOffset(16, 36)
+	detail.Size = UDim2.new(1, -34, 0, 22)
 	detail.BackgroundTransparency = 1
 	detail.Font = Enum.Font.GothamMedium
 	detail.TextColor3 = GameConfig.Palette.Ink
-	detail.TextSize = 12
+	detail.TextSize = 14
 	detail.TextTransparency = 1
 	detail.TextXAlignment = Enum.TextXAlignment.Left
 	detail.Parent = card
@@ -91,7 +91,7 @@ function NoticeController.Start()
 	local function fade(visible: boolean, duration: number)
 		local target = if visible then 0 else 1
 		TweenService:Create(card, TweenInfo.new(duration, Enum.EasingStyle.Quad), {
-			Position = UDim2.new(0.5, 0, 0, if visible then 70 else 60),
+			Position = UDim2.new(0.5, 0, 0, if visible then 162 else 152),
 			BackgroundTransparency = target,
 		}):Play()
 		TweenService:Create(outline, TweenInfo.new(duration), { Transparency = if visible then 0.15 else 1 }):Play()

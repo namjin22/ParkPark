@@ -2144,6 +2144,13 @@ function ParkBuilder.FindLitterTemplate(): Model?
 	return nil
 end
 
+-- An authored scenery template (`DecorTree`, `DecorBench`, ...) or nil while it has not been imported.
+function ParkBuilder.FindDecorTemplate(name: string): Model?
+	local folder = getAssetFolder()
+	local template = if folder then folder:FindFirstChild(name) else nil
+	return if template and template:IsA("Model") then template else nil
+end
+
 function ParkBuilder.ApplyEntranceRestored(entrance: Model)
 	applyAuthoredEntranceState(entrance, true)
 end
