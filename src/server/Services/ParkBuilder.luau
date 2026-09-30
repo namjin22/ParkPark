@@ -1626,6 +1626,29 @@ local function ensureUpgradePrompts(console: BasePart, objectText: string): (Pro
 	return income, staff
 end
 
+-- Saved state applied while building (see PersistenceService.SavedState): the park folder's attributes and each
+-- attraction model's unlock, repair, and upgrade attributes, set before the appearance code reads them.
+local savedState: { [string]: any }? = nil
+
+function ParkBuilder.SetSavedState(state: { [string]: any }?)
+	savedState = state
+end
+
+local function applySavedRide(model: Model, name: string)
+	local rides = savedState and savedState.Rides
+	if rides == nil then
+		return
+	end
+	for key, config in GameConfig.Rides do
+		local saved = rides[key]
+		if config.ModelName == name and saved then
+			for attribute, value in saved do
+				model:SetAttribute(attribute, value)
+			end
+		end
+	end
+end
+
 local function getOrCreateParkFolder(): Folder
 	local existing = Workspace:FindFirstChild(PARK_FOLDER_NAME)
 	if existing ~= nil then
@@ -1637,6 +1660,12 @@ local function getOrCreateParkFolder(): Folder
 
 	local parkFolder = Instance.new("Folder")
 	parkFolder.Name = PARK_FOLDER_NAME
+	local savedPark = savedState and savedState.Park
+	if savedPark then
+		for attribute, value in savedPark do
+			parkFolder:SetAttribute(attribute, value)
+		end
+	end
 	parkFolder.Parent = Workspace
 	return parkFolder
 end
@@ -1659,6 +1688,7 @@ local function getOrCreateModel(parent: Instance, name: string, build: (Folder) 
 		local model = template:Clone()
 		model.Name = name
 		model:SetAttribute("IsGraybox", false)
+		applySavedRide(model, name)
 		model.Parent = parent
 		if name == ENTRANCE_NAME then
 			model:PivotTo(AUTHORED_ENTRANCE_PIVOT)
@@ -1684,7 +1714,9 @@ local function getOrCreateModel(parent: Instance, name: string, build: (Folder) 
 		return model
 	end
 
-	return build(parent)
+	local built = build(parent)
+	applySavedRide(built, name)
+	return built
 end
 
 function ParkBuilder.Build(): References

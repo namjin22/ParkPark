@@ -1,5 +1,6 @@
 --!strict
 
+local persistenceService = require(script.Parent.Services.PersistenceService)
 local parkBuilder = require(script.Parent.Services.ParkBuilder)
 local bumperCarService = require(script.Parent.Services.BumperCarService)
 local coasterService = require(script.Parent.Services.CoasterService)
@@ -18,9 +19,13 @@ local rideService = require(script.Parent.Services.RideService)
 local teacupService = require(script.Parent.Services.TeacupService)
 
 -- Create leaderstats before the builder's bounded asset waits so the HUD never stalls.
+economyService.SetStartingCoinsProvider(persistenceService.LoadCoins)
 economyService.Initialize()
 noticeService.Initialize()
-print("[ParkPark] Building park world")
+-- The first player to join hosts the park: their saved park (if any) is what gets built.
+local savedPark = persistenceService.LoadParkState()
+parkBuilder.SetSavedState(savedPark :: any)
+print(if savedPark then "[ParkPark] Building park world from a saved game" else "[ParkPark] Building park world")
 local park = parkBuilder.Build()
 parkProgressionService.Start(park, economyService.AwardCoins, parkBuilder.ApplyEntranceRestored, noticeService.Send)
 rideService.Start(
@@ -55,8 +60,46 @@ janitorService.Start(
 	economyService.GetCoins,
 	noticeService.Send,
 	noticeService.Popup,
-	litter
+	litter,
+	if savedPark then savedPark.Janitors else 0
 )
+
+-- Everything worth keeping is read here, from server-side state only.
+local rideModels: { [string]: Model } = {
+	Carousel = park.Carousel,
+	Teacups = park.TeacupsRide,
+	Snack = park.SnackStand,
+	Bumper = park.BumperRide,
+	Ferris = park.FerrisRide,
+	Swing = park.SwingRide,
+	Pirate = park.PirateRide,
+	Haunted = park.HauntedHouse,
+	Coaster = park.CoasterRide,
+}
+local watched: { Instance } = { park.ParkFolder }
+for _, model in rideModels do
+	table.insert(watched, model)
+end
+persistenceService.Start(function()
+	local rides: { [string]: any } = {}
+	for key, model in rideModels do
+		rides[key] = {
+			IsUnlocked = model:GetAttribute("IsUnlocked") == true,
+			IsRepaired = model:GetAttribute("IsRepaired") == true,
+			IncomeLevel = (model:GetAttribute("IncomeLevel") :: number?) or 0,
+			StaffLevel = (model:GetAttribute("StaffLevel") :: number?) or 0,
+		}
+	end
+	return {
+		Park = {
+			EntranceCleared = park.ParkFolder:GetAttribute("EntranceCleared") == true,
+			ParkOpen = park.ParkFolder:GetAttribute("ParkOpen") == true,
+			GuestsBoarded = (park.ParkFolder:GetAttribute("GuestsBoarded") :: number?) or 0,
+		},
+		Rides = rides,
+		Janitors = (park.ParkFolder:GetAttribute("Janitors") :: number?) or 0,
+	}
+end, watched)
 
 local function source(model: Model): string
 	return if model:GetAttribute("IsGraybox") == true then "graybox" else "authored"

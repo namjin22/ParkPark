@@ -159,7 +159,8 @@ function JanitorService.Start(
 	litter: {
 		Nearest: (Vector3) -> Model?,
 		Remove: (Model) -> boolean,
-	}
+	},
+	initialHired: number?
 )
 	local cart, prompt = buildCart(park.ParkFolder)
 	local currency = GameConfig.CurrencyDisplayName
@@ -240,6 +241,36 @@ function JanitorService.Start(
 		end
 	end
 
+	-- Creates a janitor, counts them as hired, and sets them cleaning. False if the character could not be made.
+	local function spawnJanitor(): boolean
+		local model = createJanitorModel()
+		if model == nil then
+			return false
+		end
+		hired += 1
+		model:PivotTo(CFrame.new(CART_POSITION + Vector3.new(6, 4, 4)))
+		model.Parent = folder
+		local root = model:FindFirstChild("HumanoidRootPart")
+		if root and root:IsA("BasePart") then
+			root:SetNetworkOwner(nil)
+		end
+		task.spawn(function()
+			local ok, err = pcall(function()
+				runJanitor(model)
+			end)
+			if not ok then
+				warn("[ParkPark] Janitor stopped: " .. tostring(err))
+			end
+		end)
+		return true
+	end
+
+	-- Janitors hired in a saved park come back at the cart.
+	for _ = 1, math.min(initialHired or 0, #GameConfig.JanitorCosts) do
+		spawnJanitor()
+	end
+	refreshPrompt()
+
 	prompt.Triggered:Connect(function(player: Player)
 		local character = player.Character
 		local playerRoot = character and character:FindFirstChild("HumanoidRootPart")
@@ -262,25 +293,9 @@ function JanitorService.Start(
 			return
 		end
 
-		local model = createJanitorModel()
-		if model == nil then
+		if not spawnJanitor() then
 			return
 		end
-		hired += 1
-		model:PivotTo(CFrame.new(CART_POSITION + Vector3.new(6, 4, 4)))
-		model.Parent = folder
-		local root = model:FindFirstChild("HumanoidRootPart")
-		if root and root:IsA("BasePart") then
-			root:SetNetworkOwner(nil)
-		end
-		task.spawn(function()
-			local ok, err = pcall(function()
-				runJanitor(model)
-			end)
-			if not ok then
-				warn("[ParkPark] Janitor stopped: " .. tostring(err))
-			end
-		end)
 		refreshPrompt()
 		notify(
 			player,
