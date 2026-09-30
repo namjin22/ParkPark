@@ -63,6 +63,12 @@
     "ParkParkPirateShip": "rbxassetid://135335487450751",
     "ParkParkHauntedHouse": "rbxassetid://90126711284962",
     "ParkParkCoasterTrack": "rbxassetid://137439725574920",
-    "ParkParkCoasterCar": "rbxassetid://119683478283420"
+    "ParkParkCoasterCar": "rbxassetid://119683478283420",
+    "ParkParkDecorBench": "rbxassetid://112078099037445",
+    "ParkParkDecorBalloons": "rbxassetid://112144524930515",
+    "ParkParkDecorLamp": "rbxassetid://108235021978572",
+    "ParkParkDecorBush": "rbxassetid://131758318432547",
+    "ParkParkDecorFountain": "rbxassetid://129699646755570",
+    "ParkParkDecorTree": "rbxassetid://80862845179141"
   }
 }
