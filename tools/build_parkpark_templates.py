@@ -400,10 +400,10 @@ def build_snack_stand() -> None:
         model(
             "SnackStand",
             [
-                mesh_part("StandBody", "ParkParkSnackStand", (0, 0, 0), 0, False, CORAL, SNACK_SCALE),
+                mesh_part("StandBody", "ParkParkSnackStand", (0, 0, 0), 180, False, CORAL, SNACK_SCALE),
                 *colliders,
                 # Behind the stand, away from the queue in front of the counter, so its prompts stay clear of the guests.
-                console("SnackConsole", -9.5, 7),
+                console("SnackConsole", -9.5, 7, 0),
             ],
         ),
     )
