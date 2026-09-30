@@ -51,6 +51,10 @@ BUMPER_CAR_COUNT = int(config_number("BumperSeatCount"))
 CONSOLE_SCALE = config_number("ConsoleScale")
 LITTER_SCALE = config_number("LitterScale")
 SNACK_SCALE = config_number("SnackScale")
+FERRIS_SCALE = config_number("FerrisScale")
+FERRIS_RADIUS = config_number("FerrisRadius")
+FERRIS_HUB = config_number("FerrisHubHeight")
+FERRIS_CABINS = int(config_number("FerrisCabinCount"))
 TEACUP_COUNT = int(config_number("TeacupCupCount"))
 TEACUP_RING_RADIUS = config_number("TeacupRingRadius")
 TEACUP_BASE_HEIGHT = config_number("TeacupCupBaseHeight")
@@ -271,6 +275,7 @@ def main() -> None:
     build_teacups()
     build_bumper_cars()
     build_snack_stand()
+    build_ferris_wheel()
 
 
 def build_teacups() -> None:
@@ -404,6 +409,47 @@ def build_snack_stand() -> None:
                 *colliders,
                 # Behind the stand, away from the queue in front of the counter, so its prompts stay clear of the guests.
                 console("SnackConsole", -9.5, 7, 0),
+            ],
+        ),
+    )
+
+
+def build_ferris_wheel() -> None:
+    needed = ("ParkParkFerrisBase", "ParkParkFerrisWheel", "ParkParkFerrisCabin")
+    missing = missing_meshes(needed)
+    if missing:
+        print(f"skipped FerrisWheelRide: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    # The wheel turns in the local XY plane on an axle along Z; ParkBuilder turns the model a quarter.
+    # Cabins are placed with their hanger point (the OBJ origin) on the rim, and FerrisService then moves them.
+    cabins = []
+    for index in range(FERRIS_CABINS):
+        angle = 2 * math.pi * index / FERRIS_CABINS
+        hanger = (FERRIS_RADIUS * math.cos(angle), FERRIS_HUB + FERRIS_RADIUS * math.sin(angle), 0.0)
+        cabins.append(mesh_part(f"FerrisCabin{index + 1}", "ParkParkFerrisCabin", hanger, 0, False, CORAL, FERRIS_SCALE))
+
+    colliders = [box_collider("BasePad", (0, 0.15, 0), (11.0, 0.3, 8.4), 0, FERRIS_SCALE)]
+    # The tower legs lean, so approximate each with a few upright posts along its length.
+    for z in (-1.4, 1.4):
+        for side in (-1, 1):
+            for t in (0.0, 0.35, 0.7):
+                x = side * 4.4 * (1 - t)
+                y = 0.3 + (FERRIS_HUB - 0.3) * t
+                colliders.append(
+                    cylinder_collider(f"LegCollider_{z:+.1f}_{side:+d}_{int(t * 100)}", (x, y + 1.6, z), 3.2, 1.3, FERRIS_SCALE)
+                )
+    write(
+        "FerrisWheelRide",
+        model(
+            "FerrisWheelRide",
+            [
+                mesh_part("FerrisBase", "ParkParkFerrisBase", (0, 0, 0), 0, False, CREAM, FERRIS_SCALE),
+                mesh_part("Wheel", "ParkParkFerrisWheel", (0, FERRIS_HUB, 0), 0, False, GOLD, FERRIS_SCALE),
+                model("FerrisCabins", cabins),
+                *colliders,
+                # Behind the wheel (local +Z is east in the world), away from the queue on the west side.
+                console("FerrisConsole", 8, 10, 0),
             ],
         ),
     )

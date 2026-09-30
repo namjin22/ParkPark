@@ -23,6 +23,7 @@ ParkLayout.SidePathZ = -12
 ParkLayout.SidePathHalfWidth = 9
 ParkLayout.SnackZ = 4
 ParkLayout.SnackPathHalfWidth = 8
+ParkLayout.FerrisZ = 16
 ParkLayout.GroundHalfWidth = 190
 ParkLayout.GroundMinZ = -170
 ParkLayout.GroundMaxZ = 115
@@ -32,6 +33,15 @@ local TEACUPS_PIVOT = Vector3.new(-105, 0, -60)
 local BUMPER_PIVOT = Vector3.new(105, 0, -60)
 -- The snack stand stands at the end of a short spur off the main path, its counter facing +X.
 local SNACK_PIVOT = Vector3.new(-50, 0, ParkLayout.SnackZ)
+-- The Ferris wheel mirrors it on the other side of the main path, its wheel turning in the YZ plane.
+local FERRIS_PIVOT = Vector3.new(66, 0, ParkLayout.FerrisZ)
+
+-- Attractions reached along a short spur off the main path instead of the side path: the spur's z and the
+-- x where it meets the main path.
+local SPURS: { [string]: { Z: number, InnerX: number } } = {
+	Snack = { Z = ParkLayout.SnackZ, InnerX = -8 },
+	Ferris = { Z = ParkLayout.FerrisZ, InnerX = 8 },
+}
 
 local carouselRadius = GameConfig.CarouselPlatformRadius * GameConfig.CarouselScale
 local teacupsRadius = GameConfig.TeacupsPlatformRadius * GameConfig.TeacupsScale
@@ -54,6 +64,12 @@ ParkLayout.Rides = {
 		Pivot = BUMPER_PIVOT,
 		PlatformRadius = bumperRadius,
 		QueueHead = Vector3.new(BUMPER_PIVOT.X, 0, BUMPER_PIVOT.Z + bumperRadius + 5),
+		QueueDirection = Vector3.new(-1, 0, 0),
+	},
+	Ferris = {
+		Pivot = FERRIS_PIVOT,
+		PlatformRadius = 20,
+		QueueHead = Vector3.new(FERRIS_PIVOT.X - 12, 0, ParkLayout.FerrisZ),
 		QueueDirection = Vector3.new(-1, 0, 0),
 	},
 	Snack = {
@@ -83,10 +99,11 @@ function ParkLayout.ToCrossing(fromKey: string?, from: Vector3, lane: number): {
 		table.insert(route, Vector3.new(lane, 0, ParkLayout.EntryZ))
 		table.insert(route, Vector3.new(lane, 0, ParkLayout.GateZ + 14))
 		table.insert(route, Vector3.new(lane, 0, ParkLayout.GateZ - 14))
-	elseif fromKey == "Snack" then
+	elseif SPURS[fromKey] then
 		-- Back along the spur to the main path; the caller continues from there.
-		table.insert(route, Vector3.new(-8, 0, ParkLayout.SnackZ + lane * 0.3))
-		table.insert(route, Vector3.new(lane, 0, ParkLayout.SnackZ))
+		local spur = SPURS[fromKey]
+		table.insert(route, Vector3.new(spur.InnerX, 0, spur.Z + lane * 0.3))
+		table.insert(route, Vector3.new(lane, 0, spur.Z))
 		return route
 	elseif fromKey == "Carousel" then
 		table.insert(route, Vector3.new(lane, 0, from.Z))
@@ -119,18 +136,21 @@ function ParkLayout.RouteToRide(
 	slot: Vector3
 ): { Vector3 }
 	local route: { Vector3 } = {}
-	if rideKey == "Snack" then
+	local targetSpur = SPURS[rideKey]
+	if targetSpur then
 		if fromKey == nil then
 			table.insert(route, Vector3.new(lane, 0, ParkLayout.EntryZ))
 			table.insert(route, Vector3.new(lane, 0, ParkLayout.GateZ + 14))
-			table.insert(route, Vector3.new(lane, 0, ParkLayout.GateZ - 14))
+			if targetSpur.Z < ParkLayout.GateZ - 14 then
+				table.insert(route, Vector3.new(lane, 0, ParkLayout.GateZ - 14))
+			end
 		else
 			for _, point in ParkLayout.ToCrossing(fromKey, from, lane) do
 				table.insert(route, point)
 			end
 		end
-		table.insert(route, Vector3.new(lane, 0, ParkLayout.SnackZ))
-		table.insert(route, Vector3.new(-8, 0, ParkLayout.SnackZ + lane * 0.3))
+		table.insert(route, Vector3.new(lane, 0, targetSpur.Z))
+		table.insert(route, Vector3.new(targetSpur.InnerX, 0, targetSpur.Z + lane * 0.3))
 		table.insert(route, slot)
 		return route
 	end
@@ -138,7 +158,7 @@ function ParkLayout.RouteToRide(
 	for _, point in ParkLayout.ToCrossing(fromKey, from, lane) do
 		table.insert(route, point)
 	end
-	if fromKey == "Snack" then
+	if fromKey ~= nil and SPURS[fromKey] then
 		table.insert(route, Vector3.new(lane, 0, ParkLayout.SidePathZ))
 	end
 	for _, point in ParkLayout.CrossingToRide(rideKey, lane, slot) do

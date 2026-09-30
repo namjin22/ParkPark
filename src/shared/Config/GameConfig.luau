@@ -13,6 +13,8 @@ export type RideEconomy = {
 	StaffCosts: { number },
 	-- A shop serves guests at a counter instead of seating them on a moving ride.
 	IsShop: boolean?,
+	-- How long a guest stays aboard; rides without it use GuestRideSeconds.
+	RideSeconds: number?,
 }
 
 return {
@@ -38,6 +40,7 @@ return {
 	BumperCarScale = 3.2,
 	ConsoleScale = 3,
 	SnackScale = 3,
+	FerrisScale = 2.6,
 
 	Rides = {
 		Carousel = {
@@ -77,6 +80,16 @@ return {
 			StaffCosts = { 60, 120, 220 },
 			IsShop = true,
 		},
+		Ferris = {
+			DisplayName = "관람차",
+			UnlockCost = 200,
+			RepairCost = 100,
+			BaseFare = 20,
+			IncomePerLevel = 8,
+			IncomeCosts = { 150, 300, 520, 800 },
+			StaffCosts = { 220, 420, 700 },
+			RideSeconds = 40,
+		},
 	} :: { [string]: RideEconomy },
 	-- Seconds between automatic boardings for staff level 1, 2, 3 (0 staff means players accept guests).
 	StaffIntervals = { 10, 6, 3 },
@@ -115,6 +128,20 @@ return {
 	BumperSeatHeight = 1.29,
 	BumperSeatZ = 0.5,
 	BumperRiderHip = 1.05,
+
+	-- Ferris wheel (unscaled OBJ units from ParkParkFerrisWheel/Base/Cabin.obj). Cabins hang from the rim at
+	-- FerrisRadius, and a cabin at the bottom is the one guests board. A rider sits on the bench (seat top
+	-- FerrisSeatHeight), measured from the cabin's hanger point; the cabin mesh's bounding-box center is at
+	-- FerrisCabinCenterHeight, which is where the cabin part's position sits.
+	FerrisRotationSeconds = 40,
+	FerrisCabinCount = 8,
+	FerrisRadius = 6,
+	FerrisHubHeight = 9.2,
+	FerrisCabinCenterHeight = -1.135,
+	FerrisSeatHeight = -2.0,
+	FerrisRiderHip = 1.25,
+	-- A cabin can be boarded while it is within this fraction of the wheel radius above its lowest point.
+	FerrisBoardingWindow = 0.15,
 
 	-- Snack stand: guests at the counter buy a snack and eat it for a few seconds.
 	SnackCounterSeats = 3,

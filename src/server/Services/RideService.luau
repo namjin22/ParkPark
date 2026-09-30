@@ -37,6 +37,12 @@ type RideReferences = {
 	SnackRepairPrompt: ProximityPrompt,
 	SnackIncomePrompt: ProximityPrompt,
 	SnackStaffPrompt: ProximityPrompt,
+	FerrisRide: Model,
+	FerrisConsole: BasePart,
+	FerrisUnlockPrompt: ProximityPrompt,
+	FerrisRepairPrompt: ProximityPrompt,
+	FerrisIncomePrompt: ProximityPrompt,
+	FerrisStaffPrompt: ProximityPrompt,
 }
 
 type SpendCoins = (Player, number) -> boolean
@@ -137,6 +143,7 @@ function RideService.Start(
 	applyTeacupsRepaired: ApplyRepairedAppearance,
 	applyBumperRepaired: ApplyRepairedAppearance,
 	applySnackRepaired: ApplyRepairedAppearance,
+	applyFerrisRepaired: ApplyRepairedAppearance,
 	notify: Notify
 )
 	local currency = GameConfig.CurrencyDisplayName
@@ -505,6 +512,29 @@ function RideService.Start(
 			park.SnackStand:SetAttribute("IsOperating", true)
 		end,
 		applyRepairedAppearance = applySnackRepaired,
+	})
+
+	-- The Ferris wheel unlocks once the bumper cars run; FerrisService turns it while IsOperating is true.
+	setupRide({
+		key = "Ferris",
+		model = park.FerrisRide,
+		console = park.FerrisConsole,
+		unlockPrompt = park.FerrisUnlockPrompt,
+		repairPrompt = park.FerrisRepairPrompt,
+		incomePrompt = park.FerrisIncomePrompt,
+		staffPrompt = park.FerrisStaffPrompt,
+		isAvailable = function()
+			return park.ParkFolder:GetAttribute("ParkOpen") == true
+				and park.BumperRide:GetAttribute("IsRepaired") == true
+		end,
+		signals = {
+			park.ParkFolder:GetAttributeChangedSignal("ParkOpen"),
+			park.BumperRide:GetAttributeChangedSignal("IsRepaired"),
+		},
+		start = function()
+			park.FerrisRide:SetAttribute("IsOperating", true)
+		end,
+		applyRepairedAppearance = applyFerrisRepaired,
 	})
 end
 

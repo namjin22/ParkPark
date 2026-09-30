@@ -25,6 +25,8 @@ type GuestReferences = {
 	BumperCars: Model,
 	SnackStand: Model,
 	SnackCounter: BasePart,
+	FerrisRide: Model,
+	FerrisCabins: Model,
 }
 
 type Guest = {
@@ -51,6 +53,8 @@ type Ride = {
 	seatCount: number,
 	-- A shop serves guests where they stand instead of seating them on the ride.
 	service: boolean,
+	-- Optional extra condition for a seat, e.g. the Ferris wheel only lets guests on at the bottom.
+	canBoard: ((number) -> boolean)?,
 	seatTaken: { [number]: boolean },
 	queue: { Guest },
 	lastStaffBoarding: number,
@@ -195,6 +199,16 @@ local function cupSeatOffset(_: number): CFrame
 	)
 end
 
+-- A Ferris cabin is a bench under a roof; the offset is relative to the cabin part's centre.
+local function ferrisSeatOffset(_: number): CFrame
+	local scale = GameConfig.FerrisScale
+	return CFrame.new(
+		0,
+		(GameConfig.FerrisSeatHeight - GameConfig.FerrisCabinCenterHeight) * scale + GameConfig.FerrisRiderHip,
+		0
+	)
+end
+
 -- Bumper cars face local -Z, so a rider with an identity rotation looks along the car's travel.
 local function bumperSeatOffset(_: number): CFrame
 	local scale = GameConfig.BumperCarScale
@@ -266,7 +280,21 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		end, function()
 			return CFrame.identity
 		end, GameConfig.SnackCounterSeats, true),
+		newRide("Ferris", park.FerrisRide, function(seat: number)
+			local cabin = park.FerrisCabins:FindFirstChild(string.format("FerrisCabin%d", seat))
+			return if cabin and cabin:IsA("BasePart") then cabin else nil
+		end, ferrisSeatOffset, GameConfig.FerrisCabinCount, false),
 	}
+	for _, rideInfo in rides do
+		if rideInfo.key == "Ferris" then
+			-- Only a cabin near the bottom of its turn can be boarded.
+			rideInfo.canBoard = function(seat: number): boolean
+				local cabin = rideInfo.seatPart(seat)
+				local boardY = rideInfo.model:GetAttribute("BoardY") :: number?
+				return cabin ~= nil and boardY ~= nil and cabin.Position.Y <= boardY
+			end
+		end
+	end
 
 	local function fareOf(ride: Ride): number
 		return (ride.model:GetAttribute("Fare") :: number?) or GameConfig.Rides[ride.key].BaseFare
@@ -274,7 +302,11 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 
 	local function firstFreeSeat(ride: Ride): number?
 		for seat = 1, ride.seatCount do
-			if not ride.seatTaken[seat] and ride.seatPart(seat) ~= nil then
+			if
+				not ride.seatTaken[seat]
+				and ride.seatPart(seat) ~= nil
+				and (ride.canBoard == nil or ride.canBoard(seat))
+			then
 				return seat
 			end
 		end
@@ -383,7 +415,8 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		weld.Parent = guest.root
 
 		local elapsed = 0
-		while guest.alive and elapsed < GameConfig.GuestRideSeconds do
+		local rideSeconds = GameConfig.Rides[rideInfo.key].RideSeconds or GameConfig.GuestRideSeconds
+		while guest.alive and elapsed < rideSeconds do
 			elapsed += task.wait(0.5)
 		end
 

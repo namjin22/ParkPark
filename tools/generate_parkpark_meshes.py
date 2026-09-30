@@ -1052,6 +1052,127 @@ def make_snack_stand() -> Mesh:
     return mesh
 
 
+FERRIS_RADIUS = 6.0
+FERRIS_HUB_HEIGHT = 9.2
+FERRIS_CABIN_COUNT = 8
+
+
+def in_wheel_plane(z_offset: float) -> PointTransform:
+    """Map a horizontal (XZ) primitive onto the wheel's vertical XY plane at z = z_offset."""
+
+    def transform(x: float, y: float, z: float) -> tuple[float, float, float]:
+        return x, z, y + z_offset
+
+    return transform
+
+
+def make_ferris_wheel() -> Mesh:
+    """The turning wheel, centered on its hub (axle along Z): twin rims, spokes, cross-braces, bulbs, hub caps."""
+    mesh = Mesh("ParkParkFerrisWheel")
+    for z in (-0.5, 0.5):
+        add_torus(mesh, FERRIS_RADIUS, 0.17, 0.0, "coral", 48, 6, transform=in_wheel_plane(z))
+        add_torus(mesh, FERRIS_RADIUS - 0.9, 0.1, 0.0, "cream", 40, 5, transform=in_wheel_plane(z))
+    for index in range(16):
+        angle = TAU * index / 16
+        cosine, sine = math.cos(angle), math.sin(angle)
+        for z in (-0.5, 0.5):
+            add_cylinder_between(
+                mesh,
+                (0.6 * cosine, 0.6 * sine, z),
+                (FERRIS_RADIUS * cosine, FERRIS_RADIUS * sine, z),
+                0.07,
+                0.07,
+                "cream" if index % 2 else "gold",
+                6,
+            )
+        add_cylinder_between(
+            mesh,
+            (FERRIS_RADIUS * cosine, FERRIS_RADIUS * sine, -0.5),
+            (FERRIS_RADIUS * cosine, FERRIS_RADIUS * sine, 0.5),
+            0.09,
+            0.09,
+            "gold",
+            6,
+        )
+    # Bulbs round the rim on both faces.
+    for index in range(32):
+        angle = TAU * index / 32
+        material = "gold" if index % 2 else "cream"
+        for z in (-0.72, 0.72):
+            add_ellipsoid(
+                mesh,
+                ((FERRIS_RADIUS + 0.12) * math.cos(angle), (FERRIS_RADIUS + 0.12) * math.sin(angle), z),
+                (0.13, 0.13, 0.13),
+                material,
+                slices=6,
+                stacks=3,
+            )
+    # Hanger knobs where the cabins hang.
+    for index in range(FERRIS_CABIN_COUNT):
+        angle = TAU * index / FERRIS_CABIN_COUNT
+        add_ellipsoid(
+            mesh,
+            (FERRIS_RADIUS * math.cos(angle), FERRIS_RADIUS * math.sin(angle), 0.0),
+            (0.22, 0.22, 0.7),
+            "gold",
+            slices=8,
+            stacks=4,
+        )
+    # Hub: axle cylinder, coral drum, and gold caps on both sides.
+    add_cylinder_between(mesh, (0, 0, -1.0), (0, 0, 1.0), 0.95, 0.95, "coral", 20)
+    add_cylinder_between(mesh, (0, 0, -1.02), (0, 0, -1.15), 0.55, 0.55, "gold", 16)
+    add_cylinder_between(mesh, (0, 0, 1.02), (0, 0, 1.15), 0.55, 0.55, "gold", 16)
+    return mesh
+
+
+def make_ferris_base() -> Mesh:
+    """Boarding pad and two A-frame towers that carry the axle at (0, hub, 0); origin is the ground center."""
+    mesh = Mesh("ParkParkFerrisBase")
+    add_box(mesh, (0, 0.15, 0), (11.0, 0.3, 8.4), "wood")
+    add_box(mesh, (0, 0.32, 0), (10.0, 0.06, 7.4), "cream")
+    for z in (-1.4, 1.4):
+        apex = (0.0, FERRIS_HUB_HEIGHT, z)
+        for foot_x in (-4.4, 4.4):
+            add_cylinder_between(mesh, (foot_x, 0.3, z), apex, 0.3, 0.24, "coral", 8)
+            add_box(mesh, (foot_x, 0.5, z), (0.9, 0.4, 0.9), "gold")
+        # Cross-brace and a gold collar under the axle.
+        add_cylinder_between(mesh, (-2.6, 3.7, z), (2.6, 3.7, z), 0.16, 0.16, "cream", 6)
+        add_cylinder_between(mesh, (-1.5, 6.4, z), (1.5, 6.4, z), 0.13, 0.13, "cream", 6)
+        add_ellipsoid(mesh, apex, (0.5, 0.5, 0.45), "gold", slices=10, stacks=5)
+    add_cylinder_between(mesh, (0, FERRIS_HUB_HEIGHT, -1.7), (0, FERRIS_HUB_HEIGHT, 1.7), 0.32, 0.32, "gold", 10)
+    add_star(mesh, FERRIS_HUB_HEIGHT + 0.9, 0.35, "gold")
+    return mesh
+
+
+def make_ferris_cabin() -> Mesh:
+    """A gondola hanging from its hanger point (the origin): striped dome roof, low walls, and a bench.
+
+    It is symmetric front to back, so it looks right whichever way the imported mesh ends up facing.
+    """
+    mesh = Mesh("ParkParkFerrisCabin")
+    add_cylinder_between(mesh, (0, 0.25, 0), (0, -0.55, 0), 0.09, 0.09, "gold", 8)
+    add_ellipsoid(mesh, (0, 0.28, 0), (0.2, 0.12, 0.2), "gold", slices=8, stacks=4)
+    lathe(
+        mesh,
+        [(0.0, -0.32, "gold"), (0.5, -0.48, "coral"), (1.2, -0.62, "cream"), (1.55, -0.78, "coral"), (1.55, -0.86, "gold")],
+        24,
+    )
+    for x in (-1.15, 1.15):
+        for z in (-0.85, 0.85):
+            add_cylinder_between(mesh, (x, -0.86, z), (x, -2.5, z), 0.07, 0.07, "gold", 6)
+    add_box(mesh, (0, -2.6, 0), (2.5, 0.14, 2.0), "wood")
+    # Half walls on the two long sides, and a railing on the two short ends.
+    for x in (-1.2, 1.2):
+        add_box(mesh, (x, -2.05, 0), (0.1, 0.9, 1.8), "coral")
+        add_box(mesh, (x, -1.55, 0), (0.14, 0.1, 1.9), "gold")
+    for z in (-0.9, 0.9):
+        add_box(mesh, (0, -1.95, z), (2.3, 0.12, 0.08), "cream")
+        add_box(mesh, (0, -2.25, z), (2.3, 0.08, 0.08), "cream")
+    # Bench seat in the middle; its top is at y = -2.0.
+    add_box(mesh, (0, -2.25, 0), (1.3, 0.5, 0.9), "mint")
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -1132,6 +1253,9 @@ def main() -> None:
         make_teacup(),
         make_litter(),
         make_snack_stand(),
+        make_ferris_wheel(),
+        make_ferris_base(),
+        make_ferris_cabin(),
         make_bumper_platform(),
         make_bumper_car(),
         make_entrance(),
