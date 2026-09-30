@@ -1,0 +1,320 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" version="4">
+<Item class="Model" referent="RBX105"><Properties>
+<string name="Name">FerrisWheelRide</string>
+<OptionalCoordinateFrame name="WorldPivotData"><CFrame><X>0.0</X><Y>0.0</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CFrame></OptionalCoordinateFrame>
+</Properties>
+<Item class="MeshPart" referent="RBX101"><Properties>
+<string name="Name">FerrisBase</string>
+<Content name="MeshId"><url>rbxassetid://97401878191247</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>11.0</X><Y>10.45</Y><Z>8.4</Z></Vector3>
+<Vector3 name="size"><X>28.6</X><Y>27.17</Y><Z>21.84</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>13.585</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item><Item class="MeshPart" referent="RBX102"><Properties>
+<string name="Name">Wheel</string>
+<Content name="MeshId"><url>rbxassetid://126686784045591</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>12.4652</X><Y>12.5</Y><Z>2.3</Z></Vector3>
+<Vector3 name="size"><X>32.4095</X><Y>32.5</Y><Z>5.98</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>23.92</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item><Item class="Model" referent="RBX103"><Properties>
+<string name="Name">FerrisCabins</string>
+<OptionalCoordinateFrame name="WorldPivotData"><CFrame><X>0.0</X><Y>0.0</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CFrame></OptionalCoordinateFrame>
+</Properties>
+<Item class="MeshPart" referent="RBX80"><Properties>
+<string name="Name">FerrisCabin1</string>
+<Content name="MeshId"><url>rbxassetid://101590622757213</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>3.1</X><Y>3.07</Y><Z>3.1</Z></Vector3>
+<Vector3 name="size"><X>8.06</X><Y>7.982</Y><Z>8.06</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>15.6</X><Y>20.969</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item><Item class="MeshPart" referent="RBX81"><Properties>
+<string name="Name">FerrisCabin2</string>
+<Content name="MeshId"><url>rbxassetid://101590622757213</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>3.1</X><Y>3.07</Y><Z>3.1</Z></Vector3>
+<Vector3 name="size"><X>8.06</X><Y>7.982</Y><Z>8.06</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>11.0309</X><Y>31.9999</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item><Item class="MeshPart" referent="RBX82"><Properties>
+<string name="Name">FerrisCabin3</string>
+<Content name="MeshId"><url>rbxassetid://101590622757213</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>3.1</X><Y>3.07</Y><Z>3.1</Z></Vector3>
+<Vector3 name="size"><X>8.06</X><Y>7.982</Y><Z>8.06</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>36.569</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item><Item class="MeshPart" referent="RBX83"><Properties>
+<string name="Name">FerrisCabin4</string>
+<Content name="MeshId"><url>rbxassetid://101590622757213</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>3.1</X><Y>3.07</Y><Z>3.1</Z></Vector3>
+<Vector3 name="size"><X>8.06</X><Y>7.982</Y><Z>8.06</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>-11.0309</X><Y>31.9999</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item><Item class="MeshPart" referent="RBX84"><Properties>
+<string name="Name">FerrisCabin5</string>
+<Content name="MeshId"><url>rbxassetid://101590622757213</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>3.1</X><Y>3.07</Y><Z>3.1</Z></Vector3>
+<Vector3 name="size"><X>8.06</X><Y>7.982</Y><Z>8.06</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>-15.6</X><Y>20.969</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item><Item class="MeshPart" referent="RBX85"><Properties>
+<string name="Name">FerrisCabin6</string>
+<Content name="MeshId"><url>rbxassetid://101590622757213</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>3.1</X><Y>3.07</Y><Z>3.1</Z></Vector3>
+<Vector3 name="size"><X>8.06</X><Y>7.982</Y><Z>8.06</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>-11.0309</X><Y>9.9381</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item><Item class="MeshPart" referent="RBX86"><Properties>
+<string name="Name">FerrisCabin7</string>
+<Content name="MeshId"><url>rbxassetid://101590622757213</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>3.1</X><Y>3.07</Y><Z>3.1</Z></Vector3>
+<Vector3 name="size"><X>8.06</X><Y>7.982</Y><Z>8.06</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>5.369</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item><Item class="MeshPart" referent="RBX87"><Properties>
+<string name="Name">FerrisCabin8</string>
+<Content name="MeshId"><url>rbxassetid://101590622757213</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>3.1</X><Y>3.07</Y><Z>3.1</Z></Vector3>
+<Vector3 name="size"><X>8.06</X><Y>7.982</Y><Z>8.06</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>11.0309</X><Y>9.9381</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item>
+</Item><Item class="Part" referent="RBX88"><Properties>
+<string name="Name">BasePad</string>
+<Vector3 name="size"><X>28.6</X><Y>0.78</Y><Z>21.84</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>0.39</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX89"><Properties>
+<string name="Name">LegCollider_-1.4_-1_0</string>
+<token name="shape">2</token>
+<Vector3 name="size"><X>8.32</X><Y>3.38</Y><Z>3.38</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>-11.44</X><Y>4.94</Y><Z>-3.64</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX90"><Properties>
+<string name="Name">LegCollider_-1.4_-1_35</string>
+<token name="shape">2</token>
+<Vector3 name="size"><X>8.32</X><Y>3.38</Y><Z>3.38</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>-7.436</X><Y>13.039</Y><Z>-3.64</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX91"><Properties>
+<string name="Name">LegCollider_-1.4_-1_70</string>
+<token name="shape">2</token>
+<Vector3 name="size"><X>8.32</X><Y>3.38</Y><Z>3.38</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>-3.432</X><Y>21.138</Y><Z>-3.64</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX92"><Properties>
+<string name="Name">LegCollider_-1.4_+1_0</string>
+<token name="shape">2</token>
+<Vector3 name="size"><X>8.32</X><Y>3.38</Y><Z>3.38</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>11.44</X><Y>4.94</Y><Z>-3.64</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX93"><Properties>
+<string name="Name">LegCollider_-1.4_+1_35</string>
+<token name="shape">2</token>
+<Vector3 name="size"><X>8.32</X><Y>3.38</Y><Z>3.38</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>7.436</X><Y>13.039</Y><Z>-3.64</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX94"><Properties>
+<string name="Name">LegCollider_-1.4_+1_70</string>
+<token name="shape">2</token>
+<Vector3 name="size"><X>8.32</X><Y>3.38</Y><Z>3.38</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>3.432</X><Y>21.138</Y><Z>-3.64</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX95"><Properties>
+<string name="Name">LegCollider_+1.4_-1_0</string>
+<token name="shape">2</token>
+<Vector3 name="size"><X>8.32</X><Y>3.38</Y><Z>3.38</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>-11.44</X><Y>4.94</Y><Z>3.64</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX96"><Properties>
+<string name="Name">LegCollider_+1.4_-1_35</string>
+<token name="shape">2</token>
+<Vector3 name="size"><X>8.32</X><Y>3.38</Y><Z>3.38</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>-7.436</X><Y>13.039</Y><Z>3.64</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX97"><Properties>
+<string name="Name">LegCollider_+1.4_-1_70</string>
+<token name="shape">2</token>
+<Vector3 name="size"><X>8.32</X><Y>3.38</Y><Z>3.38</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>-3.432</X><Y>21.138</Y><Z>3.64</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX98"><Properties>
+<string name="Name">LegCollider_+1.4_+1_0</string>
+<token name="shape">2</token>
+<Vector3 name="size"><X>8.32</X><Y>3.38</Y><Z>3.38</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>11.44</X><Y>4.94</Y><Z>3.64</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX99"><Properties>
+<string name="Name">LegCollider_+1.4_+1_35</string>
+<token name="shape">2</token>
+<Vector3 name="size"><X>8.32</X><Y>3.38</Y><Z>3.38</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>7.436</X><Y>13.039</Y><Z>3.64</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX100"><Properties>
+<string name="Name">LegCollider_+1.4_+1_70</string>
+<token name="shape">2</token>
+<Vector3 name="size"><X>8.32</X><Y>3.38</Y><Z>3.38</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>3.432</X><Y>21.138</Y><Z>3.64</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="MeshPart" referent="RBX104"><Properties>
+<string name="Name">FerrisConsole</string>
+<Content name="MeshId"><url>rbxassetid://137595459068722</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>1.88</X><Y>2.94</Y><Z>1.88</Z></Vector3>
+<Vector3 name="size"><X>5.64</X><Y>8.82</Y><Z>5.64</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>8.0</X><Y>4.65</Y><Z>10.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">true</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item>
+</Item>
+</roblox>
