@@ -5,12 +5,12 @@ local bumperCarService = require(script.Parent.Services.BumperCarService)
 local ferrisService = require(script.Parent.Services.FerrisService)
 local economyService = require(script.Parent.Services.EconomyService)
 local guestService = require(script.Parent.Services.GuestService)
+local janitorService = require(script.Parent.Services.JanitorService)
 local litterService = require(script.Parent.Services.LitterService)
 local noticeService = require(script.Parent.Services.NoticeService)
 local powerService = require(script.Parent.Services.PowerService)
 local parkProgressionService = require(script.Parent.Services.ParkProgressionService)
 local rideService = require(script.Parent.Services.RideService)
-local ratingService = require(script.Parent.Services.RatingService)
 local teacupService = require(script.Parent.Services.TeacupService)
 
 -- Create leaderstats before the builder's bounded asset waits so the HUD never stalls.
@@ -33,10 +33,17 @@ rideService.Start(
 bumperCarService.Start(park)
 teacupService.Start(park)
 ferrisService.Start(park)
-ratingService.Start(park, noticeService.Send)
 powerService.Start(park, economyService.AwardCoins, noticeService.Send, noticeService.Popup)
 guestService.Start(park, economyService.AwardCoins, noticeService.Send, noticeService.Popup)
-litterService.Start(park, economyService.AwardCoins, noticeService.Popup, parkBuilder.FindLitterTemplate)
+local litter = litterService.Start(park, economyService.AwardCoins, noticeService.Popup, parkBuilder.FindLitterTemplate)
+janitorService.Start(
+	park,
+	economyService.SpendCoins,
+	economyService.GetCoins,
+	noticeService.Send,
+	noticeService.Popup,
+	litter
+)
 
 local function source(model: Model): string
 	return if model:GetAttribute("IsGraybox") == true then "graybox" else "authored"

@@ -147,6 +147,13 @@ function RideService.Start(
 	notify: Notify
 )
 	local currency = GameConfig.CurrencyDisplayName
+	local rideModels: { [string]: Model } = {
+		Carousel = park.Carousel,
+		Teacups = park.TeacupsRide,
+		Snack = park.SnackStand,
+		Bumper = park.BumperRide,
+		Ferris = park.FerrisRide,
+	}
 
 	local function startRotation(ride: Model, rotor: Model, rotationSeconds: number, name: string)
 		local rotorRoot = rotor.PrimaryPart
@@ -193,17 +200,18 @@ function RideService.Start(
 		local model = ride.model
 		local displayName = config.DisplayName
 		-- A shop serves its guests; a ride seats them.
-		local requiredStars = config.RequiredStars or 1
+		local requiresKey = config.Requires
+		local requiredModel = if requiresKey then rideModels[requiresKey] else nil
 		local boardNoun = if config.IsShop == true then "서빙" else "탑승"
 		local staffAction = if config.IsShop == true then "서빙해요" else "태워요"
 		local started = false
 
-		local function starsOk(): boolean
-			return ((park.ParkFolder:GetAttribute("Rating") :: number?) or 1) >= requiredStars
+		-- Each attraction opens up only after the one before it in the chain has been repaired.
+		local function prerequisiteDone(): boolean
+			return requiredModel == nil or requiredModel:GetAttribute("IsRepaired") == true
 		end
-		-- The console works once the park is ready for the ride and the park rating is high enough.
 		local function isReady(): boolean
-			return ride.isAvailable() and starsOk()
+			return ride.isAvailable() and prerequisiteDone()
 		end
 
 		local function start()
@@ -252,9 +260,9 @@ function RideService.Start(
 			if not unlocked then
 				fareLine.Text = string.format("손님당 +%d %s", config.BaseFare, currency)
 				detailLine.Text = string.format("해금 %d %s", config.UnlockCost, currency)
-				queueLine.Text = if starsOk()
+				queueLine.Text = if prerequisiteDone()
 					then "잠겨 있어요"
-					else string.format("별점 %d단계에 해금", requiredStars)
+					else string.format("먼저 %s 수리", GameConfig.Rides[requiresKey :: string].DisplayName)
 			elseif not repaired then
 				fareLine.Text = string.format("손님당 +%d %s", config.BaseFare, currency)
 				detailLine.Text = string.format("수리 %d %s", config.RepairCost, currency)
@@ -336,7 +344,9 @@ function RideService.Start(
 		for _, signal in ride.signals do
 			signal:Connect(refreshPrompts)
 		end
-		park.ParkFolder:GetAttributeChangedSignal("Rating"):Connect(refreshPrompts)
+		if requiredModel then
+			requiredModel:GetAttributeChangedSignal("IsRepaired"):Connect(refreshPrompts)
+		end
 		for _, attribute in { "QueueLength", "IncomeLevel", "StaffLevel" } do
 			model:GetAttributeChangedSignal(attribute):Connect(function()
 				publishRates()
@@ -496,7 +506,7 @@ function RideService.Start(
 		applyRepairedAppearance = applyTeacupsRepaired,
 	})
 
-	-- The bumper cars need a park rating of 2 stars; BumperCarService moves the cars while
+	-- The bumper cars need the snack stand repaired first; BumperCarService moves the cars while
 	-- IsOperating is true, so starting this ride only flips that attribute.
 	setupRide({
 		key = "Bumper",
@@ -535,7 +545,7 @@ function RideService.Start(
 		applyRepairedAppearance = applySnackRepaired,
 	})
 
-	-- The Ferris wheel needs a park rating of 3 stars; FerrisService turns it while IsOperating is true.
+	-- The Ferris wheel needs the bumper cars repaired first; FerrisService turns it while IsOperating is true.
 	setupRide({
 		key = "Ferris",
 		model = park.FerrisRide,

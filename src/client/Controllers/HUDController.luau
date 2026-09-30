@@ -120,35 +120,6 @@ function HUDController.Start()
 	count.TextYAlignment = Enum.TextYAlignment.Top
 	count.Parent = textColumn
 
-	-- The park's star rating sits at the top right of the coin card; the server owns it as `Rating`.
-	local starLabel = Instance.new("TextLabel")
-	starLabel.Name = "RatingStars"
-	starLabel.Position = UDim2.fromOffset(0, 9)
-	starLabel.Size = UDim2.new(1, 0, 0, 16)
-	starLabel.BackgroundTransparency = 1
-	starLabel.Font = Enum.Font.GothamBold
-	starLabel.RichText = true
-	starLabel.TextSize = 13
-	starLabel.TextXAlignment = Enum.TextXAlignment.Right
-	starLabel.Parent = textColumn
-	local starGold = "#F2B744"
-	local starGray = "#C9BFA8"
-	local function showRating(stars: number)
-		local text = ""
-		for index = 1, 5 do
-			text ..= string.format('<font color="%s">★</font>', if index <= stars then starGold else starGray)
-		end
-		starLabel.Text = text
-	end
-	showRating(1)
-	task.spawn(function()
-		local world = workspace:WaitForChild("ParkParkWorld")
-		showRating((world:GetAttribute("Rating") :: number?) or 1)
-		world:GetAttributeChangedSignal("Rating"):Connect(function()
-			showRating((world:GetAttribute("Rating") :: number?) or 1)
-		end)
-	end)
-
 	local leaderstats = player:WaitForChild("leaderstats")
 	local coins = leaderstats:WaitForChild("Coins") :: IntValue
 	local displayedCoins = coins.Value

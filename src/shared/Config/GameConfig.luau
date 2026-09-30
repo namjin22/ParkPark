@@ -15,8 +15,8 @@ export type RideEconomy = {
 	IsShop: boolean?,
 	-- How long a guest stays aboard; rides without it use GuestRideSeconds.
 	RideSeconds: number?,
-	-- Park rating (stars) needed before this attraction can be unlocked; 1 (or nil) means from the start.
-	RequiredStars: number?,
+	-- The attraction that must be repaired before this one can be unlocked (the chain runs in this order).
+	Requires: string?,
 }
 
 return {
@@ -59,6 +59,7 @@ return {
 			UnlockCost = 60,
 			RepairCost = 35,
 			BaseFare = 8,
+			Requires = "Carousel",
 			IncomePerLevel = 4,
 			IncomeCosts = { 60, 130, 230, 360 },
 			StaffCosts = { 100, 200, 340 },
@@ -68,7 +69,7 @@ return {
 			UnlockCost = 120,
 			RepairCost = 60,
 			BaseFare = 12,
-			RequiredStars = 2,
+			Requires = "Snack",
 			IncomePerLevel = 6,
 			IncomeCosts = { 90, 190, 320, 500 },
 			StaffCosts = { 140, 280, 450 },
@@ -78,6 +79,7 @@ return {
 			UnlockCost = 40,
 			RepairCost = 30,
 			BaseFare = 4,
+			Requires = "Teacups",
 			IncomePerLevel = 2,
 			IncomeCosts = { 30, 70, 130, 220 },
 			StaffCosts = { 60, 120, 220 },
@@ -88,7 +90,7 @@ return {
 			UnlockCost = 200,
 			RepairCost = 100,
 			BaseFare = 20,
-			RequiredStars = 3,
+			Requires = "Bumper",
 			IncomePerLevel = 8,
 			IncomeCosts = { 150, 300, 520, 800 },
 			StaffCosts = { 220, 420, 700 },
@@ -147,14 +149,11 @@ return {
 	-- A cabin can be boarded while it is within this fraction of the wheel radius above its lowest point.
 	FerrisBoardingWindow = 0.15,
 
-	-- Park rating: one point per repaired attraction, plus a clean-park bonus and guest milestones. The
-	-- score reaches star n once it is at least RatingScoreForStar[n]. More stars mean more, faster guests.
-	RatingScoreForStar = { 0, 2, 4, 6, 8 },
-	RatingCleanLitter = 4,
-	RatingDirtyLitter = 10,
-	RatingGuestMilestones = { 30, 100 },
-	GuestsPerStar = 3,
-	SpawnRatePerStar = 0.2,
+	-- Janitors: hired at the cleaning cart by the entrance path, they walk to litter and clear it for free.
+	-- Costs are for the 1st, 2nd, ... janitor.
+	JanitorCosts = { 60, 140, 240 },
+	JanitorWalkSpeed = 12,
+	JanitorCleanSeconds = 1.6,
 
 	-- Power outage: now and then the park loses power. Every attraction stops and the lights dim until a
 	-- player switches the generator by the entrance back on; it also comes back on its own after a while.

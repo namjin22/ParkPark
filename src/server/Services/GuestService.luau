@@ -594,15 +594,12 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 
 	task.spawn(function()
 		while park.ParkFolder.Parent ~= nil do
-			-- Each park star beyond the first brings more guests, more often.
-			local stars = (park.ParkFolder:GetAttribute("Rating") :: number?) or 1
-			local guestCap = GameConfig.MaxGuests + (stars - 1) * GameConfig.GuestsPerStar
-			if park.ParkFolder:GetAttribute("ParkOpen") == true and guestCount < guestCap then
+			if park.ParkFolder:GetAttribute("ParkOpen") == true and guestCount < GameConfig.MaxGuests then
 				if pickRide(nil) ~= nil then
 					spawnGuest()
 				end
 			end
-			task.wait(GameConfig.GuestSpawnSeconds / (1 + (stars - 1) * GameConfig.SpawnRatePerStar))
+			task.wait(GameConfig.GuestSpawnSeconds)
 		end
 	end)
 end

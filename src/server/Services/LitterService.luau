@@ -18,13 +18,20 @@ type AwardCoins = (Player, number) -> boolean
 type Popup = (Vector3, string) -> ()
 type FindTemplate = () -> Model?
 
+-- What the janitors use: the nearest piece nobody else has claimed, and a way to clear one away.
+export type LitterControl = {
+	Nearest: (Vector3) -> Model?,
+	Remove: (Model) -> boolean,
+}
+
 local MIN_SPACING = 9
 local PICKUP_DISTANCE = 18
 
 local function isNearRide(x: number, z: number): boolean
-	local generator = ParkLayout.GeneratorPosition
-	if math.abs(x - generator.X) < 14 and math.abs(z - generator.Z) < 14 then
-		return true
+	for _, spot in { ParkLayout.GeneratorPosition, ParkLayout.JanitorCartPosition } do
+		if math.abs(x - spot.X) < 14 and math.abs(z - spot.Z) < 14 then
+			return true
+		end
 	end
 	for _, site in ParkLayout.Rides do
 		local dx, dz = x - site.Pivot.X, z - site.Pivot.Z
@@ -100,7 +107,12 @@ local function buildGrayboxLitter(): Model
 	return model
 end
 
-function LitterService.Start(park: LitterReferences, awardCoins: AwardCoins, popup: Popup, findTemplate: FindTemplate)
+function LitterService.Start(
+	park: LitterReferences,
+	awardCoins: AwardCoins,
+	popup: Popup,
+	findTemplate: FindTemplate
+): LitterControl
 	local folder = park.ParkFolder:FindFirstChild("Litter")
 	if folder == nil then
 		local newFolder = Instance.new("Folder")
@@ -193,6 +205,31 @@ function LitterService.Start(park: LitterReferences, awardCoins: AwardCoins, pop
 			end
 		end
 	end)
+
+	return {
+		Nearest = function(from: Vector3): Model?
+			local best: Model? = nil
+			local bestDistance = math.huge
+			for _, piece in pieces do
+				if piece:GetAttribute("Claimed") ~= true then
+					local distance = (piece:GetPivot().Position - from).Magnitude
+					if distance < bestDistance then
+						best, bestDistance = piece, distance
+					end
+				end
+			end
+			return best
+		end,
+		Remove = function(piece: Model): boolean
+			local index = table.find(pieces, piece)
+			if index == nil then
+				return false
+			end
+			table.remove(pieces, index)
+			piece:Destroy()
+			return true
+		end,
+	}
 end
 
 return LitterService
