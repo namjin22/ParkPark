@@ -31,7 +31,7 @@ ParkLayout.ZoneBoundaryZ = -168
 ParkLayout.ZoneGroundMinZ = -480
 ParkLayout.ZoneRoadX = 52
 ParkLayout.ZoneRoadHalfWidth = 8
-ParkLayout.ZoneBranchZ = { Flume = -205 } :: { [string]: number }
+ParkLayout.ZoneBranchZ = { Flume = -205, Drop = -215 } :: { [string]: number }
 ParkLayout.GeneratorPosition = Vector3.new(24, 0, 52)
 -- The cleaning cart where janitors are hired, on the other side of the same path.
 ParkLayout.JanitorCartPosition = Vector3.new(-24, 0, 52)
@@ -115,6 +115,13 @@ ParkLayout.Rides = {
 		Pivot = Vector3.new(-20, 0, -270),
 		PlatformRadius = 45,
 		QueueHead = Vector3.new(-20, 0, -239),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	-- The drop tower stands east of the zone road; its line runs toward +Z to the branch.
+	Drop = {
+		Pivot = Vector3.new(120, 0, -270),
+		PlatformRadius = 20,
+		QueueHead = Vector3.new(120, 0, -246),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Ferris = {

@@ -40,6 +40,8 @@ type RideReferences = {
 	CoasterConsole: BasePart,
 	FlumeRide: Model,
 	FlumeConsole: BasePart,
+	DropRide: Model,
+	DropConsole: BasePart,
 }
 
 type SpendCoins = (Player, number) -> boolean
@@ -195,6 +197,7 @@ function RideService.Start(
 	applyHauntedRepaired: ApplyRepairedAppearance,
 	applyCoasterRepaired: ApplyRepairedAppearance,
 	applyFlumeRepaired: ApplyRepairedAppearance,
+	applyDropRepaired: ApplyRepairedAppearance,
 	notify: Notify
 )
 	local currency = GameConfig.CurrencyDisplayName
@@ -209,6 +212,7 @@ function RideService.Start(
 		Haunted = park.HauntedHouse,
 		Coaster = park.CoasterRide,
 		Flume = park.FlumeRide,
+		Drop = park.DropRide,
 	}
 	local actions: { [string]: { [string]: (Player) -> () } } = {}
 
@@ -665,6 +669,21 @@ function RideService.Start(
 			park.FlumeRide:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
 		end,
 		applyRepairedAppearance = applyFlumeRepaired,
+	})
+
+	-- The drop tower is in the same zone; DropService runs the gondola while IsOperating is true.
+	setupRide({
+		key = "Drop",
+		model = park.DropRide,
+		console = park.DropConsole,
+		isAvailable = function()
+			return parkOpen() and park.ParkFolder:GetAttribute("Zone_Water") == true
+		end,
+		signals = { parkOpenSignal, park.ParkFolder:GetAttributeChangedSignal("Zone_Water") },
+		start = function()
+			park.DropRide:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
+		end,
+		applyRepairedAppearance = applyDropRepaired,
 	})
 end
 

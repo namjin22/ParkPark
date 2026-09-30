@@ -26,6 +26,7 @@ type PowerReferences = {
 	HauntedHouse: Model,
 	CoasterRide: Model,
 	FlumeRide: Model,
+	DropRide: Model,
 }
 
 type AwardCoins = (Player, number) -> boolean
@@ -124,6 +125,7 @@ function PowerService.Start(park: PowerReferences, awardCoins: AwardCoins, notif
 		park.HauntedHouse,
 		park.CoasterRide,
 		park.FlumeRide,
+		park.DropRide,
 	}
 	local _, lamp, prompt = buildGenerator(park.ParkFolder)
 	local lampLight = lamp:FindFirstChildOfClass("PointLight")

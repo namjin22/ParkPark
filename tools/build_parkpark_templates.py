@@ -69,6 +69,8 @@ COASTER_SCALE = config_number("CoasterScale")
 COASTER_CARS = int(config_number("CoasterCarCount"))
 FLUME_SCALE = config_number("FlumeScale")
 FLUME_CARS = int(config_number("FlumeCarCount"))
+DROP_SCALE = config_number("DropScale")
+DROP_REST_Y = config_number("DropRestY")
 FLUME_SCALE = config_number("FlumeScale")
 FLUME_CARS = int(config_number("FlumeCarCount"))
 TREE_SCALE = config_number("TreeScale")
@@ -303,6 +305,7 @@ def main() -> None:
     build_haunted_house()
     build_coaster()
     build_flume()
+    build_drop_tower()
     build_flume()
     build_decor()
 
@@ -576,6 +579,31 @@ def build_flume() -> None:
                 model("FlumeCars", boats),
                 # The ride is turned half a turn in the world, so this lands beside the station near its line.
                 console("FlumeConsole", 18, -33, 0),
+            ],
+        ),
+    )
+
+
+def build_drop_tower() -> None:
+    needed = ("ParkParkDropTower", "ParkParkDropGondola")
+    missing = missing_meshes(needed)
+    if missing:
+        print(f"skipped DropRide: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    # DropService raises the gondola from this rest height (the top of the base) at run time.
+    write(
+        "DropRide",
+        model(
+            "DropRide",
+            [
+                mesh_part("DropTower", "ParkParkDropTower", (0, 0, 0), 0, False, CREAM, DROP_SCALE),
+                mesh_part("DropGondola", "ParkParkDropGondola", (0, DROP_REST_Y, 0), 0, False, CORAL, DROP_SCALE),
+                cylinder_collider("BaseCollider", (0, 0.3, 0), 0.6, 12.0, DROP_SCALE),
+                # The tower is slim and solid; its four posts make a 2.6-stud square in world scale.
+                box_collider("TowerCollider", (0, 10.0, 0), (2.6, 20.0, 2.6), 0, DROP_SCALE),
+                # Beside the base, near the line that forms in front of it (+Z).
+                console("DropConsole", -24, 22),
             ],
         ),
     )

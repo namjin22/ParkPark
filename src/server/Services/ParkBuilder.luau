@@ -21,6 +21,7 @@ local PIRATE_NAME = "PirateRide"
 local HAUNTED_NAME = "HauntedHouse"
 local COASTER_NAME = "CoasterRide"
 local FLUME_NAME = "FlumeRide"
+local DROP_NAME = "DropRide"
 local ASSET_FOLDER_SYNC_TIMEOUT = 5
 local ASSET_MANIFEST_SYNC_TIMEOUT = 2
 -- Guests spawn on +Z and walk through the entrance toward the rides on -Z (see ParkLayout).
@@ -37,6 +38,7 @@ local AUTHORED_SNACK_PIVOT = GRAYBOX_SNACK_PIVOT * CFrame.Angles(0, -math.pi / 2
 -- The wheel is modelled with its axle along local Z; turned a quarter it turns in the YZ plane, facing the path.
 local COASTER_PIVOT = CFrame.new(ParkLayout.Rides.Coaster.Pivot)
 -- Zone rides face the road (+Z), so their models are turned half a turn.
+local DROP_PIVOT = CFrame.new(ParkLayout.Rides.Drop.Pivot)
 local FLUME_PIVOT = CFrame.new(ParkLayout.Rides.Flume.Pivot) * CFrame.Angles(0, math.pi, 0)
 local HAUNTED_PIVOT = CFrame.new(ParkLayout.Rides.Haunted.Pivot)
 local PIRATE_PIVOT = CFrame.new(ParkLayout.Rides.Pirate.Pivot)
@@ -63,6 +65,7 @@ type AssetManifest = {
 		Haunted: string?,
 		Coaster: string?,
 		Flume: string?,
+		Drop: string?,
 		Litter: string?,
 	},
 	EntranceSign: string,
@@ -91,6 +94,7 @@ local assetManifest: AssetManifest = {
 		Haunted = HAUNTED_NAME,
 		Coaster = COASTER_NAME,
 		Flume = FLUME_NAME,
+		Drop = DROP_NAME,
 		Litter = "Litter",
 	},
 	EntranceSign = "SignPanel",
@@ -141,6 +145,7 @@ local function getAssetFolder(): Folder?
 				and (candidate.Models.Haunted == nil or type(candidate.Models.Haunted) == "string")
 				and (candidate.Models.Coaster == nil or type(candidate.Models.Coaster) == "string")
 				and (candidate.Models.Flume == nil or type(candidate.Models.Flume) == "string")
+				and (candidate.Models.Drop == nil or type(candidate.Models.Drop) == "string")
 				and (candidate.Models.Litter == nil or type(candidate.Models.Litter) == "string")
 				and type(candidate.EntranceSign) == "string"
 				and type(candidate.CarouselStates) == "table"
@@ -232,6 +237,9 @@ export type References = {
 	FlumeRide: Model,
 	FlumeCars: Model,
 	FlumeConsole: BasePart,
+	DropRide: Model,
+	DropGondola: BasePart,
+	DropConsole: BasePart,
 	GateRope: Model,
 	GatePrompt: ProximityPrompt,
 }
@@ -654,6 +662,8 @@ local function findAuthoredTemplate(name: string): Model?
 		assetName = assetManifest.Models.Coaster
 	elseif name == FLUME_NAME then
 		assetName = assetManifest.Models.Flume
+	elseif name == DROP_NAME then
+		assetName = assetManifest.Models.Drop
 	elseif name == DEBRIS_NAME then
 		assetName = assetManifest.Models.Debris
 	end
@@ -928,6 +938,24 @@ local function applyFlumeAppearance(ride: Model, repaired: boolean)
 		applyPalette(ride, repaired)
 	end
 	setRestoredGlow(ride:FindFirstChild("Station", true) or ride:FindFirstChild("FlumeTrack", true), repaired, 60)
+end
+
+local function applyDropAppearance(ride: Model, repaired: boolean)
+	if ride:GetAttribute("IsGraybox") == true then
+		for _, descendant in ride:GetDescendants() do
+			if descendant:IsA("BasePart") and descendant.Name ~= "ParkPivot" then
+				descendant.Material = Enum.Material.SmoothPlastic
+				if descendant.Name == "DropGondola" then
+					descendant.Color = if repaired then Color3.fromRGB(235, 122, 108) else Color3.fromRGB(126, 113, 98)
+				elseif descendant.Name == "Tower" or descendant.Name == "BasePad" then
+					descendant.Color = if repaired then Color3.fromRGB(255, 232, 190) else Color3.fromRGB(112, 104, 94)
+				end
+			end
+		end
+	else
+		applyPalette(ride, repaired)
+	end
+	setRestoredGlow(ride:FindFirstChild("BasePad", true) or ride:FindFirstChild("DropTower", true), repaired, 60)
 end
 
 local function applyAuthoredEntranceState(entrance: Model, cleared: boolean)
@@ -1669,6 +1697,44 @@ local function buildGrayboxFlume(parkFolder: Folder): Model
 	return ride
 end
 
+-- Graybox drop tower in the template's local frame: a round base, a square tower, and a flat gondola block
+-- that DropService raises.
+local function buildGrayboxDrop(parkFolder: Folder): Model
+	local ride = Instance.new("Model")
+	ride.Name = DROP_NAME
+	ride:SetAttribute("IsGraybox", true)
+	ride.Parent = parkFolder
+
+	local pivot = createPart("ParkPivot", Vector3.new(0.1, 0.1, 0.1), Vector3.zero, Color3.new(1, 1, 1), ride)
+	pivot.Transparency = 1
+	pivot.CanCollide = false
+	pivot.CanTouch = false
+	pivot.CanQuery = false
+	pivot.CastShadow = false
+	ride.PrimaryPart = pivot
+
+	local scale = GameConfig.DropScale
+	local grey = Color3.fromRGB(112, 104, 94)
+	local pad = createPart("BasePad", Vector3.new(0.8, 12 * scale, 12 * scale), Vector3.new(0, 0.4, 0), grey, ride)
+	pad.Shape = Enum.PartType.Cylinder
+	pad.CFrame = CFrame.new(0, 0.4, 0) * CFrame.Angles(0, 0, math.pi / 2)
+	createPart("Tower", Vector3.new(2.6, 20, 2.6) * scale, Vector3.new(0, 10 * scale, 0), grey, ride)
+	local gondola = createPart(
+		"DropGondola",
+		Vector3.new(6.4, 1.32, 6.4) * scale,
+		Vector3.new(0, (GameConfig.DropRestY + GameConfig.DropGondolaCenterY) * scale, 0),
+		Color3.fromRGB(126, 113, 98),
+		ride
+	)
+	gondola.CanCollide = false
+	-- Beside the base, near the line that forms in front of it.
+	local console =
+		createPart("DropConsole", Vector3.new(2, 3, 2), Vector3.new(-24, 1.5, 22), Color3.fromRGB(91, 87, 79), ride)
+	console.Material = Enum.Material.Slate
+	ride:PivotTo(DROP_PIVOT)
+	return ride
+end
+
 local function ensureRidePrompt(
 	console: BasePart,
 	name: string,
@@ -1804,6 +1870,8 @@ local function getOrCreateModel(parent: Instance, name: string, build: (Folder) 
 			model:PivotTo(COASTER_PIVOT)
 		elseif name == FLUME_NAME then
 			model:PivotTo(FLUME_PIVOT)
+		elseif name == DROP_NAME then
+			model:PivotTo(DROP_PIVOT)
 		end
 		return model
 	end
@@ -2188,6 +2256,30 @@ function ParkBuilder.Build(): References
 	end
 	applyFlumeAppearance(flumeRide, flumeRide:GetAttribute("IsRepaired") == true)
 
+	local dropRide = getOrCreateModel(parkFolder, DROP_NAME, buildGrayboxDrop)
+	if dropRide:GetAttribute("IsGraybox") == nil then
+		dropRide:SetAttribute("IsGraybox", true)
+	end
+	for _, attribute in { "IsUnlocked", "IsRepaired", "IsOperating" } do
+		if dropRide:GetAttribute(attribute) == nil then
+			dropRide:SetAttribute(attribute, false)
+		end
+	end
+	local dropGondolaInstance = dropRide:FindFirstChild("DropGondola", true)
+	if dropGondolaInstance == nil or not dropGondolaInstance:IsA("BasePart") then
+		error("[ParkPark] DropRide.DropGondola must be a BasePart")
+	end
+	-- DropService moves the gondola every frame, so it stays anchored and non-solid.
+	dropGondolaInstance.Anchored = true
+	dropGondolaInstance.CanCollide = false
+	dropGondolaInstance.CanTouch = false
+	dropGondolaInstance.CanQuery = false
+	local dropConsoleInstance = dropRide:FindFirstChild("DropConsole", true)
+	if dropConsoleInstance == nil or not dropConsoleInstance:IsA("BasePart") then
+		error("[ParkPark] DropRide.DropConsole must be a BasePart")
+	end
+	applyDropAppearance(dropRide, dropRide:GetAttribute("IsRepaired") == true)
+
 	return {
 		ParkFolder = parkFolder,
 		Entrance = entrance,
@@ -2250,6 +2342,9 @@ function ParkBuilder.Build(): References
 		FlumeRide = flumeRide,
 		FlumeCars = flumeCarsInstance,
 		FlumeConsole = flumeConsoleInstance,
+		DropRide = dropRide,
+		DropGondola = dropGondolaInstance,
+		DropConsole = dropConsoleInstance,
 		GateRope = gateRope,
 		GatePrompt = gatePrompt,
 	}
@@ -2335,6 +2430,10 @@ end
 
 function ParkBuilder.ApplyFlumeRepairedAppearance(ride: Model)
 	applyFlumeAppearance(ride, true)
+end
+
+function ParkBuilder.ApplyDropRepairedAppearance(ride: Model)
+	applyDropAppearance(ride, true)
 end
 
 return ParkBuilder

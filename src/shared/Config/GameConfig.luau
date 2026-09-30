@@ -53,6 +53,7 @@ return {
 	HauntedScale = 3.2,
 	CoasterScale = 3,
 	FlumeScale = 2.6,
+	DropScale = 3,
 	TreeScale = 1.9,
 	BushScale = 1.7,
 	LampScale = 2,
@@ -188,9 +189,35 @@ return {
 			StaffCosts = { 1100, 1800, 2900 },
 			RideSeconds = 90,
 		},
+		Drop = {
+			DisplayName = "자유낙하 타워",
+			ModelName = "DropRide",
+			ConsoleName = "DropConsole",
+			UnlockCost = 1700,
+			RepairCost = 800,
+			BaseFare = 125,
+			Requires = "Flume",
+			Zone = "Water",
+			IncomePerLevel = 40,
+			IncomeCosts = { 1000, 1900, 3100, 4800 },
+			StaffCosts = { 1400, 2300, 3600 },
+			RideSeconds = 60,
+		},
 	} :: { [string]: RideEconomy },
 	-- The order attractions unlock in (each needs the one before it repaired).
-	RideChain = { "Carousel", "Teacups", "Snack", "Bumper", "Ferris", "Swing", "Pirate", "Haunted", "Coaster", "Flume" },
+	RideChain = {
+		"Carousel",
+		"Teacups",
+		"Snack",
+		"Bumper",
+		"Ferris",
+		"Swing",
+		"Pirate",
+		"Haunted",
+		"Coaster",
+		"Flume",
+		"Drop",
+	},
 	-- Zones beyond the first: what opening each costs (paid at its gate once the park's last attraction of the
 	-- previous zone is repaired) and how it is named.
 	ZoneCosts = { Water = 2500 } :: { [string]: number },
@@ -324,6 +351,21 @@ return {
 	FlumeRowZ = 0.7,
 	FlumeColumnX = 0.5,
 	FlumeRiderHip = 1.25,
+
+	-- Drop tower (unscaled OBJ units from ParkParkDropTower/Gondola.obj). The gondola rests DropRestY above the
+	-- ground (the top of the boarding base) and rises to DropTopY; DropGondolaCenterY is the gondola mesh's
+	-- bounding-box centre above its ring plane, DropSeatTop the seat top, and DropSeatRadius the ring of seats.
+	DropSeatCount = 8,
+	DropRestY = 1.2,
+	DropTopY = 14.5,
+	DropDockSeconds = 9,
+	DropLiftSeconds = 7,
+	DropHoldSeconds = 2.5,
+	DropFallAccel = 55,
+	DropGondolaCenterY = 0.435,
+	DropSeatTop = 0.2,
+	DropSeatRadius = 2.4,
+	DropRiderHip = 1.25,
 
 	-- Janitors: hired at the cleaning cart by the entrance path, they walk to litter and clear it for free.
 	-- Costs are for the 1st, 2nd, ... janitor.

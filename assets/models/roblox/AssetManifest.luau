@@ -14,6 +14,7 @@ return {
 		Haunted = "HauntedHouse",
 		Coaster = "CoasterRide",
 		Flume = "FlumeRide",
+		Drop = "DropRide",
 		Litter = "Litter",
 	},
 	EntranceSign = "SignPanel",

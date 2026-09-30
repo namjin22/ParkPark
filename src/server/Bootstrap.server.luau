@@ -9,6 +9,7 @@ local configFolder = game:GetService("ReplicatedStorage"):WaitForChild("ParkRebo
 local gameConfig = require(configFolder:WaitForChild("GameConfig"))
 local coasterPath = require(configFolder:WaitForChild("CoasterPath"))
 local flumePath = require(configFolder:WaitForChild("FlumePath"))
+local dropService = require(script.Parent.Services.DropService)
 local zoneService = require(script.Parent.Services.ZoneService)
 local hauntedService = require(script.Parent.Services.HauntedService)
 local pirateService = require(script.Parent.Services.PirateService)
@@ -48,6 +49,7 @@ rideService.Start(
 	parkBuilder.ApplyHauntedRepairedAppearance,
 	parkBuilder.ApplyCoasterRepairedAppearance,
 	parkBuilder.ApplyFlumeRepairedAppearance,
+	parkBuilder.ApplyDropRepairedAppearance,
 	noticeService.Send
 )
 bumperCarService.Start(park)
@@ -70,6 +72,7 @@ trackService.Start({
 	CarPrefix = "FlumeCar",
 	ConfigPrefix = "Flume",
 })
+dropService.Start(park)
 zoneService.Start(park, economyService.SpendCoins, economyService.GetCoins, noticeService.Send)
 decorService.Start(park, parkBuilder.FindDecorTemplate)
 powerService.Start(park, economyService.AwardCoins, noticeService.Send, noticeService.Popup)
@@ -98,6 +101,7 @@ local rideModels: { [string]: Model } = {
 	Haunted = park.HauntedHouse,
 	Coaster = park.CoasterRide,
 	Flume = park.FlumeRide,
+	Drop = park.DropRide,
 }
 local watched: { Instance } = { park.ParkFolder }
 for _, model in rideModels do

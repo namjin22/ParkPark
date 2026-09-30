@@ -1864,6 +1864,64 @@ def make_flume_boat() -> Mesh:
     return mesh
 
 
+DROP_TOWER_HEIGHT = 17.0
+DROP_SEAT_RADIUS = 2.4
+
+
+def make_drop_tower() -> Mesh:
+    """Round boarding base and a four-post lattice tower with a striped crown; origin at the ground centre."""
+    mesh = Mesh("ParkParkDropTower")
+    add_vertical_cylinder(mesh, 6.0, 0.05, 0.6, "cream", 40)
+    add_vertical_cylinder(mesh, 6.02, 0.05, 0.4, "coral", 40)
+    add_torus(mesh, 5.85, 0.12, 0.62, "gold", segments=40, sides=6)
+    for index in range(14):
+        angle = TAU * index / 14
+        add_ellipsoid(mesh, (5.4 * math.cos(angle), 0.76, 5.4 * math.sin(angle)), (0.14, 0.14, 0.14), "gold" if index % 2 else "cream", slices=6, stacks=3)
+    post = 0.95
+    for x in (-post, post):
+        for z in (-post, post):
+            add_cylinder_between(mesh, (x, 0.5, z), (x, DROP_TOWER_HEIGHT, z), 0.3, 0.26, "coral" if (x > 0) == (z > 0) else "cream", 8)
+    y = 1.6
+    while y < DROP_TOWER_HEIGHT:
+        for a, b in (((-post, y, -post), (post, y, -post)), ((post, y, -post), (post, y, post)), ((post, y, post), (-post, y, post)), ((-post, y, post), (-post, y, -post))):
+            add_cylinder_between(mesh, a, b, 0.11, 0.11, "gold" if int(y / 1.6) % 2 == 0 else "cream", 5)
+        y += 1.6
+    # Crown: striped roof, a bulb ring, and a star.
+    add_box(mesh, (0, DROP_TOWER_HEIGHT + 0.2, 0), (2.9, 0.5, 2.9), "gold")
+    segments = 12
+    for index in range(segments):
+        material = "coral" if index % 2 == 0 else "cream"
+        a0, a1 = TAU * index / segments, TAU * (index + 1) / segments
+        ring = [(2.6, DROP_TOWER_HEIGHT + 0.45), (1.4, DROP_TOWER_HEIGHT + 1.5), (0.0, DROP_TOWER_HEIGHT + 2.6)]
+        ids = [(mesh.vertex((r * math.cos(a0), h, r * math.sin(a0))), mesh.vertex((r * math.cos(a1), h, r * math.sin(a1)))) for r, h in ring]
+        for k in range(len(ring) - 1):
+            quad = (ids[k][0], ids[k][1], ids[k + 1][1], ids[k + 1][0])
+            mesh.face(material, *quad)
+            mesh.face(material, *reversed(quad))
+    add_star(mesh, DROP_TOWER_HEIGHT + 3.3, 0.45, "gold")
+    return mesh
+
+
+def make_drop_gondola() -> Mesh:
+    """The ride car: a ring of eight outward-facing seats around a collar that slides on the tower.
+
+    The origin is the centre of the ring at seat level; the collar leaves room for the tower (half-width 1.25).
+    """
+    mesh = Mesh("ParkParkDropGondola")
+    add_torus(mesh, 1.55, 0.26, 0.0, "cream", segments=24, sides=6)
+    add_torus(mesh, 3.1, 0.1, 0.32, "gold", segments=40, sides=5)
+    for index in range(8):
+        angle = TAU * index / 8
+        yaw = -math.degrees(angle)
+        cosine, sine = math.cos(angle), math.sin(angle)
+        add_box(mesh, (0, 0, 0), (1.6, 0.22, 0.16), "cream", tilted_transform((2.1 * cosine, -0.02, 2.1 * sine), yaw + 90))
+        add_box(mesh, (0, 0, 0), (1.0, 0.16, 0.9), "coral", tilted_transform((DROP_SEAT_RADIUS * cosine, 0.12, DROP_SEAT_RADIUS * sine), yaw + 90))
+        add_box(mesh, (0, 0, 0), (1.0, 0.95, 0.12), "coral", tilted_transform((1.85 * cosine, 0.62, 1.85 * sine), yaw + 90))
+        add_box(mesh, (0, 0, 0), (1.0, 0.1, 0.1), "gold", tilted_transform((2.85 * cosine, 0.62, 2.85 * sine), yaw + 90))
+        add_cylinder_between(mesh, (2.85 * cosine, 0.2, 2.85 * sine), (2.85 * cosine, 0.62, 2.85 * sine), 0.05, 0.05, "gold", 4)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -1957,6 +2015,8 @@ def main() -> None:
         make_coaster_car(),
         make_flume_track(),
         make_flume_boat(),
+        make_drop_tower(),
+        make_drop_gondola(),
         make_decor_tree(),
         make_decor_bush(),
         make_decor_lamp(),

@@ -37,6 +37,8 @@ type GuestReferences = {
 	CoasterCars: Model,
 	FlumeRide: Model,
 	FlumeCars: Model,
+	DropRide: Model,
+	DropGondola: BasePart,
 }
 
 type Guest = {
@@ -253,7 +255,7 @@ end
 
 -- Track-ride cars (coaster, flume) carry two rows of two; every seat faces the direction of travel (the car's
 -- -Z). The offset is relative to the car part's centre, from the ride's `<Prefix>...` numbers in GameConfig.
-local TRACK_RIDES: { [string]: boolean } = { Coaster = true, Flume = true }
+local TRACK_RIDES: { [string]: boolean } = { Coaster = true, Flume = true, Drop = true }
 
 local function trackSeatOffset(prefix: string): (number) -> CFrame
 	local settings = GameConfig :: any
@@ -268,6 +270,17 @@ local function trackSeatOffset(prefix: string): (number) -> CFrame
 			row * settings[prefix .. "RowZ"] * scale
 		)
 	end
+end
+
+-- The drop tower's gondola seats eight guests in a ring, all facing outward; the offset is relative to the
+-- gondola part's centre.
+local function dropSeatOffset(seat: number): CFrame
+	local scale = GameConfig.DropScale
+	local angle = (seat - 1) * 2 * math.pi / GameConfig.DropSeatCount
+	local outward = Vector3.new(math.cos(angle), 0, math.sin(angle))
+	local position = outward * GameConfig.DropSeatRadius * scale
+		+ Vector3.new(0, (GameConfig.DropSeatTop - GameConfig.DropGondolaCenterY) * scale + GameConfig.DropRiderHip, 0)
+	return CFrame.lookAt(position, position + outward)
 end
 
 -- Bumper cars face local -Z, so a rider with an identity rotation looks along the car's travel.
@@ -365,6 +378,9 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			local car = park.FlumeCars:FindFirstChild(string.format("FlumeCar%d", (seat - 1) // 4 + 1))
 			return if car and car:IsA("BasePart") then car else nil
 		end, trackSeatOffset("Flume"), GameConfig.FlumeSeatCount, false),
+		newRide("Drop", park.DropRide, function()
+			return park.DropGondola
+		end, dropSeatOffset, GameConfig.DropSeatCount, false),
 	}
 	for _, rideInfo in rides do
 		if rideInfo.key == "Haunted" then
