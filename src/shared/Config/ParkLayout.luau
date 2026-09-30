@@ -28,7 +28,9 @@ ParkLayout.FerrisZ = 16
 ParkLayout.GeneratorPosition = Vector3.new(24, 0, 52)
 -- The cleaning cart where janitors are hired, on the other side of the same path.
 ParkLayout.JanitorCartPosition = Vector3.new(-24, 0, 52)
-ParkLayout.GroundHalfWidth = 190
+ParkLayout.GroundHalfWidth = 260
+-- The side path runs this far out to each side, past the outermost ride queues.
+ParkLayout.SidePathReach = 175
 ParkLayout.GroundMinZ = -170
 ParkLayout.GroundMaxZ = 115
 
@@ -50,6 +52,7 @@ local SPURS: { [string]: { Z: number, InnerX: number } } = {
 local carouselRadius = GameConfig.CarouselPlatformRadius * GameConfig.CarouselScale
 local teacupsRadius = GameConfig.TeacupsPlatformRadius * GameConfig.TeacupsScale
 local bumperRadius = GameConfig.BumperPlatformRadius * GameConfig.BumperScale
+local swingRadius = GameConfig.SwingPlatformRadius * GameConfig.SwingScale
 
 ParkLayout.Rides = {
 	Carousel = {
@@ -69,6 +72,13 @@ ParkLayout.Rides = {
 		PlatformRadius = bumperRadius,
 		QueueHead = Vector3.new(BUMPER_PIVOT.X, 0, BUMPER_PIVOT.Z + bumperRadius + 5),
 		QueueDirection = Vector3.new(-1, 0, 0),
+	},
+	-- The swing ride stands at the west end of the side path; its line runs back along the path.
+	Swing = {
+		Pivot = Vector3.new(-150 - swingRadius - 6, 0, ParkLayout.SidePathZ),
+		PlatformRadius = swingRadius,
+		QueueHead = Vector3.new(-150, 0, ParkLayout.SidePathZ),
+		QueueDirection = Vector3.new(1, 0, 0),
 	},
 	Ferris = {
 		Pivot = FERRIS_PIVOT,

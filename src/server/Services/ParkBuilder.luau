@@ -14,6 +14,7 @@ local TEACUPS_NAME = "TeacupsRide"
 local BUMPER_NAME = "BumperCarsRide"
 local SNACK_NAME = "SnackStand"
 local FERRIS_NAME = "FerrisWheelRide"
+local SWING_NAME = "SwingRide"
 local ASSET_FOLDER_SYNC_TIMEOUT = 5
 local ASSET_MANIFEST_SYNC_TIMEOUT = 2
 -- Guests spawn on +Z and walk through the entrance toward the rides on -Z (see ParkLayout).
@@ -28,6 +29,7 @@ local AUTHORED_BUMPER_PIVOT = CFrame.new(ParkLayout.Rides.Bumper.Pivot)
 local GRAYBOX_SNACK_PIVOT = CFrame.new(ParkLayout.Rides.Snack.Pivot)
 local AUTHORED_SNACK_PIVOT = GRAYBOX_SNACK_PIVOT * CFrame.Angles(0, -math.pi / 2, 0)
 -- The wheel is modelled with its axle along local Z; turned a quarter it turns in the YZ plane, facing the path.
+local SWING_PIVOT = CFrame.new(ParkLayout.Rides.Swing.Pivot)
 local FERRIS_PIVOT = CFrame.new(ParkLayout.Rides.Ferris.Pivot) * CFrame.Angles(0, math.pi / 2, 0)
 local DEBRIS_NAME = "EntranceDebris"
 -- Beside the path between the spawn and the gate, so the first job is right in front of the player.
@@ -45,6 +47,7 @@ type AssetManifest = {
 		Bumper: string?,
 		Snack: string?,
 		Ferris: string?,
+		Swing: string?,
 		Litter: string?,
 	},
 	EntranceSign: string,
@@ -68,6 +71,7 @@ local assetManifest: AssetManifest = {
 		Bumper = BUMPER_NAME,
 		Snack = SNACK_NAME,
 		Ferris = FERRIS_NAME,
+		Swing = SWING_NAME,
 		Litter = "Litter",
 	},
 	EntranceSign = "SignPanel",
@@ -113,6 +117,7 @@ local function getAssetFolder(): Folder?
 				and (candidate.Models.Bumper == nil or type(candidate.Models.Bumper) == "string")
 				and (candidate.Models.Snack == nil or type(candidate.Models.Snack) == "string")
 				and (candidate.Models.Ferris == nil or type(candidate.Models.Ferris) == "string")
+				and (candidate.Models.Swing == nil or type(candidate.Models.Swing) == "string")
 				and (candidate.Models.Litter == nil or type(candidate.Models.Litter) == "string")
 				and type(candidate.EntranceSign) == "string"
 				and type(candidate.CarouselStates) == "table"
@@ -184,6 +189,14 @@ export type References = {
 	FerrisRepairPrompt: ProximityPrompt,
 	FerrisIncomePrompt: ProximityPrompt,
 	FerrisStaffPrompt: ProximityPrompt,
+	SwingRide: Model,
+	SwingCrown: BasePart,
+	SwingSeats: Model,
+	SwingConsole: BasePart,
+	SwingUnlockPrompt: ProximityPrompt,
+	SwingRepairPrompt: ProximityPrompt,
+	SwingIncomePrompt: ProximityPrompt,
+	SwingStaffPrompt: ProximityPrompt,
 	GateRope: Model,
 	GatePrompt: ProximityPrompt,
 }
@@ -291,7 +304,7 @@ local function ensureGrayboxApproach(parkFolder: Folder)
 	end
 	if parkFolder:FindFirstChild("SidePath") == nil then
 		-- One side path crosses the main path and reaches the teacups' and the bumper cars' queues.
-		local reach = math.abs(ParkLayout.Rides.Teacups.Pivot.X) + 10
+		local reach = ParkLayout.SidePathReach
 		createPart(
 			"SidePath",
 			Vector3.new(reach * 2, 0.2, ParkLayout.SidePathHalfWidth * 2),
@@ -568,6 +581,8 @@ local function findAuthoredTemplate(name: string): Model?
 		assetName = assetManifest.Models.Snack
 	elseif name == FERRIS_NAME then
 		assetName = assetManifest.Models.Ferris
+	elseif name == SWING_NAME then
+		assetName = assetManifest.Models.Swing
 	elseif name == DEBRIS_NAME then
 		assetName = assetManifest.Models.Debris
 	end
@@ -751,6 +766,26 @@ local function applyFerrisAppearance(ride: Model, repaired: boolean)
 		applyPalette(ride, repaired)
 	end
 	setRestoredGlow(ride:FindFirstChild("Wheel", true), repaired, 60)
+end
+
+local function applySwingAppearance(ride: Model, repaired: boolean)
+	if ride:GetAttribute("IsGraybox") == true then
+		for _, descendant in ride:GetDescendants() do
+			if descendant:IsA("BasePart") and descendant.Name ~= "ParkPivot" then
+				descendant.Material = Enum.Material.SmoothPlastic
+				if descendant.Name == "Crown" then
+					descendant.Color = if repaired then Color3.fromRGB(235, 122, 108) else Color3.fromRGB(124, 114, 104)
+				elseif string.match(descendant.Name, "^SwingSeat%d+$") then
+					descendant.Color = if repaired then Color3.fromRGB(245, 193, 83) else Color3.fromRGB(126, 113, 98)
+				elseif descendant.Name == "Tower" or descendant.Name == "RidePlatform" then
+					descendant.Color = if repaired then Color3.fromRGB(255, 232, 190) else Color3.fromRGB(112, 104, 94)
+				end
+			end
+		end
+	else
+		applyPalette(ride, repaired)
+	end
+	setRestoredGlow(ride:FindFirstChild("Crown", true), repaired, 60)
 end
 
 local function applyAuthoredEntranceState(entrance: Model, cleared: boolean)
@@ -1142,6 +1177,96 @@ local function buildGrayboxFerris(parkFolder: Folder): Model
 	return ride
 end
 
+-- Graybox swing ride in the template's local frame: platform, tower, turning crown, and eight hanging seats.
+local function buildGrayboxSwing(parkFolder: Folder): Model
+	local ride = Instance.new("Model")
+	ride.Name = SWING_NAME
+	ride:SetAttribute("IsGraybox", true)
+	ride.Parent = parkFolder
+
+	local pivot = createPart("ParkPivot", Vector3.new(0.1, 0.1, 0.1), Vector3.zero, Color3.new(1, 1, 1), ride)
+	pivot.Transparency = 1
+	pivot.CanCollide = false
+	pivot.CanTouch = false
+	pivot.CanQuery = false
+	pivot.CastShadow = false
+	ride.PrimaryPart = pivot
+
+	local scale = GameConfig.SwingScale
+	local grey = Color3.fromRGB(112, 104, 94)
+	local diameter = GameConfig.SwingPlatformRadius * 2 * scale
+	local platform = createPart(
+		"RidePlatform",
+		Vector3.new(0.8, diameter, diameter),
+		Vector3.new(0, 0.4, 0),
+		grey,
+		ride,
+		Enum.Material.SmoothPlastic
+	)
+	platform.Shape = Enum.PartType.Cylinder
+	platform.CFrame = CFrame.new(0, 0.4, 0) * CFrame.Angles(0, 0, math.pi / 2)
+
+	local towerHeight = GameConfig.SwingTowerHeight * scale
+	local tower = createPart(
+		"Tower",
+		Vector3.new(towerHeight, 2.4 * scale, 2.4 * scale),
+		Vector3.new(0, towerHeight / 2, 0),
+		grey,
+		ride,
+		Enum.Material.SmoothPlastic
+	)
+	tower.Shape = Enum.PartType.Cylinder
+	tower.CFrame = CFrame.new(0, towerHeight / 2, 0) * CFrame.Angles(0, 0, math.pi / 2)
+
+	-- A block stands in for the crown so it can turn about the tower's axis (a rolled cylinder could not).
+	local crown = createPart(
+		"Crown",
+		Vector3.new(11 * scale, 0.8 * scale, 11 * scale),
+		Vector3.new(0, towerHeight, 0),
+		grey,
+		ride,
+		Enum.Material.SmoothPlastic
+	)
+	crown.CanCollide = false
+
+	local seats = Instance.new("Model")
+	seats.Name = "SwingSeats"
+	seats.Parent = ride
+	local count = GameConfig.SwingSeatCount
+	local center = Vector3.new(GameConfig.SwingSeatCenterX, GameConfig.SwingSeatCenterY, GameConfig.SwingSeatCenterZ)
+	for index = 1, count do
+		local angle = 2 * math.pi * (index - 1) / count
+		local anchor = Vector3.new(
+			GameConfig.SwingAnchorRadius * math.cos(angle),
+			GameConfig.SwingTowerHeight + GameConfig.SwingAnchorY,
+			GameConfig.SwingAnchorRadius * math.sin(angle)
+		) * scale
+		local seat = createPart(
+			string.format("SwingSeat%d", index),
+			Vector3.new(1.7, 5.96, 1.27) * scale,
+			anchor + center * scale,
+			grey,
+			seats,
+			Enum.Material.SmoothPlastic
+		)
+		seat.CanCollide = false
+		seat.CanTouch = false
+		seat.CanQuery = false
+	end
+
+	-- Off to the side of the platform, away from the queue that forms along the path to the east.
+	local console = createPart(
+		"SwingConsole",
+		Vector3.new(2, 3, 2),
+		Vector3.new(0, 1.5, diameter / 2 + 8),
+		Color3.fromRGB(91, 87, 79),
+		ride
+	)
+	console.Material = Enum.Material.Slate
+	ride:PivotTo(SWING_PIVOT)
+	return ride
+end
+
 local function ensureRidePrompt(
 	console: BasePart,
 	name: string,
@@ -1237,6 +1362,8 @@ local function getOrCreateModel(parent: Instance, name: string, build: (Folder) 
 			model:PivotTo(AUTHORED_SNACK_PIVOT)
 		elseif name == FERRIS_NAME then
 			model:PivotTo(FERRIS_PIVOT)
+		elseif name == SWING_NAME then
+			model:PivotTo(SWING_PIVOT)
 		end
 		return model
 	end
@@ -1479,6 +1606,47 @@ function ParkBuilder.Build(): References
 	local ferrisIncomePrompt, ferrisStaffPrompt = ensureUpgradePrompts(ferrisConsoleInstance, "관람차")
 	applyFerrisAppearance(ferrisRide, ferrisRide:GetAttribute("IsRepaired") == true)
 
+	local swingRide = getOrCreateModel(parkFolder, SWING_NAME, buildGrayboxSwing)
+	if swingRide:GetAttribute("IsGraybox") == nil then
+		swingRide:SetAttribute("IsGraybox", true)
+	end
+	for _, attribute in { "IsUnlocked", "IsRepaired", "IsOperating" } do
+		if swingRide:GetAttribute(attribute) == nil then
+			swingRide:SetAttribute(attribute, false)
+		end
+	end
+	local swingCrownInstance = swingRide:FindFirstChild("Crown", true)
+	if swingCrownInstance == nil or not swingCrownInstance:IsA("BasePart") then
+		error("[ParkPark] SwingRide.Crown must be a BasePart")
+	end
+	local swingSeatsInstance = swingRide:FindFirstChild("SwingSeats", true)
+	if swingSeatsInstance == nil or not swingSeatsInstance:IsA("Model") then
+		error("[ParkPark] SwingRide.SwingSeats must be a Model")
+	end
+	-- SwingService moves the crown and the seats every frame, so they stay anchored and non-solid.
+	swingCrownInstance.Anchored = true
+	swingCrownInstance.CanCollide = false
+	swingCrownInstance.CanTouch = false
+	swingCrownInstance.CanQuery = false
+	for _, descendant in swingSeatsInstance:GetDescendants() do
+		if descendant:IsA("BasePart") then
+			descendant.Anchored = true
+			descendant.CanCollide = false
+			descendant.CanTouch = false
+			descendant.CanQuery = false
+		end
+	end
+	local swingConsoleInstance = swingRide:FindFirstChild("SwingConsole", true)
+	if swingConsoleInstance == nil or not swingConsoleInstance:IsA("BasePart") then
+		error("[ParkPark] SwingRide.SwingConsole must be a BasePart")
+	end
+	local swingUnlockPrompt =
+		ensureRidePrompt(swingConsoleInstance, "UnlockPrompt", "해금하기", 1.5, "회전 그네", nil, nil)
+	local swingRepairPrompt =
+		ensureRidePrompt(swingConsoleInstance, "RepairPrompt", "수리하기", 2, "회전 그네", nil, nil)
+	local swingIncomePrompt, swingStaffPrompt = ensureUpgradePrompts(swingConsoleInstance, "회전 그네")
+	applySwingAppearance(swingRide, swingRide:GetAttribute("IsRepaired") == true)
+
 	return {
 		ParkFolder = parkFolder,
 		Entrance = entrance,
@@ -1521,6 +1689,14 @@ function ParkBuilder.Build(): References
 		FerrisRepairPrompt = ferrisRepairPrompt,
 		FerrisIncomePrompt = ferrisIncomePrompt,
 		FerrisStaffPrompt = ferrisStaffPrompt,
+		SwingRide = swingRide,
+		SwingCrown = swingCrownInstance,
+		SwingSeats = swingSeatsInstance,
+		SwingConsole = swingConsoleInstance,
+		SwingUnlockPrompt = swingUnlockPrompt,
+		SwingRepairPrompt = swingRepairPrompt,
+		SwingIncomePrompt = swingIncomePrompt,
+		SwingStaffPrompt = swingStaffPrompt,
 		GateRope = gateRope,
 		GatePrompt = gatePrompt,
 	}
@@ -1579,6 +1755,10 @@ end
 
 function ParkBuilder.ApplyFerrisRepairedAppearance(ride: Model)
 	applyFerrisAppearance(ride, true)
+end
+
+function ParkBuilder.ApplySwingRepairedAppearance(ride: Model)
+	applySwingAppearance(ride, true)
 end
 
 return ParkBuilder

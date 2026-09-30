@@ -9,6 +9,7 @@ return {
 		Bumper = "BumperCarsRide",
 		Snack = "SnackStand",
 		Ferris = "FerrisWheelRide",
+		Swing = "SwingRide",
 		Litter = "Litter",
 	},
 	EntranceSign = "SignPanel",

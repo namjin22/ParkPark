@@ -43,6 +43,12 @@ type RideReferences = {
 	FerrisRepairPrompt: ProximityPrompt,
 	FerrisIncomePrompt: ProximityPrompt,
 	FerrisStaffPrompt: ProximityPrompt,
+	SwingRide: Model,
+	SwingConsole: BasePart,
+	SwingUnlockPrompt: ProximityPrompt,
+	SwingRepairPrompt: ProximityPrompt,
+	SwingIncomePrompt: ProximityPrompt,
+	SwingStaffPrompt: ProximityPrompt,
 }
 
 type SpendCoins = (Player, number) -> boolean
@@ -144,6 +150,7 @@ function RideService.Start(
 	applyBumperRepaired: ApplyRepairedAppearance,
 	applySnackRepaired: ApplyRepairedAppearance,
 	applyFerrisRepaired: ApplyRepairedAppearance,
+	applySwingRepaired: ApplyRepairedAppearance,
 	notify: Notify
 )
 	local currency = GameConfig.CurrencyDisplayName
@@ -153,6 +160,7 @@ function RideService.Start(
 		Snack = park.SnackStand,
 		Bumper = park.BumperRide,
 		Ferris = park.FerrisRide,
+		Swing = park.SwingRide,
 	}
 
 	local function startRotation(ride: Model, rotor: Model, rotationSeconds: number, name: string)
@@ -562,6 +570,25 @@ function RideService.Start(
 			park.FerrisRide:SetAttribute("IsOperating", true)
 		end,
 		applyRepairedAppearance = applyFerrisRepaired,
+	})
+
+	-- The swing ride follows the Ferris wheel; SwingService turns the crown while IsOperating is true.
+	setupRide({
+		key = "Swing",
+		model = park.SwingRide,
+		console = park.SwingConsole,
+		unlockPrompt = park.SwingUnlockPrompt,
+		repairPrompt = park.SwingRepairPrompt,
+		incomePrompt = park.SwingIncomePrompt,
+		staffPrompt = park.SwingStaffPrompt,
+		isAvailable = function()
+			return park.ParkFolder:GetAttribute("ParkOpen") == true
+		end,
+		signals = { park.ParkFolder:GetAttributeChangedSignal("ParkOpen") },
+		start = function()
+			park.SwingRide:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
+		end,
+		applyRepairedAppearance = applySwingRepaired,
 	})
 end
 

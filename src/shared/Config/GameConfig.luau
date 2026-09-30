@@ -43,6 +43,7 @@ return {
 	ConsoleScale = 3,
 	SnackScale = 3,
 	FerrisScale = 2.6,
+	SwingScale = 3,
 
 	Rides = {
 		Carousel = {
@@ -96,6 +97,17 @@ return {
 			StaffCosts = { 220, 420, 700 },
 			RideSeconds = 40,
 		},
+		Swing = {
+			DisplayName = "회전 그네",
+			UnlockCost = 300,
+			RepairCost = 150,
+			BaseFare = 28,
+			Requires = "Ferris",
+			IncomePerLevel = 10,
+			IncomeCosts = { 200, 400, 700, 1100 },
+			StaffCosts = { 300, 560, 900 },
+			RideSeconds = 30,
+		},
 	} :: { [string]: RideEconomy },
 	-- Seconds between automatic boardings for staff level 1, 2, 3 (0 staff means players accept guests).
 	StaffIntervals = { 10, 6, 3 },
@@ -148,6 +160,25 @@ return {
 	FerrisRiderHip = 1.25,
 	-- A cabin can be boarded while it is within this fraction of the wheel radius above its lowest point.
 	FerrisBoardingWindow = 0.15,
+
+	-- Swing ride (unscaled OBJ units from ParkParkSwingBase/Crown/Seat.obj). The crown turns on top of the
+	-- tower, and its speed rises and falls over SwingCycleSeconds; the faster it goes, the further the chairs
+	-- swing out (up to SwingMaxAngle degrees). SwingSeatCenter* is the seat mesh's bounding-box centre
+	-- relative to its anchor (the OBJ origin), and SwingSeatTop is the height of the bench above the anchor.
+	SwingSeatCount = 8,
+	SwingTowerHeight = 8,
+	SwingAnchorRadius = 4.6,
+	SwingAnchorY = -0.4,
+	SwingPlatformRadius = 8,
+	SwingRotationSeconds = 4,
+	SwingCycleSeconds = 20,
+	SwingMaxAngle = 42,
+	SwingSeatCenterX = 0,
+	SwingSeatCenterY = -2.82,
+	SwingSeatCenterZ = -0.065,
+	SwingSeatTop = -5.26,
+	SwingRiderHip = 1.25,
+	SwingSeatFlip = false,
 
 	-- Janitors: hired at the cleaning cart by the entrance path, they walk to litter and clear it for free.
 	-- Costs are for the 1st, 2nd, ... janitor.

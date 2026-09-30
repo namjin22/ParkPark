@@ -1173,6 +1173,103 @@ def make_ferris_cabin() -> Mesh:
     return mesh
 
 
+SWING_TOWER_HEIGHT = 8.0
+SWING_ANCHOR_RADIUS = 4.6
+SWING_ANCHOR_Y = -0.4
+SWING_SEAT_COUNT = 8
+SWING_CHAIN = 5.0
+
+
+def make_swing_base() -> Mesh:
+    """Round boarding platform and the tall central tower of the swing ride; origin is the ground center."""
+    mesh = Mesh("ParkParkSwingBase")
+    add_vertical_cylinder(mesh, 8.0, 0.05, 0.6, "cream", 48)
+    add_vertical_cylinder(mesh, 8.02, 0.05, 0.4, "coral", 48)
+    add_torus(mesh, 7.85, 0.12, 0.62, "gold", segments=48, sides=6)
+    for index in range(16):
+        angle = TAU * index / 16
+        add_ellipsoid(mesh, (7.4 * math.cos(angle), 0.75, 7.4 * math.sin(angle)), (0.14, 0.14, 0.14), "gold" if index % 2 else "cream", slices=6, stacks=3)
+    lathe(
+        mesh,
+        [
+            (0.0, 0.55, "wood"),
+            (1.7, 0.55, "wood"),
+            (1.35, 1.1, "gold"),
+            (1.05, 1.7, "coral"),
+            (0.9, 3.0, "cream"),
+            (0.82, 4.4, "cream"),
+            (0.98, 4.6, "gold"),
+            (0.78, 5.0, "mint"),
+            (0.72, 6.9, "cream"),
+            (0.88, 7.1, "gold"),
+            (0.66, 7.4, "coral"),
+            (0.62, SWING_TOWER_HEIGHT - 0.3, "cream"),
+            (0.5, SWING_TOWER_HEIGHT, "gold"),
+            (0.0, SWING_TOWER_HEIGHT, "gold"),
+        ],
+        32,
+    )
+    return mesh
+
+
+def make_swing_crown() -> Mesh:
+    """The turning crown: hub, arms out to eight anchor points, ring, striped roof, bulbs, and a star.
+
+    The origin is the top of the tower, on the axis the crown turns about.
+    """
+    mesh = Mesh("ParkParkSwingCrown")
+    lathe(mesh, [(0.0, -0.9, "gold"), (0.95, -0.9, "gold"), (1.05, -0.5, "coral"), (0.95, 0.1, "cream"), (0.7, 0.3, "gold"), (0.0, 0.3, "gold")], 24)
+    for index in range(SWING_SEAT_COUNT):
+        angle = TAU * index / SWING_SEAT_COUNT
+        cosine, sine = math.cos(angle), math.sin(angle)
+        anchor = (SWING_ANCHOR_RADIUS * cosine, SWING_ANCHOR_Y, SWING_ANCHOR_RADIUS * sine)
+        add_cylinder_between(mesh, (0.6 * cosine, -0.2, 0.6 * sine), anchor, 0.15, 0.13, "gold", 8)
+        add_ellipsoid(mesh, (anchor[0], anchor[1] - 0.1, anchor[2]), (0.24, 0.2, 0.24), "coral", slices=8, stacks=4)
+    add_torus(mesh, SWING_ANCHOR_RADIUS + 0.35, 0.12, -0.35, "cream", segments=48, sides=6)
+    for index in range(24):
+        angle = TAU * index / 24
+        add_ellipsoid(
+            mesh,
+            ((SWING_ANCHOR_RADIUS + 0.75) * math.cos(angle), -0.3, (SWING_ANCHOR_RADIUS + 0.75) * math.sin(angle)),
+            (0.13, 0.13, 0.13),
+            "gold" if index % 2 else "cream",
+            slices=6,
+            stacks=3,
+        )
+    # Striped umbrella roof above the arms, alternating coral and cream wedges.
+    segments = 16
+    for index in range(segments):
+        material = "coral" if index % 2 == 0 else "cream"
+        a0, a1 = TAU * index / segments, TAU * (index + 1) / segments
+        ring = [(0.0, 2.3), (1.6, 1.75), (3.3, 1.2), (5.4, 0.55)]
+        ids = []
+        for radius, height in ring:
+            ids.append((mesh.vertex((radius * math.cos(a0), height, radius * math.sin(a0))), mesh.vertex((radius * math.cos(a1), height, radius * math.sin(a1)))))
+        for k in range(len(ring) - 1):
+            quad = (ids[k][0], ids[k][1], ids[k + 1][1], ids[k + 1][0])
+            # The roof is a thin shell, so both sides are drawn.
+            mesh.face(material, *quad)
+            mesh.face(material, *reversed(quad))
+    add_torus(mesh, 5.4, 0.13, 0.5, "gold", segments=48, sides=6)
+    add_cylinder_between(mesh, (0, 2.2, 0), (0, 3.0, 0), 0.16, 0.1, "gold", 8)
+    add_star(mesh, 3.35, 0.4, "gold")
+    return mesh
+
+
+def make_swing_seat() -> Mesh:
+    """One hanging chair: two chains from the anchor (the origin) to a bench with a backrest at +Z."""
+    mesh = Mesh("ParkParkSwingSeat")
+    add_box(mesh, (0, 0.08, 0), (1.3, 0.16, 0.16), "gold")
+    for side in (-1, 1):
+        add_cylinder_between(mesh, (side * 0.15, 0.05, 0), (side * 0.62, -SWING_CHAIN, 0), 0.05, 0.05, "ink", 5)
+        add_box(mesh, (side * 0.78, -SWING_CHAIN - 0.3, 0.05), (0.14, 0.55, 1.0), "coral")
+    add_box(mesh, (0, -SWING_CHAIN - 0.35, 0.02), (1.5, 0.18, 1.1), "coral")
+    add_box(mesh, (0, -SWING_CHAIN + 0.15, 0.5), (1.5, 0.95, 0.14), "gold")
+    add_box(mesh, (0, -SWING_CHAIN - 0.05, -0.36), (1.4, 0.08, 0.08), "cream")
+    add_box(mesh, (0, -SWING_CHAIN - 0.75, -0.5), (1.4, 0.1, 0.4), "wood")
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -1256,6 +1353,9 @@ def main() -> None:
         make_ferris_wheel(),
         make_ferris_base(),
         make_ferris_cabin(),
+        make_swing_base(),
+        make_swing_crown(),
+        make_swing_seat(),
         make_bumper_platform(),
         make_bumper_car(),
         make_entrance(),

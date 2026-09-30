@@ -55,6 +55,12 @@ FERRIS_SCALE = config_number("FerrisScale")
 FERRIS_RADIUS = config_number("FerrisRadius")
 FERRIS_HUB = config_number("FerrisHubHeight")
 FERRIS_CABINS = int(config_number("FerrisCabinCount"))
+SWING_SCALE = config_number("SwingScale")
+SWING_TOWER = config_number("SwingTowerHeight")
+SWING_ANCHOR_RADIUS = config_number("SwingAnchorRadius")
+SWING_ANCHOR_Y = config_number("SwingAnchorY")
+SWING_SEATS = int(config_number("SwingSeatCount"))
+SWING_PLATFORM = config_number("SwingPlatformRadius")
 TEACUP_COUNT = int(config_number("TeacupCupCount"))
 TEACUP_RING_RADIUS = config_number("TeacupRingRadius")
 TEACUP_BASE_HEIGHT = config_number("TeacupCupBaseHeight")
@@ -276,6 +282,7 @@ def main() -> None:
     build_bumper_cars()
     build_snack_stand()
     build_ferris_wheel()
+    build_swing_ride()
 
 
 def build_teacups() -> None:
@@ -450,6 +457,41 @@ def build_ferris_wheel() -> None:
                 *colliders,
                 # Behind the wheel (local +Z is east in the world), away from the queue on the west side.
                 console("FerrisConsole", 8, 10, 0),
+            ],
+        ),
+    )
+
+
+def build_swing_ride() -> None:
+    needed = ("ParkParkSwingBase", "ParkParkSwingCrown", "ParkParkSwingSeat")
+    missing = missing_meshes(needed)
+    if missing:
+        print(f"skipped SwingRide: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    # The seats hang at rest straight below their anchors on the crown's rim; SwingService then moves the
+    # crown and the seats. Each seat's OBJ origin is its anchor, so the anchor is the part's origin here.
+    seats = []
+    for index in range(SWING_SEATS):
+        angle = 2 * math.pi * index / SWING_SEATS
+        anchor = (
+            SWING_ANCHOR_RADIUS * math.cos(angle),
+            SWING_TOWER + SWING_ANCHOR_Y,
+            SWING_ANCHOR_RADIUS * math.sin(angle),
+        )
+        seats.append(mesh_part(f"SwingSeat{index + 1}", "ParkParkSwingSeat", anchor, 0, False, CORAL, SWING_SCALE))
+    write(
+        "SwingRide",
+        model(
+            "SwingRide",
+            [
+                mesh_part("Tower", "ParkParkSwingBase", (0, 0, 0), 0, False, CREAM, SWING_SCALE),
+                mesh_part("Crown", "ParkParkSwingCrown", (0, SWING_TOWER, 0), 0, False, CORAL, SWING_SCALE),
+                model("SwingSeats", seats),
+                cylinder_collider("PlatformCollider", (0, 0.3, 0), 0.6, SWING_PLATFORM * 2, SWING_SCALE),
+                cylinder_collider("ColumnCollider", (0, SWING_TOWER / 2, 0), SWING_TOWER, 2.0, SWING_SCALE),
+                # South of the platform (local +Z), away from the queue that forms along the path to the east.
+                console("SwingConsole", 0, SWING_PLATFORM * SWING_SCALE + 8),
             ],
         ),
     )

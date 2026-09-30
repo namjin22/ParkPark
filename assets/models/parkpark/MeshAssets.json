@@ -20,7 +20,10 @@
     "ParkParkSnackStand",
     "ParkParkFerrisWheel",
     "ParkParkFerrisBase",
-    "ParkParkFerrisCabin"
+    "ParkParkFerrisCabin",
+    "ParkParkSwingBase",
+    "ParkParkSwingCrown",
+    "ParkParkSwingSeat"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",

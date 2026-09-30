@@ -27,6 +27,8 @@ type GuestReferences = {
 	SnackCounter: BasePart,
 	FerrisRide: Model,
 	FerrisCabins: Model,
+	SwingRide: Model,
+	SwingSeats: Model,
 }
 
 type Guest = {
@@ -209,6 +211,19 @@ local function ferrisSeatOffset(_: number): CFrame
 	)
 end
 
+-- A swing seat is a chair on chains; the guest sits on the bench facing the direction of travel. Set
+-- GameConfig.SwingSeatFlip when the imported mesh's front ends up on the opposite side of the seat part.
+local function swingSeatOffset(_: number): CFrame
+	local scale = GameConfig.SwingScale
+	local x = -GameConfig.SwingSeatCenterX * scale
+	local y = (GameConfig.SwingSeatTop - GameConfig.SwingSeatCenterY) * scale + GameConfig.SwingRiderHip
+	local z = (0 - GameConfig.SwingSeatCenterZ) * scale
+	if GameConfig.SwingSeatFlip then
+		return CFrame.new(-x, y, -z) * CFrame.Angles(0, math.pi, 0)
+	end
+	return CFrame.new(x, y, z)
+end
+
 -- Bumper cars face local -Z, so a rider with an identity rotation looks along the car's travel.
 local function bumperSeatOffset(_: number): CFrame
 	local scale = GameConfig.BumperCarScale
@@ -284,6 +299,10 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			local cabin = park.FerrisCabins:FindFirstChild(string.format("FerrisCabin%d", seat))
 			return if cabin and cabin:IsA("BasePart") then cabin else nil
 		end, ferrisSeatOffset, GameConfig.FerrisCabinCount, false),
+		newRide("Swing", park.SwingRide, function(seat: number)
+			local swingSeat = park.SwingSeats:FindFirstChild(string.format("SwingSeat%d", seat))
+			return if swingSeat and swingSeat:IsA("BasePart") then swingSeat else nil
+		end, swingSeatOffset, GameConfig.SwingSeatCount, false),
 	}
 	for _, rideInfo in rides do
 		if rideInfo.key == "Ferris" then
