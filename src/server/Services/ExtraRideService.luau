@@ -312,7 +312,7 @@ end
 -- A seat offset for GuestService: the rider's root relative to the seat part's centre.
 function ExtraRideService.SeatOffset(key: string): CFrame
 	local spec = ExtraRides[key]
-	return CFrame.new(0, spec.SeatLift * spec.Scale + spec.RiderHip, 0)
+	return CFrame.new(0, spec.SeatLift * spec.Scale + spec.RiderHip, (spec.SeatForward or 0) * spec.Scale)
 		* CFrame.Angles(0, math.rad(spec.RiderYaw or 0), 0)
 end
 

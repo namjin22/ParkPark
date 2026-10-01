@@ -60,7 +60,8 @@ ParkLayout.JanitorCartPosition = Vector3.new(-24, 0, 52)
 ParkLayout.GroundHalfWidth = 260
 -- The side path runs this far out to each side, past the outermost ride queues.
 ParkLayout.SidePathReach = 175
-ParkLayout.GroundMinZ = -170
+-- The first park's ground ends exactly where the water zone's ground begins (ZoneBounds.Water.BoundaryZ).
+ParkLayout.GroundMinZ = -168
 ParkLayout.GroundMaxZ = 115
 
 local CAROUSEL_PIVOT = Vector3.new(0, 0, -95)
@@ -314,6 +315,17 @@ function ParkLayout.RouteToRide(
 	local route: { Vector3 } = {}
 	local branchZ = ParkLayout.ZoneBranchZ[rideKey]
 	if branchZ then
+		local fromBranchZ = if fromKey ~= nil then ParkLayout.ZoneBranchZ[fromKey] else nil
+		if fromBranchZ then
+			-- Both rides are off the zone road: back to the road, along it, and out the other branch.
+			local roadX = ParkLayout.ZoneRoadX + lane * 0.6
+			table.insert(route, Vector3.new(from.X, 0, fromBranchZ + lane * 0.3))
+			table.insert(route, Vector3.new(roadX, 0, fromBranchZ + lane * 0.3))
+			table.insert(route, Vector3.new(roadX, 0, branchZ + lane * 0.3))
+			table.insert(route, Vector3.new(slot.X, 0, branchZ + lane * 0.3))
+			table.insert(route, slot)
+			return route
+		end
 		for _, point in ParkLayout.ToCrossing(fromKey, from, lane) do
 			table.insert(route, point)
 		end

@@ -285,7 +285,7 @@ def main() -> None:
                 cylinder_collider("PlatformCollider", (0, 0.42, 0), 0.7, 24, S),
                 # The central column blocks players; the horses and arms move, so they stay non-solid.
                 cylinder_collider("ColumnCollider", (0, 4.0, 0), 7.0, 1.4, S),
-                console("RepairConsole", 12 * S + 5, 0),
+                console("RepairConsole", 12 * S + 3, 0),
                 model(
                     "CarouselRotor",
                     [

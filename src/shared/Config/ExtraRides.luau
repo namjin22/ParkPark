@@ -21,6 +21,8 @@ export type ExtraSpec = {
 	SeatCount: number,
 	SeatLift: number,
 	RiderHip: number,
+	-- Toward the seat part's back (+Z in part space), in OBJ units like SeatLift.
+	SeatForward: number?,
 	-- Which way a rider faces relative to the seat part (degrees about Y).
 	RiderYaw: number?,
 	PivotYaw: number?,
@@ -63,6 +65,7 @@ local ExtraRides: { [string]: ExtraSpec } = {
 		Scale = GameConfig.BunnyScale,
 		SeatCount = 6,
 		SeatLift = 0.08,
+		SeatForward = 0.4,
 		RiderHip = 1.4,
 		HubSeconds = 14,
 		BounceHeight = 2.6,

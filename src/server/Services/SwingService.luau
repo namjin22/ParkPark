@@ -25,10 +25,11 @@ function SwingService.Start(park: SwingReferences)
 	local crown = park.SwingCrown
 	local baseCFrame = crown.CFrame
 	local scale = GameConfig.SwingScale
+	-- The imported mesh is turned half a turn about its centre, so the centre offset flips in x and z.
 	local seatCenter = Vector3.new(
-		GameConfig.SwingSeatCenterX,
+		-GameConfig.SwingSeatCenterX,
 		GameConfig.SwingSeatCenterY,
-		GameConfig.SwingSeatCenterZ
+		-GameConfig.SwingSeatCenterZ
 	) * scale
 
 	-- Each seat's anchor relative to the crown, measured once while the ride is at rest (the seat hangs

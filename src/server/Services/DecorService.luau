@@ -217,7 +217,7 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 		end
 	end
 	for _, spot in lampSpots do
-		if not blockedByStructures(spot.X, spot.Z, 0) and not inRect(spot.X, spot.Z, RECTS[7], 0) then
+		if not blocked(spot.X, spot.Z, 0) then
 			place("DecorLamp", spot, 0, 1.5)
 		end
 	end
@@ -232,12 +232,12 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 		{ Vector3.new(72, 0, -22.5), Vector3.new(0, 0, 1) },
 		{ Vector3.new(-100, 0, -22.5), Vector3.new(0, 0, 1) },
 		{ Vector3.new(100, 0, -1.5), Vector3.new(0, 0, -1) },
-		{ Vector3.new(FOUNTAIN_POSITION.X - 11, 0, FOUNTAIN_POSITION.Z), Vector3.new(1, 0, 0) },
-		{ Vector3.new(FOUNTAIN_POSITION.X + 11, 0, FOUNTAIN_POSITION.Z), Vector3.new(-1, 0, 0) },
+		{ Vector3.new(FOUNTAIN_POSITION.X - 14, 0, FOUNTAIN_POSITION.Z), Vector3.new(1, 0, 0) },
+		{ Vector3.new(FOUNTAIN_POSITION.X + 14, 0, FOUNTAIN_POSITION.Z), Vector3.new(-1, 0, 0) },
 	}
 	for _, bench in benchSpots do
 		local position, facing = bench[1], bench[2]
-		if not blockedByStructures(position.X, position.Z, 0) then
+		if not blocked(position.X, position.Z, 0) then
 			-- A bench's front is local -Z, so look toward the direction it should face.
 			local look = CFrame.lookAt(position, position + facing)
 			local _, yaw = look:ToOrientation()
@@ -344,7 +344,7 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 	for z = -184, -460, -24 do
 		for _, side in { -1, 1 } do
 			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
-			if not zoneBlocked(spot.X, spot.Z, -4) and clear(spot.X, spot.Z, 1.5) then
+			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then
 				place("DecorLamp", spot, 0, 1.5)
 			end
 		end
@@ -352,7 +352,7 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 	for index, z in { -230, -290, -350, -410 } do
 		local side = if index % 2 == 0 then 1 else -1
 		local position = Vector3.new(roadX + side * (roadHalf + 3), 0, z)
-		if not zoneBlocked(position.X, position.Z, -2) then
+		if not zoneBlocked(position.X, position.Z, 0) then
 			local _, yaw = CFrame.lookAt(position, position + Vector3.new(-side, 0, 0)):ToOrientation()
 			place("DecorBench", position, yaw, 2.5)
 		end
@@ -383,7 +383,7 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 	for z = kids.BoundaryZ - 16, kids.MinZ + 12, -24 do
 		for _, side in { -1, 1 } do
 			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
-			if not zoneBlocked(spot.X, spot.Z, -4) and clear(spot.X, spot.Z, 1.5) then
+			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then
 				place("DecorLamp", spot, 0, 1.5)
 			end
 		end
@@ -391,7 +391,7 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 	for index, z in { -510, -570, -630, -690 } do
 		local side = if index % 2 == 0 then 1 else -1
 		local position = Vector3.new(roadX + side * (roadHalf + 3), 0, z)
-		if not zoneBlocked(position.X, position.Z, -2) then
+		if not zoneBlocked(position.X, position.Z, 0) then
 			local _, yaw = CFrame.lookAt(position, position + Vector3.new(-side, 0, 0)):ToOrientation()
 			place("DecorBench", position, yaw, 2.5)
 		end
@@ -419,7 +419,7 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 	for z = adventure.BoundaryZ - 16, adventure.MinZ + 12, -24 do
 		for _, side in { -1, 1 } do
 			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
-			if not zoneBlocked(spot.X, spot.Z, -4) and clear(spot.X, spot.Z, 1.5) then
+			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then
 				place("DecorLamp", spot, 0, 1.5)
 			end
 		end
@@ -427,7 +427,7 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 	for index, z in { -830, -890, -950, -1010 } do
 		local side = if index % 2 == 0 then 1 else -1
 		local position = Vector3.new(roadX + side * (roadHalf + 3), 0, z)
-		if not zoneBlocked(position.X, position.Z, -2) then
+		if not zoneBlocked(position.X, position.Z, 0) then
 			local _, yaw = CFrame.lookAt(position, position + Vector3.new(-side, 0, 0)):ToOrientation()
 			place("DecorBench", position, yaw, 2.5)
 		end
