@@ -460,7 +460,9 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 	end
 
 	local function fareOf(ride: Ride): number
-		return (ride.model:GetAttribute("Fare") :: number?) or GameConfig.Rides[ride.key].BaseFare
+		local base = (ride.model:GetAttribute("Fare") :: number?) or GameConfig.Rides[ride.key].BaseFare
+		local multiplier = (park.ParkFolder:GetAttribute("FareMultiplier") :: number?) or 1
+		return math.floor(base * multiplier + 0.5)
 	end
 
 	local function firstFreeSeat(ride: Ride): number?
@@ -802,8 +804,11 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 					operating += 1
 				end
 			end
-			local capacity =
-				math.min(GameConfig.MaxGuests + GameConfig.GuestsPerRide * operating, GameConfig.MaxGuestsCap)
+			local crowd = (park.ParkFolder:GetAttribute("CrowdMultiplier") :: number?) or 1
+			local capacity = math.min(
+				math.floor((GameConfig.MaxGuests + GameConfig.GuestsPerRide * operating) * crowd),
+				math.floor(GameConfig.MaxGuestsCap * crowd)
+			)
 			if park.ParkFolder:GetAttribute("ParkOpen") == true and guestCount < capacity then
 				if pickRide(nil) ~= nil then
 					spawnGuest()

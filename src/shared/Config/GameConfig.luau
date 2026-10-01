@@ -615,6 +615,12 @@ return {
 
 	-- Power outage: now and then the park loses power. Every attraction stops and the lights dim until a
 	-- player switches the generator by the entrance back on; it also comes back on its own after a while.
+	-- Park events (festival, crowds): every few minutes once the park is open with a few rides running.
+	EventMinSeconds = 300,
+	EventMaxSeconds = 480,
+	EventSeconds = 60,
+	EventMinRides = 5,
+
 	PowerOutageMinSeconds = 240,
 	PowerOutageMaxSeconds = 360,
 	PowerOutageTimeoutSeconds = 60,
