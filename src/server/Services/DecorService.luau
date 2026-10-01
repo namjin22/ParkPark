@@ -260,6 +260,8 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 			{ lineX - 6, lineX + 6, math.min(site.QueueHead.Z - 4, branchZ), math.max(site.QueueHead.Z, branchZ + 6) }
 		)
 	end
+	local kids = ParkLayout.ZoneBounds.Kids
+	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, kids.MinZ, kids.BoundaryZ })
 	local function zoneBlocked(x: number, z: number, margin: number): boolean
 		if blockedByStructures(x, z, margin) then
 			return true
@@ -343,6 +345,42 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 	end
 	for _, spot in { Vector3.new(28, 0, -182), Vector3.new(76, 0, -182) } do
 		place("DecorBalloons", spot, random:NextNumber(0, math.pi * 2), 3)
+	end
+
+	-- The kids' zone: round green trees and bushes, balloon bunches, and lamps and benches along its road.
+	local kidsProps: { { kind: string, count: number, margin: number, radius: number } } = {
+		{ kind = "DecorTree", count = 40, margin = 7, radius = 5 },
+		{ kind = "DecorBush", count = 60, margin = 4, radius = 2 },
+		{ kind = "DecorBalloons", count = 14, margin = 5, radius = 3 },
+	}
+	for _, prop in kidsProps do
+		local made = 0
+		local tries = 0
+		while made < prop.count and tries < 3000 do
+			tries += 1
+			local x = random:NextNumber(-WORLD_X, WORLD_X)
+			local z = random:NextNumber(kids.MinZ + 6, kids.BoundaryZ - 8)
+			if not zoneBlocked(x, z, prop.margin) and clear(x, z, prop.radius) then
+				place(prop.kind, Vector3.new(x, 0, z), random:NextNumber(0, math.pi * 2), prop.radius)
+				made += 1
+			end
+		end
+	end
+	for z = kids.BoundaryZ - 16, kids.MinZ + 12, -24 do
+		for _, side in { -1, 1 } do
+			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
+			if not zoneBlocked(spot.X, spot.Z, -4) and clear(spot.X, spot.Z, 1.5) then
+				place("DecorLamp", spot, 0, 1.5)
+			end
+		end
+	end
+	for index, z in { -510, -570, -630, -690 } do
+		local side = if index % 2 == 0 then 1 else -1
+		local position = Vector3.new(roadX + side * (roadHalf + 3), 0, z)
+		if not zoneBlocked(position.X, position.Z, -2) then
+			local _, yaw = CFrame.lookAt(position, position + Vector3.new(-side, 0, 0)):ToOrientation()
+			place("DecorBench", position, yaw, 2.5)
+		end
 	end
 
 	-- Bushes: some scattered, some hugging the path edges.
