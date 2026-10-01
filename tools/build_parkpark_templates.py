@@ -427,14 +427,15 @@ def build_snack_stand() -> None:
     # The mesh faces -Z; ParkBuilder turns the template so the counter faces the queue (+X in the world).
     colliders = [
         # SnackCounter is where served guests stand in front of, and it blocks the way like the counter does.
-        # The body is yawed 180 (imported meshes came in turned), so the colliders are mirrored to match it.
-        box_collider("SnackCounter", (0, 0.65, 1.1), (5.7, 1.3, 1.3), 0, SNACK_SCALE),
-        box_collider("BackWall", (0, 1.7, -1.5), (5.6, 3.4, 0.3), 0, SNACK_SCALE),
-        box_collider("LeftWall", (2.75, 1.7, -0.2), (0.3, 3.4, 2.8), 0, SNACK_SCALE),
-        box_collider("RightWall", (-2.75, 1.7, -0.2), (0.3, 3.4, 2.8), 0, SNACK_SCALE),
+        # Imported meshes arrive turned half a turn, so the body is yawed 180 and the result matches the OBJ
+        # layout: colliders are written in OBJ coordinates (the counter on the -Z front).
+        box_collider("SnackCounter", (0, 0.65, -1.1), (5.7, 1.3, 1.3), 0, SNACK_SCALE),
+        box_collider("BackWall", (0, 1.7, 1.5), (5.6, 3.4, 0.3), 0, SNACK_SCALE),
+        box_collider("LeftWall", (-2.75, 1.7, 0.2), (0.3, 3.4, 2.8), 0, SNACK_SCALE),
+        box_collider("RightWall", (2.75, 1.7, 0.2), (0.3, 3.4, 2.8), 0, SNACK_SCALE),
     ]
     for x in (-2.85, 2.85):
-        colliders.append(cylinder_collider(f"PostColliderFront{x:+.0f}", (-x, 1.85, 1.7), 3.3, 0.3, SNACK_SCALE))
+        colliders.append(cylinder_collider(f"PostColliderFront{x:+.0f}", (x, 1.85, -1.7), 3.3, 0.3, SNACK_SCALE))
     write(
         "SnackStand",
         model(
@@ -617,16 +618,16 @@ def build_gift_shop() -> None:
         print("skipped GiftShop: import ParkParkGiftShop.obj and record its mesh ID first")
         return
 
-    # Imported stall meshes have come in turned half a turn from their OBJ -Z front (see the snack stand and the
-    # haunted house), so the body is yawed 180 and the colliders, written for the OBJ layout, are mirrored to match.
+    # Imported meshes arrive turned half a turn, so the body is yawed 180 and the result matches the OBJ layout:
+    # colliders are written in OBJ coordinates (the counter on the -Z front), like the snack stand's.
     colliders = [
-        box_collider("GiftCounter", (0, 0.65, 1.1), (5.7, 1.3, 1.3), 0, GIFT_SCALE),
-        box_collider("BackWall", (0, 1.7, -1.5), (5.6, 3.4, 0.3), 0, GIFT_SCALE),
-        box_collider("LeftWall", (2.75, 1.7, -0.2), (0.3, 3.4, 2.8), 0, GIFT_SCALE),
-        box_collider("RightWall", (-2.75, 1.7, -0.2), (0.3, 3.4, 2.8), 0, GIFT_SCALE),
+        box_collider("GiftCounter", (0, 0.65, -1.1), (5.7, 1.3, 1.3), 0, GIFT_SCALE),
+        box_collider("BackWall", (0, 1.7, 1.5), (5.6, 3.4, 0.3), 0, GIFT_SCALE),
+        box_collider("LeftWall", (-2.75, 1.7, 0.2), (0.3, 3.4, 2.8), 0, GIFT_SCALE),
+        box_collider("RightWall", (2.75, 1.7, 0.2), (0.3, 3.4, 2.8), 0, GIFT_SCALE),
     ]
     for x in (-2.85, 2.85):
-        colliders.append(cylinder_collider(f"PostColliderFront{x:+.0f}", (-x, 1.85, 1.7), 3.3, 0.3, GIFT_SCALE))
+        colliders.append(cylinder_collider(f"PostColliderFront{x:+.0f}", (x, 1.85, -1.7), 3.3, 0.3, GIFT_SCALE))
     write(
         "GiftShop",
         model(
@@ -634,7 +635,7 @@ def build_gift_shop() -> None:
             [
                 mesh_part("ShopBody", "ParkParkGiftShop", (0, 0, 0), 180, False, CORAL, GIFT_SCALE),
                 *colliders,
-                # Behind the shop, away from the line in front of the counter.
+                # Behind the shop, away from the line in front of the counter (the counter is on local -Z).
                 console("GiftConsole", -6, 10, 0),
             ],
         ),
@@ -677,8 +678,8 @@ def build_haunted_house() -> None:
             [
                 mesh_part("HouseBody", "ParkParkHauntedHouse", (0, 0, 0), body_yaw, False, CREAM, HAUNTED_SCALE),
                 box_collider("BodyCollider", (0, 3.6, 0), (12.0, 7.0, 9.0), 0, HAUNTED_SCALE),
-                # Turned with the mesh: the tower is at (+5.4, -1.5) in the OBJ, so at (-5.4, +1.5) once the house is yawed 180.
-                cylinder_collider("TowerCollider", (-5.4, 6.0, 1.5), 12.0, 3.6, HAUNTED_SCALE),
+                # In OBJ coordinates: the yawed import matches the OBJ layout (the tower is at +5.4, -1.5).
+                cylinder_collider("TowerCollider", (5.4, 6.0, -1.5), 12.0, 3.6, HAUNTED_SCALE),
                 *windows,
                 # West of the house, away from the line that forms south of it.
                 console("HauntedConsole", -9 * HAUNTED_SCALE - 8, -4 * HAUNTED_SCALE),

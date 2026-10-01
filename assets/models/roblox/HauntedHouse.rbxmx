@@ -32,7 +32,7 @@
 <string name="Name">TowerCollider</string>
 <token name="shape">2</token>
 <Vector3 name="size"><X>38.4</X><Y>11.52</Y><Z>11.52</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>-17.28</X><Y>19.2</Y><Z>4.8</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>17.28</X><Y>19.2</Y><Z>-4.8</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">true</bool>
 <bool name="CanTouch">false</bool>
