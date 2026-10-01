@@ -80,6 +80,10 @@ LAMP_SCALE = config_number("LampScale")
 BENCH_SCALE = config_number("BenchScale")
 FOUNTAIN_SCALE = config_number("FountainScale")
 BALLOON_SCALE = config_number("BalloonScale")
+PALM_SCALE = config_number("PalmScale")
+UMBRELLA_SCALE = config_number("UmbrellaScale")
+POND_SCALE = config_number("PondScale")
+SANDCASTLE_SCALE = config_number("SandcastleScale")
 TEACUP_COUNT = int(config_number("TeacupCupCount"))
 TEACUP_RING_RADIUS = config_number("TeacupRingRadius")
 TEACUP_BASE_HEIGHT = config_number("TeacupCupBaseHeight")
@@ -726,6 +730,10 @@ def build_decor() -> None:
         ("DecorBench", "ParkParkDecorBench", BENCH_SCALE, box_collider("Collider", (0, 0.9, 0.2), (2.8, 1.8, 1.1), 0, BENCH_SCALE)),
         ("DecorFountain", "ParkParkDecorFountain", FOUNTAIN_SCALE, cylinder_collider("Collider", (0, 0.6, 0), 1.2, 9.0, FOUNTAIN_SCALE)),
         ("DecorBalloons", "ParkParkDecorBalloons", BALLOON_SCALE, None),
+        ("DecorPalm", "ParkParkDecorPalm", PALM_SCALE, cylinder_collider("Collider", (0, 1.8, 0), 3.6, 1.2, PALM_SCALE)),
+        ("DecorUmbrella", "ParkParkDecorUmbrella", UMBRELLA_SCALE, cylinder_collider("Collider", (0, 2.3, 0), 4.6, 0.4, UMBRELLA_SCALE)),
+        ("DecorPond", "ParkParkDecorPond", POND_SCALE, cylinder_collider("Collider", (0, 0.4, 0), 0.8, 12.6, POND_SCALE)),
+        ("DecorSandcastle", "ParkParkDecorSandcastle", SANDCASTLE_SCALE, cylinder_collider("Collider", (0, 1.6, 0), 3.2, 6.0, SANDCASTLE_SCALE)),
     )
     for name, obj, scale, collider in pieces:
         if missing_meshes((obj,)):

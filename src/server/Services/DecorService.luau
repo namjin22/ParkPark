@@ -125,6 +125,25 @@ local function grayboxDecor(kind: string): Model
 		basin.Shape = Enum.PartType.Cylinder
 		basin.CanCollide = true
 		part("Water", Vector3.new(1, 3, 3), Vector3.new(0, 4, 0), Color3.fromRGB(150, 210, 230), Enum.PartType.Ball)
+	elseif kind == "DecorPalm" then
+		local trunk = part("Trunk", Vector3.new(9, 1.6, 1.6), Vector3.new(0, 4.5, 0), wood, nil)
+		trunk.CFrame = CFrame.new(0, 4.5, 0) * CFrame.Angles(0, 0, math.pi / 2)
+		trunk.Shape = Enum.PartType.Cylinder
+		trunk.CanCollide = true
+		part("Fronds", Vector3.new(11, 2.4, 11), Vector3.new(0, 9.4, 0), green, Enum.PartType.Ball)
+	elseif kind == "DecorUmbrella" then
+		part("Pole", Vector3.new(0.4, 10, 0.4), Vector3.new(0, 5, 0), wood, nil).CanCollide = true
+		local cover = part("Cover", Vector3.new(0.6, 11, 11), Vector3.new(0, 10, 0), Color3.fromRGB(244, 127, 112), nil)
+		cover.CFrame = CFrame.new(0, 10, 0) * CFrame.Angles(0, 0, math.pi / 2)
+		cover.Shape = Enum.PartType.Cylinder
+	elseif kind == "DecorPond" then
+		local water =
+			part("Water", Vector3.new(0.6, 30, 30), Vector3.new(0, 0.3, 0), Color3.fromRGB(150, 210, 230), nil)
+		water.CFrame = CFrame.new(0, 0.3, 0) * CFrame.Angles(0, 0, math.pi / 2)
+		water.Shape = Enum.PartType.Cylinder
+		water.CanCollide = true
+	elseif kind == "DecorSandcastle" then
+		part("Castle", Vector3.new(8, 6, 8), Vector3.new(0, 3, 0), Color3.fromRGB(235, 200, 120), nil).CanCollide = true
 	else
 		part("Balloon", Vector3.new(3, 3.6, 3), Vector3.new(0, 9, 0), Color3.fromRGB(244, 127, 112), Enum.PartType.Ball)
 	end
@@ -225,6 +244,105 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 			place("DecorTree", Vector3.new(x, 0, z), random:NextNumber(0, math.pi * 2), 5)
 			trees += 1
 		end
+	end
+
+	-- The water zone beyond the fence: ponds, palms, beach umbrellas, sandcastles, and lamps along its road.
+	local roadX = ParkLayout.ZoneRoadX
+	local roadHalf = ParkLayout.ZoneRoadHalfWidth
+	local zoneRects: { Rect } =
+		{ { roadX - roadHalf, roadX + roadHalf, ParkLayout.ZoneGroundMinZ, ParkLayout.ZoneBoundaryZ } }
+	for key, branchZ in ParkLayout.ZoneBranchZ do
+		local site = ParkLayout.Rides[key]
+		local lineX = site.QueueHead.X
+		table.insert(zoneRects, { math.min(lineX, roadX) - 6, math.max(lineX, roadX) + 6, branchZ - 6, branchZ + 6 })
+		table.insert(
+			zoneRects,
+			{ lineX - 6, lineX + 6, math.min(site.QueueHead.Z - 4, branchZ), math.max(site.QueueHead.Z, branchZ + 6) }
+		)
+	end
+	local function zoneBlocked(x: number, z: number, margin: number): boolean
+		if blockedByStructures(x, z, margin) then
+			return true
+		end
+		for _, rect in zoneRects do
+			if inRect(x, z, rect, margin) then
+				return true
+			end
+		end
+		return false
+	end
+	local function zoneRandom(): (number, number)
+		return random:NextNumber(-WORLD_X, WORLD_X),
+			random:NextNumber(ParkLayout.ZoneGroundMinZ + 6, ParkLayout.ZoneBoundaryZ - 8)
+	end
+
+	local ponds: { Vector3 } = {}
+	for _, spot in
+		{ Vector3.new(-125, 0, -335), Vector3.new(-150, 0, -215), Vector3.new(195, 0, -330), Vector3.new(-20, 0, -420) }
+	do
+		if not zoneBlocked(spot.X, spot.Z, 12) then
+			place("DecorPond", spot, random:NextNumber(0, math.pi * 2), 11)
+			table.insert(ponds, spot)
+		end
+	end
+	local zoneProps: { { kind: string, count: number, margin: number, radius: number } } = {
+		{ kind = "DecorPalm", count = 70, margin = 7, radius = 5 },
+		{ kind = "DecorSandcastle", count = 6, margin = 6, radius = 4.5 },
+	}
+	for _, prop in zoneProps do
+		local made = 0
+		local tries = 0
+		while made < prop.count and tries < 3000 do
+			tries += 1
+			local x, z = zoneRandom()
+			if not zoneBlocked(x, z, prop.margin) and clear(x, z, prop.radius) then
+				place(prop.kind, Vector3.new(x, 0, z), random:NextNumber(0, math.pi * 2), prop.radius)
+				made += 1
+			end
+		end
+	end
+	-- Umbrellas gather around the ponds, with a few scattered beside the road.
+	for index = 1, 14 do
+		local made = false
+		for _ = 1, 40 do
+			local x, z
+			if index <= 10 and #ponds > 0 then
+				local pond = ponds[(index - 1) % #ponds + 1]
+				local angle = random:NextNumber(0, math.pi * 2)
+				x, z =
+					pond.X + math.cos(angle) * random:NextNumber(15, 22),
+					pond.Z + math.sin(angle) * random:NextNumber(15, 22)
+			else
+				x, z = zoneRandom()
+			end
+			if not zoneBlocked(x, z, 5) and clear(x, z, 5) then
+				place("DecorUmbrella", Vector3.new(x, 0, z), random:NextNumber(0, math.pi * 2), 4.5)
+				made = true
+				break
+			end
+		end
+		if not made then
+			break
+		end
+	end
+	for z = -184, -460, -24 do
+		for _, side in { -1, 1 } do
+			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
+			if not zoneBlocked(spot.X, spot.Z, -4) and clear(spot.X, spot.Z, 1.5) then
+				place("DecorLamp", spot, 0, 1.5)
+			end
+		end
+	end
+	for index, z in { -230, -290, -350, -410 } do
+		local side = if index % 2 == 0 then 1 else -1
+		local position = Vector3.new(roadX + side * (roadHalf + 3), 0, z)
+		if not zoneBlocked(position.X, position.Z, -2) then
+			local _, yaw = CFrame.lookAt(position, position + Vector3.new(-side, 0, 0)):ToOrientation()
+			place("DecorBench", position, yaw, 2.5)
+		end
+	end
+	for _, spot in { Vector3.new(28, 0, -182), Vector3.new(76, 0, -182) } do
+		place("DecorBalloons", spot, random:NextNumber(0, math.pi * 2), 3)
 	end
 
 	-- Bushes: some scattered, some hugging the path edges.

@@ -2004,6 +2004,97 @@ def make_gift_shop() -> Mesh:
     return mesh
 
 
+def make_decor_palm() -> Mesh:
+    """A leaning palm tree (origin at the base of the trunk): segmented curved trunk, a fan of drooping fronds, coconuts."""
+    mesh = Mesh("ParkParkDecorPalm")
+    segments = 7
+    points = []
+    for index in range(segments + 1):
+        t = index / segments
+        points.append((1.9 * t * t, 8.4 * t, 0.0))
+    for index in range(segments):
+        radius_a = 0.62 - 0.32 * index / segments
+        radius_b = 0.62 - 0.32 * (index + 1) / segments
+        add_cylinder_between(mesh, points[index], points[index + 1], radius_a, radius_b, "wood" if index % 2 == 0 else "faded_coral", 8)
+    top = points[-1]
+    frond_count = 8
+    for index in range(frond_count):
+        angle = TAU * index / frond_count
+        dx, dz = math.cos(angle), math.sin(angle)
+        previous = top
+        for step in range(1, 5):
+            length = 1.15 * step
+            droop = -0.32 * step * step * 0.35
+            point = (top[0] + dx * length, top[1] + 0.55 + droop, top[2] + dz * length)
+            add_cylinder_between(mesh, previous, point, 0.12 - 0.015 * step, 0.1 - 0.015 * step, "mint", 5)
+            # Leaflets: flat paddles to each side of the rib.
+            for side in (-1, 1):
+                leaf = (point[0] - dz * side * 0.55, point[1] - 0.18, point[2] + dx * side * 0.55)
+                add_ellipsoid(mesh, ((point[0] + leaf[0]) / 2, (point[1] + leaf[1]) / 2, (point[2] + leaf[2]) / 2), (0.34, 0.07, 0.34), "mint", slices=6, stacks=3)
+            previous = point
+    for angle in (0.4, 2.2, 4.1):
+        add_ellipsoid(mesh, (top[0] + math.cos(angle) * 0.32, top[1] - 0.25, top[2] + math.sin(angle) * 0.32), (0.26, 0.26, 0.26), "wood", slices=7, stacks=4)
+    return mesh
+
+
+def make_decor_umbrella() -> Mesh:
+    """A striped beach umbrella over a lounger and towel (origin at the pole's base)."""
+    mesh = Mesh("ParkParkDecorUmbrella")
+    add_cylinder_between(mesh, (0, 0, 0), (0, 4.6, 0), 0.1, 0.08, "wood", 6)
+    segments = 10
+    for index in range(segments):
+        material = "coral" if index % 2 == 0 else "cream"
+        a0, a1 = TAU * index / segments, TAU * (index + 1) / segments
+        ring = [(2.5, 3.9), (1.3, 4.5), (0.0, 4.85)]
+        ids = [(mesh.vertex((r * math.cos(a0), h, r * math.sin(a0))), mesh.vertex((r * math.cos(a1), h, r * math.sin(a1)))) for r, h in ring]
+        for k in range(len(ring) - 1):
+            quad = (ids[k][0], ids[k][1], ids[k + 1][1], ids[k + 1][0])
+            mesh.face(material, *quad)
+            mesh.face(material, *reversed(quad))
+    add_ellipsoid(mesh, (0, 4.95, 0), (0.14, 0.14, 0.14), "gold", slices=6, stacks=4)
+    # Lounger: frame, striped cushion, and a raised back.
+    add_box(mesh, (1.9, 0.45, 0), (2.4, 0.12, 0.9), "wood")
+    add_box(mesh, (1.9, 0.6, 0), (2.3, 0.16, 0.85), "mint")
+    add_box(mesh, (3.15, 0.95, 0), (0.12, 0.9, 0.85), "mint", tilted_transform((3.1, 0.9, 0), 0, 35))
+    for x in (0.9, 2.9):
+        for z in (-0.35, 0.35):
+            add_box(mesh, (x, 0.2, z), (0.1, 0.4, 0.1), "wood")
+    add_box(mesh, (-1.2, 0.04, 1.4), (1.5, 0.05, 0.9), "gold", tilted_transform((-1.2, 0.05, 1.4), 25))
+    return mesh
+
+
+def make_decor_pond() -> Mesh:
+    """A round pond with a sand rim, a lily pad or two, and a few stones (origin at the ground centre)."""
+    mesh = Mesh("ParkParkDecorPond")
+    add_vertical_cylinder(mesh, 6.4, 0.0, 0.32, "cream", 36)
+    add_vertical_cylinder(mesh, 5.6, 0.0, 0.34, "mint", 36)
+    add_torus(mesh, 5.7, 0.2, 0.34, "faded_cream", segments=36, sides=6)
+    for x, z, r in ((-1.6, 1.2, 0.8), (1.8, -1.0, 0.65), (0.4, 2.6, 0.55)):
+        add_vertical_cylinder(mesh, r, 0.34, 0.4, "faded_mint", 10, center_x=x, center_z=z)
+    add_ellipsoid(mesh, (-1.6, 0.55, 1.2), (0.2, 0.18, 0.2), "coral", slices=6, stacks=4)
+    add_ellipsoid(mesh, (1.8, 0.5, -1.0), (0.16, 0.14, 0.16), "gold", slices=6, stacks=4)
+    for angle, radius in ((0.3, 6.4), (1.4, 6.6), (2.6, 6.4), (3.9, 6.6), (5.1, 6.5)):
+        add_ellipsoid(mesh, (radius * math.cos(angle), 0.35, radius * math.sin(angle)), (0.7, 0.45, 0.6), "faded_cream", slices=7, stacks=4)
+    return mesh
+
+
+def make_decor_sandcastle() -> Mesh:
+    """A small sandcastle with towers, a gate, and pennants (origin at the ground centre)."""
+    mesh = Mesh("ParkParkDecorSandcastle")
+    add_vertical_cylinder(mesh, 3.2, 0.0, 0.5, "cream", 24)
+    add_box(mesh, (0, 1.2, 0), (3.0, 1.4, 3.0), "gold")
+    add_box(mesh, (0, 2.2, 0), (2.0, 0.7, 2.0), "cream")
+    for x, z, height in ((-1.9, -1.9, 2.4), (1.9, -1.9, 2.0), (-1.9, 1.9, 2.0), (1.9, 1.9, 2.6)):
+        add_vertical_cylinder(mesh, 0.7, 0.4, height, "gold", 10, center_x=x, center_z=z)
+        lathe(mesh, [(0.85, height, "cream"), (0.0, height + 0.9, "coral")], 10, transform=lambda a, b, c, x=x, z=z: (a + x, b, c + z))
+    add_box(mesh, (0, 0.8, -1.55), (0.9, 1.0, 0.2), "ink")
+    add_cylinder_between(mesh, (0, 2.55, 0), (0, 4.0, 0), 0.05, 0.04, "wood", 4)
+    add_box(mesh, (0.35, 3.75, 0), (0.7, 0.4, 0.05), "coral")
+    for x, z in ((-2.7, 0.4), (2.6, -0.5), (0.5, 2.8)):
+        add_ellipsoid(mesh, (x, 0.35, z), (0.3, 0.2, 0.3), "coral", slices=6, stacks=4)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -2100,6 +2191,10 @@ def main() -> None:
         make_drop_tower(),
         make_drop_gondola(),
         make_gift_shop(),
+        make_decor_palm(),
+        make_decor_umbrella(),
+        make_decor_pond(),
+        make_decor_sandcastle(),
         make_decor_tree(),
         make_decor_bush(),
         make_decor_lamp(),

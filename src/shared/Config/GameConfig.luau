@@ -61,6 +61,10 @@ return {
 	BenchScale = 1.9,
 	FountainScale = 2.6,
 	BalloonScale = 2,
+	PalmScale = 2.2,
+	UmbrellaScale = 2.2,
+	PondScale = 2.6,
+	SandcastleScale = 2.2,
 
 	Rides = {
 		Carousel = {
