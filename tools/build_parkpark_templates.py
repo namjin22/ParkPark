@@ -82,6 +82,9 @@ MAZE_SCALE = config_number("MazeScale")
 PINE_SCALE = config_number("PineScale")
 ROCK_SCALE = config_number("RockScale")
 SHOP_SCALE = config_number("ShopScale")
+SWAN_SCALE = config_number("SwanScale")
+BALLPIT_SCALE = config_number("BallPitScale")
+ROCKET_SCALE = config_number("RocketScale")
 TRAIN_CARS = int(config_number("TrainCarCount"))
 FLUME_SCALE = config_number("FlumeScale")
 FLUME_CARS = int(config_number("FlumeCarCount"))
@@ -330,6 +333,9 @@ def main() -> None:
     build_track_ride("Mine", "MineRide", "MineTrack", "MineCar", "MineCars", MINE_SCALE, 20, -36)
     build_track_ride("Sky", "SkyRide", "SkyTrack", "SkyCar", "SkyCars", SKY_SCALE, 18, -30)
     build_maze()
+    build_swan()
+    build_ball_pit()
+    build_rocket()
     for shop_template, shop_obj in (("IceCreamShop", "ParkParkShopIceCream"), ("PizzaShop", "ParkParkShopPizza"), ("NoodleShop", "ParkParkShopNoodle")):
         build_shop(shop_template, shop_obj)
     build_flume()
@@ -841,6 +847,86 @@ def build_shop(template: str, obj: str) -> None:
                 box_collider("BodyCollider", (0, 2.0, -0.2), (8.2, 4.0, 5.0), 0, SHOP_SCALE),
                 box_collider("Counter", (0, 1.2, 3.0), (1.0, 0.2, 1.0), 0, SHOP_SCALE),
                 console("Console", -16, 6, 0),
+            ],
+        ),
+    )
+
+
+def build_swan() -> None:
+    needed = ("ParkParkSwanHub", "ParkParkSwan")
+    missing = missing_meshes(needed)
+    if missing:
+        print(f"skipped SwanRide: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    # Like the bunny carousel: each swan faces its direction of travel (the imported mesh already comes in half a turn
+    # round, hence the minus sign); ExtraRideService bobs the `Seat<N>` swans while `Hub` turns.
+    swans = []
+    for index in range(6):
+        angle = 2 * math.pi * index / 6
+        origin = (4.4 * math.cos(angle), 0.9, 4.4 * math.sin(angle))
+        swans.append(mesh_part(f"Seat{index + 1}", "ParkParkSwan", origin, -math.degrees(angle), False, CREAM, SWAN_SCALE))
+    write(
+        "SwanRide",
+        model(
+            "SwanRide",
+            [
+                mesh_part("Hub", "ParkParkSwanHub", (0, 0, 0), 0, False, MINT, SWAN_SCALE),
+                cylinder_collider("HubCollider", (0, 0.5, 0), 1.0, 14.4, SWAN_SCALE),
+                cylinder_collider("ColumnCollider", (0, 2.0, 0), 4.0, 1.8, SWAN_SCALE),
+                *swans,
+                console("Console", -24, 22, 0),
+            ],
+        ),
+    )
+
+
+def build_ball_pit() -> None:
+    if missing_meshes(("ParkParkBallPit",)):
+        print("skipped BallPitRide: import ParkParkBallPit and record its mesh ID first")
+        return
+
+    # The pit is turned 180 so the imported mesh matches the OBJ layout (its low entrance side faces +Z).
+    seats = []
+    for index in range(6):
+        angle = 2 * math.pi * index / 6
+        seats.append(box_collider(f"Seat{index + 1}", (3.2 * math.cos(angle), 1.1, 3.2 * math.sin(angle)), (1, 0.2, 1), 0, BALLPIT_SCALE))
+    write(
+        "BallPitRide",
+        model(
+            "BallPitRide",
+            [
+                mesh_part("Pad", "ParkParkBallPit", (0, 0, 0), 180, False, GOLD, BALLPIT_SCALE),
+                box_collider("Collider", (0, 1.2, 0), (14.0, 2.4, 14.0), 0, BALLPIT_SCALE),
+                *seats,
+                console("Console", -24, 24, 0),
+            ],
+        ),
+    )
+
+
+def build_rocket() -> None:
+    needed = ("ParkParkRocketHub", "ParkParkRocket")
+    missing = missing_meshes(needed)
+    if missing:
+        print(f"skipped RocketRide: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    rockets = []
+    for index in range(6):
+        angle = 2 * math.pi * index / 6
+        origin = (5.4 * math.cos(angle), 0.98, 5.4 * math.sin(angle))
+        rockets.append(mesh_part(f"Seat{index + 1}", "ParkParkRocket", origin, 0, False, CREAM, ROCKET_SCALE))
+    write(
+        "RocketRide",
+        model(
+            "RocketRide",
+            [
+                mesh_part("Hub", "ParkParkRocketHub", (0, 0, 0), 0, False, MINT, ROCKET_SCALE),
+                cylinder_collider("HubCollider", (0, 0.5, 0), 1.0, 16.8, ROCKET_SCALE),
+                cylinder_collider("ColumnCollider", (0, 3.0, 0), 5.0, 2.2, ROCKET_SCALE),
+                *rockets,
+                console("Console", -26, 24, 0),
             ],
         ),
     )

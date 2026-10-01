@@ -74,15 +74,15 @@ local function buildGraybox(key: string, spec: ExtraSpec): Model
 	if spec.Kind == "Spinner" or spec.Kind == "Carousel" then
 		local radius = spec.HubRadius or 8.6
 		local orbit = spec.SeatOrbit or 5.6
-		local hub = makePart(
+		-- A block, not a cylinder: a cylinder's axis is X, so turning it about its local Y would tumble the deck.
+		makePart(
 			model,
 			"Hub",
-			Vector3.new(0.9 * scale, radius * 2 * scale, radius * 2 * scale),
+			Vector3.new(radius * 2 * scale, 0.9 * scale, radius * 2 * scale),
 			Vector3.new(0, 0.45 * scale, 0),
 			Color3.fromRGB(240, 190, 80),
-			Enum.PartType.Cylinder
+			nil
 		)
-		hub.CFrame = CFrame.new(0, 0.45 * scale, 0) * CFrame.Angles(0, 0, math.pi / 2)
 		for index = 1, spec.SeatCount do
 			local angle = (index - 1) * 2 * math.pi / spec.SeatCount
 			local seat = makePart(

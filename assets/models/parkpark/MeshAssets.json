@@ -60,7 +60,12 @@
     "ParkParkDecorRock",
     "ParkParkShopIceCream",
     "ParkParkShopPizza",
-    "ParkParkShopNoodle"
+    "ParkParkShopNoodle",
+    "ParkParkSwanHub",
+    "ParkParkSwan",
+    "ParkParkBallPit",
+    "ParkParkRocketHub",
+    "ParkParkRocket"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",

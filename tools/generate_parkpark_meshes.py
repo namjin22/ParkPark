@@ -2677,6 +2677,123 @@ def make_shop_noodle() -> Mesh:
     return mesh
 
 
+def make_swan_hub() -> Mesh:
+    """Rotating swan-pond deck: a mint pond with a rim of lily pads, a fountain column, and a pedestal per swan."""
+    mesh = Mesh("ParkParkSwanHub")
+    add_vertical_cylinder(mesh, 6.8, 0.0, 0.5, "cream", 40)
+    add_vertical_cylinder(mesh, 6.5, 0.5, 0.74, "mint", 40)
+    add_torus(mesh, 6.6, 0.13, 0.76, "gold", segments=40, sides=6)
+    for index in range(10):
+        angle = TAU * index / 10 + 0.15
+        add_vertical_cylinder(mesh, 0.5, 0.74, 0.8, "faded_mint", 10, 5.9 * math.cos(angle), 5.9 * math.sin(angle))
+    lathe(
+        mesh,
+        [(0.0, 0.7, "wood"), (1.0, 0.7, "wood"), (0.7, 1.2, "gold"), (0.45, 3.4, "cream"), (1.1, 3.9, "mint"), (0.0, 4.2, "cream")],
+        24,
+    )
+    for index in range(6):
+        angle = TAU * index / 6
+        x, z = 4.4 * math.cos(angle), 4.4 * math.sin(angle)
+        add_cylinder_between(mesh, (0, 0.95, 0), (x, 0.95, z), 0.14, 0.14, "gold", 8)
+        add_vertical_cylinder(mesh, 1.2, 0.74, 0.9, "gold", 20, x, z)
+    add_star(mesh, 5.1, 0.45, "gold")
+    return mesh
+
+
+def make_swan() -> Mesh:
+    """A swan boat (base at y=0, facing +Z): a white hull with an arched neck and a bench on its back at about y=1.5."""
+    mesh = Mesh("ParkParkSwan")
+    add_ellipsoid(mesh, (0, 0.85, 0), (0.95, 0.65, 1.55), "cream", slices=14, stacks=7)
+    add_ellipsoid(mesh, (0, 0.45, -1.35), (0.45, 0.35, 0.5), "cream", slices=8, stacks=5)
+    for side in (-1, 1):
+        add_ellipsoid(mesh, (side * 0.85, 1.15, -0.25), (0.22, 0.5, 1.0), "cream", slices=8, stacks=5)
+    # Neck: a curved stack of spheres rising to the head, then the beak.
+    for index, (y, z, r) in enumerate(((1.2, 1.2, 0.34), (1.7, 1.45, 0.3), (2.2, 1.5, 0.27), (2.55, 1.35, 0.25))):
+        add_ellipsoid(mesh, (0, y, z), (r, r, r), "cream", slices=8, stacks=5)
+    add_ellipsoid(mesh, (0, 2.7, 1.45), (0.3, 0.28, 0.34), "cream", slices=9, stacks=5)
+    add_box(mesh, (0, 2.62, 1.85), (0.2, 0.14, 0.36), "coral")
+    for side in (-1, 1):
+        add_ellipsoid(mesh, (side * 0.16, 2.78, 1.6), (0.05, 0.06, 0.04), "ink", slices=5, stacks=3)
+    add_box(mesh, (0, 1.47, -0.1), (1.0, 0.14, 0.9), "gold")
+    add_box(mesh, (0, 1.85, -0.55), (1.0, 0.7, 0.12), "gold")
+    add_torus(mesh, 1.05, 0.12, 0.25, "mint", segments=18, sides=6)
+    return mesh
+
+
+def make_ball_pit() -> Mesh:
+    """A square ball pit (origin at the ground centre, entrance gap on the +Z side): a padded rim, a mint floor
+    full of coloured balls, and corner posts with balloons."""
+    mesh = Mesh("ParkParkBallPit")
+    half = 6.5
+    add_box(mesh, (0, 0.4, 0), (half * 2 + 0.8, 0.8, half * 2 + 0.8), "gold")
+    add_box(mesh, (0, 0.85, 0), (half * 2 - 1.0, 0.1, half * 2 - 1.0), "mint")
+    # Padded rim: stacked soft rolls on three sides, a lower step on the +Z side.
+    for row, (height, material) in enumerate(((1.3, "coral"), (2.2, "cream"))):
+        add_cylinder_between(mesh, (-half, height, -half), (half, height, -half), 0.5, 0.5, material, 10)
+        add_cylinder_between(mesh, (-half, height, -half), (-half, height, half), 0.5, 0.5, material, 10)
+        add_cylinder_between(mesh, (half, height, -half), (half, height, half), 0.5, 0.5, material, 10)
+        add_cylinder_between(mesh, (-half, height, half), (-2.4, height, half), 0.5, 0.5, material, 10)
+        add_cylinder_between(mesh, (2.4, height, half), (half, height, half), 0.5, 0.5, material, 10)
+    # Balls spread over the floor in a repeating pattern of colours.
+    colours = ("coral", "gold", "mint", "cream")
+    for ix in range(-5, 6):
+        for iz in range(-5, 6):
+            if (ix * 7 + iz * 3) % 3 == 0:
+                continue
+            offset = 0.18 * ((ix + iz) % 3 - 1)
+            add_ellipsoid(
+                mesh,
+                (ix * 1.12 + offset, 1.2 + 0.1 * ((ix * iz) % 3), iz * 1.12 - offset),
+                (0.5, 0.5, 0.5),
+                colours[(ix * 5 + iz * 3) % 4],
+                slices=6,
+                stacks=4,
+            )
+    for x, z in ((-half, -half), (half, -half), (-half, half), (half, half)):
+        add_vertical_cylinder(mesh, 0.35, 0.8, 4.4, "wood", 8, x, z)
+        add_ellipsoid(mesh, (x, 5.2, z), (0.7, 0.9, 0.7), "coral" if (x + z) % 2 else "gold", slices=8, stacks=5)
+    return mesh
+
+
+def make_rocket_hub() -> Mesh:
+    """Rotating launch-pad deck: a dark starburst pad, a radar mast, and a pedestal per rocket."""
+    mesh = Mesh("ParkParkRocketHub")
+    add_vertical_cylinder(mesh, 8.2, 0.0, 0.6, "ink", 44)
+    add_vertical_cylinder(mesh, 8.25, 0.0, 0.45, "gold", 44)
+    add_torus(mesh, 8.0, 0.14, 0.62, "coral", segments=44, sides=6)
+    lathe(
+        mesh,
+        [(0.0, 0.6, "wood"), (1.4, 0.6, "wood"), (1.0, 1.4, "gold"), (0.6, 2.2, "cream"), (0.5, 5.0, "coral"), (0.9, 5.3, "gold"), (0.0, 6.4, "cream")],
+        24,
+    )
+    for index in range(6):
+        angle = TAU * index / 6
+        x, z = 5.4 * math.cos(angle), 5.4 * math.sin(angle)
+        add_cylinder_between(mesh, (0, 0.9, 0), (x, 0.9, z), 0.18, 0.18, "coral", 8)
+        add_vertical_cylinder(mesh, 1.5, 0.6, 0.9, "gold", 24, x, z)
+        add_vertical_cylinder(mesh, 1.2, 0.9, 0.98, "mint", 24, x, z)
+    add_star(mesh, 7.0, 0.5, "gold")
+    return mesh
+
+
+def make_rocket() -> Mesh:
+    """A rocket scooter (base at y=0, facing +Z): a cream hull with a coral nose, fins, a flame, and a seat on top
+    at about y=1.7."""
+    mesh = Mesh("ParkParkRocket")
+    add_ellipsoid(mesh, (0, 1.0, -0.1), (0.75, 0.7, 1.7), "cream", slices=14, stacks=7)
+    add_ellipsoid(mesh, (0, 1.05, 1.75), (0.5, 0.45, 0.8), "coral", slices=10, stacks=6)
+    for angle in (0, 2.094, 4.188):
+        fx, fy = math.sin(angle), math.cos(angle)
+        add_box(mesh, (fx * 0.8, 1.0 + fy * 0.8, -1.5), (0.1 if abs(fx) < 0.5 else 0.7, 0.7 if abs(fx) < 0.5 else 0.1, 0.9), "mint")
+    add_ellipsoid(mesh, (0, 1.0, -2.0), (0.45, 0.4, 0.8), "gold", slices=8, stacks=5)
+    add_ellipsoid(mesh, (0, 1.0, -2.6), (0.28, 0.25, 0.6), "coral", slices=8, stacks=4)
+    add_box(mesh, (0, 1.72, -0.2), (0.9, 0.14, 1.0), "mint")
+    for side in (-1, 1):
+        add_cylinder_between(mesh, (side * 0.5, 1.75, 0.35), (side * 0.5, 2.3, 0.7), 0.05, 0.05, "gold", 5)
+    add_cylinder_between(mesh, (0, 0.0, 0.0), (0, 0.5, 0.0), 0.09, 0.09, "gold", 6)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -2793,6 +2910,11 @@ def main() -> None:
         make_shop_ice_cream(),
         make_shop_pizza(),
         make_shop_noodle(),
+        make_swan_hub(),
+        make_swan(),
+        make_ball_pit(),
+        make_rocket_hub(),
+        make_rocket(),
         make_bounce_house(),
         make_decor_tree(),
         make_decor_bush(),
