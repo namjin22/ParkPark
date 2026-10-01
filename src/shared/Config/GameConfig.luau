@@ -663,6 +663,25 @@ return {
 
 	-- Power outage: now and then the park loses power. Every attraction stops and the lights dim until a
 	-- player switches the generator by the entrance back on; it also comes back on its own after a while.
+	-- Guest milestones: once the park has boarded this many guests the next goal pays its reward to everyone.
+	Goals = {
+		{ Boarded = 50, Reward = 300 },
+		{ Boarded = 150, Reward = 800 },
+		{ Boarded = 400, Reward = 2000 },
+		{ Boarded = 1000, Reward = 6000 },
+		{ Boarded = 2500, Reward = 16000 },
+		{ Boarded = 6000, Reward = 45000 },
+	} :: { { Boarded: number, Reward: number } },
+	-- Thrill-seeking guests (this share of arrivals) pick the rides below three times as often.
+	ThrillGuestChance = 0.3,
+	ThrillRides = { "Coaster", "Drop", "Flume", "Pirate", "Swing", "Mine", "Rocket", "Sky" } :: { string },
+
+	-- Day and night: the sky makes a full turn every DayCycleSeconds; at night the lamps glow and fares rise.
+	DayCycleSeconds = 1200,
+	NightStartHour = 19,
+	NightEndHour = 5.5,
+	NightFareMultiplier = 1.15,
+
 	-- Park events (festival, crowds): every few minutes once the park is open with a few rides running.
 	EventMinSeconds = 300,
 	EventMaxSeconds = 480,

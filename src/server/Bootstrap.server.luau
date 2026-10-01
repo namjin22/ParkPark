@@ -26,6 +26,8 @@ local parkProgressionService = require(script.Parent.Services.ParkProgressionSer
 local rideService = require(script.Parent.Services.RideService)
 local teacupService = require(script.Parent.Services.TeacupService)
 local eventService = require(script.Parent.Services.EventService)
+local goalService = require(script.Parent.Services.GoalService)
+local dayNightService = require(script.Parent.Services.DayNightService)
 local travelService = require(script.Parent.Services.TravelService)
 local extraRideService = require(script.Parent.Services.ExtraRideService)
 
@@ -63,6 +65,8 @@ rideService.Start(
 extraRideService.Start(park)
 travelService.Start(park)
 eventService.Start(park, noticeService.Send)
+goalService.Start(park, economyService.AwardCoins, noticeService.Send)
+dayNightService.Start(park, noticeService.Send)
 bumperCarService.Start(park)
 teacupService.Start(park)
 ferrisService.Start(park)
@@ -144,6 +148,7 @@ persistenceService.Start(function()
 		EntranceCleared = park.ParkFolder:GetAttribute("EntranceCleared") == true,
 		ParkOpen = park.ParkFolder:GetAttribute("ParkOpen") == true,
 		GuestsBoarded = (park.ParkFolder:GetAttribute("GuestsBoarded") :: number?) or 0,
+		GoalsClaimed = (park.ParkFolder:GetAttribute("GoalsClaimed") :: number?) or 0,
 	}
 	for zone in gameConfig.ZoneCosts do
 		parkState["Zone_" .. zone] = park.ParkFolder:GetAttribute("Zone_" .. zone) == true

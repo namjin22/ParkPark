@@ -52,6 +52,7 @@ type GuestReferences = {
 }
 
 type Guest = {
+	thrill: boolean,
 	model: Model,
 	humanoid: Humanoid,
 	root: BasePart,
@@ -462,6 +463,9 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 	local function fareOf(ride: Ride): number
 		local base = (ride.model:GetAttribute("Fare") :: number?) or GameConfig.Rides[ride.key].BaseFare
 		local multiplier = (park.ParkFolder:GetAttribute("FareMultiplier") :: number?) or 1
+		if park.ParkFolder:GetAttribute("Night") == true then
+			multiplier *= GameConfig.NightFareMultiplier
+		end
 		return math.floor(base * multiplier + 0.5)
 	end
 
@@ -547,18 +551,29 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		return true
 	end
 
-	local function pickRide(previous: Ride?): Ride?
+	local thrillRides: { [string]: boolean } = {}
+	for _, key in GameConfig.ThrillRides do
+		thrillRides[key] = true
+	end
+
+	local function pickRide(previous: Ride?, thrill: boolean?): Ride?
 		local open: { Ride } = {}
 		for _, ride in rides do
 			if ride.model:GetAttribute("IsOperating") == true and #ride.queue < GameConfig.QueueMax then
 				table.insert(open, ride)
+				-- A thrill-seeker counts a thrill ride three times, so it is picked three times as often.
+				if thrill and thrillRides[ride.key] then
+					table.insert(open, ride)
+					table.insert(open, ride)
+				end
 			end
 		end
 		-- Prefer a different ride than the one just ridden, but never leave the choice empty.
 		if previous and #open > 1 then
-			local index = table.find(open, previous)
-			if index then
-				table.remove(open, index)
+			for index = #open, 1, -1 do
+				if open[index] == previous then
+					table.remove(open, index)
+				end
 			end
 		end
 		return if #open > 0 then pick(open) else nil
@@ -654,7 +669,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		local fromPosition = guest.root.Position
 
 		while guest.alive and guest.ridesTaken < GameConfig.GuestMaxRides do
-			local chosen = pickRide(previousRide)
+			local chosen = pickRide(previousRide, guest.thrill)
 			if chosen == nil then
 				break
 			end
@@ -733,6 +748,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			prompt = prompt,
 			lane = lane,
 			jitter = math.random(-25, 25) / 10,
+			thrill = math.random() < GameConfig.ThrillGuestChance,
 			ridesTaken = 0,
 			ride = nil,
 			slot = Vector3.zero,

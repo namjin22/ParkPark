@@ -24,7 +24,7 @@ local GameConfig =
 local PersistenceService = {}
 
 export type SavedState = {
-	Park: { EntranceCleared: boolean, ParkOpen: boolean, GuestsBoarded: number, [string]: any },
+	Park: { EntranceCleared: boolean, ParkOpen: boolean, GuestsBoarded: number, GoalsClaimed: number, [string]: any },
 	Rides: { [string]: { IsUnlocked: boolean, IsRepaired: boolean, IncomeLevel: number, StaffLevel: number } },
 	Janitors: number,
 }
@@ -176,6 +176,7 @@ local function sanitizePark(raw: any): SavedState?
 			EntranceCleared = parkRaw.EntranceCleared == true,
 			ParkOpen = parkRaw.ParkOpen == true,
 			GuestsBoarded = asNumber(parkRaw.GuestsBoarded, 0, 1e9, 0),
+			GoalsClaimed = asNumber(parkRaw.GoalsClaimed, 0, #GameConfig.Goals, 0),
 		},
 		Rides = {},
 		Janitors = asNumber(raw.Janitors, 0, #GameConfig.JanitorCosts, 0),
