@@ -1,15 +1,15 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" version="4">
-<Item class="Model" referent="RBX208"><Properties>
+<Item class="Model" referent="RBX324"><Properties>
 <string name="Name">DecorPond</string>
 <OptionalCoordinateFrame name="WorldPivotData"><CFrame><X>0.0</X><Y>0.0</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CFrame></OptionalCoordinateFrame>
 </Properties>
-<Item class="MeshPart" referent="RBX207"><Properties>
+<Item class="MeshPart" referent="RBX323"><Properties>
 <string name="Name">Piece</string>
 <Content name="MeshId"><url>rbxassetid://94868419049187</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
 <Vector3 name="InitialSize"><X>13.2142</X><Y>0.9</Y><Z>13.6917</Z></Vector3>
 <Vector3 name="size"><X>34.3569</X><Y>2.34</Y><Z>35.5984</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>0.5385</X><Y>0.91</Y><Z>0.6321</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-0.5385</X><Y>0.91</Y><Z>-0.6321</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">false</bool>
 <bool name="CanTouch">false</bool>
@@ -18,7 +18,7 @@
 <token name="RenderFidelity">0</token>
 <token name="Material">272</token>
 <Color3uint8 name="Color3uint8">4294967295</Color3uint8>
-</Properties></Item><Item class="Part" referent="RBX189"><Properties>
+</Properties></Item><Item class="Part" referent="RBX301"><Properties>
 <string name="Name">Collider</string>
 <token name="shape">2</token>
 <Vector3 name="size"><X>2.08</X><Y>32.76</Y><Z>32.76</Z></Vector3>

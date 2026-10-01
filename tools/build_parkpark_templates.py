@@ -160,8 +160,13 @@ def mesh_part(
     sx, sy, sz = (scale, scale, scale) if isinstance(scale, (int, float)) else scale
     # Roblox scales the mesh by Size / InitialSize, so InitialSize must stay the mesh's natural size.
     size = tuple(round(natural_size[axis] * (sx, sy, sz)[axis], 4) for axis in range(3))
-    cosine, sine = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
-    # scale * (origin * Ry(yaw) * center), about the template root
+    # Studio's importer turns every mesh half a turn about its own centre, and the template yaw turns it back about
+    # that centre too, so the part's centre belongs where the OBJ puts it, rotated about the template origin by
+    # the intended layout yaw (template yaw + 180). Rotating the centre by the template yaw alone put an
+    # off-centre mesh (the sky ride's track) on the wrong side of its pivot.
+    layout_yaw = yaw + 180.0
+    cosine, sine = math.cos(math.radians(layout_yaw)), math.sin(math.radians(layout_yaw))
+    # scale * (origin + Ry(layout yaw) * center), about the template root
     position = (
         round(sx * (origin[0] + cosine * center[0] + sine * center[2]), 4),
         round(sy * (origin[1] + center[1]), 4),
