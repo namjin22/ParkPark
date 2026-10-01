@@ -142,6 +142,20 @@ local function buildGraybox(key: string, spec: ExtraSpec): Model
 			nil
 		)
 		hide(collider)
+	elseif spec.Kind == "Shop" then
+		makePart(
+			model,
+			"Body",
+			Vector3.new(8 * scale, 4 * scale, 5.2 * scale),
+			Vector3.new(0, 2 * scale, 0),
+			Color3.fromRGB(240, 190, 80),
+			nil
+		)
+		local counter =
+			makePart(model, "Counter", Vector3.new(1, 0.2, 1), Vector3.new(0, 1.2 * scale, 3 * scale), FADED, nil)
+		counter.CanCollide = false
+		hide(counter)
+		consolePosition = Vector3.new(-16, 1.5, 6)
 	elseif spec.Kind == "Hidden" then
 		makePart(
 			model,
@@ -255,6 +269,17 @@ function ExtraRideService.Build(park: ParkBuilder.References, savedRides: { [str
 					descendant.CanQuery = false
 				end
 			end
+		elseif spec.Kind == "Shop" then
+			-- A shop serves the head guest at its counter, like the snack stand.
+			local counter = model:FindFirstChild("Counter", true)
+			if counter == nil or not counter:IsA("BasePart") then
+				error(string.format("[ParkPark] %s needs a Counter part", spec.Template))
+			end
+			counter.Anchored = true
+			counter.CanCollide = false
+			counter.CanTouch = false
+			counter.CanQuery = false
+			table.insert(seats, counter)
 		else
 			-- Parts that animate stay anchored and are never solid (only the colliders are).
 			for index = 1, spec.SeatCount do

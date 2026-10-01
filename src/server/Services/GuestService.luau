@@ -416,6 +416,16 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 					return if car and car:IsA("BasePart") then car else nil
 				end, trackSeatOffset(prefix), (GameConfig :: any)[prefix .. "SeatCount"], false)
 			)
+		elseif extra.Kind == "Shop" then
+			local counter = seats[1]
+			table.insert(
+				rides,
+				newRide(key, extra.Ride, function()
+					return counter
+				end, function()
+					return CFrame.identity
+				end, GameConfig.SnackCounterSeats, true)
+			)
 		else
 			local offset = ExtraRideService.SeatOffset(key)
 			local rideInfo = newRide(key, extra.Ride, function(seat: number)
@@ -786,12 +796,20 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 
 	task.spawn(function()
 		while park.ParkFolder.Parent ~= nil do
-			if park.ParkFolder:GetAttribute("ParkOpen") == true and guestCount < GameConfig.MaxGuests then
+			local operating = 0
+			for _, ride in rides do
+				if ride.model:GetAttribute("IsOperating") == true then
+					operating += 1
+				end
+			end
+			local capacity =
+				math.min(GameConfig.MaxGuests + GameConfig.GuestsPerRide * operating, GameConfig.MaxGuestsCap)
+			if park.ParkFolder:GetAttribute("ParkOpen") == true and guestCount < capacity then
 				if pickRide(nil) ~= nil then
 					spawnGuest()
 				end
 			end
-			task.wait(GameConfig.GuestSpawnSeconds)
+			task.wait(math.max(GameConfig.GuestSpawnMinSeconds, GameConfig.GuestSpawnSeconds - 0.2 * operating))
 		end
 	end)
 end

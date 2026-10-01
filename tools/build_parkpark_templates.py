@@ -81,6 +81,7 @@ SKY_SCALE = config_number("SkyScale")
 MAZE_SCALE = config_number("MazeScale")
 PINE_SCALE = config_number("PineScale")
 ROCK_SCALE = config_number("RockScale")
+SHOP_SCALE = config_number("ShopScale")
 TRAIN_CARS = int(config_number("TrainCarCount"))
 FLUME_SCALE = config_number("FlumeScale")
 FLUME_CARS = int(config_number("FlumeCarCount"))
@@ -329,6 +330,8 @@ def main() -> None:
     build_track_ride("Mine", "MineRide", "MineTrack", "MineCar", "MineCars", MINE_SCALE, 20, -36)
     build_track_ride("Sky", "SkyRide", "SkyTrack", "SkyCar", "SkyCars", SKY_SCALE, 18, -30)
     build_maze()
+    for shop_template, shop_obj in (("IceCreamShop", "ParkParkShopIceCream"), ("PizzaShop", "ParkParkShopPizza"), ("NoodleShop", "ParkParkShopNoodle")):
+        build_shop(shop_template, shop_obj)
     build_flume()
     build_decor()
 
@@ -817,6 +820,27 @@ def build_maze() -> None:
                 box_collider("Collider", (0, 1.6, 0), (30.4, 3.2, 30.4), 0, MAZE_SCALE),
                 *seats,
                 console("Console", -24, 35, 0),
+            ],
+        ),
+    )
+
+
+def build_shop(template: str, obj: str) -> None:
+    if missing_meshes((obj,)):
+        print(f"skipped {template}: import {obj} and record its mesh ID first")
+        return
+
+    # The stall body is turned 180 so the imported mesh matches the OBJ layout (counter on +Z, toward the line).
+    # The invisible `Counter` marks where the head guest is served.
+    write(
+        template,
+        model(
+            template,
+            [
+                mesh_part("Body", obj, (0, 0, 0), 180, False, MINT, SHOP_SCALE),
+                box_collider("BodyCollider", (0, 2.0, -0.2), (8.2, 4.0, 5.0), 0, SHOP_SCALE),
+                box_collider("Counter", (0, 1.2, 3.0), (1.0, 0.2, 1.0), 0, SHOP_SCALE),
+                console("Console", -16, 6, 0),
             ],
         ),
     )

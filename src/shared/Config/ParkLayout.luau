@@ -42,6 +42,9 @@ ParkLayout.ZoneBranchZ = {
 	Mine = -868,
 	Sky = -840,
 	Maze = -990,
+	IceCream = -352,
+	Pizza = -500,
+	Noodle = -1000,
 } :: { [string]: number }
 ParkLayout.ZoneBounds = {
 	Water = { BoundaryZ = -168, MinZ = -480 },
@@ -191,6 +194,25 @@ ParkLayout.Rides = {
 		Pivot = Vector3.new(-45, 0, -1060),
 		PlatformRadius = 42,
 		QueueHead = Vector3.new(-45, 0, -1023),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	-- Shops: the counter faces +Z toward its line.
+	IceCream = {
+		Pivot = Vector3.new(-30, 0, -392),
+		PlatformRadius = 16,
+		QueueHead = Vector3.new(-30, 0, -382),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Pizza = {
+		Pivot = Vector3.new(-120, 0, -545),
+		PlatformRadius = 16,
+		QueueHead = Vector3.new(-120, 0, -535),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Noodle = {
+		Pivot = Vector3.new(100, 0, -1040),
+		PlatformRadius = 16,
+		QueueHead = Vector3.new(100, 0, -1030),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Ferris = {

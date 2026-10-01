@@ -9,6 +9,7 @@ local GameConfig = require(script.Parent:WaitForChild("GameConfig"))
 --   Carousel: `Hub` turns and the `Seat1..N` parts bob up and down on their poles.
 --   Bounce:   the `Seat1..N` parts hop up and down in turn on a fixed pad.
 --   Hidden:   guests walk in and are out of sight for the tour (like the haunted house); `Seat1..N` are markers.
+--   Shop:     a counter (`Counter` part) where the head guest is served, like the snack stand.
 --   Track:    a `<CarsName>` model with `<CarPrefix>1..N` cars runs a closed loop (TrackService, config keys
 --             `<TrackPrefix>Scale`, `<TrackPrefix>CarCount`, ...; the path is the generated `<PathModule>`).
 -- The rider's root sits `SeatLift * Scale + RiderHip` above a seat part's centre (Track rides use the shared
@@ -94,6 +95,30 @@ local ExtraRides: { [string]: ExtraSpec } = {
 		PathModule = "SkyPath",
 		CarsName = "SkyCars",
 		CarPrefix = "SkyCar",
+	},
+	IceCream = {
+		Kind = "Shop",
+		Template = GameConfig.Rides.IceCream.ModelName,
+		Scale = GameConfig.ShopScale,
+		SeatCount = 1,
+		SeatLift = 0,
+		RiderHip = 0,
+	},
+	Pizza = {
+		Kind = "Shop",
+		Template = GameConfig.Rides.Pizza.ModelName,
+		Scale = GameConfig.ShopScale,
+		SeatCount = 1,
+		SeatLift = 0,
+		RiderHip = 0,
+	},
+	Noodle = {
+		Kind = "Shop",
+		Template = GameConfig.Rides.Noodle.ModelName,
+		Scale = GameConfig.ShopScale,
+		SeatCount = 1,
+		SeatLift = 0,
+		RiderHip = 0,
 	},
 	Maze = {
 		Kind = "Hidden",

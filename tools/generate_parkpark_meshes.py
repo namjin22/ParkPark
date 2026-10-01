@@ -2591,6 +2591,92 @@ def make_decor_rock() -> Mesh:
     return mesh
 
 
+def shop_base(mesh: Mesh, wall: str, awning_a: str, awning_b: str) -> None:
+    """A little market stall (origin at the ground centre, counter on the +Z side): walls, a counter, a striped
+    awning on two posts, a menu board, and a shelf of jars."""
+    add_box(mesh, (0, 0.1, 0), (8.6, 0.2, 6.2), "cream")
+    add_box(mesh, (0, 2.4, -1.6), (8.0, 4.4, 2.6), wall)
+    add_box(mesh, (0, 4.75, -1.6), (8.4, 0.3, 3.0), "wood")
+    # Counter with a gold top, and a shelf behind it.
+    add_box(mesh, (0, 0.95, 1.1), (8.0, 1.5, 1.4), wall)
+    add_box(mesh, (0, 1.78, 1.1), (8.4, 0.16, 1.7), "gold")
+    add_box(mesh, (0, 2.6, -0.2), (7.0, 0.14, 0.7), "wood")
+    for index in range(5):
+        x = -2.8 + index * 1.4
+        add_vertical_cylinder(mesh, 0.32, 2.67, 3.3, "coral" if index % 2 == 0 else "mint", 8, x, -0.2)
+        add_vertical_cylinder(mesh, 0.36, 3.3, 3.42, "gold", 8, x, -0.2)
+    # Striped awning sloping forward over the counter, held by two posts.
+    for x in (-3.9, 3.9):
+        add_cylinder_between(mesh, (x, 0.2, 2.5), (x, 4.2, 2.5), 0.14, 0.14, "gold", 6)
+    for index in range(8):
+        x0 = -4.4 + 8.8 * index / 8
+        x1 = -4.4 + 8.8 * (index + 1) / 8
+        add_slab(
+            mesh,
+            [
+                (x0, 4.9, -3.0),
+                (x1, 4.9, -3.0),
+                (x1, 5.04, -3.0),
+                (x0, 5.04, -3.0),
+                (x0, 4.1, 3.2),
+                (x1, 4.1, 3.2),
+                (x1, 4.24, 3.2),
+                (x0, 4.24, 3.2),
+            ],
+            awning_a if index % 2 == 0 else awning_b,
+        )
+    # Menu board on the front of the counter.
+    add_box(mesh, (0, 0.95, 1.85), (3.6, 0.9, 0.1), "ink")
+    for x in (-1.2, 0.0, 1.2):
+        add_box(mesh, (x, 0.95, 1.92), (0.8, 0.14, 0.05), "cream")
+
+
+def make_shop_ice_cream() -> Mesh:
+    """Ice-cream parlour: mint walls, a giant cone with three scoops on the roof."""
+    mesh = Mesh("ParkParkShopIceCream")
+    shop_base(mesh, "mint", "coral", "cream")
+    lathe(mesh, [(0.0, 5.0, "gold"), (0.9, 7.2, "gold"), (0.0, 7.2, "gold")], 12)
+    lathe(mesh, [(0.95, 7.1, "wood"), (0.95, 7.3, "wood"), (0.0, 7.3, "wood")], 12)
+    add_ellipsoid(mesh, (0, 7.9, 0), (1.05, 0.9, 1.05), "coral", slices=12, stacks=6)
+    add_ellipsoid(mesh, (0, 8.9, 0), (0.92, 0.85, 0.92), "cream", slices=12, stacks=6)
+    add_ellipsoid(mesh, (0, 9.8, 0), (0.78, 0.75, 0.78), "mint", slices=12, stacks=6)
+    add_ellipsoid(mesh, (0, 10.65, 0), (0.22, 0.22, 0.22), "coral", slices=8, stacks=4)
+    return mesh
+
+
+def make_shop_pizza() -> Mesh:
+    """Pizzeria: coral walls, a round pizza sign with toppings on a post."""
+    mesh = Mesh("ParkParkShopPizza")
+    shop_base(mesh, "coral", "mint", "cream")
+    add_cylinder_between(mesh, (0, 5.0, 0), (0, 6.6, 0), 0.16, 0.16, "wood", 6)
+    add_vertical_cylinder(mesh, 1.9, 6.6, 6.85, "gold", 24)
+    add_vertical_cylinder(mesh, 1.55, 6.85, 6.95, "coral", 24)
+    for angle, radius in ((0.4, 0.9), (1.6, 1.0), (2.8, 0.8), (4.0, 1.0), (5.2, 0.85), (0.0, 0.0)):
+        add_ellipsoid(mesh, (radius * math.cos(angle), 7.05, radius * math.sin(angle)), (0.3, 0.1, 0.3), "ink" if radius else "mint", slices=7, stacks=3)
+    for index in range(8):
+        a = TAU * index / 8
+        add_cylinder_between(mesh, (0, 6.97, 0), (1.5 * math.cos(a), 6.97, 1.5 * math.sin(a)), 0.03, 0.03, "gold", 4)
+    return mesh
+
+
+def make_shop_noodle() -> Mesh:
+    """Noodle bar: wooden walls, a big bowl with steam curls and chopsticks on the roof."""
+    mesh = Mesh("ParkParkShopNoodle")
+    shop_base(mesh, "wood", "gold", "coral")
+    lathe(
+        mesh,
+        [(0.0, 5.0, "ink"), (1.1, 5.0, "ink"), (1.7, 6.2, "cream"), (1.8, 6.6, "coral"), (1.55, 6.55, "gold"), (0.0, 6.4, "gold")],
+        20,
+    )
+    for dx in (-0.5, 0.0, 0.5):
+        add_ellipsoid(mesh, (dx, 6.65, 0.1), (0.35, 0.12, 0.8), "cream", slices=8, stacks=3)
+    for x in (-0.25, 0.25):
+        add_cylinder_between(mesh, (x, 6.7, 0.0), (x + 0.5, 8.4, 0.9), 0.06, 0.05, "wood", 5)
+    for index, x in enumerate((-0.8, 0.0, 0.8)):
+        add_cylinder_between(mesh, (x, 7.0, -0.2), (x + 0.3 * (1 if index % 2 else -1), 8.0, -0.2), 0.08, 0.03, "faded_cream", 5)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -2704,6 +2790,9 @@ def main() -> None:
         make_hedge_maze(),
         make_decor_pine(),
         make_decor_rock(),
+        make_shop_ice_cream(),
+        make_shop_pizza(),
+        make_shop_noodle(),
         make_bounce_house(),
         make_decor_tree(),
         make_decor_bush(),
