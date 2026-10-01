@@ -636,6 +636,8 @@ return {
 	GuestSpawnMinSeconds = 2.5,
 	GuestRideSeconds = 16,
 	GuestWalkSpeed = 14,
+	-- Players run faster than guests because the park is large; the travel menu covers the rest.
+	PlayerWalkSpeed = 24,
 	QueueMax = 6,
 	QueueSpacing = 5,
 	GuestPatienceSeconds = 75,

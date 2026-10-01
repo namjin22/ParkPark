@@ -25,6 +25,7 @@ local powerService = require(script.Parent.Services.PowerService)
 local parkProgressionService = require(script.Parent.Services.ParkProgressionService)
 local rideService = require(script.Parent.Services.RideService)
 local teacupService = require(script.Parent.Services.TeacupService)
+local travelService = require(script.Parent.Services.TravelService)
 local extraRideService = require(script.Parent.Services.ExtraRideService)
 
 -- Create leaderstats before the builder's bounded asset waits so the HUD never stalls.
@@ -59,6 +60,7 @@ rideService.Start(
 	noticeService.Send
 )
 extraRideService.Start(park)
+travelService.Start(park)
 bumperCarService.Start(park)
 teacupService.Start(park)
 ferrisService.Start(park)
