@@ -584,7 +584,7 @@ def build_flume() -> None:
         model(
             "FlumeRide",
             [
-                mesh_part("FlumeTrack", "ParkParkFlumeTrack", (0, 0, 0), 0, False, MINT, FLUME_SCALE),
+                mesh_part("FlumeTrack", "ParkParkFlumeTrack", (0, 0, 0), 180, False, MINT, FLUME_SCALE),
                 # The station dock is solid, so guests and players cannot walk through it.
                 box_collider("Station", (0, 0.35, -8.0), (20.0, 0.7, 4.4), 0, FLUME_SCALE),
                 model("FlumeCars", boats),
@@ -666,7 +666,7 @@ def build_train() -> None:
         model(
             "TrainRide",
             [
-                mesh_part("TrainTrack", "ParkParkTrainTrack", (0, 0, 0), 0, False, CREAM, TRAIN_SCALE),
+                mesh_part("TrainTrack", "ParkParkTrainTrack", (0, 0, 0), 180, False, CREAM, TRAIN_SCALE),
                 # The station platform is solid, so guests and players cannot walk through it.
                 box_collider("Station", (0, 0.2, -8.2), (16.0, 0.4, 2.6), 0, TRAIN_SCALE),
                 model("TrainCars", wagons),
@@ -741,7 +741,7 @@ def build_coaster() -> None:
         model(
             "CoasterRide",
             [
-                mesh_part("CoasterTrack", "ParkParkCoasterTrack", (0, 0, 0), 0, False, CORAL, COASTER_SCALE),
+                mesh_part("CoasterTrack", "ParkParkCoasterTrack", (0, 0, 0), 180, False, CORAL, COASTER_SCALE),
                 # The station platform is solid, so guests and players cannot walk through it.
                 box_collider("Station", (0, 0.35, -8.0), (20.0, 0.7, 4.4), 0, COASTER_SCALE),
                 model("CoasterCars", cars),

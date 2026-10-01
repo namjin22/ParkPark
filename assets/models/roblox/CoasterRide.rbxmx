@@ -9,7 +9,7 @@
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
 <Vector3 name="InitialSize"><X>38.4535</X><Y>15.7088</Y><Z>20.4943</Z></Vector3>
 <Vector3 name="size"><X>115.3605</X><Y>47.1264</Y><Z>61.4829</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>-2.6133</X><Y>23.5632</Y><Z>-0.4587</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>2.6133</X><Y>23.5632</Y><Z>0.4587</Z><R00>-1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>-1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">false</bool>
 <bool name="CanTouch">false</bool>
