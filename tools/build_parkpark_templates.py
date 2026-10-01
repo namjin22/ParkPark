@@ -156,6 +156,9 @@ def mesh_part(
     fallback: tuple[int, int, int],
     scale: float | tuple[float, float, float] = 1.0,
 ) -> str:
+    # A V2 mesh (ParkPark<Name>V2) replaces its original as soon as its mesh ID is recorded in MeshAssets.json.
+    if f"{obj}V2" in ASSETS["meshes"]:
+        obj = f"{obj}V2"
     center, natural_size = obj_bounds(obj)
     sx, sy, sz = (scale, scale, scale) if isinstance(scale, (int, float)) else scale
     # Roblox scales the mesh by Size / InitialSize, so InitialSize must stay the mesh's natural size.

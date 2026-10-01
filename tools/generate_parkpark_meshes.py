@@ -368,17 +368,17 @@ def add_torus(
             )
 
 
-def add_star(mesh: Mesh, center_y: float, radius: float, material: str) -> None:
-    front_z, back_z = -0.12, 0.12
+def add_star(mesh: Mesh, center_y: float, radius: float, material: str, cx: float = 0.0, cz: float = 0.0) -> None:
+    front_z, back_z = cz - 0.12, cz + 0.12
     points = []
     for index in range(10):
         angle = math.pi / 2 + index * math.pi / 5
         point_radius = radius if index % 2 == 0 else radius * 0.43
-        points.append((point_radius * math.cos(angle), center_y + point_radius * math.sin(angle)))
+        points.append((cx + point_radius * math.cos(angle), center_y + point_radius * math.sin(angle)))
     front = [mesh.vertex((x, y, front_z)) for x, y in points]
     back = [mesh.vertex((x, y, back_z)) for x, y in points]
-    front_center = mesh.vertex((0, center_y, front_z))
-    back_center = mesh.vertex((0, center_y, back_z))
+    front_center = mesh.vertex((cx, center_y, front_z))
+    back_center = mesh.vertex((cx, center_y, back_z))
     for index in range(10):
         following = (index + 1) % 10
         mesh.triangle(material, front_center, front[index], front[following])
@@ -1343,9 +1343,11 @@ def make_pirate_ship() -> Mesh:
     return mesh
 
 
-def make_haunted_house() -> Mesh:
-    """A crooked storybook mansion (front, with the door, is -Z): gabled roof, round tower, chimney, porch."""
-    mesh = Mesh("ParkParkHauntedHouse")
+def make_haunted_house(v2: bool = False) -> Mesh:
+    """A crooked storybook mansion (front, with the door, is -Z): gabled roof, round tower, chimney, porch.
+
+    The V2 variant puts the tower star on the tower tip instead of at the origin."""
+    mesh = Mesh("ParkParkHauntedHouseV2" if v2 else "ParkParkHauntedHouse")
     add_box(mesh, (0, 0.3, 0), (12.8, 0.6, 9.8), "wood")
     add_box(mesh, (0, 3.6, 0), (12.0, 6.0, 9.0), "mint")
     add_box(mesh, (0, 0.9, -4.55), (12.2, 0.6, 0.2), "faded_mint")
@@ -1387,7 +1389,7 @@ def make_haunted_house() -> Mesh:
         20,
         transform=lambda x, y, z: (x + 5.4, y, z - 1.5),
     )
-    add_star(mesh, 15.9, 0.35, "gold")
+    add_star(mesh, 15.9, 0.35, "gold", *((5.4, -1.5) if v2 else (0.0, 0.0)))
     add_box(mesh, (-3.9, 9.9, 1.3), (1.3, 3.0, 1.3), "wood")
     add_box(mesh, (-3.9, 11.5, 1.3), (1.6, 0.25, 1.6), "gold")
     for x, y, z, r in ((-3.9, 12.3, 1.3, 0.5), (-3.6, 13.1, 1.4, 0.65), (-3.2, 14.1, 1.5, 0.75)):
@@ -1492,9 +1494,9 @@ def coaster_path() -> tuple[list[tuple[float, float, float]], dict[str, int]]:
     return samples, marks
 
 
-def make_coaster_track() -> Mesh:
+def make_coaster_track(v2: bool = False) -> Mesh:
     """Rails, ties, chain teeth on the lift, supports, and a striped station; origin is the ground centre."""
-    mesh = Mesh("ParkParkCoasterTrack")
+    mesh = Mesh("ParkParkCoasterTrackV2" if v2 else "ParkParkCoasterTrack")
     samples, marks = coaster_path()
     count = len(samples)
     for index in range(count):
@@ -1545,7 +1547,7 @@ def make_coaster_track() -> Mesh:
             ],
             "coral" if index % 2 == 0 else "cream",
         )
-    add_star(mesh, 6.3, 0.5, "gold")
+    add_star(mesh, 6.3, 0.5, "gold", *((0.0, -8.0) if v2 else (0.0, 0.0)))
     return mesh
 
 
@@ -2117,9 +2119,9 @@ def train_path() -> tuple[list[tuple[float, float, float]], dict[str, int]]:
     return track_samples(TRAIN_CONTROL_POINTS, 1, 3, 5, TRAIN_SAMPLES)
 
 
-def make_train_track() -> Mesh:
+def make_train_track(v2: bool = False) -> Mesh:
     """Rails on a gravel bed with wooden ties, small flower beds along the way, and a striped station."""
-    mesh = Mesh("ParkParkTrainTrack")
+    mesh = Mesh("ParkParkTrainTrackV2" if v2 else "ParkParkTrainTrack")
     samples, marks = train_path()
     count = len(samples)
     w = TRAIN_GAUGE
@@ -2171,7 +2173,7 @@ def make_train_track() -> Mesh:
             ],
             "coral" if index % 2 == 0 else "cream",
         )
-    add_star(mesh, 4.7, 0.4, "gold")
+    add_star(mesh, 4.7, 0.4, "gold", *((0.0, -8.2) if v2 else (0.0, 0.0)))
     return mesh
 
 
@@ -2419,9 +2421,9 @@ def make_mine_car() -> Mesh:
     return mesh
 
 
-def make_sky_track() -> Mesh:
+def make_sky_track(v2: bool = False) -> Mesh:
     """The sky ride: a steel cable on tall pylons and a low boarding station; origin at the ground centre."""
-    mesh = Mesh("ParkParkSkyTrack")
+    mesh = Mesh("ParkParkSkyTrackV2" if v2 else "ParkParkSkyTrack")
     samples, marks = sky_path()
     count = len(samples)
     for index in range(count):
@@ -2436,21 +2438,24 @@ def make_sky_track() -> Mesh:
     station_shed(mesh, "coral", "cream", "gold")
     # A tall entrance mast with a star beside the station.
     add_cylinder_between(mesh, (-9.5, 0.0, -9.0), (-9.5, 7.0, -9.0), 0.2, 0.14, "cream", 8)
-    add_star(mesh, 7.6, 0.55, "gold")
+    add_star(mesh, 7.6, 0.55, "gold", *((-9.5, -9.0) if v2 else (0.0, 0.0)))
     return mesh
 
 
-def make_sky_car() -> Mesh:
-    """A hanging open gondola: an arm up to the cable (origin at the cable), two benches, rails, a striped roof."""
-    mesh = Mesh("ParkParkSkyCar")
-    add_box(mesh, (0, -2.3, 0), (2.0, 0.2, 3.4), "wood")
+def make_sky_car(v2: bool = False) -> Mesh:
+    """A hanging open gondola: an arm up to the cable (origin at the cable), two benches, rails, a striped roof.
+
+    The V2 variant hangs the floor, benches and rails 0.5 units lower so riders' heads clear the roof."""
+    mesh = Mesh("ParkParkSkyCarV2" if v2 else "ParkParkSkyCar")
+    drop = 0.5 if v2 else 0.0
+    add_box(mesh, (0, -2.3 - drop, 0), (2.0, 0.2, 3.4), "wood")
     for x in (-0.95, 0.95):
         for z in (-1.6, 1.6):
-            add_cylinder_between(mesh, (x, -2.2, z), (x, -0.55, z), 0.07, 0.07, "gold", 5)
-        add_box(mesh, (x, -1.65, 0), (0.08, 0.08, 3.3), "gold")
-        add_box(mesh, (x, -1.2, 0), (0.08, 0.08, 3.3), "gold")
+            add_cylinder_between(mesh, (x, -2.2 - drop, z), (x, -0.55, z), 0.07, 0.07, "gold", 5)
+        add_box(mesh, (x, -1.65 - drop, 0), (0.08, 0.08, 3.3), "gold")
+        add_box(mesh, (x, -1.2 - drop, 0), (0.08, 0.08, 3.3), "gold")
     for z in (-0.85, 0.85):
-        add_box(mesh, (0, -2.0, z), (1.7, 0.24, 0.8), "mint")
+        add_box(mesh, (0, -2.0 - drop, z), (1.7, 0.24, 0.8), "mint")
     add_box(mesh, (0, -0.45, 0), (2.3, 0.14, 3.6), "coral")
     add_box(mesh, (0, -0.33, 0), (1.9, 0.1, 3.2), "cream")
     add_cylinder_between(mesh, (0, -0.4, 0), (0, 0.0, 0), 0.1, 0.1, "ink", 6)
@@ -2700,16 +2705,25 @@ def make_swan_hub() -> Mesh:
     return mesh
 
 
-def make_swan() -> Mesh:
-    """A swan boat (base at y=0, facing +Z): a white hull with an arched neck and a bench on its back at about y=1.5."""
-    mesh = Mesh("ParkParkSwan")
+def make_swan(v2: bool = False) -> Mesh:
+    """A swan boat (base at y=0, facing +Z): a white hull with an arched neck and a bench on its back at about y=1.5.
+
+    The V2 variant joins the neck with tapered tubes instead of a stack of beads."""
+    mesh = Mesh("ParkParkSwanV2" if v2 else "ParkParkSwan")
     add_ellipsoid(mesh, (0, 0.85, 0), (0.95, 0.65, 1.55), "cream", slices=14, stacks=7)
     add_ellipsoid(mesh, (0, 0.45, -1.35), (0.45, 0.35, 0.5), "cream", slices=8, stacks=5)
     for side in (-1, 1):
         add_ellipsoid(mesh, (side * 0.85, 1.15, -0.25), (0.22, 0.5, 1.0), "cream", slices=8, stacks=5)
     # Neck: a curved stack of spheres rising to the head, then the beak.
-    for index, (y, z, r) in enumerate(((1.2, 1.2, 0.34), (1.7, 1.45, 0.3), (2.2, 1.5, 0.27), (2.55, 1.35, 0.25))):
-        add_ellipsoid(mesh, (0, y, z), (r, r, r), "cream", slices=8, stacks=5)
+    neck = ((1.2, 1.2, 0.34), (1.7, 1.45, 0.3), (2.2, 1.5, 0.27), (2.55, 1.35, 0.25))
+    if v2:
+        for (y0, z0, r0), (y1, z1, r1) in zip(neck, neck[1:]):
+            add_cylinder_between(mesh, (0, y0, z0), (0, y1, z1), r0 * 0.85, r1 * 0.85, "cream", 10)
+            add_ellipsoid(mesh, (0, y1, z1), (r1 * 0.9, r1 * 0.9, r1 * 0.9), "cream", slices=8, stacks=5)
+        add_ellipsoid(mesh, (0, 1.2, 1.2), (0.36, 0.36, 0.36), "cream", slices=8, stacks=5)
+    else:
+        for y, z, r in neck:
+            add_ellipsoid(mesh, (0, y, z), (r, r, r), "cream", slices=8, stacks=5)
     add_ellipsoid(mesh, (0, 2.7, 1.45), (0.3, 0.28, 0.34), "cream", slices=9, stacks=5)
     add_box(mesh, (0, 2.62, 1.85), (0.2, 0.14, 0.36), "coral")
     for side in (-1, 1):
@@ -2912,6 +2926,12 @@ def main() -> None:
         make_shop_noodle(),
         make_swan_hub(),
         make_swan(),
+        make_swan(v2=True),
+        make_sky_car(v2=True),
+        make_sky_track(v2=True),
+        make_coaster_track(v2=True),
+        make_train_track(v2=True),
+        make_haunted_house(v2=True),
         make_ball_pit(),
         make_rocket_hub(),
         make_rocket(),
