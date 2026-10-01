@@ -498,9 +498,20 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		guest.prompt.Enabled = false
 	end
 
-	-- Lets the head of a ride's line on. `player` is who allowed it, or nil when the ride's staff did.
+	-- The first guest in a ride's line who is standing at their spot. A guest still walking up (from another
+	-- zone, say) does not hold the line: whoever has arrived first is let on first.
+	local function frontGuest(ride: Ride): Guest?
+		for _, guest in ride.queue do
+			if guest.arrived and guest.seat == nil and guest.alive then
+				return guest
+			end
+		end
+		return nil
+	end
+
+	-- Lets the front of a ride's line on. `player` is who allowed it, or nil when the ride's staff did.
 	local function tryBoard(ride: Ride, guest: Guest, player: Player?): boolean
-		if ride.queue[1] ~= guest or not guest.arrived or guest.seat ~= nil or not guest.alive then
+		if frontGuest(ride) ~= guest then
 			return false
 		end
 		if ride.model:GetAttribute("IsOperating") ~= true then
@@ -516,7 +527,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		end
 
 		ride.seatTaken[seat] = true
-		table.remove(ride.queue, 1)
+		table.remove(ride.queue, table.find(ride.queue, guest) or 1)
 		updateQueue(ride)
 		guest.seat = seat
 		guest.prompt.Enabled = false
@@ -778,10 +789,13 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 				local operating = rideInfo.model:GetAttribute("IsOperating") == true
 				local hasSeat = firstFreeSeat(rideInfo) ~= nil
 				local fare = fareOf(rideInfo)
-				for index, guest in rideInfo.queue do
+				for _, guest in rideInfo.queue do
 					guest.arrived = flatDistance(guest.root.Position, guest.slot) <= ARRIVAL_DISTANCE + 1
-					local isHead = index == 1
-					guest.prompt.Enabled = isHead and guest.arrived and operating and hasSeat
+				end
+				local front = frontGuest(rideInfo)
+				for _, guest in rideInfo.queue do
+					local isHead = guest == front
+					guest.prompt.Enabled = isHead and operating and hasSeat
 					if isHead then
 						guest.prompt.ActionText = if rideInfo.service then "서빙하기" else "태우기"
 						guest.prompt.ObjectText =
@@ -790,7 +804,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 				end
 
 				local interval = (rideInfo.model:GetAttribute("StaffInterval") :: number?) or 0
-				local head = rideInfo.queue[1]
+				local head = front
 				if interval > 0 and head and now - rideInfo.lastStaffBoarding >= interval then
 					if tryBoard(rideInfo, head, nil) then
 						rideInfo.lastStaffBoarding = now
