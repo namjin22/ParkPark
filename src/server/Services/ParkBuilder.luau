@@ -10,6 +10,13 @@ local CoasterPath = require(Config:WaitForChild("CoasterPath"))
 local FlumePath = require(Config:WaitForChild("FlumePath"))
 local TrainPath = require(Config:WaitForChild("TrainPath"))
 
+export type ExtraRide = {
+	Ride: Model,
+	Console: BasePart,
+	Seats: { BasePart },
+	Hub: BasePart?,
+}
+
 local PARK_FOLDER_NAME = "ParkParkWorld"
 local ENTRANCE_NAME = "RuinedEntrance"
 local CAROUSEL_NAME = "BrokenCarousel"
@@ -266,6 +273,8 @@ export type References = {
 	TrainConsole: BasePart,
 	GateRope: Model,
 	GatePrompt: ProximityPrompt,
+	-- Filled by ExtraRideService with the data-driven attractions (ExtraRides), keyed by ride key.
+	Extras: { [string]: ExtraRide },
 }
 
 local function createPart(
@@ -2604,6 +2613,7 @@ function ParkBuilder.Build(): References
 		GiftStaffPrompt = giftStaffPrompt,
 		GateRope = gateRope,
 		GatePrompt = gatePrompt,
+		Extras = {},
 	}
 end
 
@@ -2626,6 +2636,28 @@ function ParkBuilder.FindDecorTemplate(name: string): Model?
 	local folder = getAssetFolder()
 	local template = if folder then folder:FindFirstChild(name) else nil
 	return if template and template:IsA("Model") then template else nil
+end
+
+-- Data-driven rides (ExtraRides): authored meshes swap palette; graybox parts carry `FadedColor`/`RestoredColor`.
+function ParkBuilder.ApplyExtraAppearance(ride: Model, repaired: boolean)
+	if ride:GetAttribute("IsGraybox") == true then
+		for _, descendant in ride:GetDescendants() do
+			if descendant:IsA("BasePart") then
+				local color = descendant:GetAttribute(if repaired then "RestoredColor" else "FadedColor")
+				if typeof(color) == "Color3" then
+					descendant.Color = color
+				end
+			end
+		end
+	else
+		applyPalette(ride, repaired)
+	end
+	local glowPart = ride:FindFirstChild("Hub", true) or ride:FindFirstChild("Pad", true)
+	setRestoredGlow(glowPart, repaired, 60)
+end
+
+function ParkBuilder.ApplyExtraRepairedAppearance(ride: Model)
+	ParkBuilder.ApplyExtraAppearance(ride, true)
 end
 
 function ParkBuilder.ApplyEntranceRestored(entrance: Model)

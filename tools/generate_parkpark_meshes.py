@@ -2194,6 +2194,92 @@ def make_train_car() -> Mesh:
     return mesh
 
 
+def make_duck_hub() -> Mesh:
+    """Rotating duck-pond deck: a mint pond ring, a lighthouse-style column, and a turntable per duck."""
+    mesh = Mesh("ParkParkDuckHub")
+    add_vertical_cylinder(mesh, 8.6, 0.0, 0.62, "cream", 48)
+    add_vertical_cylinder(mesh, 8.62, 0.0, 0.5, "gold", 48)
+    add_vertical_cylinder(mesh, 7.9, 0.5, 0.7, "mint", 48)
+    add_torus(mesh, 8.4, 0.14, 0.72, "coral", segments=48, sides=6)
+    lathe(
+        mesh,
+        [
+            (0.0, 0.7, "wood"),
+            (1.5, 0.7, "wood"),
+            (1.1, 1.3, "gold"),
+            (0.8, 1.7, "cream"),
+            (0.7, 3.6, "coral"),
+            (0.85, 3.7, "cream"),
+            (0.7, 4.4, "coral"),
+            (0.95, 4.55, "gold"),
+            (0.0, 5.6, "coral"),
+        ],
+        28,
+    )
+    add_ellipsoid(mesh, (0, 6.0, 0), (0.5, 0.5, 0.5), "gold", slices=10, stacks=6)
+    for index in range(6):
+        angle = TAU * index / 6
+        x, z = 5.6 * math.cos(angle), 5.6 * math.sin(angle)
+        add_cylinder_between(mesh, (0, 0.95, 0), (x, 0.95, z), 0.2, 0.2, "coral", 8)
+        add_vertical_cylinder(mesh, 1.9, 0.62, 0.96, "gold", 28, x, z)
+        add_vertical_cylinder(mesh, 1.6, 0.96, 1.04, "cream", 28, x, z)
+    return mesh
+
+
+def make_duck() -> Mesh:
+    """One duck in a swim ring (base at y=0): a guest sits on its back (seat surface at about y=1.75)."""
+    mesh = Mesh("ParkParkDuck")
+    add_torus(mesh, 1.5, 0.34, 0.34, "mint", segments=28, sides=8)
+    add_torus(mesh, 1.5, 0.12, 0.62, "cream", segments=28, sides=6)
+    add_ellipsoid(mesh, (0, 1.0, -0.1), (1.25, 0.85, 1.55), "gold", slices=16, stacks=8)
+    # Neck, head, beak, and eyes at the front (+Z).
+    add_ellipsoid(mesh, (0, 1.65, 1.05), (0.5, 0.65, 0.5), "gold", slices=10, stacks=6)
+    add_ellipsoid(mesh, (0, 2.3, 1.3), (0.58, 0.55, 0.58), "gold", slices=12, stacks=7)
+    add_box(mesh, (0, 2.2, 1.95), (0.72, 0.18, 0.62), "coral")
+    add_box(mesh, (0, 2.04, 1.9), (0.6, 0.1, 0.5), "coral")
+    for side in (-1, 1):
+        add_ellipsoid(mesh, (side * 0.3, 2.45, 1.7), (0.1, 0.12, 0.08), "ink", slices=6, stacks=4)
+        add_ellipsoid(mesh, (side * 1.12, 1.05, -0.2), (0.22, 0.55, 0.85), "cream", slices=8, stacks=5)
+    # Tail tuft and a cushion on the back where the guest sits.
+    add_ellipsoid(mesh, (0, 1.45, -1.55), (0.3, 0.4, 0.45), "gold", slices=8, stacks=5)
+    add_vertical_cylinder(mesh, 0.85, 1.66, 1.8, "coral", 18, 0.0, -0.25)
+    return mesh
+
+
+def make_bounce_house() -> Mesh:
+    """An inflatable bouncy castle (origin at the ground centre): a soft floor, tube walls, corner towers, a gate."""
+    mesh = Mesh("ParkParkBounceHouse")
+    half = 6.5
+    add_box(mesh, (0, 0.5, 0), (half * 2 + 0.6, 1.0, half * 2 + 0.6), "gold")
+    add_box(mesh, (0, 1.02, 0), (half * 2 - 1.2, 0.08, half * 2 - 1.2), "mint")
+    colors = ("coral", "cream", "coral")
+    for side_index, (ax, az) in enumerate(((1, 0), (-1, 0), (0, 1), (0, -1))):
+        # Tube walls along each side; the +Z side leaves a gate gap in the middle.
+        for row, height in enumerate((1.5, 2.45, 3.4)):
+            if az == 0:
+                a, b = (ax * half, height, -half), (ax * half, height, half)
+                add_cylinder_between(mesh, a, b, 0.48, 0.48, colors[row], 10)
+            elif az == -1:
+                a, b = (-half, height, -half), (half, height, -half)
+                add_cylinder_between(mesh, a, b, 0.48, 0.48, colors[row], 10)
+            else:
+                add_cylinder_between(mesh, (-half, height, half), (-2.6, height, half), 0.48, 0.48, colors[row], 10)
+                add_cylinder_between(mesh, (2.6, height, half), (half, height, half), 0.48, 0.48, colors[row], 10)
+    # Soft corner towers with domed tops and pennants.
+    for index, (x, z) in enumerate(((-half, -half), (half, -half), (-half, half), (half, half))):
+        material = ("mint", "gold", "gold", "mint")[index]
+        add_vertical_cylinder(mesh, 1.15, 1.0, 5.0, material, 16, x, z)
+        add_ellipsoid(mesh, (x, 5.0, z), (1.25, 1.0, 1.25), "coral", slices=14, stacks=6)
+        add_cylinder_between(mesh, (x, 5.8, z), (x, 7.0, z), 0.07, 0.05, "wood", 5)
+        add_box(mesh, (x + 0.45, 6.7, z), (0.9, 0.5, 0.06), "cream" if index % 2 else "coral")
+    # The gate: a rainbow of two arch posts and a lintel with a star.
+    for side in (-1, 1):
+        add_vertical_cylinder(mesh, 0.55, 1.0, 4.4, "cream", 12, side * 2.6, half)
+    add_box(mesh, (0, 4.6, half), (6.1, 0.9, 1.0), "coral")
+    add_box(mesh, (0, 5.4, half), (5.0, 0.6, 0.8), "gold")
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -2296,6 +2382,9 @@ def main() -> None:
         make_decor_sandcastle(),
         make_train_track(),
         make_train_car(),
+        make_duck_hub(),
+        make_duck(),
+        make_bounce_house(),
         make_decor_tree(),
         make_decor_bush(),
         make_decor_lamp(),

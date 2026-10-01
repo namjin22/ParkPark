@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config")
+local ParkBuilder = require(script.Parent:WaitForChild("ParkBuilder"))
 local GameConfig = require(Config:WaitForChild("GameConfig"))
 local ParkLayout = require(Config:WaitForChild("ParkLayout"))
 
@@ -14,7 +15,10 @@ local ParkLayout = require(Config:WaitForChild("ParkLayout"))
 -- `ForceOutage` attribute on it starts an outage at once (used for testing).
 local PowerService = {}
 
+type ExtraRide = ParkBuilder.ExtraRide
+
 type PowerReferences = {
+	Extras: { [string]: ExtraRide },
 	ParkFolder: Folder,
 	Carousel: Model,
 	TeacupsRide: Model,
@@ -131,6 +135,9 @@ function PowerService.Start(park: PowerReferences, awardCoins: AwardCoins, notif
 		park.GiftShop,
 		park.TrainRide,
 	}
+	for _, extra in park.Extras do
+		table.insert(rides, extra.Ride)
+	end
 	local _, lamp, prompt = buildGenerator(park.ParkFolder)
 	local lampLight = lamp:FindFirstChildOfClass("PointLight")
 	local currency = GameConfig.CurrencyDisplayName

@@ -73,6 +73,8 @@ DROP_SCALE = config_number("DropScale")
 DROP_REST_Y = config_number("DropRestY")
 GIFT_SCALE = config_number("GiftScale")
 TRAIN_SCALE = config_number("TrainScale")
+DUCK_SCALE = config_number("DuckScale")
+BOUNCE_SCALE = config_number("BounceScale")
 TRAIN_CARS = int(config_number("TrainCarCount"))
 FLUME_SCALE = config_number("FlumeScale")
 FLUME_CARS = int(config_number("FlumeCarCount"))
@@ -315,6 +317,8 @@ def main() -> None:
     build_drop_tower()
     build_gift_shop()
     build_train()
+    build_duck()
+    build_bounce()
     build_flume()
     build_decor()
 
@@ -672,6 +676,58 @@ def build_train() -> None:
                 model("TrainCars", wagons),
                 # The ride is turned half a turn in the world, so this lands beside the station near its line.
                 console("TrainConsole", 18, -33, 0),
+            ],
+        ),
+    )
+
+
+def build_duck() -> None:
+    needed = ("ParkParkDuckHub", "ParkParkDuck")
+    missing = missing_meshes(needed)
+    if missing:
+        print(f"skipped DuckRide: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    # ExtraRideService turns `Hub` and spins each `Seat<N>` duck on its own turntable; the console sits beside the line.
+    ducks = []
+    for index in range(6):
+        angle = 2 * math.pi * index / 6
+        origin = (5.6 * math.cos(angle), 1.04, 5.6 * math.sin(angle))
+        ducks.append(mesh_part(f"Seat{index + 1}", "ParkParkDuck", origin, 0, False, GOLD, DUCK_SCALE))
+    write(
+        "DuckRide",
+        model(
+            "DuckRide",
+            [
+                mesh_part("Hub", "ParkParkDuckHub", (0, 0, 0), 0, False, MINT, DUCK_SCALE),
+                cylinder_collider("HubCollider", (0, 0.5, 0), 1.0, 17.4, DUCK_SCALE),
+                cylinder_collider("ColumnCollider", (0, 3.0, 0), 5.0, 1.8, DUCK_SCALE),
+                *ducks,
+                console("Console", -24, 30, 0),
+            ],
+        ),
+    )
+
+
+def build_bounce() -> None:
+    if missing_meshes(("ParkParkBounceHouse",)):
+        print("skipped BounceRide: import ParkParkBounceHouse and record its mesh ID first")
+        return
+
+    # The castle is turned 180 so the imported mesh matches the OBJ layout (its gate faces +Z, toward the line).
+    seats = []
+    for index in range(6):
+        angle = 2 * math.pi * index / 6
+        seats.append(box_collider(f"Seat{index + 1}", (3.2 * math.cos(angle), 1.05, 3.2 * math.sin(angle)), (1, 0.2, 1), 0, BOUNCE_SCALE))
+    write(
+        "BounceRide",
+        model(
+            "BounceRide",
+            [
+                mesh_part("Pad", "ParkParkBounceHouse", (0, 0, 0), 180, False, GOLD, BOUNCE_SCALE),
+                box_collider("Collider", (0, 3.0, 0), (14.0, 6.0, 14.0), 0, BOUNCE_SCALE),
+                *seats,
+                console("Console", -24, 32, 0),
             ],
         ),
     )

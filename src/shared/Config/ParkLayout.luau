@@ -31,7 +31,8 @@ ParkLayout.ZoneBoundaryZ = -168
 ParkLayout.ZoneGroundMinZ = -480
 ParkLayout.ZoneRoadX = 52
 ParkLayout.ZoneRoadHalfWidth = 8
-ParkLayout.ZoneBranchZ = { Flume = -205, Drop = -215, Gift = -352, Train = -525 } :: { [string]: number }
+ParkLayout.ZoneBranchZ =
+	{ Flume = -205, Drop = -215, Gift = -352, Train = -525, Duck = -575, Bounce = -655 } :: { [string]: number }
 ParkLayout.ZoneBounds = {
 	Water = { BoundaryZ = -168, MinZ = -480 },
 	Kids = { BoundaryZ = -480, MinZ = -800 },
@@ -140,6 +141,19 @@ ParkLayout.Rides = {
 		Pivot = Vector3.new(-20, 0, -590),
 		PlatformRadius = 42,
 		QueueHead = Vector3.new(-20, 0, -559),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	-- East of the zone road; every kids' ride faces +Z so its line runs up to a branch off the road.
+	Duck = {
+		Pivot = Vector3.new(125, 0, -640),
+		PlatformRadius = 30,
+		QueueHead = Vector3.new(125, 0, -605),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Bounce = {
+		Pivot = Vector3.new(-110, 0, -720),
+		PlatformRadius = 30,
+		QueueHead = Vector3.new(-110, 0, -683),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Ferris = {

@@ -25,6 +25,7 @@ local powerService = require(script.Parent.Services.PowerService)
 local parkProgressionService = require(script.Parent.Services.ParkProgressionService)
 local rideService = require(script.Parent.Services.RideService)
 local teacupService = require(script.Parent.Services.TeacupService)
+local extraRideService = require(script.Parent.Services.ExtraRideService)
 
 -- Create leaderstats before the builder's bounded asset waits so the HUD never stalls.
 economyService.SetStartingCoinsProvider(persistenceService.LoadCoins)
@@ -35,6 +36,7 @@ local savedPark = persistenceService.LoadParkState()
 parkBuilder.SetSavedState(savedPark :: any)
 print(if savedPark then "[ParkPark] Building park world from a saved game" else "[ParkPark] Building park world")
 local park = parkBuilder.Build()
+extraRideService.Build(park, if savedPark then savedPark.Rides else nil)
 parkProgressionService.Start(park, economyService.AwardCoins, parkBuilder.ApplyEntranceRestored, noticeService.Send)
 rideService.Start(
 	park,
@@ -53,8 +55,10 @@ rideService.Start(
 	parkBuilder.ApplyDropRepairedAppearance,
 	parkBuilder.ApplyGiftRepairedAppearance,
 	parkBuilder.ApplyTrainRepairedAppearance,
+	parkBuilder.ApplyExtraRepairedAppearance,
 	noticeService.Send
 )
+extraRideService.Start(park)
 bumperCarService.Start(park)
 teacupService.Start(park)
 ferrisService.Start(park)
@@ -114,6 +118,9 @@ local rideModels: { [string]: Model } = {
 	Gift = park.GiftShop,
 	Train = park.TrainRide,
 }
+for key, extra in park.Extras do
+	rideModels[key] = extra.Ride
+end
 zoneService.Start(park, rideModels, economyService.SpendCoins, economyService.GetCoins, noticeService.Send)
 local watched: { Instance } = { park.ParkFolder }
 for _, model in rideModels do

@@ -5,8 +5,10 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config")
+local ParkBuilder = require(script.Parent:WaitForChild("ParkBuilder"))
 local GameConfig = require(Config:WaitForChild("GameConfig"))
 local ParkLayout = require(Config:WaitForChild("ParkLayout"))
+local ExtraRideService = require(script.Parent:WaitForChild("ExtraRideService"))
 
 -- Once the park is open, guests walk in along the paths, pick a ride at random, and stand in that ride's
 -- line. The guest at the head of a line shows a prompt: a player walks up and lets them on, or the ride's
@@ -14,7 +16,10 @@ local ParkLayout = require(Config:WaitForChild("ParkLayout"))
 -- may join another random ride or leave the way they came.
 local GuestService = {}
 
+type ExtraRide = ParkBuilder.ExtraRide
+
 type GuestReferences = {
+	Extras: { [string]: ExtraRide },
 	ParkFolder: Folder,
 	Carousel: Model,
 	CarouselRotor: Model,
@@ -395,6 +400,18 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			return if car and car:IsA("BasePart") then car else nil
 		end, trackSeatOffset("Train"), GameConfig.TrainSeatCount, false),
 	}
+	for key, extra in park.Extras do
+		local seats = extra.Seats
+		local offset = ExtraRideService.SeatOffset(key)
+		table.insert(
+			rides,
+			newRide(key, extra.Ride, function(seat: number)
+				return seats[seat]
+			end, function()
+				return offset
+			end, #seats, false)
+		)
+	end
 	for _, rideInfo in rides do
 		if rideInfo.key == "Haunted" then
 			rideInfo.hidden = true

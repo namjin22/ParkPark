@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
+local ParkBuilder = require(script.Parent:WaitForChild("ParkBuilder"))
 local GameConfig =
 	require(ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("GameConfig"))
 
@@ -15,7 +16,10 @@ local GameConfig =
 -- BlockedReason, the text that says why unlocking or repairing is not possible yet).
 local RideService = {}
 
+type ExtraRide = ParkBuilder.ExtraRide
+
 type RideReferences = {
+	Extras: { [string]: ExtraRide },
 	ParkFolder: Folder,
 	Carousel: Model,
 	CarouselRotor: Model,
@@ -204,6 +208,7 @@ function RideService.Start(
 	applyDropRepaired: ApplyRepairedAppearance,
 	applyGiftRepaired: ApplyRepairedAppearance,
 	applyTrainRepaired: ApplyRepairedAppearance,
+	applyExtraRepaired: ApplyRepairedAppearance,
 	notify: Notify
 )
 	local currency = GameConfig.CurrencyDisplayName
@@ -222,6 +227,9 @@ function RideService.Start(
 		Gift = park.GiftShop,
 		Train = park.TrainRide,
 	}
+	for key, extra in park.Extras do
+		rideModels[key] = extra.Ride
+	end
 	local actions: { [string]: { [string]: (Player) -> () } } = {}
 
 	local function startRotation(ride: Model, rotor: Model, rotationSeconds: number, name: string)
@@ -723,6 +731,28 @@ function RideService.Start(
 		end,
 		applyRepairedAppearance = applyTrainRepaired,
 	})
+
+	-- Data-driven rides (ExtraRides): ExtraRideService moves them while IsOperating is true.
+	for key, extra in park.Extras do
+		local zone = GameConfig.Rides[key].Zone
+		local zoneSignals: { RBXScriptSignal } = { parkOpenSignal }
+		if zone then
+			table.insert(zoneSignals, park.ParkFolder:GetAttributeChangedSignal("Zone_" .. zone))
+		end
+		setupRide({
+			key = key,
+			model = extra.Ride,
+			console = extra.Console,
+			isAvailable = function()
+				return parkOpen() and (zone == nil or park.ParkFolder:GetAttribute("Zone_" .. zone) == true)
+			end,
+			signals = zoneSignals,
+			start = function()
+				extra.Ride:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
+			end,
+			applyRepairedAppearance = applyExtraRepaired,
+		})
+	end
 end
 
 return RideService
