@@ -42,6 +42,8 @@ type RideReferences = {
 	FlumeConsole: BasePart,
 	DropRide: Model,
 	DropConsole: BasePart,
+	GiftShop: Model,
+	GiftConsole: BasePart,
 }
 
 type SpendCoins = (Player, number) -> boolean
@@ -198,6 +200,7 @@ function RideService.Start(
 	applyCoasterRepaired: ApplyRepairedAppearance,
 	applyFlumeRepaired: ApplyRepairedAppearance,
 	applyDropRepaired: ApplyRepairedAppearance,
+	applyGiftRepaired: ApplyRepairedAppearance,
 	notify: Notify
 )
 	local currency = GameConfig.CurrencyDisplayName
@@ -213,6 +216,7 @@ function RideService.Start(
 		Coaster = park.CoasterRide,
 		Flume = park.FlumeRide,
 		Drop = park.DropRide,
+		Gift = park.GiftShop,
 	}
 	local actions: { [string]: { [string]: (Player) -> () } } = {}
 
@@ -684,6 +688,21 @@ function RideService.Start(
 			park.DropRide:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
 		end,
 		applyRepairedAppearance = applyDropRepaired,
+	})
+
+	-- The gift shop is a shop in the water zone: guests buy a souvenir at the counter.
+	setupRide({
+		key = "Gift",
+		model = park.GiftShop,
+		console = park.GiftConsole,
+		isAvailable = function()
+			return parkOpen() and park.ParkFolder:GetAttribute("Zone_Water") == true
+		end,
+		signals = { parkOpenSignal, park.ParkFolder:GetAttributeChangedSignal("Zone_Water") },
+		start = function()
+			park.GiftShop:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
+		end,
+		applyRepairedAppearance = applyGiftRepaired,
 	})
 end
 

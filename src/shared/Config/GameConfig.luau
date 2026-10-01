@@ -54,6 +54,7 @@ return {
 	CoasterScale = 3,
 	FlumeScale = 2.6,
 	DropScale = 3,
+	GiftScale = 3,
 	TreeScale = 1.9,
 	BushScale = 1.7,
 	LampScale = 2,
@@ -203,6 +204,20 @@ return {
 			StaffCosts = { 1400, 2300, 3600 },
 			RideSeconds = 60,
 		},
+		Gift = {
+			DisplayName = "기념품 가게",
+			ModelName = "GiftShop",
+			ConsoleName = "GiftConsole",
+			UnlockCost = 2200,
+			RepairCost = 1000,
+			BaseFare = 70,
+			Requires = "Drop",
+			Zone = "Water",
+			IncomePerLevel = 22,
+			IncomeCosts = { 900, 1700, 2800, 4300 },
+			StaffCosts = { 1200, 2000, 3200 },
+			IsShop = true,
+		},
 	} :: { [string]: RideEconomy },
 	-- The order attractions unlock in (each needs the one before it repaired).
 	RideChain = {
@@ -217,6 +232,7 @@ return {
 		"Coaster",
 		"Flume",
 		"Drop",
+		"Gift",
 	},
 	-- Zones beyond the first: what opening each costs (paid at its gate once the park's last attraction of the
 	-- previous zone is repaired) and how it is named.

@@ -21,7 +21,7 @@
 </Properties></Item><Item class="Part" referent="RBX71"><Properties>
 <string name="Name">SnackCounter</string>
 <Vector3 name="size"><X>17.1</X><Y>3.9</Y><Z>3.9</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>0.0</X><Y>1.95</Y><Z>-3.3</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>1.95</Y><Z>3.3</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">true</bool>
 <bool name="CanTouch">false</bool>
@@ -31,7 +31,7 @@
 </Properties></Item><Item class="Part" referent="RBX72"><Properties>
 <string name="Name">BackWall</string>
 <Vector3 name="size"><X>16.8</X><Y>10.2</Y><Z>0.9</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>0.0</X><Y>5.1</Y><Z>4.5</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>5.1</Y><Z>-4.5</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">true</bool>
 <bool name="CanTouch">false</bool>
@@ -41,7 +41,7 @@
 </Properties></Item><Item class="Part" referent="RBX73"><Properties>
 <string name="Name">LeftWall</string>
 <Vector3 name="size"><X>0.9</X><Y>10.2</Y><Z>8.4</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>-8.25</X><Y>5.1</Y><Z>0.6</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>8.25</X><Y>5.1</Y><Z>-0.6</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">true</bool>
 <bool name="CanTouch">false</bool>
@@ -51,7 +51,7 @@
 </Properties></Item><Item class="Part" referent="RBX74"><Properties>
 <string name="Name">RightWall</string>
 <Vector3 name="size"><X>0.9</X><Y>10.2</Y><Z>8.4</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>8.25</X><Y>5.1</Y><Z>0.6</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-8.25</X><Y>5.1</Y><Z>-0.6</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">true</bool>
 <bool name="CanTouch">false</bool>
@@ -62,7 +62,7 @@
 <string name="Name">PostColliderFront-3</string>
 <token name="shape">2</token>
 <Vector3 name="size"><X>9.9</X><Y>0.9</Y><Z>0.9</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>-8.55</X><Y>5.55</Y><Z>-5.1</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>8.55</X><Y>5.55</Y><Z>5.1</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">true</bool>
 <bool name="CanTouch">false</bool>
@@ -73,7 +73,7 @@
 <string name="Name">PostColliderFront+3</string>
 <token name="shape">2</token>
 <Vector3 name="size"><X>9.9</X><Y>0.9</Y><Z>0.9</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>8.55</X><Y>5.55</Y><Z>-5.1</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-8.55</X><Y>5.55</Y><Z>5.1</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">true</bool>
 <bool name="CanTouch">false</bool>

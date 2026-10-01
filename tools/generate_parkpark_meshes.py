@@ -1922,6 +1922,88 @@ def make_drop_gondola() -> Mesh:
     return mesh
 
 
+def make_gift_shop() -> Mesh:
+    """A pastel gift shop (front, with the counter, is -Z): mint walls, a striped awning, a gift-box crest with a bow,
+    shelves of presents, and a teddy bear on the counter. Same footprint as the snack stand."""
+    mesh = Mesh("ParkParkGiftShop")
+    add_box(mesh, (0, 0.1, 0), (6.6, 0.2, 4.2), "wood")
+    # Back wall, side panels, and a shelf of presents on the back wall.
+    add_box(mesh, (0, 1.7, 1.5), (5.6, 3.0, 0.15), "mint")
+    add_box(mesh, (-2.75, 1.7, 0.2), (0.15, 3.0, 2.8), "mint")
+    add_box(mesh, (2.75, 1.7, 0.2), (0.15, 3.0, 2.8), "mint")
+    for y in (1.3, 2.3):
+        add_box(mesh, (0, y, 1.3), (5.0, 0.12, 0.5), "wood")
+    for x, y, size, material in (
+        (-1.9, 1.62, 0.6, "coral"),
+        (-1.0, 1.62, 0.5, "gold"),
+        (0.2, 1.62, 0.7, "cream"),
+        (1.3, 1.62, 0.5, "coral"),
+        (2.0, 1.6, 0.45, "gold"),
+        (-1.5, 2.62, 0.55, "cream"),
+        (-0.3, 2.64, 0.6, "gold"),
+        (1.0, 2.62, 0.5, "coral"),
+    ):
+        add_box(mesh, (x, y, 1.3), (size, size, size), material)
+        add_box(mesh, (x, y + size / 2 + 0.01, 1.3), (size * 0.18, 0.04, size + 0.02), "ink" if material == "cream" else "cream")
+    # Counter with a wooden top and mint front panels.
+    add_box(mesh, (0, 0.65, -1.1), (5.4, 0.9, 1.0), "coral")
+    add_box(mesh, (0, 1.16, -1.1), (5.7, 0.12, 1.3), "wood")
+    for x in (-1.8, 0.0, 1.8):
+        add_box(mesh, (x, 0.65, -1.62), (1.4, 0.6, 0.06), "mint")
+    # Corner posts.
+    for x in (-2.85, 2.85):
+        for z in (-1.7, 1.6):
+            add_vertical_cylinder(mesh, 0.1, 0.2, 3.5, "gold", 10, center_x=x, center_z=z)
+    # Striped, sloping awning in mint and cream, with a scalloped front edge.
+    stripes = 6
+    width = 6.4 / stripes
+    for index in range(stripes):
+        x0 = -3.2 + index * width
+        x1 = x0 + width
+        material = "mint" if index % 2 == 0 else "cream"
+        add_slab(
+            mesh,
+            [
+                (x0, 3.15, -2.1),
+                (x1, 3.15, -2.1),
+                (x1, 3.27, -2.1),
+                (x0, 3.27, -2.1),
+                (x0, 3.7, 1.8),
+                (x1, 3.7, 1.8),
+                (x1, 3.82, 1.8),
+                (x0, 3.82, 1.8),
+            ],
+            material,
+        )
+        add_box(mesh, ((x0 + x1) / 2, 3.0, -2.12), (width, 0.32, 0.06), material)
+    # Crest: a big gift box on the roof with a gold ribbon and a bow.
+    add_box(mesh, (0, 4.55, 0.3), (1.7, 1.4, 1.7), "coral")
+    add_box(mesh, (0, 4.55, 0.3), (0.3, 1.42, 1.72), "gold")
+    add_box(mesh, (0, 4.55, 0.3), (1.72, 1.42, 0.3), "gold")
+    add_box(mesh, (0, 5.3, 0.3), (1.9, 0.25, 1.9), "coral")
+    add_ellipsoid(mesh, (-0.45, 5.75, 0.3), (0.5, 0.32, 0.26), "gold", slices=8, stacks=4)
+    add_ellipsoid(mesh, (0.45, 5.75, 0.3), (0.5, 0.32, 0.26), "gold", slices=8, stacks=4)
+    add_ellipsoid(mesh, (0, 5.7, 0.3), (0.2, 0.2, 0.2), "gold", slices=6, stacks=4)
+    add_star(mesh, 6.6, 0.25, "gold")
+    # On the counter: a stack of presents (left) and a teddy bear (right).
+    add_box(mesh, (-1.6, 1.52, -1.0), (0.9, 0.6, 0.8), "gold")
+    add_box(mesh, (-1.6, 2.0, -1.0), (0.65, 0.4, 0.6), "cream")
+    add_box(mesh, (-1.6, 2.28, -1.0), (0.4, 0.2, 0.4), "coral")
+    add_ellipsoid(mesh, (1.7, 1.55, -1.0), (0.42, 0.45, 0.36), "wood", slices=8, stacks=5)
+    add_ellipsoid(mesh, (1.7, 2.1, -1.0), (0.32, 0.3, 0.28), "wood", slices=8, stacks=5)
+    for side in (-1, 1):
+        add_ellipsoid(mesh, (1.7 + side * 0.25, 2.35, -1.0), (0.11, 0.11, 0.08), "wood", slices=6, stacks=4)
+        add_ellipsoid(mesh, (1.7 + side * 0.4, 1.65, -1.0), (0.14, 0.2, 0.14), "wood", slices=6, stacks=4)
+    add_ellipsoid(mesh, (1.7, 2.06, -1.25), (0.11, 0.09, 0.06), "cream", slices=6, stacks=4)
+    # A barrel of balloons beside the stand.
+    add_vertical_cylinder(mesh, 0.42, 0.2, 1.1, "wood", 12, center_x=3.95, center_z=-0.4)
+    add_vertical_cylinder(mesh, 0.44, 0.55, 0.65, "gold", 12, center_x=3.95, center_z=-0.4)
+    for y, material in ((2.2, "coral"), (1.9, "gold"), (2.4, "mint")):
+        add_cylinder_between(mesh, (3.95, 1.1, -0.4), (3.95 + (y - 2.1) * 0.6, y, -0.4), 0.02, 0.02, "ink", 4)
+        add_ellipsoid(mesh, (3.95 + (y - 2.1) * 0.6, y + 0.5, -0.4), (0.4, 0.5, 0.4), material, slices=8, stacks=5)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -2017,6 +2099,7 @@ def main() -> None:
         make_flume_boat(),
         make_drop_tower(),
         make_drop_gondola(),
+        make_gift_shop(),
         make_decor_tree(),
         make_decor_bush(),
         make_decor_lamp(),

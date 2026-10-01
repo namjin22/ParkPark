@@ -71,6 +71,7 @@ FLUME_SCALE = config_number("FlumeScale")
 FLUME_CARS = int(config_number("FlumeCarCount"))
 DROP_SCALE = config_number("DropScale")
 DROP_REST_Y = config_number("DropRestY")
+GIFT_SCALE = config_number("GiftScale")
 FLUME_SCALE = config_number("FlumeScale")
 FLUME_CARS = int(config_number("FlumeCarCount"))
 TREE_SCALE = config_number("TreeScale")
@@ -306,6 +307,7 @@ def main() -> None:
     build_coaster()
     build_flume()
     build_drop_tower()
+    build_gift_shop()
     build_flume()
     build_decor()
 
@@ -425,13 +427,14 @@ def build_snack_stand() -> None:
     # The mesh faces -Z; ParkBuilder turns the template so the counter faces the queue (+X in the world).
     colliders = [
         # SnackCounter is where served guests stand in front of, and it blocks the way like the counter does.
-        box_collider("SnackCounter", (0, 0.65, -1.1), (5.7, 1.3, 1.3), 0, SNACK_SCALE),
-        box_collider("BackWall", (0, 1.7, 1.5), (5.6, 3.4, 0.3), 0, SNACK_SCALE),
-        box_collider("LeftWall", (-2.75, 1.7, 0.2), (0.3, 3.4, 2.8), 0, SNACK_SCALE),
-        box_collider("RightWall", (2.75, 1.7, 0.2), (0.3, 3.4, 2.8), 0, SNACK_SCALE),
+        # The body is yawed 180 (imported meshes came in turned), so the colliders are mirrored to match it.
+        box_collider("SnackCounter", (0, 0.65, 1.1), (5.7, 1.3, 1.3), 0, SNACK_SCALE),
+        box_collider("BackWall", (0, 1.7, -1.5), (5.6, 3.4, 0.3), 0, SNACK_SCALE),
+        box_collider("LeftWall", (2.75, 1.7, -0.2), (0.3, 3.4, 2.8), 0, SNACK_SCALE),
+        box_collider("RightWall", (-2.75, 1.7, -0.2), (0.3, 3.4, 2.8), 0, SNACK_SCALE),
     ]
     for x in (-2.85, 2.85):
-        colliders.append(cylinder_collider(f"PostColliderFront{x:+.0f}", (x, 1.85, -1.7), 3.3, 0.3, SNACK_SCALE))
+        colliders.append(cylinder_collider(f"PostColliderFront{x:+.0f}", (-x, 1.85, 1.7), 3.3, 0.3, SNACK_SCALE))
     write(
         "SnackStand",
         model(
@@ -604,6 +607,35 @@ def build_drop_tower() -> None:
                 box_collider("TowerCollider", (0, 10.0, 0), (2.6, 20.0, 2.6), 0, DROP_SCALE),
                 # Beside the base, near the line that forms in front of it (+Z).
                 console("DropConsole", -24, 22),
+            ],
+        ),
+    )
+
+
+def build_gift_shop() -> None:
+    if missing_meshes(("ParkParkGiftShop",)):
+        print("skipped GiftShop: import ParkParkGiftShop.obj and record its mesh ID first")
+        return
+
+    # Imported stall meshes have come in turned half a turn from their OBJ -Z front (see the snack stand and the
+    # haunted house), so the body is yawed 180 and the colliders, written for the OBJ layout, are mirrored to match.
+    colliders = [
+        box_collider("GiftCounter", (0, 0.65, 1.1), (5.7, 1.3, 1.3), 0, GIFT_SCALE),
+        box_collider("BackWall", (0, 1.7, -1.5), (5.6, 3.4, 0.3), 0, GIFT_SCALE),
+        box_collider("LeftWall", (2.75, 1.7, -0.2), (0.3, 3.4, 2.8), 0, GIFT_SCALE),
+        box_collider("RightWall", (-2.75, 1.7, -0.2), (0.3, 3.4, 2.8), 0, GIFT_SCALE),
+    ]
+    for x in (-2.85, 2.85):
+        colliders.append(cylinder_collider(f"PostColliderFront{x:+.0f}", (-x, 1.85, 1.7), 3.3, 0.3, GIFT_SCALE))
+    write(
+        "GiftShop",
+        model(
+            "GiftShop",
+            [
+                mesh_part("ShopBody", "ParkParkGiftShop", (0, 0, 0), 180, False, CORAL, GIFT_SCALE),
+                *colliders,
+                # Behind the shop, away from the line in front of the counter.
+                console("GiftConsole", -6, 10, 0),
             ],
         ),
     )

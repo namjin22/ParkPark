@@ -39,6 +39,8 @@ type GuestReferences = {
 	FlumeCars: Model,
 	DropRide: Model,
 	DropGondola: BasePart,
+	GiftShop: Model,
+	GiftCounter: BasePart,
 }
 
 type Guest = {
@@ -381,6 +383,11 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		newRide("Drop", park.DropRide, function()
 			return park.DropGondola
 		end, dropSeatOffset, GameConfig.DropSeatCount, false),
+		newRide("Gift", park.GiftShop, function()
+			return park.GiftCounter
+		end, function()
+			return CFrame.identity
+		end, GameConfig.SnackCounterSeats, true),
 	}
 	for _, rideInfo in rides do
 		if rideInfo.key == "Haunted" then

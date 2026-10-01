@@ -22,6 +22,7 @@ local HAUNTED_NAME = "HauntedHouse"
 local COASTER_NAME = "CoasterRide"
 local FLUME_NAME = "FlumeRide"
 local DROP_NAME = "DropRide"
+local GIFT_NAME = "GiftShop"
 local ASSET_FOLDER_SYNC_TIMEOUT = 5
 local ASSET_MANIFEST_SYNC_TIMEOUT = 2
 -- Guests spawn on +Z and walk through the entrance toward the rides on -Z (see ParkLayout).
@@ -38,6 +39,10 @@ local AUTHORED_SNACK_PIVOT = GRAYBOX_SNACK_PIVOT * CFrame.Angles(0, -math.pi / 2
 -- The wheel is modelled with its axle along local Z; turned a quarter it turns in the YZ plane, facing the path.
 local COASTER_PIVOT = CFrame.new(ParkLayout.Rides.Coaster.Pivot)
 -- Zone rides face the road (+Z), so their models are turned half a turn.
+-- The graybox shop is built with its counter toward local +X; the authored mesh's front is -Z. Both end up
+-- facing +Z in the world (toward the line at the road side).
+local GRAYBOX_GIFT_PIVOT = CFrame.new(ParkLayout.Rides.Gift.Pivot) * CFrame.Angles(0, -math.pi / 2, 0)
+local AUTHORED_GIFT_PIVOT = CFrame.new(ParkLayout.Rides.Gift.Pivot) * CFrame.Angles(0, math.pi, 0)
 local DROP_PIVOT = CFrame.new(ParkLayout.Rides.Drop.Pivot)
 local FLUME_PIVOT = CFrame.new(ParkLayout.Rides.Flume.Pivot) * CFrame.Angles(0, math.pi, 0)
 local HAUNTED_PIVOT = CFrame.new(ParkLayout.Rides.Haunted.Pivot)
@@ -66,6 +71,7 @@ type AssetManifest = {
 		Coaster: string?,
 		Flume: string?,
 		Drop: string?,
+		Gift: string?,
 		Litter: string?,
 	},
 	EntranceSign: string,
@@ -95,6 +101,7 @@ local assetManifest: AssetManifest = {
 		Coaster = COASTER_NAME,
 		Flume = FLUME_NAME,
 		Drop = DROP_NAME,
+		Gift = GIFT_NAME,
 		Litter = "Litter",
 	},
 	EntranceSign = "SignPanel",
@@ -146,6 +153,7 @@ local function getAssetFolder(): Folder?
 				and (candidate.Models.Coaster == nil or type(candidate.Models.Coaster) == "string")
 				and (candidate.Models.Flume == nil or type(candidate.Models.Flume) == "string")
 				and (candidate.Models.Drop == nil or type(candidate.Models.Drop) == "string")
+				and (candidate.Models.Gift == nil or type(candidate.Models.Gift) == "string")
 				and (candidate.Models.Litter == nil or type(candidate.Models.Litter) == "string")
 				and type(candidate.EntranceSign) == "string"
 				and type(candidate.CarouselStates) == "table"
@@ -240,6 +248,13 @@ export type References = {
 	DropRide: Model,
 	DropGondola: BasePart,
 	DropConsole: BasePart,
+	GiftShop: Model,
+	GiftCounter: BasePart,
+	GiftConsole: BasePart,
+	GiftUnlockPrompt: ProximityPrompt,
+	GiftRepairPrompt: ProximityPrompt,
+	GiftIncomePrompt: ProximityPrompt,
+	GiftStaffPrompt: ProximityPrompt,
 	GateRope: Model,
 	GatePrompt: ProximityPrompt,
 }
@@ -664,6 +679,8 @@ local function findAuthoredTemplate(name: string): Model?
 		assetName = assetManifest.Models.Flume
 	elseif name == DROP_NAME then
 		assetName = assetManifest.Models.Drop
+	elseif name == GIFT_NAME then
+		assetName = assetManifest.Models.Gift
 	elseif name == DEBRIS_NAME then
 		assetName = assetManifest.Models.Debris
 	end
@@ -956,6 +973,28 @@ local function applyDropAppearance(ride: Model, repaired: boolean)
 		applyPalette(ride, repaired)
 	end
 	setRestoredGlow(ride:FindFirstChild("BasePad", true) or ride:FindFirstChild("DropTower", true), repaired, 60)
+end
+
+local function applyGiftAppearance(stand: Model, repaired: boolean)
+	if stand:GetAttribute("IsGraybox") == true then
+		for _, descendant in stand:GetDescendants() do
+			if descendant:IsA("BasePart") and descendant.Name ~= "ParkPivot" then
+				descendant.Material = Enum.Material.SmoothPlastic
+				if descendant.Name == "Awning" then
+					descendant.Color = if repaired then Color3.fromRGB(235, 122, 108) else Color3.fromRGB(124, 114, 104)
+				elseif descendant.Name == "GiftCounter" or descendant.Name == "BackWall" then
+					descendant.Color = if repaired then Color3.fromRGB(255, 232, 190) else Color3.fromRGB(112, 104, 94)
+				elseif descendant.Name == "Post" then
+					descendant.Color = if repaired then Color3.fromRGB(245, 193, 83) else Color3.fromRGB(96, 88, 78)
+				elseif descendant.Name == "GiftSign" then
+					descendant.Color = if repaired then Color3.fromRGB(245, 193, 83) else Color3.fromRGB(110, 102, 90)
+				end
+			end
+		end
+	else
+		applyPalette(stand, repaired)
+	end
+	setRestoredGlow(stand:FindFirstChild("Awning", true) or stand:FindFirstChild("GiftCounter", true), repaired, 30)
 end
 
 local function applyAuthoredEntranceState(entrance: Model, cleared: boolean)
@@ -1735,6 +1774,68 @@ local function buildGrayboxDrop(parkFolder: Folder): Model
 	return ride
 end
 
+local function buildGrayboxGiftShop(parkFolder: Folder): Model
+	local stand = Instance.new("Model")
+	stand.Name = GIFT_NAME
+	stand:SetAttribute("IsGraybox", true)
+	stand.Parent = parkFolder
+
+	local pivot = createPart("ParkPivot", Vector3.new(0.1, 0.1, 0.1), Vector3.zero, Color3.new(1, 1, 1), stand)
+	pivot.Transparency = 1
+	pivot.CanCollide = false
+	pivot.CanTouch = false
+	pivot.CanQuery = false
+	pivot.CastShadow = false
+	stand.PrimaryPart = pivot
+
+	local grey = Color3.fromRGB(112, 104, 94)
+	-- The counter faces +X, toward the path; the guests stand in line in front of it.
+	createPart("BackWall", Vector3.new(1, 10, 16), Vector3.new(-4, 5, 0), grey, stand, Enum.Material.SmoothPlastic)
+	createPart("GiftCounter", Vector3.new(4, 3.4, 16), Vector3.new(3, 1.7, 0), grey, stand, Enum.Material.SmoothPlastic)
+	for _, z in { -7.5, 7.5 } do
+		createPart("Post", Vector3.new(1.2, 10, 1.2), Vector3.new(5.5, 5, z), grey, stand, Enum.Material.SmoothPlastic)
+	end
+	local awning = createPart(
+		"Awning",
+		Vector3.new(12, 0.6, 18),
+		Vector3.new(1, 10.3, 0),
+		grey,
+		stand,
+		Enum.Material.SmoothPlastic
+	)
+	awning.CanCollide = false
+	local sign = createPart(
+		"GiftSign",
+		Vector3.new(0.6, 2.6, 10),
+		Vector3.new(6.2, 12, 0),
+		grey,
+		stand,
+		Enum.Material.SmoothPlastic
+	)
+	sign.CanCollide = false
+	local gui = Instance.new("SurfaceGui")
+	gui.Name = "GiftSignText"
+	gui.Face = Enum.NormalId.Right
+	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	gui.PixelsPerStud = 60
+	gui.Parent = sign
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 1
+	label.Text = "GIFTS"
+	label.TextColor3 = Color3.fromRGB(57, 67, 72)
+	label.TextScaled = true
+	label.Font = Enum.Font.GothamBold
+	label.Parent = gui
+
+	local console =
+		createPart("GiftConsole", Vector3.new(2, 3, 2), Vector3.new(-7, 1.5, -9.5), Color3.fromRGB(91, 87, 79), stand)
+	console.Material = Enum.Material.Slate
+	-- Local +X is the front, so the graybox needs no turn.
+	stand:PivotTo(GRAYBOX_GIFT_PIVOT)
+	return stand
+end
+
 local function ensureRidePrompt(
 	console: BasePart,
 	name: string,
@@ -1872,6 +1973,8 @@ local function getOrCreateModel(parent: Instance, name: string, build: (Folder) 
 			model:PivotTo(FLUME_PIVOT)
 		elseif name == DROP_NAME then
 			model:PivotTo(DROP_PIVOT)
+		elseif name == GIFT_NAME then
+			model:PivotTo(AUTHORED_GIFT_PIVOT)
 		end
 		return model
 	end
@@ -2280,6 +2383,30 @@ function ParkBuilder.Build(): References
 	end
 	applyDropAppearance(dropRide, dropRide:GetAttribute("IsRepaired") == true)
 
+	local giftStand = getOrCreateModel(parkFolder, GIFT_NAME, buildGrayboxGiftShop)
+	if giftStand:GetAttribute("IsGraybox") == nil then
+		giftStand:SetAttribute("IsGraybox", true)
+	end
+	for _, attribute in { "IsUnlocked", "IsRepaired", "IsOperating" } do
+		if giftStand:GetAttribute(attribute) == nil then
+			giftStand:SetAttribute(attribute, false)
+		end
+	end
+	local giftCounterInstance = giftStand:FindFirstChild("GiftCounter", true)
+	if giftCounterInstance == nil or not giftCounterInstance:IsA("BasePart") then
+		error("[ParkPark] GiftShop.GiftCounter must be a BasePart")
+	end
+	local giftConsoleInstance = giftStand:FindFirstChild("GiftConsole", true)
+	if giftConsoleInstance == nil or not giftConsoleInstance:IsA("BasePart") then
+		error("[ParkPark] GiftShop.GiftConsole must be a BasePart")
+	end
+	local giftUnlockPrompt =
+		ensureRidePrompt(giftConsoleInstance, "UnlockPrompt", "해금하기", 1.5, "기념품 가게", nil, nil)
+	local giftRepairPrompt =
+		ensureRidePrompt(giftConsoleInstance, "RepairPrompt", "수리하기", 2, "기념품 가게", nil, nil)
+	local giftIncomePrompt, giftStaffPrompt = ensureUpgradePrompts(giftConsoleInstance, "기념품 가게")
+	applyGiftAppearance(giftStand, giftStand:GetAttribute("IsRepaired") == true)
+
 	return {
 		ParkFolder = parkFolder,
 		Entrance = entrance,
@@ -2345,6 +2472,13 @@ function ParkBuilder.Build(): References
 		DropRide = dropRide,
 		DropGondola = dropGondolaInstance,
 		DropConsole = dropConsoleInstance,
+		GiftShop = giftStand,
+		GiftCounter = giftCounterInstance,
+		GiftConsole = giftConsoleInstance,
+		GiftUnlockPrompt = giftUnlockPrompt,
+		GiftRepairPrompt = giftRepairPrompt,
+		GiftIncomePrompt = giftIncomePrompt,
+		GiftStaffPrompt = giftStaffPrompt,
 		GateRope = gateRope,
 		GatePrompt = gatePrompt,
 	}
@@ -2434,6 +2568,10 @@ end
 
 function ParkBuilder.ApplyDropRepairedAppearance(ride: Model)
 	applyDropAppearance(ride, true)
+end
+
+function ParkBuilder.ApplyGiftRepairedAppearance(stand: Model)
+	applyGiftAppearance(stand, true)
 end
 
 return ParkBuilder

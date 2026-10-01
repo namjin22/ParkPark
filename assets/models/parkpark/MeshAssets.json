@@ -38,7 +38,8 @@
     "ParkParkFlumeTrack",
     "ParkParkFlumeBoat",
     "ParkParkDropTower",
-    "ParkParkDropGondola"
+    "ParkParkDropGondola",
+    "ParkParkGiftShop"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",

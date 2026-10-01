@@ -50,6 +50,7 @@ rideService.Start(
 	parkBuilder.ApplyCoasterRepairedAppearance,
 	parkBuilder.ApplyFlumeRepairedAppearance,
 	parkBuilder.ApplyDropRepairedAppearance,
+	parkBuilder.ApplyGiftRepairedAppearance,
 	noticeService.Send
 )
 bumperCarService.Start(park)
@@ -102,6 +103,7 @@ local rideModels: { [string]: Model } = {
 	Coaster = park.CoasterRide,
 	Flume = park.FlumeRide,
 	Drop = park.DropRide,
+	Gift = park.GiftShop,
 }
 local watched: { Instance } = { park.ParkFolder }
 for _, model in rideModels do
