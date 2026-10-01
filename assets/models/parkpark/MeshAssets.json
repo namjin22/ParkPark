@@ -83,6 +83,10 @@
     "ParkParkFlumeTrack": "rbxassetid://88008700716340",
     "ParkParkDropGondola": "rbxassetid://133540812301881",
     "ParkParkDropTower": "rbxassetid://131508759598276",
-    "ParkParkGiftShop": "rbxassetid://124874903445733"
+    "ParkParkGiftShop": "rbxassetid://124874903445733",
+    "ParkParkDecorUmbrella": "rbxassetid://95788876684755",
+    "ParkParkDecorPond": "rbxassetid://94868419049187",
+    "ParkParkDecorPalm": "rbxassetid://90998843829849",
+    "ParkParkDecorSandcastle": "rbxassetid://81422113378248"
   }
 }
