@@ -529,7 +529,11 @@ function RideService.Start(
 		actionEvent.Parent = events
 	end
 	local lastAction: { [Player]: number } = {}
-	(actionEvent :: RemoteEvent).OnServerEvent:Connect(function(player: Player, key: unknown, action: unknown)
+	local actionRemote = actionEvent :: RemoteEvent
+	Players.PlayerRemoving:Connect(function(player: Player)
+		lastAction[player] = nil
+	end)
+	actionRemote.OnServerEvent:Connect(function(player: Player, key: unknown, action: unknown)
 		if type(key) ~= "string" or type(action) ~= "string" or not ACTIONS[action] then
 			return
 		end

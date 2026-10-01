@@ -668,10 +668,15 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			local seat = guest.seat
 			if seat == nil then
 				removeFromQueue(guest)
+				-- Out of patience: head home from this queue, not from wherever the last ride let off.
+				fromKey = chosen.key
+				fromPosition = guest.root.Position
 				break
 			end
 
 			rideOn(guest, chosen, seat)
+			-- rideOn freed the seat; forget it so the exit cleanup cannot free it again for someone else.
+			guest.seat = nil
 			guest.ridesTaken += 1
 			previousRide = chosen
 			fromKey = chosen.key

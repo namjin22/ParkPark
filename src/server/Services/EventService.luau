@@ -41,14 +41,22 @@ function EventService.Start(park: { ParkFolder: Folder }, notify: Notify)
 			end
 			local forced = folder:GetAttribute("ForceEvent") == true
 			folder:SetAttribute("ForceEvent", nil)
-			-- Only a park that is open and has a few rides running gets events.
-			local operating = 0
-			for _, child in folder:GetChildren() do
-				if child:IsA("Model") and child:GetAttribute("IsOperating") == true then
-					operating += 1
+			-- Only a park that is open and has a few rides running gets events; while it does not (closed, a
+			-- blackout), keep checking instead of burning the whole interval.
+			local function ready(): boolean
+				local operating = 0
+				for _, child in folder:GetChildren() do
+					if child:IsA("Model") and child:GetAttribute("IsOperating") == true then
+						operating += 1
+					end
 				end
+				return folder:GetAttribute("ParkOpen") == true and (forced or operating >= GameConfig.EventMinRides)
 			end
-			if folder:GetAttribute("ParkOpen") == true and (forced or operating >= GameConfig.EventMinRides) then
+			local patience = 0
+			while not ready() and patience < 300 do
+				patience += task.wait(5)
+			end
+			if ready() then
 				local event = EVENTS[random:NextInteger(1, #EVENTS)]
 				folder:SetAttribute("FareMultiplier", event.Fare)
 				folder:SetAttribute("CrowdMultiplier", event.Crowd)

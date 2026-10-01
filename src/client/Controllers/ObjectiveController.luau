@@ -114,6 +114,7 @@ function ObjectiveController.Start()
 			local model = park:FindFirstChild(config.ModelName)
 			if model and model:IsA("Model") and model:GetAttribute("IsRepaired") ~= true then
 				local consolePart = model:FindFirstChild(config.ConsoleName, true)
+					or model:FindFirstChild("Console", true)
 				return key, model, if consolePart and consolePart:IsA("BasePart") then consolePart else nil
 			end
 		end

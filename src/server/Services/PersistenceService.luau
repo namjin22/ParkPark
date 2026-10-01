@@ -276,6 +276,21 @@ local function loadProfile(player: Player): Profile
 		return profile
 	end
 
+	if player.Parent ~= Players then
+		-- They left while the load was retrying: hand the lock back so another server can load the save at once.
+		store.update(profile.key, function(old: any): any
+			local lock = if type(old) == "table" then old.Lock else nil
+			if type(lock) == "table" and lock.JobId == JOB_ID then
+				old.Lock = nil
+				return old
+			end
+			return nil
+		end)
+		profile.released = true
+		profile.status = "failed"
+		return profile
+	end
+
 	if data.Coins ~= nil then
 		profile.coins = asNumber(data.Coins, 0, MAX_COINS, GameConfig.StartingCoins)
 	end
@@ -383,6 +398,37 @@ local function markParkDirty()
 	end
 end
 
+-- The host is the player whose profile receives the park snapshot; pick the first player whose save loaded.
+local function pickHost(excluded: Player?)
+	local chosen: Player? = nil
+	for _, other in Players:GetPlayers() do
+		local otherProfile = profiles[other]
+		if other ~= excluded and otherProfile and otherProfile.status == "ok" then
+			chosen = other
+			break
+		end
+	end
+	hostPlayer = chosen
+	if chosen then
+		markDirty(chosen, true)
+	end
+end
+
+local function onPlayerRemoving(player: Player)
+	local profile = profiles[player]
+	if profile == nil then
+		return
+	end
+	if profile.status == "ok" then
+		saveProfile(profile, true)
+	end
+	profiles[player] = nil
+	if hostPlayer == player then
+		pickHost(player)
+	end
+end
+Players.PlayerRemoving:Connect(onPlayerRemoving)
+
 -- Starts autosaving. `collect` reads the park's current state; `watch` lists the instances whose attributes
 -- (ride models and the park folder) mean the park changed, so a save follows soon after.
 function PersistenceService.Start(collect: () -> SavedState, watch: { Instance })
@@ -399,6 +445,11 @@ function PersistenceService.Start(collect: () -> SavedState, watch: { Instance }
 		while true do
 			task.wait(TICK_SECONDS)
 			local now = os.clock()
+			local currentHost = hostPlayer
+			local hostProfile = if currentHost then profiles[currentHost] else nil
+			if hostProfile == nil or hostProfile.status == "failed" then
+				pickHost(currentHost)
+			end
 			for player, profile in profiles do
 				if profile.status == "ok" and not profile.released then
 					local coins = currentCoins(player)
@@ -410,25 +461,6 @@ function PersistenceService.Start(collect: () -> SavedState, watch: { Instance }
 					if (profile.dirty and now - profile.lastSave >= gap) or now - profile.lastSave >= REFRESH_GAP then
 						task.spawn(saveProfile, profile, false)
 					end
-				end
-			end
-		end
-	end)
-
-	Players.PlayerRemoving:Connect(function(player: Player)
-		local profile = profiles[player]
-		if profile == nil then
-			return
-		end
-		saveProfile(profile, true)
-		profiles[player] = nil
-		if hostPlayer == player then
-			hostPlayer = nil
-			for _, other in Players:GetPlayers() do
-				if other ~= player then
-					hostPlayer = other
-					markDirty(other, true)
-					break
 				end
 			end
 		end
