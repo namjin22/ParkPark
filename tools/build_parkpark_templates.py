@@ -75,6 +75,12 @@ GIFT_SCALE = config_number("GiftScale")
 TRAIN_SCALE = config_number("TrainScale")
 DUCK_SCALE = config_number("DuckScale")
 BOUNCE_SCALE = config_number("BounceScale")
+BUNNY_SCALE = config_number("BunnyScale")
+MINE_SCALE = config_number("MineScale")
+SKY_SCALE = config_number("SkyScale")
+MAZE_SCALE = config_number("MazeScale")
+PINE_SCALE = config_number("PineScale")
+ROCK_SCALE = config_number("RockScale")
 TRAIN_CARS = int(config_number("TrainCarCount"))
 FLUME_SCALE = config_number("FlumeScale")
 FLUME_CARS = int(config_number("FlumeCarCount"))
@@ -319,6 +325,10 @@ def main() -> None:
     build_train()
     build_duck()
     build_bounce()
+    build_bunny()
+    build_track_ride("Mine", "MineRide", "MineTrack", "MineCar", "MineCars", MINE_SCALE, 20, -36)
+    build_track_ride("Sky", "SkyRide", "SkyTrack", "SkyCar", "SkyCars", SKY_SCALE, 18, -30)
+    build_maze()
     build_flume()
     build_decor()
 
@@ -733,6 +743,85 @@ def build_bounce() -> None:
     )
 
 
+def build_bunny() -> None:
+    needed = ("ParkParkBunnyHub", "ParkParkBunny")
+    missing = missing_meshes(needed)
+    if missing:
+        print(f"skipped BunnyRide: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    # ExtraRideService turns `Hub` and bobs each `Seat<N>` bunny; each bunny is turned to face its direction of travel
+    # (the imported mesh already comes in half a turn round, hence the minus sign).
+    bunnies = []
+    for index in range(6):
+        angle = 2 * math.pi * index / 6
+        origin = (4.4 * math.cos(angle), 0.72, 4.4 * math.sin(angle))
+        bunnies.append(mesh_part(f"Seat{index + 1}", "ParkParkBunny", origin, -math.degrees(angle), False, CREAM, BUNNY_SCALE))
+    write(
+        "BunnyRide",
+        model(
+            "BunnyRide",
+            [
+                mesh_part("Hub", "ParkParkBunnyHub", (0, 0, 0), 0, False, MINT, BUNNY_SCALE),
+                cylinder_collider("HubCollider", (0, 0.5, 0), 1.0, 14.4, BUNNY_SCALE),
+                cylinder_collider("ColumnCollider", (0, 3.0, 0), 5.0, 1.8, BUNNY_SCALE),
+                *bunnies,
+                console("Console", -24, 20, 0),
+            ],
+        ),
+    )
+
+
+def build_track_ride(
+    key: str, template: str, track_obj: str, car_prefix: str, cars_name: str, scale: float, console_x: float, console_z: float
+) -> None:
+    needed = (f"ParkPark{track_obj}", f"ParkPark{car_prefix}")
+    missing = missing_meshes(needed)
+    if missing:
+        print(f"skipped {template}: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    # TrackService places the cars along the generated path when the game starts. Like the train, the ride is
+    # turned half a turn in the world, and the imported track mesh needs the matching yaw 180 here.
+    cars = [
+        mesh_part(f"{car_prefix}{index + 1}", f"ParkPark{car_prefix}", (0, 1.0, index * 4.9), 0, False, CORAL, scale)
+        for index in range(2)
+    ]
+    write(
+        template,
+        model(
+            template,
+            [
+                mesh_part(track_obj, f"ParkPark{track_obj}", (0, 0, 0), 180, False, CREAM, scale),
+                box_collider("Station", (0, 0.2, -8.2), (16.0, 0.4, 2.6), 0, scale),
+                model(cars_name, cars),
+                console("Console", console_x, console_z, 0),
+            ],
+        ),
+    )
+
+
+def build_maze() -> None:
+    if missing_meshes(("ParkParkHedgeMaze",)):
+        print("skipped MazeRide: import ParkParkHedgeMaze and record its mesh ID first")
+        return
+
+    # The hedge ring is turned 180 so the imported mesh matches the OBJ layout (its entrance gap faces +Z).
+    seats = [box_collider(f"Seat{index + 1}", (index, 1.0, 0), (1, 0.2, 1), 0, MAZE_SCALE) for index in range(6)]
+    write(
+        "MazeRide",
+        model(
+            "MazeRide",
+            [
+                mesh_part("Pad", "ParkParkHedgeMaze", (0, 0, 0), 180, False, MINT, MAZE_SCALE),
+                box_collider("Collider", (0, 1.6, 0), (30.4, 3.2, 30.4), 0, MAZE_SCALE),
+                *seats,
+                console("Console", -24, 35, 0),
+            ],
+        ),
+    )
+
+
 def marker(name: str, center: Vector, size: Vector, scale: float = 1.0) -> str:
     """An invisible, non-solid part that game code uses as a position (for example a window light)."""
     center = tuple(round(axis * scale, 4) for axis in center)
@@ -817,6 +906,8 @@ def build_decor() -> None:
         ("DecorBench", "ParkParkDecorBench", BENCH_SCALE, box_collider("Collider", (0, 0.9, 0.2), (2.8, 1.8, 1.1), 0, BENCH_SCALE)),
         ("DecorFountain", "ParkParkDecorFountain", FOUNTAIN_SCALE, cylinder_collider("Collider", (0, 0.6, 0), 1.2, 9.0, FOUNTAIN_SCALE)),
         ("DecorBalloons", "ParkParkDecorBalloons", BALLOON_SCALE, None),
+        ("DecorPine", "ParkParkDecorPine", PINE_SCALE, cylinder_collider("Collider", (0, 1.2, 0), 2.4, 0.8, PINE_SCALE)),
+        ("DecorRock", "ParkParkDecorRock", ROCK_SCALE, cylinder_collider("Collider", (0, 1.0, 0), 2.0, 4.4, ROCK_SCALE)),
         ("DecorPalm", "ParkParkDecorPalm", PALM_SCALE, cylinder_collider("Collider", (0, 1.8, 0), 3.6, 1.2, PALM_SCALE)),
         ("DecorUmbrella", "ParkParkDecorUmbrella", UMBRELLA_SCALE, cylinder_collider("Collider", (0, 2.3, 0), 4.6, 0.4, UMBRELLA_SCALE)),
         ("DecorPond", "ParkParkDecorPond", POND_SCALE, cylinder_collider("Collider", (0, 0.4, 0), 0.8, 12.6, POND_SCALE)),

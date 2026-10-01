@@ -48,7 +48,16 @@
     "ParkParkTrainCar",
     "ParkParkDuckHub",
     "ParkParkDuck",
-    "ParkParkBounceHouse"
+    "ParkParkBounceHouse",
+    "ParkParkBunnyHub",
+    "ParkParkBunny",
+    "ParkParkMineTrack",
+    "ParkParkMineCar",
+    "ParkParkSkyTrack",
+    "ParkParkSkyCar",
+    "ParkParkHedgeMaze",
+    "ParkParkDecorPine",
+    "ParkParkDecorRock"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",

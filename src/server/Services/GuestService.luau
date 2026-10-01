@@ -9,6 +9,7 @@ local ParkBuilder = require(script.Parent:WaitForChild("ParkBuilder"))
 local GameConfig = require(Config:WaitForChild("GameConfig"))
 local ParkLayout = require(Config:WaitForChild("ParkLayout"))
 local ExtraRideService = require(script.Parent:WaitForChild("ExtraRideService"))
+local ExtraRides = require(Config:WaitForChild("ExtraRides"))
 
 -- Once the park is open, guests walk in along the paths, pick a ride at random, and stand in that ride's
 -- line. The guest at the head of a line shows a prompt: a player walks up and lets them on, or the ride's
@@ -402,15 +403,31 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 	}
 	for key, extra in park.Extras do
 		local seats = extra.Seats
-		local offset = ExtraRideService.SeatOffset(key)
-		table.insert(
-			rides,
-			newRide(key, extra.Ride, function(seat: number)
+		local cars = extra.Cars
+		if extra.Kind == "Track" and cars then
+			-- Track rides seat four to a car and board only while docked, like the coaster.
+			local prefix = (ExtraRides[key] :: any).TrackPrefix :: string
+			local carPrefix = (ExtraRides[key] :: any).CarPrefix :: string
+			TRACK_RIDES[key] = true
+			table.insert(
+				rides,
+				newRide(key, extra.Ride, function(seat: number)
+					local car = cars:FindFirstChild(string.format("%s%d", carPrefix, (seat - 1) // 4 + 1))
+					return if car and car:IsA("BasePart") then car else nil
+				end, trackSeatOffset(prefix), (GameConfig :: any)[prefix .. "SeatCount"], false)
+			)
+		else
+			local offset = ExtraRideService.SeatOffset(key)
+			local rideInfo = newRide(key, extra.Ride, function(seat: number)
 				return seats[seat]
 			end, function()
 				return offset
 			end, #seats, false)
-		)
+			if extra.Kind == "Hidden" then
+				rideInfo.hidden = true
+			end
+			table.insert(rides, rideInfo)
+		end
 	end
 	for _, rideInfo in rides do
 		if rideInfo.key == "Haunted" then

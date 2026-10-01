@@ -142,6 +142,18 @@ local function grayboxDecor(kind: string): Model
 		water.CFrame = CFrame.new(0, 0.3, 0) * CFrame.Angles(0, 0, math.pi / 2)
 		water.Shape = Enum.PartType.Cylinder
 		water.CanCollide = true
+	elseif kind == "DecorPine" then
+		part("Trunk", Vector3.new(1.2, 5, 1.2), Vector3.new(0, 2.5, 0), wood, nil).CanCollide = true
+		part("Crown", Vector3.new(7, 12, 7), Vector3.new(0, 10, 0), green, Enum.PartType.Ball)
+	elseif kind == "DecorRock" then
+		local boulder = part(
+			"Boulder",
+			Vector3.new(7, 5, 6),
+			Vector3.new(0, 2.5, 0),
+			Color3.fromRGB(150, 142, 130),
+			Enum.PartType.Ball
+		)
+		boulder.CanCollide = true
 	elseif kind == "DecorSandcastle" then
 		part("Castle", Vector3.new(8, 6, 8), Vector3.new(0, 3, 0), Color3.fromRGB(235, 200, 120), nil).CanCollide = true
 	else
@@ -262,6 +274,8 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 	end
 	local kids = ParkLayout.ZoneBounds.Kids
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, kids.MinZ, kids.BoundaryZ })
+	local adventure = ParkLayout.ZoneBounds.Adventure
+	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, adventure.MinZ, adventure.BoundaryZ })
 	local function zoneBlocked(x: number, z: number, margin: number): boolean
 		if blockedByStructures(x, z, margin) then
 			return true
@@ -375,6 +389,42 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 		end
 	end
 	for index, z in { -510, -570, -630, -690 } do
+		local side = if index % 2 == 0 then 1 else -1
+		local position = Vector3.new(roadX + side * (roadHalf + 3), 0, z)
+		if not zoneBlocked(position.X, position.Z, -2) then
+			local _, yaw = CFrame.lookAt(position, position + Vector3.new(-side, 0, 0)):ToOrientation()
+			place("DecorBench", position, yaw, 2.5)
+		end
+	end
+
+	-- The adventure zone: pines, boulders, a few bushes, and lamps and benches along its road.
+	local adventureProps: { { kind: string, count: number, margin: number, radius: number } } = {
+		{ kind = "DecorPine", count = 70, margin = 7, radius = 4.5 },
+		{ kind = "DecorRock", count = 40, margin = 6, radius = 4 },
+		{ kind = "DecorBush", count = 30, margin = 4, radius = 2 },
+	}
+	for _, prop in adventureProps do
+		local made = 0
+		local tries = 0
+		while made < prop.count and tries < 3000 do
+			tries += 1
+			local x = random:NextNumber(-WORLD_X, WORLD_X)
+			local z = random:NextNumber(adventure.MinZ + 6, adventure.BoundaryZ - 8)
+			if not zoneBlocked(x, z, prop.margin) and clear(x, z, prop.radius) then
+				place(prop.kind, Vector3.new(x, 0, z), random:NextNumber(0, math.pi * 2), prop.radius)
+				made += 1
+			end
+		end
+	end
+	for z = adventure.BoundaryZ - 16, adventure.MinZ + 12, -24 do
+		for _, side in { -1, 1 } do
+			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
+			if not zoneBlocked(spot.X, spot.Z, -4) and clear(spot.X, spot.Z, 1.5) then
+				place("DecorLamp", spot, 0, 1.5)
+			end
+		end
+	end
+	for index, z in { -830, -890, -950, -1010 } do
 		local side = if index % 2 == 0 then 1 else -1
 		local position = Vector3.new(roadX + side * (roadHalf + 3), 0, z)
 		if not zoneBlocked(position.X, position.Z, -2) then

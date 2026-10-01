@@ -2280,6 +2280,317 @@ def make_bounce_house() -> Mesh:
     return mesh
 
 
+MINE_CONTROL_POINTS = [
+    # x, height, z: the mine train. A straight station on the south side, a lift round the east end to the crest,
+    # a plunge back across the middle, a low hill on the west and a bend home.
+    (-8.0, 0.6, -6.0),
+    (0.0, 0.6, -6.0),
+    (9.0, 0.6, -6.0),
+    (15.0, 2.5, -2.0),
+    (17.0, 7.0, 5.0),
+    (12.0, 11.0, 11.0),
+    (3.0, 6.0, 14.0),
+    (-6.0, 2.0, 12.0),
+    (-13.0, 4.5, 8.0),
+    (-17.0, 2.0, 1.0),
+    (-14.0, 0.8, -4.0),
+]
+MINE_SAMPLES = 140
+MINE_GAUGE = 0.8
+
+SKY_CONTROL_POINTS = [
+    # x, cable height, z: a long oval; the station straight is low and the cable climbs to the far end and back.
+    (-8.0, 2.4, -6.0),
+    (0.0, 2.2, -6.0),
+    (8.0, 2.6, -6.0),
+    (12.0, 5.0, 4.0),
+    (12.0, 8.5, 16.0),
+    (10.0, 9.5, 30.0),
+    (4.0, 9.5, 42.0),
+    (-4.0, 9.5, 42.0),
+    (-10.0, 9.5, 30.0),
+    (-12.0, 8.5, 16.0),
+    (-12.0, 5.0, 4.0),
+]
+SKY_SAMPLES = 150
+
+
+def mine_path() -> tuple[list[tuple[float, float, float]], dict[str, int]]:
+    return track_samples(MINE_CONTROL_POINTS, 1, 3, 5, MINE_SAMPLES)
+
+
+def sky_path() -> tuple[list[tuple[float, float, float]], dict[str, int]]:
+    return track_samples(SKY_CONTROL_POINTS, 1, 3, 4, SKY_SAMPLES)
+
+
+def station_shed(mesh: Mesh, roof_a: str, roof_b: str, post: str) -> None:
+    """A low platform with four posts and a striped roof on the south straight (shared by train-like rides)."""
+    add_box(mesh, (0, 0.2, -8.2), (16.0, 0.4, 2.6), "cream")
+    add_box(mesh, (0, 0.42, -8.2), (16.4, 0.08, 2.9), "gold")
+    for x in (-7.0, -2.3, 2.3, 7.0):
+        for z in (-9.3, -7.1):
+            add_cylinder_between(mesh, (x, 0.4, z), (x, 4.4, z), 0.14, 0.14, post, 6)
+    for index in range(8):
+        x0 = -8.4 + 16.8 * index / 8
+        x1 = -8.4 + 16.8 * (index + 1) / 8
+        add_slab(
+            mesh,
+            [
+                (x0, 4.3, -9.7),
+                (x1, 4.3, -9.7),
+                (x1, 4.42, -9.7),
+                (x0, 4.42, -9.7),
+                (x0, 4.9, -6.7),
+                (x1, 4.9, -6.7),
+                (x1, 5.02, -6.7),
+                (x0, 5.02, -6.7),
+            ],
+            roof_a if index % 2 == 0 else roof_b,
+        )
+
+
+def make_mine_track() -> Mesh:
+    """A timber mine-train track: dark rails on wooden ties, trestle supports with cross braces, a rock-lined
+    station shed; origin at the ground centre."""
+    mesh = Mesh("ParkParkMineTrack")
+    samples, marks = mine_path()
+    count = len(samples)
+    for index in range(count):
+        here, following = samples[index], samples[(index + 1) % count]
+        tangent = tuple(following[axis] - here[axis] for axis in range(3))
+        flat = math.hypot(tangent[0], tangent[2]) or 1.0
+        lateral = (tangent[2] / flat, 0.0, -tangent[0] / flat)
+        for side in (-1, 1):
+            start = tuple(here[axis] + lateral[axis] * MINE_GAUGE * side for axis in range(3))
+            end = tuple(following[axis] + lateral[axis] * MINE_GAUGE * side for axis in range(3))
+            add_cylinder_between(mesh, start, end, 0.12, 0.12, "ink", 5)
+        if index % 2 == 0:
+            add_cylinder_between(
+                mesh,
+                tuple(here[axis] - lateral[axis] * (MINE_GAUGE + 0.25) for axis in range(3)),
+                tuple(here[axis] + lateral[axis] * (MINE_GAUGE + 0.25) for axis in range(3)),
+                0.09,
+                0.09,
+                "wood",
+                4,
+            )
+        if marks["liftStart"] <= index <= marks["liftEnd"] and index % 3 == 0:
+            add_box(mesh, (here[0], here[1] + 0.1, here[2]), (0.4, 0.12, 0.16), "gold")
+        if index % 5 == 0 and here[1] > 1.6:
+            for side in (-1, 1):
+                foot = (here[0] + lateral[0] * 0.7 * side, 0.0, here[2] + lateral[2] * 0.7 * side)
+                top = (here[0] + lateral[0] * 0.5 * side, here[1] - 0.1, here[2] + lateral[2] * 0.5 * side)
+                add_cylinder_between(mesh, foot, top, 0.17, 0.13, "wood", 5)
+            if here[1] > 3.2:
+                brace_y = here[1] * 0.5
+                add_cylinder_between(
+                    mesh,
+                    (here[0] - lateral[0] * 0.65, brace_y, here[2] - lateral[2] * 0.65),
+                    (here[0] + lateral[0] * 0.65, brace_y + 0.9, here[2] + lateral[2] * 0.65),
+                    0.07,
+                    0.07,
+                    "wood",
+                    4,
+                )
+            add_box(mesh, (here[0], 0.12, here[2]), (1.4, 0.24, 1.4), "faded_cream")
+    station_shed(mesh, "wood", "gold", "wood")
+    # Rock piles by the station and a hanging lantern.
+    for x, z, size in ((-9.4, -11.0, 1.1), (9.6, -11.2, 0.9), (11.2, -9.6, 0.7)):
+        add_ellipsoid(mesh, (x, size * 0.6, z), (size, size * 0.75, size * 0.9), "faded_cream", slices=7, stacks=4)
+    add_cylinder_between(mesh, (0, 4.3, -8.2), (0, 3.7, -8.2), 0.04, 0.04, "ink", 4)
+    add_ellipsoid(mesh, (0, 3.5, -8.2), (0.22, 0.28, 0.22), "gold", slices=8, stacks=4)
+    return mesh
+
+
+def make_mine_car() -> Mesh:
+    """A wooden ore cart with iron bands and four seats (origin at rail level); symmetric front to back."""
+    mesh = Mesh("ParkParkMineCar")
+    add_box(mesh, (0, 0.3, 0), (2.0, 0.4, 3.6), "wood")
+    for x in (-0.85, 0.85):
+        for z in (-1.1, 1.1):
+            add_cylinder_between(mesh, (x - 0.1, 0.12, z), (x + 0.1, 0.12, z), 0.24, 0.24, "ink", 8)
+    for x in (-1.0, 1.0):
+        add_box(mesh, (x, 0.8, 0), (0.12, 0.6, 3.4), "wood")
+        add_box(mesh, (x, 1.12, 0), (0.18, 0.08, 3.5), "ink")
+    for z in (-1.75, 1.75):
+        add_box(mesh, (0, 0.8, z), (2.0, 0.6, 0.12), "wood")
+    for z in (-0.85, 0.85):
+        add_box(mesh, (0, 0.62, z), (1.7, 0.24, 0.8), "gold")
+    return mesh
+
+
+def make_sky_track() -> Mesh:
+    """The sky ride: a steel cable on tall pylons and a low boarding station; origin at the ground centre."""
+    mesh = Mesh("ParkParkSkyTrack")
+    samples, marks = sky_path()
+    count = len(samples)
+    for index in range(count):
+        here, following = samples[index], samples[(index + 1) % count]
+        add_cylinder_between(mesh, here, following, 0.07, 0.07, "ink", 5)
+    for control in SKY_CONTROL_POINTS[3:]:
+        x, y, z = control
+        add_cylinder_between(mesh, (x, 0.1, z), (x, y + 0.9, z), 0.28, 0.2, "cream", 8)
+        add_box(mesh, (x, 0.12, z), (1.2, 0.24, 1.2), "gold")
+        add_box(mesh, (x, y + 0.85, z), (1.4, 0.16, 0.5), "coral")
+        add_ellipsoid(mesh, (x, y + 1.05, z), (0.22, 0.22, 0.22), "gold", slices=6, stacks=4)
+    station_shed(mesh, "coral", "cream", "gold")
+    # A tall entrance mast with a star beside the station.
+    add_cylinder_between(mesh, (-9.5, 0.0, -9.0), (-9.5, 7.0, -9.0), 0.2, 0.14, "cream", 8)
+    add_star(mesh, 7.6, 0.55, "gold")
+    return mesh
+
+
+def make_sky_car() -> Mesh:
+    """A hanging open gondola: an arm up to the cable (origin at the cable), two benches, rails, a striped roof."""
+    mesh = Mesh("ParkParkSkyCar")
+    add_box(mesh, (0, -2.3, 0), (2.0, 0.2, 3.4), "wood")
+    for x in (-0.95, 0.95):
+        for z in (-1.6, 1.6):
+            add_cylinder_between(mesh, (x, -2.2, z), (x, -0.55, z), 0.07, 0.07, "gold", 5)
+        add_box(mesh, (x, -1.65, 0), (0.08, 0.08, 3.3), "gold")
+        add_box(mesh, (x, -1.2, 0), (0.08, 0.08, 3.3), "gold")
+    for z in (-0.85, 0.85):
+        add_box(mesh, (0, -2.0, z), (1.7, 0.24, 0.8), "mint")
+    add_box(mesh, (0, -0.45, 0), (2.3, 0.14, 3.6), "coral")
+    add_box(mesh, (0, -0.33, 0), (1.9, 0.1, 3.2), "cream")
+    add_cylinder_between(mesh, (0, -0.4, 0), (0, 0.0, 0), 0.1, 0.1, "ink", 6)
+    add_box(mesh, (0, 0.0, 0), (0.5, 0.18, 0.5), "ink")
+    return mesh
+
+
+def make_bunny_hub() -> Mesh:
+    """Rotating mini-carousel deck: a striped base, brass poles, a central column, and a scalloped canopy."""
+    mesh = Mesh("ParkParkBunnyHub")
+    add_vertical_cylinder(mesh, 6.8, 0.0, 0.5, "gold", 40)
+    add_vertical_cylinder(mesh, 6.5, 0.5, 0.72, "mint", 40)
+    add_torus(mesh, 6.6, 0.12, 0.74, "coral", segments=40, sides=6)
+    lathe(
+        mesh,
+        [(0.0, 0.7, "wood"), (0.9, 0.7, "wood"), (0.6, 1.2, "gold"), (0.5, 5.4, "cream"), (0.8, 5.5, "gold")],
+        24,
+    )
+    for index in range(6):
+        angle = TAU * index / 6
+        x, z = 4.4 * math.cos(angle), 4.4 * math.sin(angle)
+        add_cylinder_between(mesh, (x, 0.72, z), (x, 5.2, z), 0.11, 0.11, "gold", 8)
+    lathe(
+        mesh,
+        [
+            (6.6, 5.1, "coral"),
+            (6.8, 5.5, "cream"),
+            (6.4, 5.7, "coral"),
+            (3.4, 6.5, "cream"),
+            (1.0, 7.3, "coral"),
+            (0.0, 7.8, "gold"),
+        ],
+        36,
+    )
+    for index in range(18):
+        angle = TAU * index / 18
+        add_ellipsoid(
+            mesh,
+            (6.55 * math.cos(angle), 5.05, 6.55 * math.sin(angle)),
+            (0.34, 0.2, 0.34),
+            "gold" if index % 2 else "cream",
+            slices=6,
+            stacks=3,
+        )
+    add_star(mesh, 8.3, 0.5, "gold")
+    return mesh
+
+
+def make_bunny() -> Mesh:
+    """A little bunny to ride (base at y=0, facing +Z), with a coral saddle on its back at about y=1.6."""
+    mesh = Mesh("ParkParkBunny")
+    add_ellipsoid(mesh, (0, 1.05, -0.05), (0.7, 0.62, 1.0), "cream", slices=12, stacks=7)
+    add_ellipsoid(mesh, (0, 1.8, 0.95), (0.46, 0.46, 0.5), "cream", slices=10, stacks=6)
+    for side in (-1, 1):
+        add_ellipsoid(mesh, (side * 0.2, 2.65, 0.8), (0.13, 0.55, 0.1), "cream", slices=8, stacks=5)
+        add_ellipsoid(mesh, (side * 0.2, 2.62, 0.84), (0.07, 0.4, 0.05), "coral", slices=6, stacks=4)
+        add_ellipsoid(mesh, (side * 0.22, 1.92, 1.36), (0.07, 0.08, 0.05), "ink", slices=6, stacks=4)
+        add_ellipsoid(mesh, (side * 0.45, 0.4, 0.55), (0.16, 0.4, 0.2), "cream", slices=6, stacks=4)
+        add_ellipsoid(mesh, (side * 0.5, 0.35, -0.55), (0.2, 0.35, 0.45), "cream", slices=6, stacks=4)
+    add_ellipsoid(mesh, (0, 1.75, 1.42), (0.12, 0.09, 0.08), "coral", slices=6, stacks=4)
+    add_ellipsoid(mesh, (0, 1.1, -1.1), (0.28, 0.28, 0.28), "cream", slices=8, stacks=5)
+    add_box(mesh, (0, 1.62, -0.2), (0.9, 0.12, 0.9), "coral")
+    add_cylinder_between(mesh, (0, 0.0, 0.0), (0, 1.0, 0.0), 0.07, 0.07, "gold", 6)
+    return mesh
+
+
+def make_hedge_maze() -> Mesh:
+    """A hedge maze (origin at the ground centre, entrance gap on the +Z side): concentric hedge rings with
+    staggered gaps around a small gazebo with a pennant."""
+    mesh = Mesh("ParkParkHedgeMaze")
+    add_box(mesh, (0, 0.05, 0), (31.0, 0.1, 31.0), "faded_mint")
+
+    def hedge(x0: float, z0: float, x1: float, z1: float) -> None:
+        cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
+        width = abs(x1 - x0) + 1.2 if abs(x1 - x0) < 0.01 else abs(x1 - x0)
+        depth = abs(z1 - z0) + 1.2 if abs(z1 - z0) < 0.01 else abs(z1 - z0)
+        add_box(mesh, (cx, 1.6, cz), (width, 3.2, depth), "mint")
+        length = max(abs(x1 - x0), abs(z1 - z0))
+        steps = max(1, int(length / 1.4))
+        for step in range(steps):
+            t = (step + 0.5) / steps
+            x = x0 + (x1 - x0) * t
+            z = z0 + (z1 - z0) * t
+            add_ellipsoid(mesh, (x, 3.3, z), (0.75, 0.45, 0.75), "mint", slices=6, stacks=3)
+            if step % 4 == 2:
+                add_ellipsoid(mesh, (x, 3.8, z), (0.18, 0.18, 0.18), "coral" if step % 8 == 2 else "gold", slices=5, stacks=3)
+
+    # Ring half-extents and the side where each ring has its gap, staggered so the way winds inward.
+    for half, gap_side in ((15.0, "+z"), (11.0, "-z"), (7.0, "+x")):
+        gap = 2.2 if half > 14 else 1.8
+        sides = {
+            "+z": (-half, half, half, half),
+            "-z": (-half, -half, half, -half),
+            "+x": (half, -half, half, half),
+            "-x": (-half, -half, -half, half),
+        }
+        for side, (x0, z0, x1, z1) in sides.items():
+            if side == gap_side:
+                if side in ("+z", "-z"):
+                    hedge(x0, z0, -gap, z1)
+                    hedge(gap, z0, x1, z1)
+                else:
+                    hedge(x0, z0, x1, -gap)
+                    hedge(x0, gap, x1, z1)
+            else:
+                hedge(x0, z0, x1, z1)
+    # Central gazebo.
+    add_vertical_cylinder(mesh, 2.0, 0.1, 0.6, "cream", 16)
+    for angle in range(6):
+        a = TAU * angle / 6
+        add_cylinder_between(
+            mesh, (1.7 * math.cos(a), 0.6, 1.7 * math.sin(a)), (1.7 * math.cos(a), 3.6, 1.7 * math.sin(a)), 0.1, 0.1, "gold", 6
+        )
+    lathe(mesh, [(2.4, 3.6, "coral"), (1.6, 4.2, "cream"), (0.0, 5.0, "coral")], 16)
+    add_cylinder_between(mesh, (0, 5.0, 0), (0, 6.6, 0), 0.05, 0.04, "wood", 4)
+    add_box(mesh, (0.45, 6.3, 0), (0.9, 0.5, 0.06), "gold")
+    return mesh
+
+
+def make_decor_pine() -> Mesh:
+    """A tiered pine tree for the adventure zone (origin at the base of the trunk)."""
+    mesh = Mesh("ParkParkDecorPine")
+    add_vertical_cylinder(mesh, 0.38, 0.0, 1.8, "wood", 8)
+    for index, (radius, base, top) in enumerate(((2.3, 1.2, 3.8), (1.8, 2.8, 5.2), (1.3, 4.2, 6.5), (0.8, 5.5, 7.6))):
+        material = "mint" if index % 2 == 0 else "faded_mint"
+        lathe(mesh, [(radius, base, material), (radius * 0.55, (base + top) / 2, "mint"), (0.0, top, "mint")], 10)
+    add_ellipsoid(mesh, (0.6, 2.3, 0.4), (0.14, 0.14, 0.14), "coral", slices=5, stacks=3)
+    return mesh
+
+
+def make_decor_rock() -> Mesh:
+    """A cluster of three boulders (origin at the ground centre)."""
+    mesh = Mesh("ParkParkDecorRock")
+    add_ellipsoid(mesh, (0, 1.0, 0), (1.9, 1.3, 1.6), "faded_cream", slices=9, stacks=5)
+    add_ellipsoid(mesh, (1.9, 0.7, 0.6), (1.2, 0.9, 1.1), "cream", slices=8, stacks=4)
+    add_ellipsoid(mesh, (-1.5, 0.55, 1.2), (0.9, 0.7, 0.8), "faded_cream", slices=8, stacks=4)
+    add_ellipsoid(mesh, (0.1, 1.9, -0.2), (0.7, 0.4, 0.6), "mint", slices=6, stacks=3)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -2384,6 +2695,15 @@ def main() -> None:
         make_train_car(),
         make_duck_hub(),
         make_duck(),
+        make_mine_track(),
+        make_mine_car(),
+        make_sky_track(),
+        make_sky_car(),
+        make_bunny_hub(),
+        make_bunny(),
+        make_hedge_maze(),
+        make_decor_pine(),
+        make_decor_rock(),
         make_bounce_house(),
         make_decor_tree(),
         make_decor_bush(),
@@ -2403,6 +2723,10 @@ def main() -> None:
     write_track_path("FlumePath.luau", "log flume", flume_samples, flume_marks)
     train_samples, train_marks = train_path()
     write_track_path("TrainPath.luau", "mini train", train_samples, train_marks)
+    mine_samples, mine_marks = mine_path()
+    write_track_path("MinePath.luau", "mine train", mine_samples, mine_marks)
+    sky_samples, sky_marks = sky_path()
+    write_track_path("SkyPath.luau", "sky ride", sky_samples, sky_marks)
     for mesh in meshes:
         path = OUTPUT / f"{mesh.name}.obj"
         vertices, triangles, minimum, maximum = mesh.write(path)

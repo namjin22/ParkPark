@@ -15,6 +15,9 @@ export type ExtraRide = {
 	Console: BasePart,
 	Seats: { BasePart },
 	Hub: BasePart?,
+	-- Track rides: the model holding the moving cars.
+	Cars: Model?,
+	Kind: string,
 }
 
 local PARK_FOLDER_NAME = "ParkParkWorld"

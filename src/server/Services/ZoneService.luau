@@ -26,6 +26,7 @@ local FENCE_HALF = 264
 local GROUND_MATERIALS: { [string]: Enum.Material } = {
 	Sand = Enum.Material.Sand,
 	Grass = Enum.Material.Grass,
+	Ground = Enum.Material.Ground,
 }
 local SIGN_SIZE = Vector3.new(18, 7, 0.6)
 local SIGN_CANVAS = Vector2.new(720, 280)

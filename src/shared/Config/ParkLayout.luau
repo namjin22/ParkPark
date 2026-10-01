@@ -31,11 +31,22 @@ ParkLayout.ZoneBoundaryZ = -168
 ParkLayout.ZoneGroundMinZ = -480
 ParkLayout.ZoneRoadX = 52
 ParkLayout.ZoneRoadHalfWidth = 8
-ParkLayout.ZoneBranchZ =
-	{ Flume = -205, Drop = -215, Gift = -352, Train = -525, Duck = -575, Bounce = -655 } :: { [string]: number }
+ParkLayout.ZoneBranchZ = {
+	Flume = -205,
+	Drop = -215,
+	Gift = -352,
+	Train = -525,
+	Duck = -575,
+	Bounce = -655,
+	Bunny = -680,
+	Mine = -868,
+	Sky = -840,
+	Maze = -990,
+} :: { [string]: number }
 ParkLayout.ZoneBounds = {
 	Water = { BoundaryZ = -168, MinZ = -480 },
 	Kids = { BoundaryZ = -480, MinZ = -800 },
+	Adventure = { BoundaryZ = -800, MinZ = -1120 },
 } :: { [string]: { BoundaryZ: number, MinZ: number } }
 ParkLayout.GeneratorPosition = Vector3.new(24, 0, 52)
 -- The cleaning cart where janitors are hired, on the other side of the same path.
@@ -154,6 +165,32 @@ ParkLayout.Rides = {
 		Pivot = Vector3.new(-110, 0, -720),
 		PlatformRadius = 30,
 		QueueHead = Vector3.new(-110, 0, -683),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Bunny = {
+		Pivot = Vector3.new(125, 0, -748),
+		PlatformRadius = 24,
+		QueueHead = Vector3.new(125, 0, -712),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	-- The adventure zone: the mine train west of its road, the sky ride east (its cable runs far north of the
+	-- station, hence the large radius), and the maze beyond the mine train.
+	Mine = {
+		Pivot = Vector3.new(-45, 0, -935),
+		PlatformRadius = 66,
+		QueueHead = Vector3.new(-45, 0, -902),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Sky = {
+		Pivot = Vector3.new(150, 0, -900),
+		PlatformRadius = 100,
+		QueueHead = Vector3.new(150, 0, -874),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Maze = {
+		Pivot = Vector3.new(-45, 0, -1060),
+		PlatformRadius = 42,
+		QueueHead = Vector3.new(-45, 0, -1023),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Ferris = {
