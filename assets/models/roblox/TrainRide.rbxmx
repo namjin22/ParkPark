@@ -5,7 +5,7 @@
 </Properties>
 <Item class="MeshPart" referent="RBX178"><Properties>
 <string name="Name">TrainTrack</string>
-<Content name="MeshId"><url>rbxassetid://136507456559614</url></Content>
+<Content name="MeshId"><url>rbxassetid://127700051931183</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
 <Vector3 name="InitialSize"><X>32.0763</X><Y>5.25</Y><Z>20.5821</Z></Vector3>
 <Vector3 name="size"><X>89.8136</X><Y>14.7</Y><Z>57.6299</Z></Vector3>

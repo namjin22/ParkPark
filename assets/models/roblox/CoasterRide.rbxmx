@@ -5,7 +5,7 @@
 </Properties>
 <Item class="MeshPart" referent="RBX149"><Properties>
 <string name="Name">CoasterTrack</string>
-<Content name="MeshId"><url>rbxassetid://137439725574920</url></Content>
+<Content name="MeshId"><url>rbxassetid://76167674230612</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
 <Vector3 name="InitialSize"><X>38.4535</X><Y>15.7088</Y><Z>20.4943</Z></Vector3>
 <Vector3 name="size"><X>115.3605</X><Y>47.1264</Y><Z>61.4829</Z></Vector3>

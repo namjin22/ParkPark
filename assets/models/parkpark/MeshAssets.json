@@ -65,7 +65,13 @@
     "ParkParkSwan",
     "ParkParkBallPit",
     "ParkParkRocketHub",
-    "ParkParkRocket"
+    "ParkParkRocket",
+    "ParkParkSkyCarV2",
+    "ParkParkSwanV2",
+    "ParkParkSkyTrackV2",
+    "ParkParkHauntedHouseV2",
+    "ParkParkTrainTrackV2",
+    "ParkParkCoasterTrackV2"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",
@@ -131,6 +137,12 @@
     "ParkParkSwanHub": "rbxassetid://130868588342340",
     "ParkParkSwan": "rbxassetid://133170596753478",
     "ParkParkRocket": "rbxassetid://100405117296257",
-    "ParkParkRocketHub": "rbxassetid://137189364124416"
+    "ParkParkRocketHub": "rbxassetid://137189364124416",
+    "ParkParkSkyCarV2": "rbxassetid://93460450084959",
+    "ParkParkSwanV2": "rbxassetid://135861488814026",
+    "ParkParkSkyTrackV2": "rbxassetid://99243672887412",
+    "ParkParkHauntedHouseV2": "rbxassetid://138520009385343",
+    "ParkParkTrainTrackV2": "rbxassetid://127700051931183",
+    "ParkParkCoasterTrackV2": "rbxassetid://76167674230612"
   }
 }

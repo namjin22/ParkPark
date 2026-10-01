@@ -5,7 +5,7 @@
 </Properties>
 <Item class="MeshPart" referent="RBX224"><Properties>
 <string name="Name">SkyTrack</string>
-<Content name="MeshId"><url>rbxassetid://78327795355337</url></Content>
+<Content name="MeshId"><url>rbxassetid://99243672887412</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
 <Vector3 name="InitialSize"><X>25.4</X><Y>10.77</Y><Z>53.2467</Z></Vector3>
 <Vector3 name="size"><X>55.88</X><Y>23.694</Y><Z>117.1427</Z></Vector3>
@@ -34,11 +34,11 @@
 </Properties>
 <Item class="MeshPart" referent="RBX222"><Properties>
 <string name="Name">SkyCar1</string>
-<Content name="MeshId"><url>rbxassetid://100436976467949</url></Content>
+<Content name="MeshId"><url>rbxassetid://93460450084959</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
-<Vector3 name="InitialSize"><X>2.3</X><Y>2.49</Y><Z>3.6</Z></Vector3>
-<Vector3 name="size"><X>5.06</X><Y>5.478</Y><Z>7.92</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>0.0</X><Y>-0.341</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<Vector3 name="InitialSize"><X>2.3</X><Y>2.99</Y><Z>3.6</Z></Vector3>
+<Vector3 name="size"><X>5.06</X><Y>6.578</Y><Z>7.92</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>-0.891</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">false</bool>
 <bool name="CanTouch">false</bool>
@@ -49,11 +49,11 @@
 <Color3uint8 name="Color3uint8">4294967295</Color3uint8>
 </Properties></Item><Item class="MeshPart" referent="RBX223"><Properties>
 <string name="Name">SkyCar2</string>
-<Content name="MeshId"><url>rbxassetid://100436976467949</url></Content>
+<Content name="MeshId"><url>rbxassetid://93460450084959</url></Content>
 <Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
-<Vector3 name="InitialSize"><X>2.3</X><Y>2.49</Y><Z>3.6</Z></Vector3>
-<Vector3 name="size"><X>5.06</X><Y>5.478</Y><Z>7.92</Z></Vector3>
-<CoordinateFrame name="CFrame"><X>0.0</X><Y>-0.341</Y><Z>10.78</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<Vector3 name="InitialSize"><X>2.3</X><Y>2.99</Y><Z>3.6</Z></Vector3>
+<Vector3 name="size"><X>5.06</X><Y>6.578</Y><Z>7.92</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>-0.891</Y><Z>10.78</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">false</bool>
 <bool name="CanTouch">false</bool>
