@@ -2095,6 +2095,105 @@ def make_decor_sandcastle() -> Mesh:
     return mesh
 
 
+TRAIN_CONTROL_POINTS = [
+    # x, height, z: a small loop for the kids' train: station straight on the south side, a gentle rise round the
+    # east end, a low rolling run along the back, and a bend home on the west.
+    (-8.0, 0.5, -6.0),
+    (0.0, 0.5, -6.0),
+    (8.0, 0.5, -6.0),
+    (13.0, 0.9, -3.0),
+    (14.5, 2.2, 3.0),
+    (10.0, 2.5, 8.0),
+    (2.0, 1.6, 9.5),
+    (-8.0, 0.7, 8.5),
+    (-14.0, 0.5, 3.0),
+    (-14.0, 0.5, -2.5),
+]
+TRAIN_SAMPLES = 100
+TRAIN_GAUGE = 0.8
+
+
+def train_path() -> tuple[list[tuple[float, float, float]], dict[str, int]]:
+    return track_samples(TRAIN_CONTROL_POINTS, 1, 3, 5, TRAIN_SAMPLES)
+
+
+def make_train_track() -> Mesh:
+    """Rails on a gravel bed with wooden ties, small flower beds along the way, and a striped station."""
+    mesh = Mesh("ParkParkTrainTrack")
+    samples, marks = train_path()
+    count = len(samples)
+    w = TRAIN_GAUGE
+    for index in range(count):
+        here, following = samples[index], samples[(index + 1) % count]
+        tangent = tuple(following[axis] - here[axis] for axis in range(3))
+        flat = math.hypot(tangent[0], tangent[2]) or 1.0
+        lateral = (tangent[2] / flat, 0.0, -tangent[0] / flat)
+        channel_segment(mesh, here, following, lateral, -w - 0.55, w + 0.55, -0.35, -0.02, "faded_cream")
+        for side in (-1, 1):
+            start = tuple(here[axis] + lateral[axis] * w * side for axis in range(3))
+            end = tuple(following[axis] + lateral[axis] * w * side for axis in range(3))
+            add_cylinder_between(mesh, start, end, 0.1, 0.1, "coral", 5)
+        if index % 2 == 0:
+            add_cylinder_between(
+                mesh,
+                tuple(here[axis] - lateral[axis] * (w + 0.2) for axis in range(3)),
+                tuple(here[axis] + lateral[axis] * (w + 0.2) for axis in range(3)),
+                0.07,
+                0.07,
+                "wood",
+                4,
+            )
+    # Little flower beds on the inside of the loop.
+    for x, z, material in ((-3.0, 2.5, "coral"), (0.0, 3.5, "gold"), (3.0, 2.0, "coral"), (6.0, 4.0, "gold")):
+        add_ellipsoid(mesh, (x, 0.2, z), (1.0, 0.35, 0.8), "mint", slices=8, stacks=4)
+        for dx, dz in ((-0.4, 0.0), (0.3, 0.2), (0.0, -0.3)):
+            add_ellipsoid(mesh, (x + dx, 0.55, z + dz), (0.16, 0.16, 0.16), material, slices=6, stacks=3)
+    # Station: a low platform, four posts, and a striped roof.
+    add_box(mesh, (0, 0.2, -8.2), (16.0, 0.4, 2.6), "cream")
+    add_box(mesh, (0, 0.42, -8.2), (16.4, 0.08, 2.9), "gold")
+    for x in (-7.0, -2.3, 2.3, 7.0):
+        for z in (-9.3, -7.1):
+            add_cylinder_between(mesh, (x, 0.4, z), (x, 3.4, z), 0.14, 0.14, "gold", 6)
+    for index in range(8):
+        x0 = -8.4 + 16.8 * index / 8
+        x1 = -8.4 + 16.8 * (index + 1) / 8
+        add_slab(
+            mesh,
+            [
+                (x0, 3.3, -9.7),
+                (x1, 3.3, -9.7),
+                (x1, 3.42, -9.7),
+                (x0, 3.42, -9.7),
+                (x0, 3.9, -6.7),
+                (x1, 3.9, -6.7),
+                (x1, 4.02, -6.7),
+                (x0, 4.02, -6.7),
+            ],
+            "coral" if index % 2 == 0 else "cream",
+        )
+    add_star(mesh, 4.7, 0.4, "gold")
+    return mesh
+
+
+def make_train_car() -> Mesh:
+    """A small open wagon with a steam funnel between its two benches (origin at rail level); symmetric front to back."""
+    mesh = Mesh("ParkParkTrainCar")
+    add_box(mesh, (0, 0.3, 0), (2.0, 0.4, 3.6), "coral")
+    for x in (-0.85, 0.85):
+        for z in (-1.1, 1.1):
+            add_cylinder_between(mesh, (x - 0.1, 0.12, z), (x + 0.1, 0.12, z), 0.24, 0.24, "ink", 8)
+    for sign in (-1, 1):
+        add_ellipsoid(mesh, (0, 0.35, sign * 1.85), (0.9, 0.3, 0.45), "gold", slices=8, stacks=4)
+    for x in (-1.0, 1.0):
+        add_box(mesh, (x, 0.8, 0), (0.12, 0.6, 3.4), "coral")
+        add_box(mesh, (x, 1.12, 0), (0.18, 0.08, 3.5), "gold")
+    for z in (-0.85, 0.85):
+        add_box(mesh, (0, 0.62, z), (1.7, 0.24, 0.8), "mint")
+    add_cylinder_between(mesh, (0, 0.5, 0), (0, 1.5, 0), 0.2, 0.26, "gold", 8)
+    add_ellipsoid(mesh, (0, 1.55, 0), (0.34, 0.14, 0.34), "ink", slices=8, stacks=3)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -2195,6 +2294,8 @@ def main() -> None:
         make_decor_umbrella(),
         make_decor_pond(),
         make_decor_sandcastle(),
+        make_train_track(),
+        make_train_car(),
         make_decor_tree(),
         make_decor_bush(),
         make_decor_lamp(),
@@ -2211,6 +2312,8 @@ def main() -> None:
     write_coaster_path()
     flume_samples, flume_marks = flume_path()
     write_track_path("FlumePath.luau", "log flume", flume_samples, flume_marks)
+    train_samples, train_marks = train_path()
+    write_track_path("TrainPath.luau", "mini train", train_samples, train_marks)
     for mesh in meshes:
         path = OUTPUT / f"{mesh.name}.obj"
         vertices, triangles, minimum, maximum = mesh.write(path)

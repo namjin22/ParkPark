@@ -166,7 +166,7 @@ function ObjectiveController.Start()
 						GameConfig.ZoneCosts[config.Zone],
 						string.format("게이트에서 E · %d %s", GameConfig.ZoneCosts[config.Zone], currency)
 					),
-					target = park:FindFirstChild("ZoneGate"),
+					target = park:FindFirstChild("ZoneGate_" .. config.Zone),
 				}
 			end
 			local unlocked = model:GetAttribute("IsUnlocked") == true

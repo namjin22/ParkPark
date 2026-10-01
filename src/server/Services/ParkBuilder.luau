@@ -8,6 +8,7 @@ local GameConfig = require(Config:WaitForChild("GameConfig"))
 local ParkLayout = require(Config:WaitForChild("ParkLayout"))
 local CoasterPath = require(Config:WaitForChild("CoasterPath"))
 local FlumePath = require(Config:WaitForChild("FlumePath"))
+local TrainPath = require(Config:WaitForChild("TrainPath"))
 
 local PARK_FOLDER_NAME = "ParkParkWorld"
 local ENTRANCE_NAME = "RuinedEntrance"
@@ -21,6 +22,7 @@ local PIRATE_NAME = "PirateRide"
 local HAUNTED_NAME = "HauntedHouse"
 local COASTER_NAME = "CoasterRide"
 local FLUME_NAME = "FlumeRide"
+local TRAIN_NAME = "TrainRide"
 local DROP_NAME = "DropRide"
 local GIFT_NAME = "GiftShop"
 local ASSET_FOLDER_SYNC_TIMEOUT = 5
@@ -45,6 +47,7 @@ local GRAYBOX_GIFT_PIVOT = CFrame.new(ParkLayout.Rides.Gift.Pivot) * CFrame.Angl
 local AUTHORED_GIFT_PIVOT = CFrame.new(ParkLayout.Rides.Gift.Pivot) * CFrame.Angles(0, math.pi, 0)
 local DROP_PIVOT = CFrame.new(ParkLayout.Rides.Drop.Pivot)
 local FLUME_PIVOT = CFrame.new(ParkLayout.Rides.Flume.Pivot) * CFrame.Angles(0, math.pi, 0)
+local TRAIN_PIVOT = CFrame.new(ParkLayout.Rides.Train.Pivot) * CFrame.Angles(0, math.pi, 0)
 local HAUNTED_PIVOT = CFrame.new(ParkLayout.Rides.Haunted.Pivot)
 local PIRATE_PIVOT = CFrame.new(ParkLayout.Rides.Pirate.Pivot)
 local SWING_PIVOT = CFrame.new(ParkLayout.Rides.Swing.Pivot)
@@ -72,6 +75,7 @@ type AssetManifest = {
 		Flume: string?,
 		Drop: string?,
 		Gift: string?,
+		Train: string?,
 		Litter: string?,
 	},
 	EntranceSign: string,
@@ -102,6 +106,7 @@ local assetManifest: AssetManifest = {
 		Flume = FLUME_NAME,
 		Drop = DROP_NAME,
 		Gift = GIFT_NAME,
+		Train = TRAIN_NAME,
 		Litter = "Litter",
 	},
 	EntranceSign = "SignPanel",
@@ -154,6 +159,7 @@ local function getAssetFolder(): Folder?
 				and (candidate.Models.Flume == nil or type(candidate.Models.Flume) == "string")
 				and (candidate.Models.Drop == nil or type(candidate.Models.Drop) == "string")
 				and (candidate.Models.Gift == nil or type(candidate.Models.Gift) == "string")
+				and (candidate.Models.Train == nil or type(candidate.Models.Train) == "string")
 				and (candidate.Models.Litter == nil or type(candidate.Models.Litter) == "string")
 				and type(candidate.EntranceSign) == "string"
 				and type(candidate.CarouselStates) == "table"
@@ -255,6 +261,9 @@ export type References = {
 	GiftRepairPrompt: ProximityPrompt,
 	GiftIncomePrompt: ProximityPrompt,
 	GiftStaffPrompt: ProximityPrompt,
+	TrainRide: Model,
+	TrainCars: Model,
+	TrainConsole: BasePart,
 	GateRope: Model,
 	GatePrompt: ProximityPrompt,
 }
@@ -681,6 +690,8 @@ local function findAuthoredTemplate(name: string): Model?
 		assetName = assetManifest.Models.Drop
 	elseif name == GIFT_NAME then
 		assetName = assetManifest.Models.Gift
+	elseif name == TRAIN_NAME then
+		assetName = assetManifest.Models.Train
 	elseif name == DEBRIS_NAME then
 		assetName = assetManifest.Models.Debris
 	end
@@ -955,6 +966,24 @@ local function applyFlumeAppearance(ride: Model, repaired: boolean)
 		applyPalette(ride, repaired)
 	end
 	setRestoredGlow(ride:FindFirstChild("Station", true) or ride:FindFirstChild("FlumeTrack", true), repaired, 60)
+end
+
+local function applyTrainAppearance(ride: Model, repaired: boolean)
+	if ride:GetAttribute("IsGraybox") == true then
+		for _, descendant in ride:GetDescendants() do
+			if descendant:IsA("BasePart") and descendant.Name ~= "ParkPivot" then
+				descendant.Material = Enum.Material.SmoothPlastic
+				if descendant.Name == "TrackSegment" or descendant.Name == "Station" then
+					descendant.Color = if repaired then Color3.fromRGB(235, 122, 108) else Color3.fromRGB(112, 104, 94)
+				elseif string.match(descendant.Name, "^TrainCar%d+$") then
+					descendant.Color = if repaired then Color3.fromRGB(96, 178, 146) else Color3.fromRGB(126, 113, 98)
+				end
+			end
+		end
+	else
+		applyPalette(ride, repaired)
+	end
+	setRestoredGlow(ride:FindFirstChild("Station", true) or ride:FindFirstChild("TrainTrack", true), repaired, 60)
 end
 
 local function applyDropAppearance(ride: Model, repaired: boolean)
@@ -1736,6 +1765,67 @@ local function buildGrayboxFlume(parkFolder: Folder): Model
 	return ride
 end
 
+-- Graybox mini train: track segments along the generated centre line, a station slab, and two boxes for the wagons.
+local function buildGrayboxTrain(parkFolder: Folder): Model
+	local ride = Instance.new("Model")
+	ride.Name = TRAIN_NAME
+	ride:SetAttribute("IsGraybox", true)
+	ride.Parent = parkFolder
+
+	local pivot = createPart("ParkPivot", Vector3.new(0.1, 0.1, 0.1), Vector3.zero, Color3.new(1, 1, 1), ride)
+	pivot.Transparency = 1
+	pivot.CanCollide = false
+	pivot.CanTouch = false
+	pivot.CanQuery = false
+	pivot.CastShadow = false
+	ride.PrimaryPart = pivot
+
+	local scale = GameConfig.TrainScale
+	local grey = Color3.fromRGB(112, 104, 94)
+	local points = TrainPath.Points
+	for index = 1, #points, 2 do
+		local from = points[index] * scale
+		local to = points[index % #points + 1 + 1 > #points and 1 or index + 2] * scale
+		local length = (to - from).Magnitude
+		if length > 0.1 then
+			local segment = createPart(
+				"TrackSegment",
+				Vector3.new(1.6 * scale, 0.5 * scale, length + 0.3),
+				(from + to) / 2,
+				grey,
+				ride
+			)
+			segment.CFrame = CFrame.lookAt((from + to) / 2, to)
+			segment.CanCollide = false
+		end
+	end
+	createPart("Station", Vector3.new(20, 0.7, 4.4) * scale, Vector3.new(0, 0.35 * scale, -8 * scale), grey, ride)
+
+	local cars = Instance.new("Model")
+	cars.Name = "TrainCars"
+	cars.Parent = ride
+	for index = 1, GameConfig.TrainCarCount do
+		local car = createPart(
+			string.format("TrainCar%d", index),
+			Vector3.new(2.2, 1.59, 3.96) * scale,
+			points[TrainPath.StationIndex] * scale,
+			grey,
+			cars,
+			Enum.Material.SmoothPlastic
+		)
+		car.CanCollide = false
+		car.CanTouch = false
+		car.CanQuery = false
+	end
+
+	-- Beside the station, off the line that forms in front of it.
+	local console =
+		createPart("TrainConsole", Vector3.new(2, 3, 2), Vector3.new(18, 1.5, -33), Color3.fromRGB(91, 87, 79), ride)
+	console.Material = Enum.Material.Slate
+	ride:PivotTo(TRAIN_PIVOT)
+	return ride
+end
+
 -- Graybox drop tower in the template's local frame: a round base, a square tower, and a flat gondola block
 -- that DropService raises.
 local function buildGrayboxDrop(parkFolder: Folder): Model
@@ -1975,6 +2065,8 @@ local function getOrCreateModel(parent: Instance, name: string, build: (Folder) 
 			model:PivotTo(DROP_PIVOT)
 		elseif name == GIFT_NAME then
 			model:PivotTo(AUTHORED_GIFT_PIVOT)
+		elseif name == TRAIN_NAME then
+			model:PivotTo(TRAIN_PIVOT)
 		end
 		return model
 	end
@@ -2359,6 +2451,34 @@ function ParkBuilder.Build(): References
 	end
 	applyFlumeAppearance(flumeRide, flumeRide:GetAttribute("IsRepaired") == true)
 
+	local trainRide = getOrCreateModel(parkFolder, TRAIN_NAME, buildGrayboxTrain)
+	if trainRide:GetAttribute("IsGraybox") == nil then
+		trainRide:SetAttribute("IsGraybox", true)
+	end
+	for _, attribute in { "IsUnlocked", "IsRepaired", "IsOperating" } do
+		if trainRide:GetAttribute(attribute) == nil then
+			trainRide:SetAttribute(attribute, false)
+		end
+	end
+	local trainCarsInstance = trainRide:FindFirstChild("TrainCars", true)
+	if trainCarsInstance == nil or not trainCarsInstance:IsA("Model") then
+		error("[ParkPark] TrainRide.TrainCars must be a Model")
+	end
+	-- TrackService moves the cars every frame, so they stay anchored and non-solid.
+	for _, descendant in trainCarsInstance:GetDescendants() do
+		if descendant:IsA("BasePart") then
+			descendant.Anchored = true
+			descendant.CanCollide = false
+			descendant.CanTouch = false
+			descendant.CanQuery = false
+		end
+	end
+	local trainConsoleInstance = trainRide:FindFirstChild("TrainConsole", true)
+	if trainConsoleInstance == nil or not trainConsoleInstance:IsA("BasePart") then
+		error("[ParkPark] TrainRide.TrainConsole must be a BasePart")
+	end
+	applyTrainAppearance(trainRide, trainRide:GetAttribute("IsRepaired") == true)
+
 	local dropRide = getOrCreateModel(parkFolder, DROP_NAME, buildGrayboxDrop)
 	if dropRide:GetAttribute("IsGraybox") == nil then
 		dropRide:SetAttribute("IsGraybox", true)
@@ -2469,6 +2589,9 @@ function ParkBuilder.Build(): References
 		FlumeRide = flumeRide,
 		FlumeCars = flumeCarsInstance,
 		FlumeConsole = flumeConsoleInstance,
+		TrainRide = trainRide,
+		TrainCars = trainCarsInstance,
+		TrainConsole = trainConsoleInstance,
 		DropRide = dropRide,
 		DropGondola = dropGondolaInstance,
 		DropConsole = dropConsoleInstance,
@@ -2564,6 +2687,10 @@ end
 
 function ParkBuilder.ApplyFlumeRepairedAppearance(ride: Model)
 	applyFlumeAppearance(ride, true)
+end
+
+function ParkBuilder.ApplyTrainRepairedAppearance(ride: Model)
+	applyTrainAppearance(ride, true)
 end
 
 function ParkBuilder.ApplyDropRepairedAppearance(ride: Model)

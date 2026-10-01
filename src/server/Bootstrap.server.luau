@@ -9,6 +9,7 @@ local configFolder = game:GetService("ReplicatedStorage"):WaitForChild("ParkRebo
 local gameConfig = require(configFolder:WaitForChild("GameConfig"))
 local coasterPath = require(configFolder:WaitForChild("CoasterPath"))
 local flumePath = require(configFolder:WaitForChild("FlumePath"))
+local trainPath = require(configFolder:WaitForChild("TrainPath"))
 local dropService = require(script.Parent.Services.DropService)
 local zoneService = require(script.Parent.Services.ZoneService)
 local hauntedService = require(script.Parent.Services.HauntedService)
@@ -51,6 +52,7 @@ rideService.Start(
 	parkBuilder.ApplyFlumeRepairedAppearance,
 	parkBuilder.ApplyDropRepairedAppearance,
 	parkBuilder.ApplyGiftRepairedAppearance,
+	parkBuilder.ApplyTrainRepairedAppearance,
 	noticeService.Send
 )
 bumperCarService.Start(park)
@@ -73,8 +75,14 @@ trackService.Start({
 	CarPrefix = "FlumeCar",
 	ConfigPrefix = "Flume",
 })
+trackService.Start({
+	Ride = park.TrainRide,
+	Cars = park.TrainCars,
+	Path = trainPath,
+	CarPrefix = "TrainCar",
+	ConfigPrefix = "Train",
+})
 dropService.Start(park)
-zoneService.Start(park, economyService.SpendCoins, economyService.GetCoins, noticeService.Send)
 decorService.Start(park, parkBuilder.FindDecorTemplate)
 powerService.Start(park, economyService.AwardCoins, noticeService.Send, noticeService.Popup)
 guestService.Start(park, economyService.AwardCoins, noticeService.Send, noticeService.Popup)
@@ -104,7 +112,9 @@ local rideModels: { [string]: Model } = {
 	Flume = park.FlumeRide,
 	Drop = park.DropRide,
 	Gift = park.GiftShop,
+	Train = park.TrainRide,
 }
+zoneService.Start(park, rideModels, economyService.SpendCoins, economyService.GetCoins, noticeService.Send)
 local watched: { Instance } = { park.ParkFolder }
 for _, model in rideModels do
 	table.insert(watched, model)

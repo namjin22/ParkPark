@@ -43,7 +43,9 @@
     "ParkParkDecorPalm",
     "ParkParkDecorUmbrella",
     "ParkParkDecorPond",
-    "ParkParkDecorSandcastle"
+    "ParkParkDecorSandcastle",
+    "ParkParkTrainTrack",
+    "ParkParkTrainCar"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",

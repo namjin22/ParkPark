@@ -44,6 +44,8 @@ type RideReferences = {
 	DropConsole: BasePart,
 	GiftShop: Model,
 	GiftConsole: BasePart,
+	TrainRide: Model,
+	TrainConsole: BasePart,
 }
 
 type SpendCoins = (Player, number) -> boolean
@@ -201,6 +203,7 @@ function RideService.Start(
 	applyFlumeRepaired: ApplyRepairedAppearance,
 	applyDropRepaired: ApplyRepairedAppearance,
 	applyGiftRepaired: ApplyRepairedAppearance,
+	applyTrainRepaired: ApplyRepairedAppearance,
 	notify: Notify
 )
 	local currency = GameConfig.CurrencyDisplayName
@@ -217,6 +220,7 @@ function RideService.Start(
 		Flume = park.FlumeRide,
 		Drop = park.DropRide,
 		Gift = park.GiftShop,
+		Train = park.TrainRide,
 	}
 	local actions: { [string]: { [string]: (Player) -> () } } = {}
 
@@ -703,6 +707,21 @@ function RideService.Start(
 			park.GiftShop:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
 		end,
 		applyRepairedAppearance = applyGiftRepaired,
+	})
+
+	-- The mini train runs in the kids' zone; TrackService moves it while IsOperating is true.
+	setupRide({
+		key = "Train",
+		model = park.TrainRide,
+		console = park.TrainConsole,
+		isAvailable = function()
+			return parkOpen() and park.ParkFolder:GetAttribute("Zone_Kids") == true
+		end,
+		signals = { parkOpenSignal, park.ParkFolder:GetAttributeChangedSignal("Zone_Kids") },
+		start = function()
+			park.TrainRide:SetAttribute("IsOperating", park.ParkFolder:GetAttribute("PowerOut") ~= true)
+		end,
+		applyRepairedAppearance = applyTrainRepaired,
 	})
 end
 

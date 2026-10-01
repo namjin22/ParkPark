@@ -41,6 +41,8 @@ type GuestReferences = {
 	DropGondola: BasePart,
 	GiftShop: Model,
 	GiftCounter: BasePart,
+	TrainRide: Model,
+	TrainCars: Model,
 }
 
 type Guest = {
@@ -257,7 +259,7 @@ end
 
 -- Track-ride cars (coaster, flume) carry two rows of two; every seat faces the direction of travel (the car's
 -- -Z). The offset is relative to the car part's centre, from the ride's `<Prefix>...` numbers in GameConfig.
-local TRACK_RIDES: { [string]: boolean } = { Coaster = true, Flume = true, Drop = true }
+local TRACK_RIDES: { [string]: boolean } = { Coaster = true, Flume = true, Drop = true, Train = true }
 
 local function trackSeatOffset(prefix: string): (number) -> CFrame
 	local settings = GameConfig :: any
@@ -388,6 +390,10 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		end, function()
 			return CFrame.identity
 		end, GameConfig.SnackCounterSeats, true),
+		newRide("Train", park.TrainRide, function(seat: number)
+			local car = park.TrainCars:FindFirstChild(string.format("TrainCar%d", (seat - 1) // 4 + 1))
+			return if car and car:IsA("BasePart") then car else nil
+		end, trackSeatOffset("Train"), GameConfig.TrainSeatCount, false),
 	}
 	for _, rideInfo in rides do
 		if rideInfo.key == "Haunted" then

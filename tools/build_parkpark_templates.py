@@ -72,6 +72,8 @@ FLUME_CARS = int(config_number("FlumeCarCount"))
 DROP_SCALE = config_number("DropScale")
 DROP_REST_Y = config_number("DropRestY")
 GIFT_SCALE = config_number("GiftScale")
+TRAIN_SCALE = config_number("TrainScale")
+TRAIN_CARS = int(config_number("TrainCarCount"))
 FLUME_SCALE = config_number("FlumeScale")
 FLUME_CARS = int(config_number("FlumeCarCount"))
 TREE_SCALE = config_number("TreeScale")
@@ -312,6 +314,7 @@ def main() -> None:
     build_flume()
     build_drop_tower()
     build_gift_shop()
+    build_train()
     build_flume()
     build_decor()
 
@@ -641,6 +644,34 @@ def build_gift_shop() -> None:
                 *colliders,
                 # Behind the shop, away from the line in front of the counter (the counter is on local -Z).
                 console("GiftConsole", -6, 10, 0),
+            ],
+        ),
+    )
+
+
+def build_train() -> None:
+    needed = ("ParkParkTrainTrack", "ParkParkTrainCar")
+    missing = missing_meshes(needed)
+    if missing:
+        print(f"skipped TrainRide: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    # TrackService places the wagons along the generated path when the game starts.
+    wagons = [
+        mesh_part(f"TrainCar{index + 1}", "ParkParkTrainCar", (0, 1.0, index * 4.9), 0, False, CORAL, TRAIN_SCALE)
+        for index in range(TRAIN_CARS)
+    ]
+    write(
+        "TrainRide",
+        model(
+            "TrainRide",
+            [
+                mesh_part("TrainTrack", "ParkParkTrainTrack", (0, 0, 0), 0, False, CREAM, TRAIN_SCALE),
+                # The station platform is solid, so guests and players cannot walk through it.
+                box_collider("Station", (0, 0.2, -8.2), (16.0, 0.4, 2.6), 0, TRAIN_SCALE),
+                model("TrainCars", wagons),
+                # The ride is turned half a turn in the world, so this lands beside the station near its line.
+                console("TrainConsole", 18, -33, 0),
             ],
         ),
     )

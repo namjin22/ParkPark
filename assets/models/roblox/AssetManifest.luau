@@ -16,6 +16,7 @@ return {
 		Flume = "FlumeRide",
 		Drop = "DropRide",
 		Gift = "GiftShop",
+		Train = "TrainRide",
 		Litter = "Litter",
 	},
 	EntranceSign = "SignPanel",

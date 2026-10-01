@@ -55,6 +55,7 @@ return {
 	FlumeScale = 2.6,
 	DropScale = 3,
 	GiftScale = 3,
+	TrainScale = 2.8,
 	TreeScale = 1.9,
 	BushScale = 1.7,
 	LampScale = 2,
@@ -222,6 +223,20 @@ return {
 			StaffCosts = { 1200, 2000, 3200 },
 			IsShop = true,
 		},
+		Train = {
+			DisplayName = "미니 기차",
+			ModelName = "TrainRide",
+			ConsoleName = "TrainConsole",
+			UnlockCost = 3000,
+			RepairCost = 1400,
+			BaseFare = 150,
+			Requires = "Gift",
+			Zone = "Kids",
+			IncomePerLevel = 50,
+			IncomeCosts = { 1500, 2800, 4600, 7000 },
+			StaffCosts = { 2000, 3400, 5400 },
+			RideSeconds = 90,
+		},
 	} :: { [string]: RideEconomy },
 	-- The order attractions unlock in (each needs the one before it repaired).
 	RideChain = {
@@ -237,11 +252,19 @@ return {
 		"Flume",
 		"Drop",
 		"Gift",
+		"Train",
 	},
 	-- Zones beyond the first: what opening each costs (paid at its gate once the park's last attraction of the
 	-- previous zone is repaired) and how it is named.
-	ZoneCosts = { Water = 2500 } :: { [string]: number },
-	ZoneNames = { Water = "물 구역" } :: { [string]: string },
+	ZoneOrder = { "Water", "Kids" } :: { string },
+	ZoneCosts = { Water = 2500, Kids = 4500 } :: { [string]: number },
+	ZoneNames = { Water = "물 구역", Kids = "어린이 구역" } :: { [string]: string },
+	-- The attraction that must be repaired before a zone's gate can be opened.
+	ZoneRequires = { Water = "Coaster", Kids = "Gift" } :: { [string]: string },
+	ZoneGround = {
+		Water = { Color = Color3.fromRGB(232, 214, 170), Material = "Sand" },
+		Kids = { Color = Color3.fromRGB(150, 205, 120), Material = "Grass" },
+	} :: { [string]: { Color: Color3, Material: string } },
 	-- Seconds between automatic boardings for staff level 1, 2, 3 (0 staff means players accept guests).
 	StaffIntervals = { 10, 6, 3 },
 
@@ -386,6 +409,24 @@ return {
 	DropSeatTop = 0.2,
 	DropSeatRadius = 2.4,
 	DropRiderHip = 1.25,
+
+	-- Mini train (the kids' zone; unscaled OBJ units from ParkParkTrainTrack/Car.obj, centre line in the generated
+	-- TrainPath). It runs through TrackService like the coaster and flume, but on a gentle low loop, so its speed
+	-- stays near TrainMinSpeed. TrainCarCenterY is the wagon mesh's bounding-box centre above the rail.
+	TrainSeatCount = 8,
+	TrainCarCount = 2,
+	TrainCarSpacing = 4.9,
+	TrainDockSeconds = 8,
+	TrainLiftSpeed = 8,
+	TrainStationSpeed = 7,
+	TrainMinSpeed = 8,
+	TrainGravity = 6,
+	TrainTopHeight = 3,
+	TrainCarCenterY = 0.785,
+	TrainSeatTop = 0.74,
+	TrainRowZ = 0.85,
+	TrainColumnX = 0.5,
+	TrainRiderHip = 1.25,
 
 	-- Janitors: hired at the cleaning cart by the entrance path, they walk to litter and clear it for free.
 	-- Costs are for the 1st, 2nd, ... janitor.
