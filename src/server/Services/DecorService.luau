@@ -54,7 +54,14 @@ local function blockedByStructures(x: number, z: number, margin: number): boolea
 			return true
 		end
 	end
-	for _, spot in { ParkLayout.GeneratorPosition, ParkLayout.JanitorCartPosition, Vector3.new(-32, 0, 52) } do
+	for _, spot in
+		{
+			ParkLayout.GeneratorPosition,
+			ParkLayout.JanitorCartPosition,
+			ParkLayout.SpeedShopPosition,
+			Vector3.new(-32, 0, 52),
+		}
+	do
 		if nearCircle(x, z, spot, 6, 6 + margin) then
 			return true
 		end
@@ -294,7 +301,7 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 
 	local ponds: { Vector3 } = {}
 	for _, spot in
-		{ Vector3.new(-125, 0, -335), Vector3.new(-150, 0, -215), Vector3.new(195, 0, -330), Vector3.new(-20, 0, -420) }
+		{ Vector3.new(-150, 0, -235), Vector3.new(190, 0, -270), Vector3.new(-150, 0, -340), Vector3.new(60, 0, -340) }
 	do
 		if not zoneBlocked(spot.X, spot.Z, 12) then
 			place("DecorPond", spot, random:NextNumber(0, math.pi * 2), 11)
@@ -341,7 +348,7 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 			break
 		end
 	end
-	for z = -184, -460, -24 do
+	for z = -184, -350, -24 do
 		for _, side in { -1, 1 } do
 			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
 			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then
@@ -349,7 +356,7 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 			end
 		end
 	end
-	for index, z in { -230, -290, -350, -410 } do
+	for index, z in { -200, -240, -280, -330 } do
 		local side = if index % 2 == 0 then 1 else -1
 		local position = Vector3.new(roadX + side * (roadHalf + 3), 0, z)
 		if not zoneBlocked(position.X, position.Z, 0) then
@@ -388,7 +395,7 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 			end
 		end
 	end
-	for index, z in { -510, -570, -630, -690 } do
+	for index, z in { -390, -440, -500, -560 } do
 		local side = if index % 2 == 0 then 1 else -1
 		local position = Vector3.new(roadX + side * (roadHalf + 3), 0, z)
 		if not zoneBlocked(position.X, position.Z, 0) then
@@ -424,7 +431,7 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 			end
 		end
 	end
-	for index, z in { -830, -890, -950, -1010 } do
+	for index, z in { -640, -700, -770, -850 } do
 		local side = if index % 2 == 0 then 1 else -1
 		local position = Vector3.new(roadX + side * (roadHalf + 3), 0, z)
 		if not zoneBlocked(position.X, position.Z, 0) then

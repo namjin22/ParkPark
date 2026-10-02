@@ -6,6 +6,9 @@ local managePanelController = require(script.Parent.Controllers.ManagePanelContr
 local noticeController = require(script.Parent.Controllers.NoticeController)
 local powerController = require(script.Parent.Controllers.PowerController)
 local travelController = require(script.Parent.Controllers.TravelController)
+local questController = require(script.Parent.Controllers.QuestController)
+local speedShopController = require(script.Parent.Controllers.SpeedShopController)
+local signLodController = require(script.Parent.Controllers.SignLODController)
 local objectiveController = require(script.Parent.Controllers.ObjectiveController)
 
 hudController.Start()
@@ -15,5 +18,8 @@ task.spawn(objectiveController.Start)
 task.spawn(powerController.Start)
 task.spawn(managePanelController.Start)
 task.spawn(travelController.Start)
+task.spawn(questController.Start)
+task.spawn(speedShopController.Start)
+task.spawn(signLodController.Start)
 
 print("[ParkPark] Client bootstrap loaded")

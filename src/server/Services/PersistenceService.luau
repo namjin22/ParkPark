@@ -24,7 +24,14 @@ local GameConfig =
 local PersistenceService = {}
 
 export type SavedState = {
-	Park: { EntranceCleared: boolean, ParkOpen: boolean, GuestsBoarded: number, GoalsClaimed: number, [string]: any },
+	Park: {
+		EntranceCleared: boolean,
+		ParkOpen: boolean,
+		GuestsBoarded: number,
+		GoalsClaimed: number,
+		QuestIndex: number,
+		[string]: any,
+	},
 	Rides: { [string]: { IsUnlocked: boolean, IsRepaired: boolean, IncomeLevel: number, StaffLevel: number } },
 	Janitors: number,
 }
@@ -34,6 +41,7 @@ type Profile = {
 	key: string,
 	status: string, -- "loading" | "ok" | "failed"
 	coins: number?,
+	speed: number,
 	park: SavedState?,
 	lastCoins: number,
 	dirty: boolean,
@@ -177,6 +185,7 @@ local function sanitizePark(raw: any): SavedState?
 			ParkOpen = parkRaw.ParkOpen == true,
 			GuestsBoarded = asNumber(parkRaw.GuestsBoarded, 0, 1e9, 0),
 			GoalsClaimed = asNumber(parkRaw.GoalsClaimed, 0, #GameConfig.Goals, 0),
+			QuestIndex = asNumber(parkRaw.QuestIndex, 0, #GameConfig.Quests, 0),
 		},
 		Rides = {},
 		Janitors = asNumber(raw.Janitors, 0, #GameConfig.JanitorCosts, 0),
@@ -225,6 +234,7 @@ local function loadProfile(player: Player): Profile
 		key = "Player_" .. tostring(player.UserId),
 		status = "loading",
 		coins = nil,
+		speed = 0,
 		park = nil,
 		lastCoins = 0,
 		dirty = false,
@@ -295,6 +305,7 @@ local function loadProfile(player: Player): Profile
 	if data.Coins ~= nil then
 		profile.coins = asNumber(data.Coins, 0, MAX_COINS, GameConfig.StartingCoins)
 	end
+	profile.speed = asNumber(data.Speed, 0, #GameConfig.SpeedLevelCosts, 0)
 	profile.park = sanitizePark(data)
 	profile.status = "ok"
 	return profile
@@ -334,6 +345,7 @@ local function saveProfile(profile: Profile, release: boolean): boolean
 			local record = if type(old) == "table" then old else {}
 			record.Version = SAVE_VERSION
 			record.Coins = coins
+			record.Speed = profile.speed
 			if snapshot then
 				record.Park = snapshot.Park
 				record.Rides = snapshot.Rides
@@ -371,6 +383,21 @@ end
 function PersistenceService.LoadCoins(player: Player): number?
 	local profile = loadProfile(player)
 	return profile.coins
+end
+
+-- A player's speed-shop level (saved with their coins).
+function PersistenceService.GetSpeedLevel(player: Player): number
+	local profile = profiles[player]
+	return if profile then profile.speed else 0
+end
+
+function PersistenceService.SetSpeedLevel(player: Player, level: number)
+	local profile = profiles[player]
+	if profile and profile.status == "ok" then
+		profile.speed = math.clamp(level, 0, #GameConfig.SpeedLevelCosts)
+		profile.dirty = true
+		profile.urgent = true
+	end
 end
 
 -- Waits for the first player, makes them the host, and returns the park they saved (nil for a new park or a

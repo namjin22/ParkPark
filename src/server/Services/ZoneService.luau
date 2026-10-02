@@ -52,6 +52,39 @@ local function part(
 	return piece
 end
 
+-- A signboard's SurfaceGui is a texture on the board, so its text turns to mush when seen from far away. Beside
+-- it every sign carries a screen-space BillboardGui (`FarLabel`): crisp at any distance, switched on by the
+-- client's SignLODController when the camera is far and off when it is near (then the SurfaceGui shows).
+local function createFarLabel(board: BasePart, height: number, title: string, subtitle: string): (string) -> ()
+	local billboard = Instance.new("BillboardGui")
+	billboard.Name = "FarLabel"
+	billboard.Size = UDim2.fromOffset(230, 78)
+	billboard.StudsOffset = Vector3.new(0, height, 0)
+	billboard.MaxDistance = 130
+	billboard.LightInfluence = 0
+	billboard.Enabled = false
+	billboard.Parent = board
+	local function line(y: number, h: number, color: Color3, text: string): TextLabel
+		local text_ = Instance.new("TextLabel")
+		text_.Position = UDim2.fromOffset(0, y)
+		text_.Size = UDim2.new(1, 0, 0, h)
+		text_.BackgroundTransparency = 1
+		text_.Font = Enum.Font.GothamBlack
+		text_.Text = text
+		text_.TextColor3 = color
+		text_.TextStrokeColor3 = Color3.fromRGB(255, 248, 232)
+		text_.TextStrokeTransparency = 0
+		text_.TextScaled = true
+		text_.Parent = billboard
+		return text_
+	end
+	line(0, 42, GameConfig.Palette.Ink, title)
+	local sub = line(44, 34, Color3.fromRGB(206, 78, 64), subtitle)
+	return function(text: string)
+		sub.Text = text
+	end
+end
+
 local function label(parent: Instance, y: number, height: number, size: number, color: Color3): TextLabel
 	local text = Instance.new("TextLabel")
 	text.Position = UDim2.fromOffset(15, y)
@@ -220,6 +253,7 @@ function ZoneService.Start(
 		)
 		frame.CanCollide = false
 		local statuses: { TextLabel } = {}
+		local setFar = createFarLabel(sign, SIGN_SIZE.Y / 2 + 1.5, zoneName, "")
 		for _, face in { Enum.NormalId.Front, Enum.NormalId.Back } do
 			local gui = Instance.new("SurfaceGui")
 			gui.Face = face
@@ -257,6 +291,7 @@ function ZoneService.Start(
 			else
 				text = string.format("%d %s · 게이트에서 E", cost, GameConfig.CurrencyDisplayName)
 			end
+			setFar(text)
 			for _, status in statuses do
 				status.Text = text
 			end

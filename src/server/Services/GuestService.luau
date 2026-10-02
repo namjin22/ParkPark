@@ -548,6 +548,22 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			"GuestsBoarded",
 			((park.ParkFolder:GetAttribute("GuestsBoarded") :: number?) or 0) + 1
 		)
+		-- Counters the quests read.
+		local function bump(name: string)
+			park.ParkFolder:SetAttribute(name, ((park.ParkFolder:GetAttribute(name) :: number?) or 0) + 1)
+		end
+		if table.find(GameConfig.ThrillRides, ride.key) then
+			bump("BoardedThrill")
+		end
+		if ride.service then
+			bump("ShopServes")
+		end
+		if park.ParkFolder:GetAttribute("Night") == true then
+			bump("BoardedNight")
+		end
+		if park.ParkFolder:GetAttribute("EventName") ~= nil then
+			bump("BoardedEvent")
+		end
 		return true
 	end
 

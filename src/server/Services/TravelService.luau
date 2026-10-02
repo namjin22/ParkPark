@@ -25,17 +25,27 @@ function TravelService.Start(park: { ParkFolder: Folder })
 	end
 	local travel = event :: RemoteEvent
 
-	local function configureCharacter(character: Model)
+	-- Walk speed is the base plus the speed shop's levels (the player's `SpeedLevel` attribute).
+	local function configureCharacter(player: Player, character: Model)
 		local humanoid = character:WaitForChild("Humanoid", 10)
 		if humanoid and humanoid:IsA("Humanoid") then
-			humanoid.WalkSpeed = GameConfig.PlayerWalkSpeed
+			local level = (player:GetAttribute("SpeedLevel") :: number?) or 0
+			humanoid.WalkSpeed = GameConfig.PlayerWalkSpeed + level * GameConfig.SpeedPerLevel
 		end
 	end
 	local function onPlayer(player: Player)
 		if player.Character then
-			task.spawn(configureCharacter, player.Character)
+			task.spawn(configureCharacter, player, player.Character)
 		end
-		player.CharacterAdded:Connect(configureCharacter)
+		player.CharacterAdded:Connect(function(character: Model)
+			configureCharacter(player, character)
+		end)
+		player:GetAttributeChangedSignal("SpeedLevel"):Connect(function()
+			local character = player.Character
+			if character then
+				task.spawn(configureCharacter, player, character)
+			end
+		end)
 	end
 	Players.PlayerAdded:Connect(onPlayer)
 	for _, player in Players:GetPlayers() do

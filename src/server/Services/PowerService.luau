@@ -174,6 +174,10 @@ function PowerService.Start(park: PowerReferences, awardCoins: AwardCoins, notif
 		setPower(true)
 		for _, player in Players:GetPlayers() do
 			if player == byPlayer then
+				park.ParkFolder:SetAttribute(
+					"PowerFixes",
+					((park.ParkFolder:GetAttribute("PowerFixes") :: number?) or 0) + 1
+				)
 				awardCoins(player, GameConfig.PowerRestoreReward)
 				notify(
 					player,

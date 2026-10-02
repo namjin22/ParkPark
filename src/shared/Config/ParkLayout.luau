@@ -28,33 +28,35 @@ ParkLayout.FerrisZ = 16
 -- The water zone lies beyond the carousel, past a fence across z = ZoneBoundaryZ. Its road (x = ZoneRoadX)
 -- branches north off the side path; each ride there has a branch path at ZoneBranchZ[key] leading to its line.
 ParkLayout.ZoneBoundaryZ = -168
-ParkLayout.ZoneGroundMinZ = -480
+ParkLayout.ZoneGroundMinZ = -361
 ParkLayout.ZoneRoadX = 52
 ParkLayout.ZoneRoadHalfWidth = 8
 ParkLayout.ZoneBranchZ = {
-	Flume = -205,
-	Drop = -215,
-	Gift = -352,
-	Train = -525,
-	Duck = -575,
-	Bounce = -655,
-	Bunny = -680,
-	Mine = -868,
-	Sky = -840,
-	Maze = -990,
-	IceCream = -352,
-	Pizza = -500,
-	Noodle = -1000,
-	Swan = -352,
-	BallPit = -575,
-	Rocket = -840,
+	Flume = -191,
+	Drop = -197,
+	Gift = -282,
+	Train = -397,
+	Duck = -437,
+	Bounce = -501,
+	Bunny = -521,
+	Mine = -683,
+	Sky = -656,
+	Maze = -801,
+	IceCream = -282,
+	Pizza = -377,
+	Noodle = -811,
+	Swan = -282,
+	BallPit = -437,
+	Rocket = -656,
 } :: { [string]: number }
 ParkLayout.ZoneBounds = {
-	Water = { BoundaryZ = -168, MinZ = -480 },
-	Kids = { BoundaryZ = -480, MinZ = -800 },
-	Adventure = { BoundaryZ = -800, MinZ = -1120 },
+	Water = { BoundaryZ = -168, MinZ = -361 },
+	Kids = { BoundaryZ = -361, MinZ = -617 },
+	Adventure = { BoundaryZ = -617, MinZ = -927 },
 } :: { [string]: { BoundaryZ: number, MinZ: number } }
 ParkLayout.GeneratorPosition = Vector3.new(24, 0, 52)
+-- The speed shop stands beside the spawn path.
+ParkLayout.SpeedShopPosition = Vector3.new(-26, 0, 72)
 -- The cleaning cart where janitors are hired, on the other side of the same path.
 ParkLayout.JanitorCartPosition = Vector3.new(-24, 0, 52)
 ParkLayout.GroundHalfWidth = 260
@@ -135,106 +137,106 @@ ParkLayout.Rides = {
 	},
 	-- Zone rides face the road, so the model is turned half a turn and its line runs toward +Z.
 	Flume = {
-		Pivot = Vector3.new(-20, 0, -270),
+		Pivot = Vector3.new(-2, 0, -231),
 		PlatformRadius = 45,
-		QueueHead = Vector3.new(-20, 0, -239),
+		QueueHead = Vector3.new(-2, 0, -212),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	-- The drop tower stands east of the zone road; its line runs toward +Z to the branch.
 	Drop = {
-		Pivot = Vector3.new(120, 0, -270),
+		Pivot = Vector3.new(103, 0, -231),
 		PlatformRadius = 20,
-		QueueHead = Vector3.new(120, 0, -246),
+		QueueHead = Vector3.new(103, 0, -216),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	-- The gift shop stands at the north end of the zone road, east side; its counter faces +Z like the lines above.
 	Gift = {
-		Pivot = Vector3.new(130, 0, -392),
+		Pivot = Vector3.new(110, 0, -307),
 		PlatformRadius = 14,
-		QueueHead = Vector3.new(130, 0, -382),
+		QueueHead = Vector3.new(110, 0, -301),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	-- The mini train sits west of the zone road in the kids' zone, turned toward the road like the flume.
 	Train = {
-		Pivot = Vector3.new(-20, 0, -590),
+		Pivot = Vector3.new(-9, 0, -449),
 		PlatformRadius = 42,
-		QueueHead = Vector3.new(-20, 0, -559),
+		QueueHead = Vector3.new(-9, 0, -424),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	-- East of the zone road; every kids' ride faces +Z so its line runs up to a branch off the road.
 	Duck = {
-		Pivot = Vector3.new(125, 0, -640),
+		Pivot = Vector3.new(114, 0, -489),
 		PlatformRadius = 30,
-		QueueHead = Vector3.new(125, 0, -605),
+		QueueHead = Vector3.new(114, 0, -461),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Bounce = {
-		Pivot = Vector3.new(-110, 0, -720),
+		Pivot = Vector3.new(-86, 0, -553),
 		PlatformRadius = 30,
-		QueueHead = Vector3.new(-110, 0, -683),
+		QueueHead = Vector3.new(-86, 0, -523),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Bunny = {
-		Pivot = Vector3.new(125, 0, -748),
+		Pivot = Vector3.new(114, 0, -575),
 		PlatformRadius = 24,
-		QueueHead = Vector3.new(125, 0, -712),
+		QueueHead = Vector3.new(114, 0, -547),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	-- The adventure zone: the mine train west of its road, the sky ride east (its cable runs far north of the
 	-- station, hence the large radius), and the maze beyond the mine train.
 	Mine = {
-		Pivot = Vector3.new(-45, 0, -935),
+		Pivot = Vector3.new(-26, 0, -748),
 		PlatformRadius = 66,
-		QueueHead = Vector3.new(-45, 0, -902),
+		QueueHead = Vector3.new(-26, 0, -716),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Sky = {
-		Pivot = Vector3.new(150, 0, -900),
+		Pivot = Vector3.new(130, 0, -714),
 		PlatformRadius = 100,
-		QueueHead = Vector3.new(150, 0, -874),
+		QueueHead = Vector3.new(130, 0, -689),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Maze = {
-		Pivot = Vector3.new(-45, 0, -1060),
+		Pivot = Vector3.new(-26, 0, -869),
 		PlatformRadius = 42,
-		QueueHead = Vector3.new(-45, 0, -1023),
+		QueueHead = Vector3.new(-26, 0, -833),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	-- Shops: the counter faces +Z toward its line.
 	IceCream = {
-		Pivot = Vector3.new(-30, 0, -392),
+		Pivot = Vector3.new(-10, 0, -307),
 		PlatformRadius = 16,
-		QueueHead = Vector3.new(-30, 0, -382),
+		QueueHead = Vector3.new(-10, 0, -301),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Pizza = {
-		Pivot = Vector3.new(-120, 0, -545),
+		Pivot = Vector3.new(-94, 0, -413),
 		PlatformRadius = 16,
-		QueueHead = Vector3.new(-120, 0, -535),
+		QueueHead = Vector3.new(-94, 0, -405),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Noodle = {
-		Pivot = Vector3.new(100, 0, -1040),
+		Pivot = Vector3.new(90, 0, -850),
 		PlatformRadius = 16,
-		QueueHead = Vector3.new(100, 0, -1030),
+		QueueHead = Vector3.new(90, 0, -840),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Swan = {
-		Pivot = Vector3.new(-110, 0, -412),
+		Pivot = Vector3.new(-70, 0, -319),
 		PlatformRadius = 26,
-		QueueHead = Vector3.new(-110, 0, -382),
+		QueueHead = Vector3.new(-70, 0, -301),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	BallPit = {
-		Pivot = Vector3.new(210, 0, -632),
+		Pivot = Vector3.new(186, 0, -483),
 		PlatformRadius = 26,
-		QueueHead = Vector3.new(210, 0, -605),
+		QueueHead = Vector3.new(186, 0, -461),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Rocket = {
-		Pivot = Vector3.new(-170, 0, -900),
+		Pivot = Vector3.new(-126, 0, -714),
 		PlatformRadius = 26,
-		QueueHead = Vector3.new(-170, 0, -870),
+		QueueHead = Vector3.new(-126, 0, -685),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Ferris = {

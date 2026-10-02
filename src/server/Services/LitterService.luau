@@ -178,6 +178,10 @@ function LitterService.Start(
 			end
 
 			taken = true
+			park.ParkFolder:SetAttribute(
+				"LitterPicked",
+				((park.ParkFolder:GetAttribute("LitterPicked") :: number?) or 0) + 1
+			)
 			popup(target.Position + Vector3.new(0, 4, 0), string.format("+%d %s", GameConfig.LitterReward, currency))
 			local index = table.find(pieces, piece)
 			if index then

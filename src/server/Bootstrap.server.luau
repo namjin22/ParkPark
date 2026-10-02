@@ -28,6 +28,8 @@ local teacupService = require(script.Parent.Services.TeacupService)
 local eventService = require(script.Parent.Services.EventService)
 local goalService = require(script.Parent.Services.GoalService)
 local dayNightService = require(script.Parent.Services.DayNightService)
+local questService = require(script.Parent.Services.QuestService)
+local speedShopService = require(script.Parent.Services.SpeedShopService)
 local travelService = require(script.Parent.Services.TravelService)
 local extraRideService = require(script.Parent.Services.ExtraRideService)
 
@@ -66,6 +68,13 @@ extraRideService.Start(park)
 travelService.Start(park)
 eventService.Start(park, noticeService.Send)
 goalService.Start(park, economyService.AwardCoins, noticeService.Send)
+speedShopService.Start(
+	park,
+	economyService.SpendCoins,
+	noticeService.Send,
+	persistenceService.GetSpeedLevel,
+	persistenceService.SetSpeedLevel
+)
 dayNightService.Start(park, noticeService.Send)
 bumperCarService.Start(park)
 teacupService.Start(park)
@@ -130,6 +139,7 @@ for key, extra in park.Extras do
 	rideModels[key] = extra.Ride
 end
 zoneService.Start(park, rideModels, economyService.SpendCoins, economyService.GetCoins, noticeService.Send)
+questService.Start(park, rideModels, economyService.AwardCoins, noticeService.Send)
 local watched: { Instance } = { park.ParkFolder }
 for _, model in rideModels do
 	table.insert(watched, model)
@@ -149,6 +159,7 @@ persistenceService.Start(function()
 		ParkOpen = park.ParkFolder:GetAttribute("ParkOpen") == true,
 		GuestsBoarded = (park.ParkFolder:GetAttribute("GuestsBoarded") :: number?) or 0,
 		GoalsClaimed = (park.ParkFolder:GetAttribute("GoalsClaimed") :: number?) or 0,
+		QuestIndex = (park.ParkFolder:GetAttribute("QuestIndex") :: number?) or 0,
 	}
 	for zone in gameConfig.ZoneCosts do
 		parkState["Zone_" .. zone] = park.ParkFolder:GetAttribute("Zone_" .. zone) == true
