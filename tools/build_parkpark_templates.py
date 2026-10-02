@@ -88,6 +88,11 @@ SLED_SCALE = config_number("SledScale")
 CAVE_SCALE = config_number("CaveScale")
 REINDEER_SCALE = config_number("ReindeerScale")
 SNOWFLAKE_SCALE = config_number("SnowflakeScale")
+ORBIT_SCALE = config_number("OrbitScale")
+MOON_SCALE = config_number("MoonScale")
+UFO_SCALE = config_number("UfoScale")
+CRYSTAL_SCALE = config_number("CrystalScale")
+PLANET_SCALE = config_number("PlanetScale")
 SWAN_SCALE = config_number("SwanScale")
 BALLPIT_SCALE = config_number("BallPitScale")
 ROCKET_SCALE = config_number("RocketScale")
@@ -357,9 +362,12 @@ def main() -> None:
     build_cave()
     build_reindeer()
     build_snowflake()
+    build_orbit()
+    build_moon()
+    build_ufo()
     build_ball_pit()
     build_rocket()
-    for shop_template, shop_obj in (("IceCreamShop", "ParkParkShopIceCream"), ("PizzaShop", "ParkParkShopPizza"), ("NoodleShop", "ParkParkShopNoodle"), ("CocoaShop", "ParkParkShopCocoa"), ("CookieShop", "ParkParkShopCookie")):
+    for shop_template, shop_obj in (("IceCreamShop", "ParkParkShopIceCream"), ("PizzaShop", "ParkParkShopPizza"), ("NoodleShop", "ParkParkShopNoodle"), ("CocoaShop", "ParkParkShopCocoa"), ("CookieShop", "ParkParkShopCookie"), ("StarShop", "ParkParkShopStar")):
         build_shop(shop_template, shop_obj)
     build_flume()
     build_decor()
@@ -1010,6 +1018,76 @@ def build_snowflake() -> None:
     )
 
 
+def build_orbit() -> None:
+    needed = ("ParkParkOrbitHub", "ParkParkSpacePod")
+    missing = missing_meshes(needed)
+    if missing:
+        print(f"skipped OrbitRide: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    pods = []
+    for index in range(6):
+        angle = 2 * math.pi * index / 6
+        origin = (5.4 * math.cos(angle), 0.98, 5.4 * math.sin(angle))
+        pods.append(mesh_part(f"Seat{index + 1}", "ParkParkSpacePod", origin, 0, False, CREAM, ORBIT_SCALE))
+    write(
+        "OrbitRide",
+        model(
+            "OrbitRide",
+            [
+                mesh_part("Hub", "ParkParkOrbitHub", (0, 0, 0), 0, False, MINT, ORBIT_SCALE),
+                cylinder_collider("HubCollider", (0, 0.5, 0), 1.0, 16.8, ORBIT_SCALE),
+                cylinder_collider("ColumnCollider", (0, 3.0, 0), 6.0, 2.6, ORBIT_SCALE),
+                *pods,
+                console("Console", -26, 24, 0),
+            ],
+        ),
+    )
+
+
+def build_moon() -> None:
+    if missing_meshes(("ParkParkMoonMound",)):
+        print("skipped MoonRide: import ParkParkMoonMound and record its mesh ID first")
+        return
+
+    seats = []
+    for index in range(6):
+        angle = 2 * math.pi * index / 6
+        seats.append(box_collider(f"Seat{index + 1}", (3.2 * math.cos(angle), 1.6, 3.2 * math.sin(angle)), (1, 0.2, 1), 0, MOON_SCALE))
+    write(
+        "MoonRide",
+        model(
+            "MoonRide",
+            [
+                mesh_part("Pad", "ParkParkMoonMound", (0, 0, 0), 180, False, CREAM, MOON_SCALE),
+                cylinder_collider("Collider", (0, 0.9, 0), 1.8, 14.0, MOON_SCALE),
+                *seats,
+                console("Console", -24, 24, 0),
+            ],
+        ),
+    )
+
+
+def build_ufo() -> None:
+    if missing_meshes(("ParkParkUfo",)):
+        print("skipped UfoRide: import ParkParkUfo and record its mesh ID first")
+        return
+
+    seats = [box_collider(f"Seat{index + 1}", (index, 1.0, 0), (1, 0.2, 1), 0, UFO_SCALE) for index in range(6)]
+    write(
+        "UfoRide",
+        model(
+            "UfoRide",
+            [
+                mesh_part("Pad", "ParkParkUfo", (0, 0, 0), 180, False, MINT, UFO_SCALE),
+                cylinder_collider("Collider", (0, 2.4, 0), 4.8, 14.6, UFO_SCALE),
+                *seats,
+                console("Console", -24, 30, 0),
+            ],
+        ),
+    )
+
+
 def build_stage() -> None:
     if missing_meshes(("ParkParkShowStage",)):
         print("skipped ShowStage: import ParkParkShowStage and record its mesh ID first")
@@ -1193,6 +1271,8 @@ def build_decor() -> None:
         ("DecorFlowers", "ParkParkDecorFlowers", FLOWERS_SCALE, None),
         ("DecorGazebo", "ParkParkDecorGazebo", GAZEBO_SCALE, cylinder_collider("Collider", (0, 0.5, 0), 1.0, 6.4, GAZEBO_SCALE)),
         ("DecorStatue", "ParkParkDecorStatue", STATUE_SCALE, box_collider("Collider", (0, 1.0, 0), (3.0, 2.0, 3.0), 0, STATUE_SCALE)),
+        ("DecorCrystal", "ParkParkDecorCrystal", CRYSTAL_SCALE, cylinder_collider("Collider", (0, 1.4, 0), 2.8, 2.2, CRYSTAL_SCALE)),
+        ("DecorPlanet", "ParkParkDecorPlanet", PLANET_SCALE, cylinder_collider("Collider", (0, 1.4, 0), 2.8, 2.4, PLANET_SCALE)),
         ("DecorPine", "ParkParkDecorPine", PINE_SCALE, cylinder_collider("Collider", (0, 1.2, 0), 2.4, 0.8, PINE_SCALE)),
         ("DecorRock", "ParkParkDecorRock", ROCK_SCALE, cylinder_collider("Collider", (0, 1.0, 0), 2.0, 4.4, ROCK_SCALE)),
         ("DecorPalm", "ParkParkDecorPalm", PALM_SCALE, cylinder_collider("Collider", (0, 1.8, 0), 3.6, 1.2, PALM_SCALE)),

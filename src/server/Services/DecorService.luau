@@ -290,6 +290,8 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, kids.MinZ, kids.BoundaryZ })
 	local winter = ParkLayout.ZoneBounds.Winter
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, winter.MinZ, winter.BoundaryZ })
+	local space = ParkLayout.ZoneBounds.Space
+	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, space.MinZ, space.BoundaryZ })
 	local adventure = ParkLayout.ZoneBounds.Adventure
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, adventure.MinZ, adventure.BoundaryZ })
 	local function zoneBlocked(x: number, z: number, margin: number): boolean
@@ -469,6 +471,34 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 		end
 	end
 	for z = winter.BoundaryZ - 16, winter.MinZ + 12, -24 do
+		for _, side in { -1, 1 } do
+			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
+			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then
+				place("DecorLamp", spot, 0, 1.5)
+			end
+		end
+	end
+
+	-- The space zone: crystals, planets and boulders, with lamps along its road.
+	local spaceProps: { { kind: string, count: number, margin: number, radius: number } } = {
+		{ kind = "DecorCrystal", count = 45, margin = 6, radius = 3 },
+		{ kind = "DecorPlanet", count = 10, margin = 6, radius = 3 },
+		{ kind = "DecorRock", count = 18, margin = 6, radius = 4 },
+	}
+	for _, prop in spaceProps do
+		local made = 0
+		local tries = 0
+		while made < prop.count and tries < 3000 do
+			tries += 1
+			local x = random:NextNumber(-WORLD_X, WORLD_X)
+			local z = random:NextNumber(space.MinZ + 6, space.BoundaryZ - 8)
+			if not zoneBlocked(x, z, prop.margin) and clear(x, z, prop.radius) then
+				place(prop.kind, Vector3.new(x, 0, z), random:NextNumber(0, math.pi * 2), prop.radius)
+				made += 1
+			end
+		end
+	end
+	for z = space.BoundaryZ - 16, space.MinZ + 12, -24 do
 		for _, side in { -1, 1 } do
 			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
 			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then

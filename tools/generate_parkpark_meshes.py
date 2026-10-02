@@ -3096,6 +3096,111 @@ def make_shop_cookie() -> Mesh:
     return mesh
 
 
+def make_orbit_hub() -> Mesh:
+    """Rotating planet deck: a dark starry disc, a ringed planet at the centre, and a pedestal per pod."""
+    mesh = Mesh("ParkParkOrbitHub")
+    add_vertical_cylinder(mesh, 8.2, 0.0, 0.6, "ink", 44)
+    add_vertical_cylinder(mesh, 8.25, 0.0, 0.45, "gold", 44)
+    add_torus(mesh, 8.0, 0.14, 0.62, "mint", segments=44, sides=6)
+    for index in range(10):
+        angle = TAU * index / 10 + 0.3
+        add_ellipsoid(mesh, (7.1 * math.cos(angle), 0.68, 7.1 * math.sin(angle)), (0.22, 0.1, 0.22), "gold", slices=6, stacks=3)
+    lathe(mesh, [(0.0, 0.6, "wood"), (1.3, 0.6, "wood"), (0.8, 1.4, "gold"), (0.5, 2.2, "cream"), (0.0, 2.4, "cream")], 16)
+    add_ellipsoid(mesh, (0, 4.2, 0), (1.8, 1.8, 1.8), "coral", slices=16, stacks=9)
+    add_torus(mesh, 2.8, 0.18, 4.2, "gold", segments=28, sides=6)
+    add_ellipsoid(mesh, (2.4, 5.6, 0.6), (0.4, 0.4, 0.4), "mint", slices=8, stacks=5)
+    for index in range(6):
+        angle = TAU * index / 6
+        x, z = 5.4 * math.cos(angle), 5.4 * math.sin(angle)
+        add_cylinder_between(mesh, (0, 0.9, 0), (x, 0.9, z), 0.18, 0.18, "gold", 8)
+        add_vertical_cylinder(mesh, 1.5, 0.6, 0.9, "mint", 24, x, z)
+        add_vertical_cylinder(mesh, 1.2, 0.9, 0.98, "coral", 24, x, z)
+    add_star(mesh, 7.0, 0.5, "gold")
+    return mesh
+
+
+def make_space_pod() -> Mesh:
+    """A little space pod (base at y=0): a dark shell with a gold ring, a coral dome, and a seat on top at about y=1.72."""
+    mesh = Mesh("ParkParkSpacePod")
+    add_ellipsoid(mesh, (0, 0.95, 0), (1.0, 0.75, 1.0), "mint", slices=14, stacks=7)
+    add_torus(mesh, 1.0, 0.12, 1.0, "gold", segments=18, sides=6)
+    for angle in (0.0, 1.571, 3.142, 4.712):
+        add_ellipsoid(mesh, (0.97 * math.cos(angle), 0.9, 0.97 * math.sin(angle)), (0.16, 0.16, 0.16), "cream", slices=6, stacks=4)
+    add_box(mesh, (0, 1.72, -0.2), (0.9, 0.14, 1.0), "coral")
+    for side in (-1, 1):
+        add_cylinder_between(mesh, (side * 0.5, 1.75, 0.35), (side * 0.5, 2.3, 0.7), 0.05, 0.05, "gold", 5)
+    add_cylinder_between(mesh, (0, 0.0, 0.0), (0, 0.5, 0.0), 0.09, 0.09, "gold", 6)
+    return mesh
+
+
+def make_moon_mound() -> Mesh:
+    """A moon-surface bouncing mound (origin at the ground centre): a grey hill pitted with craters, a flag, and boulders."""
+    mesh = Mesh("ParkParkMoonMound")
+    add_vertical_cylinder(mesh, 6.8, 0.0, 0.9, "faded_cream", 36)
+    lathe(mesh, [(6.6, 0.9, "faded_cream"), (5.2, 1.3, "cream"), (3.0, 1.55, "faded_cream"), (0.0, 1.6, "cream")], 28)
+    for index in range(7):
+        angle = TAU * index / 7 + 0.4
+        radius = 2.2 + 3.2 * ((index * 3) % 7) / 7
+        x, z = radius * math.cos(angle), radius * math.sin(angle)
+        add_torus(mesh, 0.7 + 0.1 * (index % 3), 0.12, 1.5, "faded_mint", segments=14, sides=5, transform=lambda px, py, pz, x=x, z=z: (px + x, py, pz + z))
+    add_cylinder_between(mesh, (0, 1.6, 0), (0, 5.0, 0), 0.07, 0.07, "cream", 6)
+    add_box(mesh, (0.7, 4.6, 0), (1.4, 0.8, 0.06), "coral")
+    for index in range(6):
+        angle = TAU * index / 6 + 0.2
+        add_ellipsoid(mesh, (6.4 * math.cos(angle), 1.2, 6.4 * math.sin(angle)), (0.8, 0.6, 0.8), "faded_mint" if index % 2 else "cream", slices=7, stacks=4)
+    return mesh
+
+
+def make_ufo() -> Mesh:
+    """A landed UFO (origin at the ground centre, ramp on the +Z side): a saucer on three legs with a glass dome and rim lights."""
+    mesh = Mesh("ParkParkUfo")
+    for angle in (0.5, 2.6, 4.7):
+        x, z = 4.6 * math.cos(angle), 4.6 * math.sin(angle)
+        add_cylinder_between(mesh, (x * 0.6, 2.4, z * 0.6), (x * 1.15, 0.0, z * 1.15), 0.22, 0.28, "gold", 6)
+        add_vertical_cylinder(mesh, 0.55, 0.0, 0.18, "gold", 10, x * 1.15, z * 1.15)
+    lathe(mesh, [(0.0, 2.2, "ink"), (3.4, 2.2, "ink"), (6.2, 2.9, "mint"), (7.2, 3.5, "cream"), (6.2, 4.1, "mint"), (3.0, 4.7, "cream"), (0.0, 4.8, "cream")], 36)
+    lathe(mesh, [(3.0, 4.7, "dark_glass"), (2.6, 6.0, "dark_glass"), (1.4, 7.2, "dark_glass"), (0.0, 7.7, "dark_glass")], 24)
+    for index in range(10):
+        angle = TAU * index / 10
+        add_ellipsoid(mesh, (6.7 * math.cos(angle), 3.5, 6.7 * math.sin(angle)), (0.3, 0.3, 0.3), "gold" if index % 2 else "coral", slices=6, stacks=4)
+    add_box(mesh, (0, 1.5, 7.2), (2.8, 0.3, 4.4), "gold")
+    add_box(mesh, (0, 0.6, 9.2), (3.4, 0.2, 1.2), "cream")
+    add_cylinder_between(mesh, (0, 7.6, 0), (0, 9.0, 0), 0.06, 0.04, "ink", 5)
+    add_ellipsoid(mesh, (0, 9.2, 0), (0.25, 0.25, 0.25), "coral", slices=6, stacks=4)
+    return mesh
+
+
+def make_shop_star() -> Mesh:
+    """Star cafe stall: dark walls, a mint-and-gold awning, and a big gold star on the roof."""
+    mesh = Mesh("ParkParkShopStar")
+    shop_base(mesh, "ink", "mint", "gold")
+    add_cylinder_between(mesh, (0, 5.2, 0), (0, 6.0, 0), 0.12, 0.12, "cream", 6)
+    add_star(mesh, 6.0, 1.6, "gold")
+    add_ellipsoid(mesh, (1.9, 7.5, 0), (0.3, 0.3, 0.3), "mint", slices=7, stacks=4)
+    return mesh
+
+
+def make_decor_crystal() -> Mesh:
+    """A crystal cluster (origin at the ground centre): five tapered spikes in mint, cream, and coral."""
+    mesh = Mesh("ParkParkDecorCrystal")
+    for (x, z, h, r, material) in ((0.0, 0.0, 3.8, 0.7, "mint"), (0.9, 0.3, 2.6, 0.5, "cream"), (-0.8, 0.5, 2.9, 0.55, "coral"), (0.2, -0.9, 2.2, 0.45, "mint"), (-0.4, -0.5, 1.6, 0.35, "cream")):
+        add_cylinder_between(mesh, (x, 0.0, z), (x * 1.2, h, z * 1.2), r, 0.04, material, 5)
+    add_vertical_cylinder(mesh, 1.5, 0.0, 0.25, "faded_cream", 12)
+    return mesh
+
+
+def make_decor_planet() -> Mesh:
+    """A floating planet on a stand (origin at the ground point): a dark pedestal, a ringed coral planet, and two small moons."""
+    mesh = Mesh("ParkParkDecorPlanet")
+    add_vertical_cylinder(mesh, 1.2, 0.0, 0.5, "ink", 16)
+    add_cylinder_between(mesh, (0, 0.5, 0), (0, 2.6, 0), 0.16, 0.12, "gold", 6)
+    add_ellipsoid(mesh, (0, 4.0, 0), (1.5, 1.5, 1.5), "coral", slices=14, stacks=8)
+    add_torus(mesh, 2.4, 0.15, 4.0, "gold", segments=26, sides=6)
+    add_ellipsoid(mesh, (2.2, 5.4, 0.4), (0.3, 0.3, 0.3), "mint", slices=7, stacks=4)
+    add_ellipsoid(mesh, (-2.0, 2.8, -0.6), (0.22, 0.22, 0.22), "cream", slices=7, stacks=4)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -3224,6 +3329,13 @@ def main() -> None:
         make_snowflake_hub(),
         make_snow_pod(),
         make_shop_cookie(),
+        make_orbit_hub(),
+        make_space_pod(),
+        make_moon_mound(),
+        make_ufo(),
+        make_shop_star(),
+        make_decor_crystal(),
+        make_decor_planet(),
         make_swan(),
         make_swan(v2=True),
         make_sky_car(v2=True),
