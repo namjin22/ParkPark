@@ -82,7 +82,10 @@
     "ParkParkSnowPod",
     "ParkParkReindeer",
     "ParkParkReindeerHub",
-    "ParkParkSnowflakeHub"
+    "ParkParkSnowflakeHub",
+    "ParkParkDecorFlowers",
+    "ParkParkDecorGazebo",
+    "ParkParkDecorStatue"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",
@@ -165,6 +168,9 @@
     "ParkParkSnowPod": "rbxassetid://109185809816004",
     "ParkParkReindeer": "rbxassetid://93128842441589",
     "ParkParkReindeerHub": "rbxassetid://123993268919608",
-    "ParkParkSnowflakeHub": "rbxassetid://133099409883993"
+    "ParkParkSnowflakeHub": "rbxassetid://133099409883993",
+    "ParkParkDecorFlowers": "rbxassetid://124366667064678",
+    "ParkParkDecorGazebo": "rbxassetid://132334916112956",
+    "ParkParkDecorStatue": "rbxassetid://91462742162629"
   }
 }
