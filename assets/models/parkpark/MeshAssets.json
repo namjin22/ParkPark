@@ -85,7 +85,14 @@
     "ParkParkSnowflakeHub",
     "ParkParkDecorFlowers",
     "ParkParkDecorGazebo",
-    "ParkParkDecorStatue"
+    "ParkParkDecorStatue",
+    "ParkParkDecorCrystal",
+    "ParkParkUfo",
+    "ParkParkSpacePod",
+    "ParkParkDecorPlanet",
+    "ParkParkMoonMound",
+    "ParkParkShopStar",
+    "ParkParkOrbitHub"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",
@@ -171,6 +178,13 @@
     "ParkParkSnowflakeHub": "rbxassetid://133099409883993",
     "ParkParkDecorFlowers": "rbxassetid://124366667064678",
     "ParkParkDecorGazebo": "rbxassetid://132334916112956",
-    "ParkParkDecorStatue": "rbxassetid://91462742162629"
+    "ParkParkDecorStatue": "rbxassetid://91462742162629",
+    "ParkParkDecorCrystal": "rbxassetid://83268154148897",
+    "ParkParkUfo": "rbxassetid://90297046066866",
+    "ParkParkSpacePod": "rbxassetid://123835755124216",
+    "ParkParkDecorPlanet": "rbxassetid://108333688805474",
+    "ParkParkMoonMound": "rbxassetid://112769973853312",
+    "ParkParkShopStar": "rbxassetid://104928878550179",
+    "ParkParkOrbitHub": "rbxassetid://107820989625578"
   }
 }
