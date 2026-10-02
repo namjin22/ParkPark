@@ -53,6 +53,9 @@ ParkLayout.ZoneBranchZ = {
 	Sled = -945,
 	Cave = -1060,
 	Cocoa = -1060,
+	Reindeer = -945,
+	Snowflake = -945,
+	Cookie = -1060,
 } :: { [string]: number }
 ParkLayout.ZoneBounds = {
 	Water = { BoundaryZ = -168, MinZ = -361 },
@@ -292,6 +295,24 @@ ParkLayout.Rides = {
 		Pivot = Vector3.new(110, 0, -1085),
 		PlatformRadius = 16,
 		QueueHead = Vector3.new(110, 0, -1075),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Reindeer = {
+		Pivot = Vector3.new(-170, 0, -1000),
+		PlatformRadius = 26,
+		QueueHead = Vector3.new(-170, 0, -970),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Snowflake = {
+		Pivot = Vector3.new(225, 0, -1000),
+		PlatformRadius = 26,
+		QueueHead = Vector3.new(225, 0, -970),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Cookie = {
+		Pivot = Vector3.new(-170, 0, -1085),
+		PlatformRadius = 16,
+		QueueHead = Vector3.new(-170, 0, -1075),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Ferris = {

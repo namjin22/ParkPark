@@ -86,6 +86,8 @@ STAGE_SCALE = config_number("StageScale")
 PENGUIN_SCALE = config_number("PenguinScale")
 SLED_SCALE = config_number("SledScale")
 CAVE_SCALE = config_number("CaveScale")
+REINDEER_SCALE = config_number("ReindeerScale")
+SNOWFLAKE_SCALE = config_number("SnowflakeScale")
 SWAN_SCALE = config_number("SwanScale")
 BALLPIT_SCALE = config_number("BallPitScale")
 ROCKET_SCALE = config_number("RocketScale")
@@ -350,9 +352,11 @@ def main() -> None:
     build_penguin()
     build_sled()
     build_cave()
+    build_reindeer()
+    build_snowflake()
     build_ball_pit()
     build_rocket()
-    for shop_template, shop_obj in (("IceCreamShop", "ParkParkShopIceCream"), ("PizzaShop", "ParkParkShopPizza"), ("NoodleShop", "ParkParkShopNoodle"), ("CocoaShop", "ParkParkShopCocoa")):
+    for shop_template, shop_obj in (("IceCreamShop", "ParkParkShopIceCream"), ("PizzaShop", "ParkParkShopPizza"), ("NoodleShop", "ParkParkShopNoodle"), ("CocoaShop", "ParkParkShopCocoa"), ("CookieShop", "ParkParkShopCookie")):
         build_shop(shop_template, shop_obj)
     build_flume()
     build_decor()
@@ -942,6 +946,61 @@ def build_rocket() -> None:
                 cylinder_collider("HubCollider", (0, 0.5, 0), 1.0, 16.8, ROCKET_SCALE),
                 cylinder_collider("ColumnCollider", (0, 3.0, 0), 5.0, 2.2, ROCKET_SCALE),
                 *rockets,
+                console("Console", -26, 24, 0),
+            ],
+        ),
+    )
+
+
+def build_reindeer() -> None:
+    needed = ("ParkParkReindeerHub", "ParkParkReindeer")
+    missing = missing_meshes(needed)
+    if missing:
+        print(f"skipped ReindeerRide: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    # Like the swan boats: each reindeer faces its direction of travel (the imported mesh comes in half a turn round).
+    deer = []
+    for index in range(6):
+        angle = 2 * math.pi * index / 6
+        origin = (4.4 * math.cos(angle), 0.9, 4.4 * math.sin(angle))
+        deer.append(mesh_part(f"Seat{index + 1}", "ParkParkReindeer", origin, -math.degrees(angle), False, CREAM, REINDEER_SCALE))
+    write(
+        "ReindeerRide",
+        model(
+            "ReindeerRide",
+            [
+                mesh_part("Hub", "ParkParkReindeerHub", (0, 0, 0), 0, False, MINT, REINDEER_SCALE),
+                cylinder_collider("HubCollider", (0, 0.5, 0), 1.0, 14.4, REINDEER_SCALE),
+                cylinder_collider("ColumnCollider", (0, 2.0, 0), 4.0, 1.8, REINDEER_SCALE),
+                *deer,
+                console("Console", -24, 22, 0),
+            ],
+        ),
+    )
+
+
+def build_snowflake() -> None:
+    needed = ("ParkParkSnowflakeHub", "ParkParkSnowPod")
+    missing = missing_meshes(needed)
+    if missing:
+        print(f"skipped SnowflakeRide: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    pods = []
+    for index in range(6):
+        angle = 2 * math.pi * index / 6
+        origin = (5.4 * math.cos(angle), 0.98, 5.4 * math.sin(angle))
+        pods.append(mesh_part(f"Seat{index + 1}", "ParkParkSnowPod", origin, 0, False, CREAM, SNOWFLAKE_SCALE))
+    write(
+        "SnowflakeRide",
+        model(
+            "SnowflakeRide",
+            [
+                mesh_part("Hub", "ParkParkSnowflakeHub", (0, 0, 0), 0, False, MINT, SNOWFLAKE_SCALE),
+                cylinder_collider("HubCollider", (0, 0.5, 0), 1.0, 16.8, SNOWFLAKE_SCALE),
+                cylinder_collider("ColumnCollider", (0, 3.0, 0), 5.0, 2.2, SNOWFLAKE_SCALE),
+                *pods,
                 console("Console", -26, 24, 0),
             ],
         ),

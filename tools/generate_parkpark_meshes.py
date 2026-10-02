@@ -2940,6 +2940,107 @@ def make_shop_cocoa() -> Mesh:
     return mesh
 
 
+def make_reindeer_hub() -> Mesh:
+    """Rotating frosted deck for the reindeer carousel: a snowy disc with a candy-striped column and a pedestal per reindeer."""
+    mesh = Mesh("ParkParkReindeerHub")
+    add_vertical_cylinder(mesh, 6.8, 0.0, 0.5, "cream", 40)
+    add_vertical_cylinder(mesh, 6.5, 0.5, 0.74, "faded_mint", 40)
+    add_torus(mesh, 6.6, 0.13, 0.76, "coral", segments=40, sides=6)
+    for index in range(10):
+        angle = TAU * index / 10 + 0.15
+        add_ellipsoid(mesh, (5.9 * math.cos(angle), 0.95, 5.9 * math.sin(angle)), (0.45, 0.3, 0.45), "cream", slices=8, stacks=4)
+    lathe(
+        mesh,
+        [(0.0, 0.7, "wood"), (1.0, 0.7, "wood"), (0.7, 1.2, "coral"), (0.45, 2.0, "cream"), (0.5, 2.8, "coral"), (0.45, 3.6, "cream"), (1.1, 4.1, "mint"), (0.0, 4.5, "cream")],
+        24,
+    )
+    for index in range(6):
+        angle = TAU * index / 6
+        x, z = 4.4 * math.cos(angle), 4.4 * math.sin(angle)
+        add_cylinder_between(mesh, (0, 0.95, 0), (x, 0.95, z), 0.14, 0.14, "coral", 8)
+        add_vertical_cylinder(mesh, 1.2, 0.74, 0.9, "mint", 20, x, z)
+    add_star(mesh, 5.1, 0.45, "gold")
+    return mesh
+
+
+def make_reindeer() -> Mesh:
+    """A reindeer (base at y=0, facing +Z): brown body, cream chest, antlers, red nose, and a mint saddle at about y=1.5."""
+    mesh = Mesh("ParkParkReindeer")
+    add_ellipsoid(mesh, (0, 1.0, -0.1), (0.7, 0.62, 1.35), "wood", slices=14, stacks=7)
+    add_ellipsoid(mesh, (0, 0.95, 0.75), (0.5, 0.5, 0.5), "cream", slices=10, stacks=6)
+    for sx in (-1, 1):
+        for sz in (-0.75, 0.6):
+            add_cylinder_between(mesh, (sx * 0.38, 0.8, sz), (sx * 0.38, 0.0, sz), 0.13, 0.1, "wood", 6)
+            add_box(mesh, (sx * 0.38, 0.05, sz + 0.06), (0.22, 0.12, 0.3), "ink")
+    add_cylinder_between(mesh, (0, 1.2, 1.0), (0, 2.0, 1.45), 0.26, 0.2, "wood", 8)
+    add_ellipsoid(mesh, (0, 2.1, 1.65), (0.3, 0.28, 0.4), "wood", slices=10, stacks=6)
+    add_ellipsoid(mesh, (0, 2.0, 2.0), (0.16, 0.15, 0.14), "coral", slices=8, stacks=4)
+    for sx in (-1, 1):
+        add_ellipsoid(mesh, (sx * 0.14, 2.28, 1.88), (0.05, 0.06, 0.04), "ink", slices=5, stacks=3)
+        add_cylinder_between(mesh, (sx * 0.16, 2.35, 1.55), (sx * 0.5, 2.95, 1.45), 0.05, 0.04, "gold", 5)
+        add_cylinder_between(mesh, (sx * 0.5, 2.95, 1.45), (sx * 0.75, 3.35, 1.4), 0.04, 0.03, "gold", 5)
+        add_cylinder_between(mesh, (sx * 0.4, 2.8, 1.5), (sx * 0.6, 2.9, 1.8), 0.03, 0.03, "gold", 5)
+        add_ellipsoid(mesh, (sx * 0.2, 2.35, 1.45), (0.1, 0.18, 0.06), "cream", slices=6, stacks=4)
+    add_box(mesh, (0, 1.47, -0.2), (1.0, 0.14, 0.9), "mint")
+    add_box(mesh, (0, 1.8, -0.62), (1.0, 0.6, 0.12), "mint")
+    add_ellipsoid(mesh, (0, 1.0, -1.5), (0.18, 0.2, 0.2), "cream", slices=6, stacks=4)
+    return mesh
+
+
+def make_snowflake_hub() -> Mesh:
+    """Rotating snowflake deck: a pale-blue disc with six crystal arms in relief, a crystal tower, and a pedestal per pod."""
+    mesh = Mesh("ParkParkSnowflakeHub")
+    add_vertical_cylinder(mesh, 8.2, 0.0, 0.6, "faded_mint", 44)
+    add_vertical_cylinder(mesh, 8.25, 0.0, 0.45, "cream", 44)
+    add_torus(mesh, 8.0, 0.14, 0.62, "mint", segments=44, sides=6)
+    for index in range(6):
+        angle = TAU * index / 6 + TAU / 12
+        add_cylinder_between(mesh, (0, 0.66, 0), (7.2 * math.cos(angle), 0.66, 7.2 * math.sin(angle)), 0.16, 0.16, "cream", 6)
+    lathe(
+        mesh,
+        [(0.0, 0.6, "wood"), (1.4, 0.6, "wood"), (1.0, 1.4, "mint"), (0.6, 2.2, "cream"), (0.9, 3.4, "mint"), (0.45, 5.0, "cream"), (0.0, 6.6, "mint")],
+        8,
+    )
+    for index in range(6):
+        angle = TAU * index / 6
+        x, z = 5.4 * math.cos(angle), 5.4 * math.sin(angle)
+        add_cylinder_between(mesh, (0, 0.9, 0), (x, 0.9, z), 0.18, 0.18, "mint", 8)
+        add_vertical_cylinder(mesh, 1.5, 0.6, 0.9, "cream", 24, x, z)
+        add_vertical_cylinder(mesh, 1.2, 0.9, 0.98, "mint", 24, x, z)
+    add_star(mesh, 7.0, 0.5, "gold")
+    return mesh
+
+
+def make_snow_pod() -> Mesh:
+    """A round snow pod (base at y=0): a cream shell with a mint rim and a seat on top at about y=1.72."""
+    mesh = Mesh("ParkParkSnowPod")
+    add_ellipsoid(mesh, (0, 0.95, 0), (1.0, 0.75, 1.0), "cream", slices=14, stacks=7)
+    add_torus(mesh, 1.0, 0.12, 1.0, "mint", segments=18, sides=6)
+    for angle in (0.0, 2.094, 4.188):
+        add_ellipsoid(mesh, (0.95 * math.cos(angle), 0.9, 0.95 * math.sin(angle)), (0.2, 0.2, 0.2), "coral", slices=6, stacks=4)
+    add_box(mesh, (0, 1.72, -0.2), (0.9, 0.14, 1.0), "mint")
+    for side in (-1, 1):
+        add_cylinder_between(mesh, (side * 0.5, 1.75, 0.35), (side * 0.5, 2.3, 0.7), 0.05, 0.05, "gold", 5)
+    add_cylinder_between(mesh, (0, 0.0, 0.0), (0, 0.5, 0.0), 0.09, 0.09, "gold", 6)
+    return mesh
+
+
+def make_shop_cookie() -> Mesh:
+    """Cookie stall: cream walls, a mint-and-coral awning, and a giant gingerbread man on the roof."""
+    mesh = Mesh("ParkParkShopCookie")
+    shop_base(mesh, "cream", "mint", "coral")
+    add_ellipsoid(mesh, (0, 6.4, 0), (0.95, 1.15, 0.3), "wood", slices=10, stacks=6)
+    add_ellipsoid(mesh, (0, 7.95, 0), (0.7, 0.7, 0.3), "wood", slices=10, stacks=6)
+    for sx in (-1, 1):
+        add_ellipsoid(mesh, (sx * 1.35, 6.9, 0), (0.75, 0.3, 0.28), "wood", slices=8, stacks=4)
+        add_ellipsoid(mesh, (sx * 0.5, 5.35, 0), (0.32, 0.8, 0.28), "wood", slices=8, stacks=4)
+        add_ellipsoid(mesh, (sx * 0.25, 8.05, 0.28), (0.07, 0.07, 0.04), "ink", slices=5, stacks=3)
+    for y in (6.9, 6.3, 5.7):
+        add_ellipsoid(mesh, (0, y, 0.28), (0.12, 0.12, 0.05), "gold", slices=6, stacks=4)
+    add_box(mesh, (0, 7.65, 0.3), (0.4, 0.05, 0.04), "coral")
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -3063,6 +3164,11 @@ def main() -> None:
         make_ice_cave(),
         make_snow_mound(),
         make_shop_cocoa(),
+        make_reindeer_hub(),
+        make_reindeer(),
+        make_snowflake_hub(),
+        make_snow_pod(),
+        make_shop_cookie(),
         make_swan(),
         make_swan(v2=True),
         make_sky_car(v2=True),
