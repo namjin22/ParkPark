@@ -34,6 +34,7 @@ local mechanicService = require(script.Parent.Services.MechanicService)
 local decorShopService = require(script.Parent.Services.DecorShopService)
 local snowService = require(script.Parent.Services.SnowService)
 local spaceService = require(script.Parent.Services.SpaceService)
+local dailyService = require(script.Parent.Services.DailyService)
 local travelService = require(script.Parent.Services.TravelService)
 local extraRideService = require(script.Parent.Services.ExtraRideService)
 
@@ -82,6 +83,13 @@ speedShopService.Start(
 	noticeService.Send,
 	persistenceService.GetSpeedLevel,
 	persistenceService.SetSpeedLevel
+)
+dailyService.Start(
+	park,
+	economyService.AwardCoins,
+	noticeService.Send,
+	persistenceService.GetDaily,
+	persistenceService.SetDaily
 )
 dayNightService.Start(park, noticeService.Send)
 bumperCarService.Start(park)

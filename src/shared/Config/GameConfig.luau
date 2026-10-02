@@ -1022,6 +1022,12 @@ return {
 	SpeedLevelCosts = { 1500, 6000, 20000, 60000, 150000 } :: { number },
 	SpeedPerLevel = 4,
 
+	-- Daily bonus: this share of the summed fares of all repaired attractions (at least DailyMinimum), times the
+	-- multiplier for the day of the streak (day 1 to 7).
+	DailyFareShare = 6,
+	DailyMinimum = 300,
+	DailyStreakMultipliers = { 1, 1.2, 1.4, 1.6, 2, 2.5, 4 } :: { number },
+
 	-- Guest milestones: once the park has boarded this many guests the next goal pays its reward to everyone.
 	Goals = {
 		{ Boarded = 50, Reward = 900 },

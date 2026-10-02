@@ -44,6 +44,8 @@ type Profile = {
 	status: string, -- "loading" | "ok" | "failed"
 	coins: number?,
 	speed: number,
+	lastDay: number,
+	streak: number,
 	park: SavedState?,
 	lastCoins: number,
 	dirty: boolean,
@@ -239,6 +241,8 @@ local function loadProfile(player: Player): Profile
 		status = "loading",
 		coins = nil,
 		speed = 0,
+		lastDay = 0,
+		streak = 0,
 		park = nil,
 		lastCoins = 0,
 		dirty = false,
@@ -250,6 +254,16 @@ local function loadProfile(player: Player): Profile
 	profiles[player] = profile
 
 	local store = ensureBackend()
+	-- Test hook: a ServerStorage StringValue `DebugResetSave` holding this user's id deletes their saved profile once,
+	-- before it is read (the Studio assistant cannot reach DataStores itself, so test saves are cleared this way).
+	local resetFlag = ServerStorage:FindFirstChild("DebugResetSave")
+	if resetFlag and resetFlag:IsA("StringValue") and resetFlag.Value == tostring(player.UserId) then
+		resetFlag:Destroy()
+		local removed = pcall(function()
+			store.remove(profile.key)
+		end)
+		print("[ParkPark] DebugResetSave: deleted the saved profile for " .. tostring(player.UserId), removed)
+	end
 	local locked = false
 	local loaded = false
 	local data: any = nil
@@ -310,6 +324,8 @@ local function loadProfile(player: Player): Profile
 		profile.coins = asNumber(data.Coins, 0, MAX_COINS, GameConfig.StartingCoins)
 	end
 	profile.speed = asNumber(data.Speed, 0, #GameConfig.SpeedLevelCosts, 0)
+	profile.lastDay = asNumber(data.LastDay, 0, 1e6, 0)
+	profile.streak = asNumber(data.Streak, 0, #GameConfig.DailyStreakMultipliers, 0)
 	profile.park = sanitizePark(data)
 	profile.status = "ok"
 	return profile
@@ -350,6 +366,8 @@ local function saveProfile(profile: Profile, release: boolean): boolean
 			record.Version = SAVE_VERSION
 			record.Coins = coins
 			record.Speed = profile.speed
+			record.LastDay = profile.lastDay
+			record.Streak = profile.streak
 			if snapshot then
 				record.Park = snapshot.Park
 				record.Rides = snapshot.Rides
@@ -399,6 +417,26 @@ function PersistenceService.SetSpeedLevel(player: Player, level: number)
 	local profile = profiles[player]
 	if profile and profile.status == "ok" then
 		profile.speed = math.clamp(level, 0, #GameConfig.SpeedLevelCosts)
+		profile.dirty = true
+		profile.urgent = true
+	end
+end
+
+-- A player's daily-bonus state: the UTC day number of the last bonus and the current streak.
+function PersistenceService.GetDaily(player: Player): (number, number)
+	local profile = profiles[player]
+	if profile and profile.status == "ok" then
+		return profile.lastDay, profile.streak
+	end
+	-- Not loaded (or the load failed): report today so no bonus is paid and nothing is overwritten.
+	return os.time() // 86400, 0
+end
+
+function PersistenceService.SetDaily(player: Player, day: number, streak: number)
+	local profile = profiles[player]
+	if profile and profile.status == "ok" then
+		profile.lastDay = day
+		profile.streak = streak
 		profile.dirty = true
 		profile.urgent = true
 	end
