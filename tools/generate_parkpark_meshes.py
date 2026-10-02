@@ -2808,6 +2808,138 @@ def make_rocket() -> Mesh:
     return mesh
 
 
+def make_show_stage() -> Mesh:
+    """A flower-trimmed show stage (origin at the ground centre, audience on the +Z side): a raised platform with
+    steps, a proscenium arch with curtains, a painted backdrop, and spotlights on a truss."""
+    mesh = Mesh("ParkParkShowStage")
+    add_box(mesh, (0, 0.6, 0), (12.0, 1.2, 9.0), "wood")
+    add_box(mesh, (0, 1.22, 0), (12.2, 0.1, 9.2), "gold")
+    for index in range(3):
+        add_box(mesh, (0, 0.2 + index * 0.2, 5.0 + (2 - index) * 0.6), (5.0, 0.4 + index * 0.4, 0.8), "cream")
+    # Backdrop with a big star, and the proscenium arch.
+    add_box(mesh, (0, 4.2, -4.3), (11.0, 6.0, 0.4), "cream")
+    add_star(mesh, 4.6, 1.6, "gold", 0.0, -4.0)
+    for side in (-1, 1):
+        add_vertical_cylinder(mesh, 0.55, 1.2, 7.4, "coral", 14, side * 5.6, 3.6)
+        add_ellipsoid(mesh, (side * 5.6, 7.6, 3.6), (0.8, 0.5, 0.8), "gold", slices=8, stacks=4)
+        add_box(mesh, (side * 4.6, 4.4, 3.2), (1.6, 6.4, 0.5), "mint")
+    add_box(mesh, (0, 7.2, 3.6), (12.4, 1.0, 0.8), "coral")
+    add_box(mesh, (0, 7.8, 3.6), (10.0, 0.4, 0.6), "gold")
+    # Truss with spotlights and a row of flowers along the stage edge.
+    add_box(mesh, (0, 6.4, 3.0), (11.0, 0.18, 0.18), "ink")
+    for index in range(5):
+        x = -4.4 + index * 2.2
+        add_cylinder_between(mesh, (x, 6.4, 3.0), (x, 5.6, 2.2), 0.09, 0.09, "ink", 5)
+        add_ellipsoid(mesh, (x, 5.4, 2.0), (0.34, 0.34, 0.34), "gold", slices=8, stacks=4)
+    for index in range(9):
+        x = -5.2 + index * 1.3
+        add_ellipsoid(mesh, (x, 1.45, 4.3), (0.32, 0.22, 0.32), "coral" if index % 2 else "cream", slices=6, stacks=3)
+    return mesh
+
+
+def make_ice_hub() -> Mesh:
+    """Rotating ice-rink deck: a frosted disc, a crystal tower, and a turntable per penguin sled."""
+    mesh = Mesh("ParkParkIceHub")
+    add_vertical_cylinder(mesh, 8.2, 0.0, 0.6, "cream", 44)
+    add_vertical_cylinder(mesh, 8.25, 0.0, 0.45, "mint", 44)
+    add_vertical_cylinder(mesh, 7.4, 0.6, 0.72, "faded_mint", 44)
+    add_torus(mesh, 8.0, 0.14, 0.62, "cream", segments=44, sides=6)
+    lathe(
+        mesh,
+        [(0.0, 0.7, "wood"), (1.5, 0.7, "wood"), (1.0, 1.5, "mint"), (0.7, 2.6, "cream"), (1.0, 3.6, "mint"), (0.55, 5.0, "cream"), (0.0, 6.6, "mint")],
+        8,
+    )
+    for index in range(6):
+        angle = TAU * index / 6
+        x, z = 5.4 * math.cos(angle), 5.4 * math.sin(angle)
+        add_cylinder_between(mesh, (0, 0.95, 0), (x, 0.95, z), 0.18, 0.18, "cream", 8)
+        add_vertical_cylinder(mesh, 1.5, 0.72, 0.95, "mint", 24, x, z)
+    add_star(mesh, 7.3, 0.5, "gold")
+    return mesh
+
+
+def make_penguin() -> Mesh:
+    """A penguin sled (base at y=0, facing +Z): a coral sled with runners, a penguin up front, a cushion behind."""
+    mesh = Mesh("ParkParkPenguin")
+    add_box(mesh, (0, 0.45, 0), (1.3, 0.22, 2.9), "coral")
+    for side in (-1, 1):
+        add_cylinder_between(mesh, (side * 0.55, 0.12, -1.5), (side * 0.55, 0.12, 1.5), 0.08, 0.08, "ink", 5)
+        add_box(mesh, (side * 0.55, 0.28, 0.9), (0.08, 0.3, 0.08), "ink")
+        add_box(mesh, (side * 0.55, 0.28, -0.9), (0.08, 0.3, 0.08), "ink")
+    add_box(mesh, (0, 0.62, -0.55), (1.0, 0.14, 0.9), "mint")
+    # Penguin: dark body, white belly, round head, beak, flippers.
+    add_ellipsoid(mesh, (0, 1.25, 1.0), (0.55, 0.8, 0.5), "ink", slices=10, stacks=6)
+    add_ellipsoid(mesh, (0, 1.2, 1.28), (0.38, 0.62, 0.25), "cream", slices=8, stacks=5)
+    add_ellipsoid(mesh, (0, 2.15, 1.0), (0.42, 0.4, 0.4), "ink", slices=10, stacks=6)
+    add_box(mesh, (0, 2.1, 1.4), (0.2, 0.1, 0.34), "gold")
+    for side in (-1, 1):
+        add_ellipsoid(mesh, (side * 0.18, 2.25, 1.32), (0.07, 0.08, 0.05), "cream", slices=5, stacks=3)
+        add_ellipsoid(mesh, (side * 0.62, 1.3, 1.0), (0.12, 0.45, 0.22), "ink", slices=6, stacks=4)
+        add_box(mesh, (side * 0.22, 0.58, 1.3), (0.28, 0.08, 0.34), "gold")
+    return mesh
+
+
+def make_ice_cave() -> Mesh:
+    """An igloo (origin at the ground centre, entrance tunnel on the +Z side): ice-block dome, glowing windows,
+    a pennant, and a lantern at the door."""
+    mesh = Mesh("ParkParkIceCave")
+    add_vertical_cylinder(mesh, 8.6, 0.0, 0.3, "faded_cream", 40)
+    profile = []
+    rows = 7
+    for row in range(rows + 1):
+        t = row / rows
+        angle = t * math.pi / 2
+        radius = 7.6 * math.cos(angle)
+        y = 0.3 + 6.4 * math.sin(angle)
+        material = "cream" if row % 2 == 0 else "mint"
+        profile.append((max(radius, 0.001), y, material))
+    lathe(mesh, profile, 28)
+    # Entrance tunnel toward +Z with an arch.
+    add_box(mesh, (0, 1.6, 8.2), (4.2, 3.2, 4.0), "cream")
+    add_box(mesh, (0, 3.35, 8.2), (4.6, 0.4, 4.4), "mint")
+    add_box(mesh, (0, 1.4, 10.25), (2.2, 2.8, 0.2), "ink")
+    for side in (-1, 1):
+        add_ellipsoid(mesh, (side * 2.4, 1.0, 10.3), (0.5, 0.5, 0.5), "mint", slices=6, stacks=4)
+    add_cylinder_between(mesh, (0, 3.6, 10.2), (0, 3.0, 10.2), 0.04, 0.04, "ink", 4)
+    add_ellipsoid(mesh, (0, 2.8, 10.2), (0.22, 0.28, 0.22), "gold", slices=8, stacks=4)
+    # Round windows, a chimney, and a pennant on top.
+    for angle in (0.7, 2.4, 4.0, 5.4):
+        add_ellipsoid(mesh, (5.4 * math.cos(angle), 3.4, 5.4 * math.sin(angle)), (0.7, 0.7, 0.3), "gold", slices=8, stacks=4)
+    add_cylinder_between(mesh, (0, 6.7, 0), (0, 8.4, 0), 0.07, 0.05, "wood", 5)
+    add_box(mesh, (0.5, 8.0, 0), (1.0, 0.55, 0.06), "coral")
+    return mesh
+
+
+def make_snow_mound() -> Mesh:
+    """A snowy bouncing mound (origin at the ground centre): a soft round hill with snowmen around the edge."""
+    mesh = Mesh("ParkParkSnowMound")
+    add_vertical_cylinder(mesh, 6.8, 0.0, 0.9, "cream", 36)
+    lathe(mesh, [(6.6, 0.9, "cream"), (5.2, 1.3, "faded_cream"), (3.0, 1.55, "cream"), (0.0, 1.6, "cream")], 28)
+    for index in range(4):
+        angle = TAU * index / 4 + math.pi / 4
+        x, z = 6.6 * math.cos(angle), 6.6 * math.sin(angle)
+        add_ellipsoid(mesh, (x, 1.1, z), (0.95, 0.95, 0.95), "cream", slices=10, stacks=6)
+        add_ellipsoid(mesh, (x, 2.4, z), (0.7, 0.7, 0.7), "cream", slices=10, stacks=6)
+        add_ellipsoid(mesh, (x, 3.4, z), (0.5, 0.5, 0.5), "cream", slices=10, stacks=6)
+        add_box(mesh, (x, 3.95, z), (0.75, 0.5, 0.75), "coral")
+        add_box(mesh, (x, 3.4, z + 0.5), (0.1, 0.1, 0.4), "gold")
+    for index in range(10):
+        angle = TAU * index / 10 + 0.2
+        add_ellipsoid(mesh, (5.4 * math.cos(angle), 1.5, 5.4 * math.sin(angle)), (0.7, 0.5, 0.7), "mint" if index % 2 else "cream", slices=6, stacks=4)
+    return mesh
+
+
+def make_shop_cocoa() -> Mesh:
+    """Cocoa stall: dark wooden walls and a giant steaming mug on the roof."""
+    mesh = Mesh("ParkParkShopCocoa")
+    shop_base(mesh, "wood", "coral", "cream")
+    lathe(mesh, [(0.0, 5.0, "coral"), (1.4, 5.0, "coral"), (1.5, 6.9, "cream"), (1.4, 7.1, "gold"), (0.0, 6.7, "wood")], 20)
+    add_ellipsoid(mesh, (1.75, 6.2, 0.0), (0.2, 0.55, 0.45), "cream", slices=8, stacks=4)
+    for dx in (-0.5, 0.0, 0.5):
+        add_ellipsoid(mesh, (dx, 7.6 + abs(dx), 0.0), (0.22, 0.4, 0.22), "faded_cream", slices=6, stacks=4)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -2925,6 +3057,12 @@ def main() -> None:
         make_shop_pizza(),
         make_shop_noodle(),
         make_swan_hub(),
+        make_show_stage(),
+        make_ice_hub(),
+        make_penguin(),
+        make_ice_cave(),
+        make_snow_mound(),
+        make_shop_cocoa(),
         make_swan(),
         make_swan(v2=True),
         make_sky_car(v2=True),

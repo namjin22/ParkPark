@@ -9,6 +9,7 @@ local GameConfig = require(script.Parent:WaitForChild("GameConfig"))
 --   Carousel: `Hub` turns and the `Seat1..N` parts bob up and down on their poles.
 --   Bounce:   the `Seat1..N` parts hop up and down in turn on a fixed pad.
 --   Hidden:   guests walk in and are out of sight for the tour (like the haunted house); `Seat1..N` are markers.
+--   Static:   guests stand in front of a fixed attraction (a stage); `Seat1..N` are ground markers.
 --   Shop:     a counter (`Counter` part) where the head guest is served, like the snack stand.
 --   Track:    a `<CarsName>` model with `<CarPrefix>1..N` cars runs a closed loop (TrackService, config keys
 --             `<TrackPrefix>Scale`, `<TrackPrefix>CarCount`, ...; the path is the generated `<PathModule>`).
@@ -157,6 +158,53 @@ local ExtraRides: { [string]: ExtraSpec } = {
 		SpinSeconds = 5,
 		HubRadius = 8.2,
 		SeatOrbit = 5.4,
+	},
+	Show = {
+		Kind = "Static",
+		Template = GameConfig.Rides.Show.ModelName,
+		Scale = GameConfig.StageScale,
+		SeatCount = 8,
+		SeatLift = 0,
+		RiderHip = 3,
+	},
+	Penguin = {
+		Kind = "Spinner",
+		Template = GameConfig.Rides.Penguin.ModelName,
+		Scale = GameConfig.PenguinScale,
+		SeatCount = 6,
+		SeatLift = -0.6,
+		SeatForward = 0.6,
+		RiderHip = 1.4,
+		HubSeconds = 13,
+		SpinSeconds = 6,
+		HubRadius = 8.2,
+		SeatOrbit = 5.4,
+	},
+	Sled = {
+		Kind = "Bounce",
+		Template = GameConfig.Rides.Sled.ModelName,
+		Scale = GameConfig.SledScale,
+		SeatCount = 6,
+		SeatLift = 0,
+		RiderHip = 2.4,
+		BounceHeight = 4,
+		BouncePeriod = 1.3,
+	},
+	Cave = {
+		Kind = "Hidden",
+		Template = GameConfig.Rides.Cave.ModelName,
+		Scale = GameConfig.CaveScale,
+		SeatCount = 6,
+		SeatLift = 0,
+		RiderHip = 0,
+	},
+	Cocoa = {
+		Kind = "Shop",
+		Template = GameConfig.Rides.Cocoa.ModelName,
+		Scale = GameConfig.ShopScale,
+		SeatCount = 1,
+		SeatLift = 0,
+		RiderHip = 0,
 	},
 	Maze = {
 		Kind = "Hidden",

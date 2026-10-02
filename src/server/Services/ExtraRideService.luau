@@ -156,6 +156,22 @@ local function buildGraybox(key: string, spec: ExtraSpec): Model
 		counter.CanCollide = false
 		hide(counter)
 		consolePosition = Vector3.new(-16, 1.5, 6)
+	elseif spec.Kind == "Static" then
+		-- A stage: a block with an audience of ground markers in front of it (its +Z side).
+		makePart(
+			model,
+			"Pad",
+			Vector3.new(12 * scale, 4 * scale, 9 * scale),
+			Vector3.new(0, 2 * scale, 0),
+			Color3.fromRGB(235, 122, 108),
+			nil
+		)
+		for index = 1, spec.SeatCount do
+			local column = (index - 1) % 4
+			local row = (index - 1) // 4
+			makeSeatMarker(model, index, Vector3.new((column - 1.5) * 3 * scale, 0.1, (7 + row * 2.5) * scale))
+		end
+		consolePosition = Vector3.new(-24, 1.5, 22)
 	elseif spec.Kind == "Hidden" then
 		makePart(
 			model,

@@ -82,6 +82,10 @@ MAZE_SCALE = config_number("MazeScale")
 PINE_SCALE = config_number("PineScale")
 ROCK_SCALE = config_number("RockScale")
 SHOP_SCALE = config_number("ShopScale")
+STAGE_SCALE = config_number("StageScale")
+PENGUIN_SCALE = config_number("PenguinScale")
+SLED_SCALE = config_number("SledScale")
+CAVE_SCALE = config_number("CaveScale")
 SWAN_SCALE = config_number("SwanScale")
 BALLPIT_SCALE = config_number("BallPitScale")
 ROCKET_SCALE = config_number("RocketScale")
@@ -342,9 +346,13 @@ def main() -> None:
     build_track_ride("Sky", "SkyRide", "SkyTrack", "SkyCar", "SkyCars", SKY_SCALE, 18, -30)
     build_maze()
     build_swan()
+    build_stage()
+    build_penguin()
+    build_sled()
+    build_cave()
     build_ball_pit()
     build_rocket()
-    for shop_template, shop_obj in (("IceCreamShop", "ParkParkShopIceCream"), ("PizzaShop", "ParkParkShopPizza"), ("NoodleShop", "ParkParkShopNoodle")):
+    for shop_template, shop_obj in (("IceCreamShop", "ParkParkShopIceCream"), ("PizzaShop", "ParkParkShopPizza"), ("NoodleShop", "ParkParkShopNoodle"), ("CocoaShop", "ParkParkShopCocoa")):
         build_shop(shop_template, shop_obj)
     build_flume()
     build_decor()
@@ -935,6 +943,102 @@ def build_rocket() -> None:
                 cylinder_collider("ColumnCollider", (0, 3.0, 0), 5.0, 2.2, ROCKET_SCALE),
                 *rockets,
                 console("Console", -26, 24, 0),
+            ],
+        ),
+    )
+
+
+def build_stage() -> None:
+    if missing_meshes(("ParkParkShowStage",)):
+        print("skipped ShowStage: import ParkParkShowStage and record its mesh ID first")
+        return
+
+    # The stage is turned 180 so the imported mesh matches the OBJ layout (audience on +Z). The `Seat<N>` markers are
+    # ground spots in front of it where watching guests stand.
+    seats = []
+    for index in range(8):
+        column, row = index % 4, index // 4
+        seats.append(box_collider(f"Seat{index + 1}", ((column - 1.5) * 3, 0.1, 7 + row * 2.5), (1, 0.2, 1), 0, STAGE_SCALE))
+    write(
+        "ShowStage",
+        model(
+            "ShowStage",
+            [
+                mesh_part("Pad", "ParkParkShowStage", (0, 0, 0), 180, False, CORAL, STAGE_SCALE),
+                box_collider("Collider", (0, 1.4, 0), (12.4, 2.8, 9.4), 0, STAGE_SCALE),
+                *seats,
+                console("Console", -24, 22, 0),
+            ],
+        ),
+    )
+
+
+def build_penguin() -> None:
+    needed = ("ParkParkIceHub", "ParkParkPenguin")
+    missing = missing_meshes(needed)
+    if missing:
+        print(f"skipped PenguinRide: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    sleds = []
+    for index in range(6):
+        angle = 2 * math.pi * index / 6
+        origin = (5.4 * math.cos(angle), 0.98, 5.4 * math.sin(angle))
+        sleds.append(mesh_part(f"Seat{index + 1}", "ParkParkPenguin", origin, 0, False, CREAM, PENGUIN_SCALE))
+    write(
+        "PenguinRide",
+        model(
+            "PenguinRide",
+            [
+                mesh_part("Hub", "ParkParkIceHub", (0, 0, 0), 0, False, MINT, PENGUIN_SCALE),
+                cylinder_collider("HubCollider", (0, 0.5, 0), 1.0, 16.8, PENGUIN_SCALE),
+                cylinder_collider("ColumnCollider", (0, 3.0, 0), 5.0, 2.2, PENGUIN_SCALE),
+                *sleds,
+                console("Console", -26, 24, 0),
+            ],
+        ),
+    )
+
+
+def build_sled() -> None:
+    if missing_meshes(("ParkParkSnowMound",)):
+        print("skipped SledRide: import ParkParkSnowMound and record its mesh ID first")
+        return
+
+    seats = []
+    for index in range(6):
+        angle = 2 * math.pi * index / 6
+        seats.append(box_collider(f"Seat{index + 1}", (3.2 * math.cos(angle), 1.6, 3.2 * math.sin(angle)), (1, 0.2, 1), 0, SLED_SCALE))
+    write(
+        "SledRide",
+        model(
+            "SledRide",
+            [
+                mesh_part("Pad", "ParkParkSnowMound", (0, 0, 0), 180, False, CREAM, SLED_SCALE),
+                cylinder_collider("Collider", (0, 0.9, 0), 1.8, 14.0, SLED_SCALE),
+                *seats,
+                console("Console", -24, 24, 0),
+            ],
+        ),
+    )
+
+
+def build_cave() -> None:
+    if missing_meshes(("ParkParkIceCave",)):
+        print("skipped CaveRide: import ParkParkIceCave and record its mesh ID first")
+        return
+
+    seats = [box_collider(f"Seat{index + 1}", (index, 1.0, 0), (1, 0.2, 1), 0, CAVE_SCALE) for index in range(6)]
+    write(
+        "CaveRide",
+        model(
+            "CaveRide",
+            [
+                mesh_part("Pad", "ParkParkIceCave", (0, 0, 0), 180, False, MINT, CAVE_SCALE),
+                cylinder_collider("Collider", (0, 3.5, 0), 7.0, 15.4, CAVE_SCALE),
+                box_collider("TunnelCollider", (0, 1.6, 8.2), (4.6, 3.2, 4.2), 0, CAVE_SCALE),
+                *seats,
+                console("Console", -24, 30, 0),
             ],
         ),
     )

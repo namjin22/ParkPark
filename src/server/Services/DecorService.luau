@@ -59,10 +59,17 @@ local function blockedByStructures(x: number, z: number, margin: number): boolea
 			ParkLayout.GeneratorPosition,
 			ParkLayout.JanitorCartPosition,
 			ParkLayout.SpeedShopPosition,
+			ParkLayout.MechanicShopPosition,
+			ParkLayout.DecorShopPosition,
 			Vector3.new(-32, 0, 52),
 		}
 	do
 		if nearCircle(x, z, spot, 6, 6 + margin) then
+			return true
+		end
+	end
+	for _, plot in ParkLayout.DecorPlots do
+		if nearCircle(x, z, plot, 4, 5 + margin) then
 			return true
 		end
 	end
@@ -281,6 +288,8 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 	end
 	local kids = ParkLayout.ZoneBounds.Kids
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, kids.MinZ, kids.BoundaryZ })
+	local winter = ParkLayout.ZoneBounds.Winter
+	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, winter.MinZ, winter.BoundaryZ })
 	local adventure = ParkLayout.ZoneBounds.Adventure
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, adventure.MinZ, adventure.BoundaryZ })
 	local function zoneBlocked(x: number, z: number, margin: number): boolean
@@ -437,6 +446,34 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 		if not zoneBlocked(position.X, position.Z, 0) then
 			local _, yaw = CFrame.lookAt(position, position + Vector3.new(-side, 0, 0)):ToOrientation()
 			place("DecorBench", position, yaw, 2.5)
+		end
+	end
+
+	-- The winter zone: snowy pines and boulders, with lamps and benches along its road.
+	local winterProps: { { kind: string, count: number, margin: number, radius: number } } = {
+		{ kind = "DecorPine", count = 45, margin = 7, radius = 4.5 },
+		{ kind = "DecorRock", count = 25, margin = 6, radius = 4 },
+		{ kind = "DecorBush", count = 12, margin = 4, radius = 2 },
+	}
+	for _, prop in winterProps do
+		local made = 0
+		local tries = 0
+		while made < prop.count and tries < 3000 do
+			tries += 1
+			local x = random:NextNumber(-WORLD_X, WORLD_X)
+			local z = random:NextNumber(winter.MinZ + 6, winter.BoundaryZ - 8)
+			if not zoneBlocked(x, z, prop.margin) and clear(x, z, prop.radius) then
+				place(prop.kind, Vector3.new(x, 0, z), random:NextNumber(0, math.pi * 2), prop.radius)
+				made += 1
+			end
+		end
+	end
+	for z = winter.BoundaryZ - 16, winter.MinZ + 12, -24 do
+		for _, side in { -1, 1 } do
+			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
+			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then
+				place("DecorLamp", spot, 0, 1.5)
+			end
 		end
 	end
 

@@ -206,7 +206,10 @@ function PowerService.Start(park: PowerReferences, awardCoins: AwardCoins, notif
 		end
 		popup(GENERATOR_POSITION + Vector3.new(0, 12, 0), "정전!")
 
-		task.delay(GameConfig.PowerOutageTimeoutSeconds, function()
+		-- Mechanics (hired at the repair shop) shorten the wait for the power to return by itself.
+		local mechanics = (park.ParkFolder:GetAttribute("Mechanics") :: number?) or 0
+		local timeout = GameConfig.MechanicTimeouts[mechanics] or GameConfig.PowerOutageTimeoutSeconds
+		task.delay(timeout, function()
 			-- Nobody restored it in time: power returns on its own, without the bonus.
 			if token == outageToken and park.ParkFolder:GetAttribute("PowerOut") == true then
 				restore(nil)

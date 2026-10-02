@@ -48,15 +48,39 @@ ParkLayout.ZoneBranchZ = {
 	Swan = -282,
 	BallPit = -437,
 	Rocket = -656,
+	Show = -282,
+	Penguin = -945,
+	Sled = -945,
+	Cave = -1060,
+	Cocoa = -1060,
 } :: { [string]: number }
 ParkLayout.ZoneBounds = {
 	Water = { BoundaryZ = -168, MinZ = -361 },
 	Kids = { BoundaryZ = -361, MinZ = -617 },
 	Adventure = { BoundaryZ = -617, MinZ = -927 },
+	Winter = { BoundaryZ = -927, MinZ = -1190 },
 } :: { [string]: { BoundaryZ: number, MinZ: number } }
 ParkLayout.GeneratorPosition = Vector3.new(24, 0, 52)
 -- The speed shop stands beside the spawn path.
 ParkLayout.SpeedShopPosition = Vector3.new(-26, 0, 72)
+-- The repair shop (mechanics) beside the generator and the decor shop opposite the speed shop.
+ParkLayout.MechanicShopPosition = Vector3.new(24, 0, 68)
+ParkLayout.DecorShopPosition = Vector3.new(26, 0, 90)
+-- Plots around the plaza that the decor shop fills one by one.
+ParkLayout.DecorPlots = {
+	Vector3.new(-48, 0, 50),
+	Vector3.new(-48, 0, 70),
+	Vector3.new(-48, 0, 90),
+	Vector3.new(-72, 0, 60),
+	Vector3.new(-72, 0, 80),
+	Vector3.new(-72, 0, 98),
+	Vector3.new(46, 0, 96),
+	Vector3.new(72, 0, 94),
+	Vector3.new(96, 0, 72),
+	Vector3.new(96, 0, 94),
+	Vector3.new(96, 0, 50),
+	Vector3.new(46, 0, 50),
+} :: { Vector3 }
 -- The cleaning cart where janitors are hired, on the other side of the same path.
 ParkLayout.JanitorCartPosition = Vector3.new(-24, 0, 52)
 ParkLayout.GroundHalfWidth = 260
@@ -237,6 +261,37 @@ ParkLayout.Rides = {
 		Pivot = Vector3.new(-126, 0, -714),
 		PlatformRadius = 26,
 		QueueHead = Vector3.new(-126, 0, -685),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	-- The show stage (water zone) and the winter zone's rides; every queue line runs toward +Z to its branch.
+	Show = {
+		Pivot = Vector3.new(180, 0, -325),
+		PlatformRadius = 26,
+		QueueHead = Vector3.new(180, 0, -300),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Penguin = {
+		Pivot = Vector3.new(-60, 0, -1000),
+		PlatformRadius = 26,
+		QueueHead = Vector3.new(-60, 0, -970),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Sled = {
+		Pivot = Vector3.new(150, 0, -1000),
+		PlatformRadius = 26,
+		QueueHead = Vector3.new(150, 0, -970),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Cave = {
+		Pivot = Vector3.new(-60, 0, -1115),
+		PlatformRadius = 34,
+		QueueHead = Vector3.new(-60, 0, -1085),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Cocoa = {
+		Pivot = Vector3.new(110, 0, -1085),
+		PlatformRadius = 16,
+		QueueHead = Vector3.new(110, 0, -1075),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Ferris = {

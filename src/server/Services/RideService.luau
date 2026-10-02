@@ -417,6 +417,18 @@ function RideService.Start(
 				)
 			else
 				local queueLength = (model:GetAttribute("QueueLength") :: number?) or 0
+				-- Popularity stars from how long guests have been waiting (fewer minutes, more stars).
+				local wait = model:GetAttribute("AvgWait") :: number?
+				local stars = ""
+				if wait then
+					local count = if wait < 12
+						then 5
+						elseif wait < 25 then 4
+						elseif wait < 45 then 3
+						elseif wait < 70 then 2
+						else 1
+					stars = " · " .. string.rep("★", count)
+				end
 				local interval = (model:GetAttribute("StaffInterval") :: number?) or 0
 				setSign(
 					string.format("손님당 +%d %s", fare, currency),
@@ -429,16 +441,18 @@ function RideService.Start(
 					),
 					if interval > 0
 						then string.format(
-							"대기 %d/%d · 직원이 %d초마다 %s",
+							"대기 %d/%d · 직원이 %d초마다 %s%s",
 							queueLength,
 							GameConfig.QueueMax,
 							interval,
-							staffAction
+							staffAction,
+							stars
 						)
 						else string.format(
-							"대기 %d/%d · 손님에게 다가가 허용",
+							"대기 %d/%d · 손님에게 다가가 허용%s",
 							queueLength,
-							GameConfig.QueueMax
+							GameConfig.QueueMax,
+							stars
 						)
 				)
 			end
@@ -450,7 +464,7 @@ function RideService.Start(
 		if requiredModel then
 			requiredModel:GetAttributeChangedSignal("IsRepaired"):Connect(refreshBoard)
 		end
-		for _, attribute in { "QueueLength", "IncomeLevel", "StaffLevel" } do
+		for _, attribute in { "QueueLength", "IncomeLevel", "StaffLevel", "AvgWait" } do
 			model:GetAttributeChangedSignal(attribute):Connect(function()
 				publishRates()
 				refreshBoard()

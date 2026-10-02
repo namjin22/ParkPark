@@ -52,6 +52,7 @@ type GuestReferences = {
 }
 
 type Guest = {
+	joinedAt: number,
 	thrill: boolean,
 	model: Model,
 	humanoid: Humanoid,
@@ -466,6 +467,8 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		if park.ParkFolder:GetAttribute("Night") == true then
 			multiplier *= GameConfig.NightFareMultiplier
 		end
+		-- Every decor-shop plot bought adds a little to every fare.
+		multiplier *= 1 + ((park.ParkFolder:GetAttribute("PlotsBought") :: number?) or 0) * GameConfig.DecorPlotFareBonus
 		return math.floor(base * multiplier + 0.5)
 	end
 
@@ -548,6 +551,10 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			"GuestsBoarded",
 			((park.ParkFolder:GetAttribute("GuestsBoarded") :: number?) or 0) + 1
 		)
+		-- Popularity: a running average of how long arrived guests waited, which RideService turns into stars.
+		local waited = if guest.joinedAt > 0 then os.clock() - guest.joinedAt else 0
+		local average = ride.model:GetAttribute("AvgWait") :: number?
+		ride.model:SetAttribute("AvgWait", math.floor((if average then average * 0.8 + waited * 0.2 else waited) + 0.5))
 		-- Counters the quests read.
 		local function bump(name: string)
 			park.ParkFolder:SetAttribute(name, ((park.ParkFolder:GetAttribute(name) :: number?) or 0) + 1)
@@ -765,6 +772,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			lane = lane,
 			jitter = math.random(-25, 25) / 10,
 			thrill = math.random() < GameConfig.ThrillGuestChance,
+			joinedAt = 0,
 			ridesTaken = 0,
 			ride = nil,
 			slot = Vector3.zero,
@@ -822,7 +830,11 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 				local hasSeat = firstFreeSeat(rideInfo) ~= nil
 				local fare = fareOf(rideInfo)
 				for _, guest in rideInfo.queue do
+					local was = guest.arrived
 					guest.arrived = flatDistance(guest.root.Position, guest.slot) <= ARRIVAL_DISTANCE + 1
+					if guest.arrived and not was then
+						guest.joinedAt = now
+					end
 				end
 				local front = frontGuest(rideInfo)
 				for _, guest in rideInfo.queue do

@@ -30,6 +30,9 @@ local goalService = require(script.Parent.Services.GoalService)
 local dayNightService = require(script.Parent.Services.DayNightService)
 local questService = require(script.Parent.Services.QuestService)
 local speedShopService = require(script.Parent.Services.SpeedShopService)
+local mechanicService = require(script.Parent.Services.MechanicService)
+local decorShopService = require(script.Parent.Services.DecorShopService)
+local snowService = require(script.Parent.Services.SnowService)
 local travelService = require(script.Parent.Services.TravelService)
 local extraRideService = require(script.Parent.Services.ExtraRideService)
 
@@ -68,6 +71,9 @@ extraRideService.Start(park)
 travelService.Start(park)
 eventService.Start(park, noticeService.Send)
 goalService.Start(park, economyService.AwardCoins, noticeService.Send)
+mechanicService.Start(park, economyService.SpendCoins, noticeService.Send)
+decorShopService.Start(park, economyService.SpendCoins, noticeService.Send, parkBuilder.FindDecorTemplate)
+snowService.Start(park)
 speedShopService.Start(
 	park,
 	economyService.SpendCoins,
@@ -160,6 +166,8 @@ persistenceService.Start(function()
 		GuestsBoarded = (park.ParkFolder:GetAttribute("GuestsBoarded") :: number?) or 0,
 		GoalsClaimed = (park.ParkFolder:GetAttribute("GoalsClaimed") :: number?) or 0,
 		QuestIndex = (park.ParkFolder:GetAttribute("QuestIndex") :: number?) or 0,
+		Mechanics = (park.ParkFolder:GetAttribute("Mechanics") :: number?) or 0,
+		PlotsBought = (park.ParkFolder:GetAttribute("PlotsBought") :: number?) or 0,
 	}
 	for zone in gameConfig.ZoneCosts do
 		parkState["Zone_" .. zone] = park.ParkFolder:GetAttribute("Zone_" .. zone) == true
