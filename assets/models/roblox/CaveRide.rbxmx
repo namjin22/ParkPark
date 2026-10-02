@@ -1,0 +1,119 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" version="4">
+<Item class="Model" referent="RBX293"><Properties>
+<string name="Name">CaveRide</string>
+<OptionalCoordinateFrame name="WorldPivotData"><CFrame><X>0.0</X><Y>0.0</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CFrame></OptionalCoordinateFrame>
+</Properties>
+<Item class="MeshPart" referent="RBX289"><Properties>
+<string name="Name">Pad</string>
+<Content name="MeshId"><url>rbxassetid://135659635750886</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>17.2</X><Y>8.4</Y><Z>19.333</Z></Vector3>
+<Vector3 name="size"><X>37.84</X><Y>18.48</Y><Z>42.5326</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>9.24</Y><Z>2.3463</Z><R00>-1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>-1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item><Item class="Part" referent="RBX290"><Properties>
+<string name="Name">Collider</string>
+<token name="shape">2</token>
+<Vector3 name="size"><X>15.4</X><Y>33.88</Y><Z>33.88</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>7.7</Y><Z>0.0</Z><R00>0.0</R00><R01>-1.0</R01><R02>0.0</R02><R10>1.0</R10><R11>0.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX291"><Properties>
+<string name="Name">TunnelCollider</string>
+<Vector3 name="size"><X>10.12</X><Y>7.04</Y><Z>9.24</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>3.52</Y><Z>18.04</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX283"><Properties>
+<string name="Name">Seat1</string>
+<Vector3 name="size"><X>2.2</X><Y>0.44</Y><Z>2.2</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>0.0</X><Y>2.2</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX284"><Properties>
+<string name="Name">Seat2</string>
+<Vector3 name="size"><X>2.2</X><Y>0.44</Y><Z>2.2</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>2.2</X><Y>2.2</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX285"><Properties>
+<string name="Name">Seat3</string>
+<Vector3 name="size"><X>2.2</X><Y>0.44</Y><Z>2.2</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>4.4</X><Y>2.2</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX286"><Properties>
+<string name="Name">Seat4</string>
+<Vector3 name="size"><X>2.2</X><Y>0.44</Y><Z>2.2</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>6.6</X><Y>2.2</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX287"><Properties>
+<string name="Name">Seat5</string>
+<Vector3 name="size"><X>2.2</X><Y>0.44</Y><Z>2.2</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>8.8</X><Y>2.2</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="Part" referent="RBX288"><Properties>
+<string name="Name">Seat6</string>
+<Vector3 name="size"><X>2.2</X><Y>0.44</Y><Z>2.2</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>11.0</X><Y>2.2</Y><Z>0.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<float name="Transparency">1</float>
+</Properties></Item><Item class="MeshPart" referent="RBX292"><Properties>
+<string name="Name">Console</string>
+<Content name="MeshId"><url>rbxassetid://137595459068722</url></Content>
+<Content name="TextureID"><url>rbxassetid://101072742922175</url></Content>
+<Vector3 name="InitialSize"><X>1.88</X><Y>2.94</Y><Z>1.88</Z></Vector3>
+<Vector3 name="size"><X>5.64</X><Y>8.82</Y><Z>5.64</Z></Vector3>
+<CoordinateFrame name="CFrame"><X>-24.0</X><Y>4.65</Y><Z>30.0</Z><R00>1.0</R00><R01>0.0</R01><R02>0.0</R02><R10>0.0</R10><R11>1.0</R11><R12>0.0</R12><R20>0.0</R20><R21>0.0</R21><R22>1.0</R22></CoordinateFrame>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">true</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CanQuery">true</bool>
+<token name="CollisionFidelity">2</token>
+<token name="RenderFidelity">0</token>
+<token name="Material">272</token>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+</Properties></Item>
+</Item>
+</roblox>

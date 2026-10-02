@@ -71,7 +71,13 @@
     "ParkParkSkyTrackV2",
     "ParkParkHauntedHouseV2",
     "ParkParkTrainTrackV2",
-    "ParkParkCoasterTrackV2"
+    "ParkParkCoasterTrackV2",
+    "ParkParkShowStage",
+    "ParkParkPenguin",
+    "ParkParkIceHub",
+    "ParkParkIceCave",
+    "ParkParkSnowMound",
+    "ParkParkShopCocoa"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",
@@ -143,6 +149,12 @@
     "ParkParkSkyTrackV2": "rbxassetid://99243672887412",
     "ParkParkHauntedHouseV2": "rbxassetid://138520009385343",
     "ParkParkTrainTrackV2": "rbxassetid://127700051931183",
-    "ParkParkCoasterTrackV2": "rbxassetid://76167674230612"
+    "ParkParkCoasterTrackV2": "rbxassetid://76167674230612",
+    "ParkParkShowStage": "rbxassetid://76678551607357",
+    "ParkParkPenguin": "rbxassetid://137861597842315",
+    "ParkParkIceHub": "rbxassetid://111794528336135",
+    "ParkParkIceCave": "rbxassetid://135659635750886",
+    "ParkParkSnowMound": "rbxassetid://111507408519510",
+    "ParkParkShopCocoa": "rbxassetid://128107444934992"
   }
 }
