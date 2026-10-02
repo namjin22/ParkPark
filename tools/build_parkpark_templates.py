@@ -98,6 +98,9 @@ TREE_SCALE = config_number("TreeScale")
 BUSH_SCALE = config_number("BushScale")
 LAMP_SCALE = config_number("LampScale")
 BENCH_SCALE = config_number("BenchScale")
+FLOWERS_SCALE = config_number("FlowersScale")
+GAZEBO_SCALE = config_number("GazeboScale")
+STATUE_SCALE = config_number("StatueScale")
 FOUNTAIN_SCALE = config_number("FountainScale")
 BALLOON_SCALE = config_number("BalloonScale")
 PALM_SCALE = config_number("PalmScale")
@@ -1187,6 +1190,9 @@ def build_decor() -> None:
         ("DecorBench", "ParkParkDecorBench", BENCH_SCALE, box_collider("Collider", (0, 0.9, 0.2), (2.8, 1.8, 1.1), 0, BENCH_SCALE)),
         ("DecorFountain", "ParkParkDecorFountain", FOUNTAIN_SCALE, cylinder_collider("Collider", (0, 0.6, 0), 1.2, 9.0, FOUNTAIN_SCALE)),
         ("DecorBalloons", "ParkParkDecorBalloons", BALLOON_SCALE, None),
+        ("DecorFlowers", "ParkParkDecorFlowers", FLOWERS_SCALE, None),
+        ("DecorGazebo", "ParkParkDecorGazebo", GAZEBO_SCALE, cylinder_collider("Collider", (0, 0.5, 0), 1.0, 6.4, GAZEBO_SCALE)),
+        ("DecorStatue", "ParkParkDecorStatue", STATUE_SCALE, box_collider("Collider", (0, 1.0, 0), (3.0, 2.0, 3.0), 0, STATUE_SCALE)),
         ("DecorPine", "ParkParkDecorPine", PINE_SCALE, cylinder_collider("Collider", (0, 1.2, 0), 2.4, 0.8, PINE_SCALE)),
         ("DecorRock", "ParkParkDecorRock", ROCK_SCALE, cylinder_collider("Collider", (0, 1.0, 0), 2.0, 4.4, ROCK_SCALE)),
         ("DecorPalm", "ParkParkDecorPalm", PALM_SCALE, cylinder_collider("Collider", (0, 1.8, 0), 3.6, 1.2, PALM_SCALE)),

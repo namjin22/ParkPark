@@ -1674,6 +1674,61 @@ def make_decor_fountain() -> Mesh:
     return mesh
 
 
+def make_decor_flowers() -> Mesh:
+    """A round flower bed (origin at the ground centre): a stone rim, soil, and a crowd of blooms on stems."""
+    mesh = Mesh("ParkParkDecorFlowers")
+    add_vertical_cylinder(mesh, 2.4, 0.0, 0.5, "cream", 24)
+    add_vertical_cylinder(mesh, 2.1, 0.45, 0.55, "wood", 24)
+    add_torus(mesh, 2.3, 0.12, 0.52, "gold", segments=24, sides=6)
+    materials = ("coral", "gold", "cream", "mint", "coral")
+    for index in range(16):
+        angle = TAU * index / 16 * 2.3
+        radius = 0.4 + 1.55 * ((index * 7) % 16) / 16
+        x, z = radius * math.cos(angle), radius * math.sin(angle)
+        height = 0.95 + 0.35 * ((index * 5) % 4) / 3
+        add_cylinder_between(mesh, (x, 0.5, z), (x, height, z), 0.04, 0.04, "mint", 4)
+        add_ellipsoid(mesh, (x, height + 0.1, z), (0.28, 0.2, 0.28), materials[index % 5], slices=7, stacks=4)
+        add_ellipsoid(mesh, (x, height + 0.2, z), (0.1, 0.08, 0.1), "gold", slices=5, stacks=3)
+    return mesh
+
+
+def make_decor_gazebo() -> Mesh:
+    """A small garden gazebo (origin at the ground centre): a round floor, six posts, a mint cone roof, and a gold finial."""
+    mesh = Mesh("ParkParkDecorGazebo")
+    add_vertical_cylinder(mesh, 3.3, 0.0, 0.35, "cream", 24)
+    add_torus(mesh, 3.25, 0.1, 0.36, "gold", segments=24, sides=6)
+    for index in range(6):
+        angle = TAU * index / 6
+        x, z = 2.7 * math.cos(angle), 2.7 * math.sin(angle)
+        add_vertical_cylinder(mesh, 0.16, 0.35, 3.6, "coral", 8, x, z)
+    for index in range(6):
+        angle = TAU * (index + 0.5) / 6
+        add_ellipsoid(mesh, (2.7 * math.cos(angle), 1.0, 2.7 * math.sin(angle)), (0.25, 0.25, 0.25), "mint", slices=6, stacks=4)
+    add_torus(mesh, 2.75, 0.12, 3.6, "gold", segments=24, sides=6)
+    lathe(mesh, [(3.4, 3.7, "mint"), (2.2, 4.4, "cream"), (1.0, 5.3, "mint"), (0.0, 6.0, "cream")], 18)
+    add_ellipsoid(mesh, (0, 6.2, 0), (0.28, 0.4, 0.28), "gold", slices=8, stacks=5)
+    add_box(mesh, (0, 0.9, 0), (1.6, 0.14, 0.7), "wood")
+    return mesh
+
+
+def make_decor_statue() -> Mesh:
+    """A park mascot statue (origin at the ground centre): a stepped pedestal and a round gold-and-coral mascot with ears."""
+    mesh = Mesh("ParkParkDecorStatue")
+    add_box(mesh, (0, 0.3, 0), (3.2, 0.6, 3.2), "cream")
+    add_box(mesh, (0, 0.95, 0), (2.4, 0.7, 2.4), "mint")
+    add_box(mesh, (0, 1.4, 0), (2.7, 0.2, 2.7), "gold")
+    add_ellipsoid(mesh, (0, 2.5, 0), (0.95, 1.05, 0.8), "coral", slices=12, stacks=7)
+    add_ellipsoid(mesh, (0, 2.45, 0.55), (0.6, 0.7, 0.4), "cream", slices=10, stacks=6)
+    add_ellipsoid(mesh, (0, 3.9, 0), (0.75, 0.7, 0.7), "coral", slices=12, stacks=7)
+    for side in (-1, 1):
+        add_ellipsoid(mesh, (side * 0.5, 4.75, 0), (0.22, 0.55, 0.16), "coral", slices=8, stacks=5)
+        add_ellipsoid(mesh, (side * 0.28, 4.0, 0.62), (0.08, 0.1, 0.05), "ink", slices=5, stacks=3)
+        add_ellipsoid(mesh, (side * 1.0, 2.7, 0.1), (0.2, 0.55, 0.22), "coral", slices=8, stacks=5)
+    add_ellipsoid(mesh, (0, 3.75, 0.68), (0.14, 0.1, 0.08), "ink", slices=6, stacks=4)
+    add_star(mesh, 6.0, 0.5, "gold")
+    return mesh
+
+
 def make_decor_balloons() -> Mesh:
     """A weighted bunch of balloons on strings (origin at the base)."""
     mesh = Mesh("ParkParkDecorBalloons")
@@ -3186,6 +3241,9 @@ def main() -> None:
         make_decor_bench(),
         make_decor_fountain(),
         make_decor_balloons(),
+        make_decor_flowers(),
+        make_decor_gazebo(),
+        make_decor_statue(),
         make_bumper_platform(),
         make_bumper_car(),
         make_entrance(),

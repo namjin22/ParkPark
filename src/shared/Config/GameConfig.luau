@@ -78,6 +78,9 @@ return {
 	BushScale = 1.7,
 	LampScale = 2,
 	BenchScale = 1.9,
+	FlowersScale = 2,
+	GazeboScale = 1.9,
+	StatueScale = 1.9,
 	FountainScale = 2.6,
 	BalloonScale = 2,
 	PalmScale = 2.2,
@@ -937,7 +940,16 @@ return {
 	DecorPlotBaseCost = 3000,
 	DecorPlotGrowth = 1.45,
 	DecorPlotFareBonus = 0.01,
-	DecorPlotKinds = { "DecorBalloons", "DecorTree", "DecorBench", "DecorBush", "DecorLamp", "DecorBalloons" } :: { string },
+	DecorPlotKinds = {
+		"DecorFlowers",
+		"DecorGazebo",
+		"DecorBench",
+		"DecorStatue",
+		"DecorFlowers",
+		"DecorLamp",
+		"DecorBalloons",
+		"DecorTree",
+	} :: { string },
 
 	-- Speed shop: each level adds SpeedPerLevel to a player's walk speed; costs are for level 1, 2, ...
 	SpeedLevelCosts = { 1500, 6000, 20000, 60000, 150000 } :: { number },
