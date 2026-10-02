@@ -54,6 +54,7 @@ type GuestReferences = {
 type Guest = {
 	joinedAt: number,
 	thrill: boolean,
+	vip: boolean,
 	model: Model,
 	humanoid: Humanoid,
 	root: BasePart,
@@ -461,7 +462,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		end
 	end
 
-	local function fareOf(ride: Ride): number
+	local function fareOf(ride: Ride, guest: Guest?): number
 		local base = (ride.model:GetAttribute("Fare") :: number?) or GameConfig.Rides[ride.key].BaseFare
 		local multiplier = (park.ParkFolder:GetAttribute("FareMultiplier") :: number?) or 1
 		if park.ParkFolder:GetAttribute("Night") == true then
@@ -469,6 +470,9 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		end
 		-- Every decor-shop plot bought adds a little to every fare.
 		multiplier *= 1 + ((park.ParkFolder:GetAttribute("PlotsBought") :: number?) or 0) * GameConfig.DecorPlotFareBonus
+		if guest and guest.vip then
+			multiplier *= GameConfig.VipFareMultiplier
+		end
 		return math.floor(base * multiplier + 0.5)
 	end
 
@@ -540,7 +544,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		guest.prompt.Enabled = false
 
 		-- The fare is paid the moment a guest boards, so accepting a guest is immediately rewarded.
-		local fare = fareOf(ride)
+		local fare = fareOf(ride, guest)
 		for _, other in Players:GetPlayers() do
 			awardCoins(other, fare)
 		end
@@ -772,6 +776,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			lane = lane,
 			jitter = math.random(-25, 25) / 10,
 			thrill = math.random() < GameConfig.ThrillGuestChance,
+			vip = math.random() < GameConfig.VipGuestChance,
 			joinedAt = 0,
 			ridesTaken = 0,
 			ride = nil,
@@ -793,6 +798,40 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			end
 			tryBoard(current, guest, player)
 		end)
+
+		if guest.vip then
+			-- A VIP glows gold, wears a crown label, and pays VipFareMultiplier times the fare.
+			local glow = Instance.new("Highlight")
+			glow.FillColor = Color3.fromRGB(255, 210, 90)
+			glow.FillTransparency = 0.6
+			glow.OutlineColor = Color3.fromRGB(255, 240, 170)
+			glow.DepthMode = Enum.HighlightDepthMode.Occluded
+			glow.Parent = model
+			local tag = Instance.new("BillboardGui")
+			tag.Size = UDim2.fromOffset(110, 34)
+			tag.StudsOffset = Vector3.new(0, 4.2, 0)
+			tag.MaxDistance = 90
+			tag.LightInfluence = 0
+			tag.Parent = root
+			local label = Instance.new("TextLabel")
+			label.Size = UDim2.fromScale(1, 1)
+			label.BackgroundTransparency = 1
+			label.Font = Enum.Font.GothamBlack
+			label.Text = "★ VIP"
+			label.TextScaled = true
+			label.TextColor3 = Color3.fromRGB(255, 205, 70)
+			label.TextStrokeTransparency = 0
+			label.TextStrokeColor3 = Color3.fromRGB(80, 50, 10)
+			label.Parent = tag
+			model:SetAttribute("Vip", true)
+			for _, player in Players:GetPlayers() do
+				notify(
+					player,
+					"VIP 손님이 왔어요!",
+					string.format("태워 주면 요금이 %d배", GameConfig.VipFareMultiplier)
+				)
+			end
+		end
 
 		guestCount += 1
 		model:PivotTo(

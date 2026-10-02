@@ -1039,6 +1039,9 @@ return {
 	} :: { { Boarded: number, Reward: number } },
 	-- Thrill-seeking guests (this share of arrivals) pick the rides below three times as often.
 	ThrillGuestChance = 0.3,
+	-- Now and then a VIP arrives: a golden glow and a crown label, paying this many times the fare when boarded.
+	VipGuestChance = 0.04,
+	VipFareMultiplier = 3,
 	ThrillRides = { "Coaster", "Drop", "Flume", "Pirate", "Swing", "Mine", "Rocket", "Sky", "Snowflake", "Orbit" } :: { string },
 
 	-- Day and night: the sky makes a full turn every DayCycleSeconds; at night the lamps glow and fares rise.
