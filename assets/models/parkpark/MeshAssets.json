@@ -77,7 +77,12 @@
     "ParkParkIceHub",
     "ParkParkIceCave",
     "ParkParkSnowMound",
-    "ParkParkShopCocoa"
+    "ParkParkShopCocoa",
+    "ParkParkShopCookie",
+    "ParkParkSnowPod",
+    "ParkParkReindeer",
+    "ParkParkReindeerHub",
+    "ParkParkSnowflakeHub"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",
@@ -155,6 +160,11 @@
     "ParkParkIceHub": "rbxassetid://111794528336135",
     "ParkParkIceCave": "rbxassetid://135659635750886",
     "ParkParkSnowMound": "rbxassetid://111507408519510",
-    "ParkParkShopCocoa": "rbxassetid://128107444934992"
+    "ParkParkShopCocoa": "rbxassetid://128107444934992",
+    "ParkParkShopCookie": "rbxassetid://100864265212849",
+    "ParkParkSnowPod": "rbxassetid://109185809816004",
+    "ParkParkReindeer": "rbxassetid://93128842441589",
+    "ParkParkReindeerHub": "rbxassetid://123993268919608",
+    "ParkParkSnowflakeHub": "rbxassetid://133099409883993"
   }
 }
