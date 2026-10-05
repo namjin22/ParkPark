@@ -1023,10 +1023,11 @@ return {
 	SpeedPerLevel = 4,
 
 	-- Daily bonus: this share of the summed fares of all repaired attractions (at least DailyMinimum), times the
-	-- multiplier for the day of the streak (day 1 to 7).
-	DailyFareShare = 6,
+	-- streak multiplier, capped so a mature save cannot collect an entire zone gate from a single login.
+	DailyFareShare = 2,
 	DailyMinimum = 300,
-	DailyStreakMultipliers = { 1, 1.2, 1.4, 1.6, 2, 2.5, 4 } :: { number },
+	DailyMaximum = 75000,
+	DailyStreakMultipliers = { 1, 1.1, 1.25, 1.4, 1.6, 1.8, 2 } :: { number },
 
 	-- Guest milestones: once the park has boarded this many guests the next goal pays its reward to everyone.
 	Goals = {
@@ -1056,8 +1057,8 @@ return {
 	EventSeconds = 60,
 	EventMinRides = 5,
 
-	PowerOutageMinSeconds = 240,
-	PowerOutageMaxSeconds = 360,
+	PowerOutageMinSeconds = 360,
+	PowerOutageMaxSeconds = 540,
 	PowerOutageTimeoutSeconds = 60,
 	PowerRestoreReward = 40,
 	PowerOutageMinRides = 3,

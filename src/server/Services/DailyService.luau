@@ -25,7 +25,8 @@ function DailyService.Reward(park: { ParkFolder: Folder }, streak: number): numb
 	end
 	local base = math.max(GameConfig.DailyMinimum, math.floor(total * GameConfig.DailyFareShare))
 	local multiplier = GameConfig.DailyStreakMultipliers[streak] or 1
-	return math.floor(base * multiplier / 10 + 0.5) * 10
+	local reward = math.floor(base * multiplier / 10 + 0.5) * 10
+	return math.min(GameConfig.DailyMaximum, reward)
 end
 
 function DailyService.Start(
@@ -49,7 +50,7 @@ function DailyService.Start(
 				return
 			end
 			if lastDay == today - 1 and streak > 0 then
-				streak = if streak >= #GameConfig.DailyStreakMultipliers then 1 else streak + 1
+				streak = math.min(streak + 1, #GameConfig.DailyStreakMultipliers)
 			else
 				streak = 1
 			end
