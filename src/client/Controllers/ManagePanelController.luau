@@ -17,6 +17,7 @@ local ManagePanelController = {}
 
 local CLOSE_DISTANCE = 30
 local PANEL_WIDTH = 460
+local PANEL_MAX_HEIGHT = 480
 
 local ACTION_ROWS = { "Unlock", "Repair", "Income", "Staff" }
 
@@ -57,15 +58,14 @@ function ManagePanelController.Start()
 	panel.Name = "Panel"
 	panel.AnchorPoint = Vector2.new(0.5, 1)
 	panel.Position = UDim2.new(0.5, 0, 1, -20)
-	panel.Size = UDim2.fromScale(0.94, 0)
-	panel.AutomaticSize = Enum.AutomaticSize.Y
+	panel.Size = UDim2.new(0.94, 0, 0, PANEL_MAX_HEIGHT)
 	panel.BackgroundColor3 = palette.Cream
 	panel.BorderSizePixel = 0
 	panel.Visible = false
 	panel.Parent = screenGui
 	addCorner(panel, 22)
 	local limit = Instance.new("UISizeConstraint")
-	limit.MaxSize = Vector2.new(PANEL_WIDTH, math.huge)
+	limit.MaxSize = Vector2.new(PANEL_WIDTH, PANEL_MAX_HEIGHT)
 	limit.Parent = panel
 	local stroke = Instance.new("UIStroke")
 	stroke.Color = palette.Gold
@@ -81,6 +81,47 @@ function ManagePanelController.Start()
 	layout.Padding = UDim.new(0, 10)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = panel
+
+	-- Keep the title and close button on-screen on short landscape phones; action rows scroll inside the panel.
+	local actionList = Instance.new("ScrollingFrame")
+	actionList.Name = "Actions"
+	actionList.BackgroundTransparency = 1
+	actionList.BorderSizePixel = 0
+	actionList.Size = UDim2.new(1, 0, 1, -(64 + layout.Padding.Offset))
+	actionList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	actionList.CanvasSize = UDim2.new(0, 0, 0, 0)
+	actionList.ScrollingDirection = Enum.ScrollingDirection.Y
+	actionList.ScrollBarThickness = 4
+	actionList.ScrollBarImageColor3 = palette.Gold
+	actionList.LayoutOrder = 2
+	actionList.Parent = panel
+	local actionLayout = Instance.new("UIListLayout")
+	actionLayout.Padding = UDim.new(0, 10)
+	actionLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	actionLayout.Parent = actionList
+
+	local boundCamera: Camera? = nil
+	local function updatePanelSize()
+		local camera = Workspace.CurrentCamera
+		if camera == nil then
+			return
+		end
+		local availableHeight = math.max(120, camera.ViewportSize.Y - 40)
+		panel.Size = UDim2.new(0.94, 0, 0, math.min(PANEL_MAX_HEIGHT, availableHeight))
+	end
+	local function bindCamera()
+		local camera = Workspace.CurrentCamera
+		if camera == boundCamera then
+			return
+		end
+		boundCamera = camera
+		if camera then
+			camera:GetPropertyChangedSignal("ViewportSize"):Connect(updatePanelSize)
+		end
+		updatePanelSize()
+	end
+	Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(bindCamera)
+	bindCamera()
 
 	-- Header: the ride's name, its state, and a close button.
 	local header = Instance.new("Frame")
@@ -114,9 +155,9 @@ function ManagePanelController.Start()
 		frame.BackgroundColor3 = Color3.fromRGB(255, 250, 235)
 		frame.BorderSizePixel = 0
 		frame.Size = UDim2.new(1, 0, 0, 76)
-		frame.LayoutOrder = 1 + index
+		frame.LayoutOrder = index
 		frame.Visible = false
-		frame.Parent = panel
+		frame.Parent = actionList
 		addCorner(frame, 16)
 		local rowStroke = Instance.new("UIStroke")
 		rowStroke.Color = palette.Gold
@@ -258,6 +299,7 @@ function ManagePanelController.Start()
 		end
 		currentKey = key
 		currentConsole = console
+		actionList.CanvasPosition = Vector2.zero
 		panel.Visible = true
 		refresh()
 	end
