@@ -169,6 +169,17 @@ local function grayboxDecor(kind: string): Model
 			Enum.PartType.Ball
 		)
 		boulder.CanCollide = true
+	elseif kind == "DecorFern" then
+		part(
+			"Fern",
+			Vector3.new(4.4, 2.6, 4.4),
+			Vector3.new(0, 1.3, 0),
+			Color3.fromRGB(80, 160, 110),
+			Enum.PartType.Ball
+		)
+	elseif kind == "DecorTotem" then
+		part("Totem", Vector3.new(2.4, 8, 2.4), Vector3.new(0, 4, 0), Color3.fromRGB(140, 96, 62), nil).CanCollide =
+			true
 	elseif kind == "DecorLollipop" then
 		part("Stick", Vector3.new(0.5, 6, 0.5), Vector3.new(0, 3, 0), Color3.fromRGB(250, 240, 230), nil).CanCollide =
 			true
@@ -216,6 +227,7 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 		DecorFlowers = true,
 		DecorBarrels = true,
 		DecorLollipop = true,
+		DecorFern = true,
 	}
 	local function place(kind: string, position: Vector3, yaw: number, radius: number)
 		local template = findTemplate(kind)
@@ -361,6 +373,8 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, kids.MinZ, kids.BoundaryZ })
 	local winter = ParkLayout.ZoneBounds.Winter
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, winter.MinZ, winter.BoundaryZ })
+	local jungle = ParkLayout.ZoneBounds.Jungle
+	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, jungle.MinZ, jungle.BoundaryZ })
 	local candy = ParkLayout.ZoneBounds.Candy
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, candy.MinZ, candy.BoundaryZ })
 	local cove = ParkLayout.ZoneBounds.Cove
@@ -546,6 +560,36 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 		end
 	end
 	for z = winter.BoundaryZ - 16, winter.MinZ + 12, -24 do
+		for _, side in { -1, 1 } do
+			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
+			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then
+				place("DecorLamp", spot, 0, 1.5)
+			end
+		end
+	end
+
+	-- The jungle: ferns, totems, palms and boulders, with lamps along its road.
+	local jungleProps: { { kind: string, count: number, margin: number, radius: number } } = {
+		{ kind = "DecorFern", count = 40, margin = 4, radius = 2.5 },
+		{ kind = "DecorTotem", count = 10, margin = 6, radius = 2 },
+		{ kind = "DecorPalm", count = 16, margin = 7, radius = 5 },
+		{ kind = "DecorBush", count = 14, margin = 4, radius = 2 },
+		{ kind = "DecorRock", count = 12, margin = 6, radius = 4 },
+	}
+	for _, prop in jungleProps do
+		local made = 0
+		local tries = 0
+		while made < prop.count and tries < 3000 do
+			tries += 1
+			local x = random:NextNumber(-WORLD_X, WORLD_X)
+			local z = random:NextNumber(jungle.MinZ + 6, jungle.BoundaryZ - 8)
+			if not zoneBlocked(x, z, prop.margin) and clear(x, z, prop.radius) then
+				place(prop.kind, Vector3.new(x, 0, z), random:NextNumber(0, math.pi * 2), prop.radius)
+				made += 1
+			end
+		end
+	end
+	for z = jungle.BoundaryZ - 16, jungle.MinZ + 12, -24 do
 		for _, side in { -1, 1 } do
 			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
 			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then

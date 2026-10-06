@@ -74,3 +74,14 @@ Check: an engaged player gathering about two items a minute, fishing now and the
 ### 5.2 Candy zone (사탕 구역), the seventh zone
 
 Same offsets as the earlier zones one zone further north (boundary z = -1716, length 263), four attractions (a lollipop spinner, a gummy bounce, a candy-factory tour, a sweet shop), candy decor, sugar-dust ambience. Gate about 700k coins, steps about 460k to 490k by the balance rule. Needs seven OBJ imports from the user.
+
+## 6. Batch 3 (2026-10-06): two more events and the jungle zone
+
+### 6.1 Events (code only)
+
+- **행운의 시간 (lucky hour):** for 60 s every active payout (gathering, fishing, delivery) is multiplied by 3 (`ActiveMultiplier` on the park folder, read by `ActiveIncome`). Check: only active play is boosted, passive income is untouched, so it rewards being present without inflating idle progress.
+- **VIP 단체 방문:** for 60 s, 40% of arrivals are VIPs (`VipChance` attribute, read by `GuestService`); each leaves a tip of one minute of that ride's income. Check: tips scale with the ride's income and only arrive while VIPs board, so the most it adds is a few minutes of income per event.
+
+### 6.2 Jungle zone (정글 구역), the eighth zone
+
+Same offsets as the earlier zones, one zone further north (boundary z = -1979, length 263). Chain after the sweet shop: Coconut (`Spinner`, fare 3200, thrill) -> Mushroom (`Bounce`, 3400) -> Temple (`Hidden` tour, 3600, thrill) -> Juice bar (`Shop`, 3300). Steps about 500k to 530k to unlock and repair (the balance rule 6 + 0.9 x n minutes continued), gate 760k (1.5 x the first step). Jungle pollen, ferns, totems and bananas to gather. Needs seven OBJ imports from the user.

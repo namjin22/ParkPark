@@ -49,6 +49,7 @@ local function areas(): { Area }
 		Space = { "별 조각", Color3.fromRGB(190, 160, 255) },
 		Cove = { "금화", Color3.fromRGB(255, 215, 100) },
 		Candy = { "알사탕", Color3.fromRGB(255, 130, 190) },
+		Jungle = { "바나나", Color3.fromRGB(255, 224, 90) },
 	}
 	for _, zone in GameConfig.ZoneOrder do
 		local bounds = ParkLayout.ZoneBounds[zone]

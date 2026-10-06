@@ -3427,6 +3427,119 @@ def make_decor_candy_cane() -> Mesh:
     return mesh
 
 
+def make_coconut_hub() -> Mesh:
+    """Rotating jungle clearing: a dark wooden disc with a carved totem pole in the middle and a pedestal per coconut cart."""
+    mesh = Mesh("ParkParkCoconutHub")
+    add_vertical_cylinder(mesh, 8.2, 0.0, 0.6, "wood", 44)
+    add_vertical_cylinder(mesh, 8.25, 0.0, 0.45, "ink", 44)
+    add_torus(mesh, 8.0, 0.14, 0.62, "gold", segments=44, sides=6)
+    for index in range(12):
+        angle = TAU * index / 12
+        add_cylinder_between(mesh, (0, 0.64, 0), (7.6 * math.cos(angle), 0.64, 7.6 * math.sin(angle)), 0.06, 0.06, "ink", 4)
+    for index, material in enumerate(("coral", "mint", "gold", "coral")):
+        add_box(mesh, (0, 1.3 + index * 1.5, 0), (1.9 - index * 0.15, 1.4, 1.9 - index * 0.15), material)
+        add_box(mesh, (0, 1.3 + index * 1.5, 0.95 - index * 0.07), (1.2, 0.5, 0.12), "ink")
+    add_box(mesh, (0, 7.2, 0), (4.2, 0.35, 0.5), "wood")
+    add_ellipsoid(mesh, (0, 7.9, 0), (0.7, 0.7, 0.7), "gold", slices=8, stacks=5)
+    for index in range(6):
+        angle = TAU * index / 6
+        x, z = 5.4 * math.cos(angle), 5.4 * math.sin(angle)
+        add_cylinder_between(mesh, (0, 0.9, 0), (x, 0.9, z), 0.16, 0.16, "wood", 8)
+        add_vertical_cylinder(mesh, 1.4, 0.6, 0.9, "ink", 24, x, z)
+        add_cylinder_between(mesh, (x * 1.45, 0.6, z * 1.45), (x * 1.45, 2.4, z * 1.45), 0.08, 0.08, "wood", 5)
+        add_ellipsoid(mesh, (x * 1.45, 2.6, z * 1.45), (0.2, 0.3, 0.2), "coral", slices=6, stacks=4)
+    return mesh
+
+
+def make_coconut_pod() -> Mesh:
+    """A coconut-shell cart (base at y=0): a hairy brown half shell with a cream rim and a seat on top at about y=1.72."""
+    mesh = Mesh("ParkParkCoconutPod")
+    add_ellipsoid(mesh, (0, 0.95, 0), (1.0, 0.75, 1.0), "wood", slices=14, stacks=7)
+    add_torus(mesh, 1.0, 0.12, 1.0, "faded_cream", segments=18, sides=6)
+    for index in range(6):
+        angle = TAU * index / 6
+        add_ellipsoid(mesh, (0.95 * math.cos(angle), 0.8, 0.95 * math.sin(angle)), (0.12, 0.3, 0.12), "ink", slices=5, stacks=3)
+    add_box(mesh, (0, 1.72, -0.2), (0.9, 0.14, 1.0), "mint")
+    for side in (-1, 1):
+        add_cylinder_between(mesh, (side * 0.5, 1.75, 0.35), (side * 0.5, 2.3, 0.7), 0.05, 0.05, "gold", 5)
+    add_cylinder_between(mesh, (0, 0.0, 0.0), (0, 0.5, 0.0), 0.09, 0.09, "gold", 6)
+    return mesh
+
+
+def make_mushroom_mound() -> Mesh:
+    """A giant bouncy mushroom (origin at the ground centre): a wide red cap with cream spots on a short stem, and small mushrooms around."""
+    mesh = Mesh("ParkParkMushroomMound")
+    add_vertical_cylinder(mesh, 6.8, 0.0, 0.9, "cream", 36)
+    lathe(mesh, [(6.6, 0.9, "coral"), (5.2, 1.3, "coral"), (3.0, 1.55, "coral"), (0.0, 1.6, "coral")], 28)
+    for index in range(9):
+        angle = TAU * index / 9 + 0.3
+        radius = 1.6 + 3.8 * ((index * 4) % 9) / 9
+        add_ellipsoid(mesh, (radius * math.cos(angle), 1.5, radius * math.sin(angle)), (0.7, 0.18, 0.7), "cream", slices=8, stacks=3)
+    for index in range(5):
+        angle = TAU * index / 5 + 0.7
+        x, z = 6.6 * math.cos(angle), 6.6 * math.sin(angle)
+        add_vertical_cylinder(mesh, 0.22, 0.0, 0.9, "cream", 8, x, z)
+        add_ellipsoid(mesh, (x, 1.0, z), (0.7, 0.4, 0.7), "coral" if index % 2 else "mint", slices=8, stacks=4)
+    return mesh
+
+
+def make_temple() -> Mesh:
+    """A stepped jungle temple (origin at the ground centre, door and stairs on the +Z side) with carved bands, torches and a gold idol on top."""
+    mesh = Mesh("ParkParkTemple")
+    add_box(mesh, (0, 1.2, 0), (13.0, 2.4, 11.0), "faded_cream")
+    add_box(mesh, (0, 3.6, 0), (10.0, 2.4, 8.4), "cream")
+    add_box(mesh, (0, 6.0, 0), (7.0, 2.4, 5.8), "faded_cream")
+    add_box(mesh, (0, 7.9, 0), (5.0, 1.4, 4.2), "cream")
+    for y, depth in ((2.4, 11.2), (4.8, 8.6), (7.2, 6.0)):
+        add_box(mesh, (0, y, 0), (13.2 if depth > 10 else 10.2 if depth > 8 else 7.2, 0.25, depth), "mint")
+    add_box(mesh, (0, 2.0, 5.55), (3.4, 4.0, 0.3), "ink")
+    for index in range(4):
+        add_box(mesh, (0, 0.25 + index * 0.5, 7.0 - index * 0.5), (3.6, 0.5, 1.2), "faded_cream")
+    for side in (-1, 1):
+        add_cylinder_between(mesh, (side * 2.6, 0.0, 6.2), (side * 2.6, 3.2, 6.2), 0.12, 0.12, "wood", 6)
+        add_ellipsoid(mesh, (side * 2.6, 3.4, 6.2), (0.3, 0.45, 0.3), "coral", slices=6, stacks=4)
+    add_ellipsoid(mesh, (0, 9.4, 0), (0.9, 1.0, 0.9), "gold", slices=10, stacks=6)
+    for side in (-1, 1):
+        add_ellipsoid(mesh, (side * 0.3, 9.6, 0.75), (0.12, 0.12, 0.08), "ink", slices=5, stacks=3)
+    return mesh
+
+
+def make_shop_juice() -> Mesh:
+    """Tiki juice bar: dark wood, a gold-and-mint awning, a thatch fringe, and a giant pineapple on the roof."""
+    mesh = Mesh("ParkParkShopJuice")
+    shop_base(mesh, "wood", "gold", "mint")
+    add_ellipsoid(mesh, (0, 6.2, 0), (1.0, 1.35, 1.0), "gold", slices=10, stacks=6)
+    for index in range(7):
+        angle = TAU * index / 7
+        add_cylinder_between(mesh, (0, 7.3, 0), (0.8 * math.cos(angle), 8.6, 0.8 * math.sin(angle)), 0.12, 0.04, "mint", 5)
+    for index in range(10):
+        add_box(mesh, (-3.6 + index * 0.8, 4.7, 2.4), (0.5, 0.9, 0.12), "faded_cream")
+    return mesh
+
+
+def make_decor_fern() -> Mesh:
+    """A fern (origin at the ground point): eight arching fronds."""
+    mesh = Mesh("ParkParkDecorFern")
+    for index in range(8):
+        angle = TAU * index / 8
+        dx, dz = math.cos(angle), math.sin(angle)
+        add_cylinder_between(mesh, (0, 0.0, 0), (dx * 0.9, 1.5, dz * 0.9), 0.1, 0.07, "mint", 5)
+        add_cylinder_between(mesh, (dx * 0.9, 1.5, dz * 0.9), (dx * 1.9, 1.1, dz * 1.9), 0.07, 0.03, "mint", 5)
+        add_ellipsoid(mesh, (dx * 1.4, 1.5, dz * 1.4), (0.5, 0.06, 0.5), "faded_mint", slices=6, stacks=3)
+    return mesh
+
+
+def make_decor_totem() -> Mesh:
+    """A small carved totem (origin at the ground point): three stacked faces and spread wings."""
+    mesh = Mesh("ParkParkDecorTotem")
+    for index, material in enumerate(("wood", "coral", "mint")):
+        add_box(mesh, (0, 0.8 + index * 1.4, 0), (1.3, 1.3, 1.3), material)
+        add_box(mesh, (0, 0.8 + index * 1.4, 0.68), (0.8, 0.35, 0.1), "ink")
+    add_box(mesh, (0, 4.6, 0), (2.6, 0.3, 0.4), "gold")
+    add_ellipsoid(mesh, (0, 5.0, 0), (0.45, 0.5, 0.45), "gold", slices=8, stacks=5)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -3574,6 +3687,13 @@ def main() -> None:
         make_shop_sweets(),
         make_decor_lollipop(),
         make_decor_candy_cane(),
+        make_coconut_hub(),
+        make_coconut_pod(),
+        make_mushroom_mound(),
+        make_temple(),
+        make_shop_juice(),
+        make_decor_fern(),
+        make_decor_totem(),
         make_decor_crystal(),
         make_decor_planet(),
         make_swan(),
