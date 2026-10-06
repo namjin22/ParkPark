@@ -85,3 +85,10 @@ Same offsets as the earlier zones one zone further north (boundary z = -1716, le
 ### 6.2 Jungle zone (정글 구역), the eighth zone
 
 Same offsets as the earlier zones, one zone further north (boundary z = -1979, length 263). Chain after the sweet shop: Coconut (`Spinner`, fare 3200, thrill) -> Mushroom (`Bounce`, 3400) -> Temple (`Hidden` tour, 3600, thrill) -> Juice bar (`Shop`, 3300). Steps about 500k to 530k to unlock and repair (the balance rule 6 + 0.9 x n minutes continued), gate 760k (1.5 x the first step). Jungle pollen, ferns, totems and bananas to gather. Needs seven OBJ imports from the user.
+
+## 7. Batch 4 (2026-10-06): the desert and cloud zones, then daily missions
+
+- **Desert (사막 구역, ninth zone):** boundary z = -2242, gate 810k after the juice bar; camel spinner (3800, thrill), dune bounce (4000), pyramid tour (4200, thrill), oasis cafe (3900); steps 540k to 570k. Sand dust, cacti, obelisks, prickly-pear pickups.
+- **Cloud zone (구름 구역, tenth zone):** boundary z = -2505, gate 880k after the oasis cafe; cloud spinner (4400, thrill), rainbow bounce (4600), sky-castle tour (4800, thrill), cotton-candy shop (4500); steps 580k to 610k. Cloud wisps, cloud and rainbow decor, cloud-piece pickups.
+- Both use the proven offsets and generic template builders (`build_spinner_zone_ride`, `build_bounce_zone_ride`, `build_hidden_zone_ride`), so a future zone is a spec entry plus its OBJs.
+- **Check:** the map now reaches z = -2768; streaming keeps what the client loads small, but a phone check of travelling far is still the user's.

@@ -3540,6 +3540,198 @@ def make_decor_totem() -> Mesh:
     return mesh
 
 
+def make_camel_hub() -> Mesh:
+    """Rotating sandstone deck: a pale disc ringed with gold, a carved obelisk in the middle, and a pedestal per basket."""
+    mesh = Mesh("ParkParkCamelHub")
+    add_vertical_cylinder(mesh, 8.2, 0.0, 0.6, "faded_cream", 44)
+    add_vertical_cylinder(mesh, 8.25, 0.0, 0.45, "gold", 44)
+    add_torus(mesh, 8.0, 0.14, 0.62, "coral", segments=44, sides=6)
+    for index in range(10):
+        angle = TAU * index / 10 + 0.2
+        add_ellipsoid(mesh, (7.0 * math.cos(angle), 0.68, 7.0 * math.sin(angle)), (0.3, 0.1, 0.3), "gold", slices=6, stacks=3)
+    lathe(mesh, [(1.5, 0.6, "cream"), (1.1, 1.0, "cream"), (0.9, 6.0, "faded_cream"), (0.0, 7.4, "gold")], 4)
+    add_box(mesh, (0, 3.4, 0), (1.9, 0.3, 1.9), "coral")
+    for index in range(6):
+        angle = TAU * index / 6
+        x, z = 5.4 * math.cos(angle), 5.4 * math.sin(angle)
+        add_cylinder_between(mesh, (0, 0.9, 0), (x, 0.9, z), 0.16, 0.16, "cream", 8)
+        add_vertical_cylinder(mesh, 1.4, 0.6, 0.9, "gold", 24, x, z)
+    return mesh
+
+
+def make_dune_pod() -> Mesh:
+    """A woven basket seat (base at y=0): sand-coloured wicker with gold bands and a seat on top at about y=1.72."""
+    mesh = Mesh("ParkParkDunePod")
+    lathe(mesh, [(0.0, 0.0, "faded_cream"), (0.8, 0.0, "faded_cream"), (1.0, 0.7, "cream"), (0.95, 1.3, "cream"), (0.0, 1.6, "faded_cream")], 14)
+    for y, radius in ((0.3, 0.9), (0.9, 1.0), (1.4, 0.93)):
+        add_torus(mesh, radius, 0.06, y, "gold", segments=18, sides=5)
+    add_box(mesh, (0, 1.72, -0.2), (0.9, 0.14, 1.0), "coral")
+    for side in (-1, 1):
+        add_cylinder_between(mesh, (side * 0.5, 1.75, 0.35), (side * 0.5, 2.3, 0.7), 0.05, 0.05, "gold", 5)
+    add_cylinder_between(mesh, (0, 0.0, 0.0), (0, 0.5, 0.0), 0.09, 0.09, "gold", 6)
+    return mesh
+
+
+def make_dune_mound() -> Mesh:
+    """A sand dune (origin at the ground centre): a rounded golden dune with ripples, a little palm and a flag."""
+    mesh = Mesh("ParkParkDuneMound")
+    add_vertical_cylinder(mesh, 6.8, 0.0, 0.9, "faded_cream", 36)
+    lathe(mesh, [(6.6, 0.9, "cream"), (5.2, 1.3, "faded_cream"), (3.0, 1.55, "cream"), (0.0, 1.6, "faded_cream")], 28)
+    for radius in (2.4, 3.8, 5.2):
+        add_torus(mesh, radius, 0.07, 1.5, "faded_cream", segments=30, sides=4)
+    add_cylinder_between(mesh, (4.6, 1.5, 3.4), (4.9, 5.2, 3.4), 0.2, 0.14, "wood", 6)
+    for index in range(6):
+        angle = TAU * index / 6
+        add_cylinder_between(mesh, (4.9, 5.2, 3.4), (4.9 + 1.4 * math.cos(angle), 4.5, 3.4 + 1.4 * math.sin(angle)), 0.1, 0.03, "mint", 5)
+    for index in range(6):
+        angle = TAU * index / 6 + 0.4
+        add_ellipsoid(mesh, (6.3 * math.cos(angle), 1.1, 6.3 * math.sin(angle)), (0.8, 0.6, 0.8), "faded_cream" if index % 2 else "gold", slices=7, stacks=4)
+    return mesh
+
+
+def make_pyramid() -> Mesh:
+    """A desert pyramid (origin at the ground centre, door and ramp on the +Z side): sandstone sides, a gold cap and torches."""
+    mesh = Mesh("ParkParkPyramid")
+    lathe(mesh, [(7.2, 0.0, "cream"), (5.2, 3.2, "faded_cream"), (3.2, 6.2, "cream"), (1.0, 8.6, "faded_cream"), (0.0, 9.6, "gold")], 4)
+    add_box(mesh, (0, 1.6, 4.9), (3.0, 3.2, 0.5), "ink")
+    for index in range(4):
+        add_box(mesh, (0, 0.2 + index * 0.4, 6.4 - index * 0.35), (3.4, 0.4, 1.0), "faded_cream")
+    for side in (-1, 1):
+        add_cylinder_between(mesh, (side * 2.4, 0.0, 6.2), (side * 2.4, 3.0, 6.2), 0.12, 0.12, "wood", 6)
+        add_ellipsoid(mesh, (side * 2.4, 3.3, 6.2), (0.3, 0.45, 0.3), "coral", slices=6, stacks=4)
+    return mesh
+
+
+def make_shop_oasis() -> Mesh:
+    """Oasis cafe stall: cream walls, a coral-and-gold awning, a palm and a water jar on the roof."""
+    mesh = Mesh("ParkParkShopOasis")
+    shop_base(mesh, "cream", "coral", "gold")
+    add_cylinder_between(mesh, (-1.8, 5.0, 0), (-1.5, 7.6, 0), 0.2, 0.14, "wood", 6)
+    for index in range(6):
+        angle = TAU * index / 6
+        add_cylinder_between(mesh, (-1.5, 7.6, 0), (-1.5 + 1.5 * math.cos(angle), 6.9, 1.5 * math.sin(angle)), 0.1, 0.03, "mint", 5)
+    lathe(mesh, [(0.0, 5.0, "coral"), (0.8, 5.0, "coral"), (1.0, 5.9, "gold"), (0.6, 6.6, "gold"), (0.4, 6.9, "coral"), (0.0, 6.9, "coral")], 14)
+    return mesh
+
+
+def make_decor_cactus() -> Mesh:
+    """A saguaro-style cactus (origin at the ground point): a ribbed trunk with two arms and a small flower."""
+    mesh = Mesh("ParkParkDecorCactus")
+    add_vertical_cylinder(mesh, 0.55, 0.0, 3.6, "mint", 10)
+    add_ellipsoid(mesh, (0, 3.6, 0), (0.55, 0.45, 0.55), "mint", slices=8, stacks=4)
+    for side, height in ((-1, 1.6), (1, 2.2)):
+        add_cylinder_between(mesh, (0, height, 0), (side * 1.0, height, 0), 0.28, 0.28, "mint", 8)
+        add_cylinder_between(mesh, (side * 1.0, height, 0), (side * 1.0, height + 1.1, 0), 0.28, 0.25, "mint", 8)
+        add_ellipsoid(mesh, (side * 1.0, height + 1.15, 0), (0.28, 0.22, 0.28), "mint", slices=6, stacks=3)
+    add_ellipsoid(mesh, (0, 4.05, 0), (0.22, 0.16, 0.22), "coral", slices=6, stacks=3)
+    return mesh
+
+
+def make_decor_obelisk() -> Mesh:
+    """A small sandstone obelisk (origin at the ground point) with a gold tip."""
+    mesh = Mesh("ParkParkDecorObelisk")
+    add_box(mesh, (0, 0.3, 0), (1.8, 0.6, 1.8), "faded_cream")
+    lathe(mesh, [(0.75, 0.6, "cream"), (0.55, 4.2, "cream"), (0.0, 5.0, "gold")], 4)
+    return mesh
+
+
+def make_nimbus_hub() -> Mesh:
+    """Rotating cloud deck: a pale disc edged with puffs, a little rainbow arch in the middle, and a pedestal per cloud seat."""
+    mesh = Mesh("ParkParkNimbusHub")
+    add_vertical_cylinder(mesh, 8.2, 0.0, 0.6, "cream", 44)
+    add_vertical_cylinder(mesh, 8.25, 0.0, 0.45, "faded_mint", 44)
+    for index in range(14):
+        angle = TAU * index / 14
+        add_ellipsoid(mesh, (8.0 * math.cos(angle), 0.7, 8.0 * math.sin(angle)), (0.9, 0.55, 0.9), "cream", slices=8, stacks=5)
+    for band, material in enumerate(("coral", "gold", "mint")):
+        radius = 2.6 - band * 0.35
+        for index in range(12):
+            a0, a1 = math.pi * index / 12, math.pi * (index + 1) / 12
+            add_cylinder_between(mesh, (radius * math.cos(a0), 0.6 + radius * math.sin(a0), 0), (radius * math.cos(a1), 0.6 + radius * math.sin(a1), 0), 0.17, 0.17, material, 6)
+    for index in range(6):
+        angle = TAU * index / 6 + TAU / 12
+        x, z = 5.4 * math.cos(angle), 5.4 * math.sin(angle)
+        add_cylinder_between(mesh, (0, 0.9, 0), (x, 0.9, z), 0.14, 0.14, "faded_mint", 8)
+        add_vertical_cylinder(mesh, 1.4, 0.6, 0.9, "cream", 24, x, z)
+    return mesh
+
+
+def make_cloud_pod() -> Mesh:
+    """A cloud seat (base at y=0): three white puffs under a seat on top at about y=1.72."""
+    mesh = Mesh("ParkParkCloudPod")
+    add_ellipsoid(mesh, (0, 0.8, 0), (0.9, 0.7, 0.9), "cream", slices=12, stacks=6)
+    add_ellipsoid(mesh, (0.6, 0.7, 0.2), (0.55, 0.5, 0.55), "cream", slices=10, stacks=5)
+    add_ellipsoid(mesh, (-0.6, 0.7, -0.2), (0.55, 0.5, 0.55), "cream", slices=10, stacks=5)
+    add_box(mesh, (0, 1.72, -0.2), (0.9, 0.14, 1.0), "coral")
+    for side in (-1, 1):
+        add_cylinder_between(mesh, (side * 0.5, 1.75, 0.35), (side * 0.5, 2.3, 0.7), 0.05, 0.05, "gold", 5)
+    add_cylinder_between(mesh, (0, 0.0, 0.0), (0, 0.5, 0.0), 0.09, 0.09, "gold", 6)
+    return mesh
+
+
+def make_rainbow_mound() -> Mesh:
+    """A bouncy rainbow pad (origin at the ground centre): concentric colour bands over a soft cloud base."""
+    mesh = Mesh("ParkParkRainbowMound")
+    add_vertical_cylinder(mesh, 6.8, 0.0, 0.9, "cream", 36)
+    lathe(mesh, [(6.6, 0.9, "coral"), (5.7, 1.2, "gold"), (4.6, 1.45, "mint"), (3.4, 1.55, "faded_mint"), (2.2, 1.6, "cream"), (0.0, 1.6, "cream")], 32)
+    for index in range(8):
+        angle = TAU * index / 8 + 0.2
+        add_ellipsoid(mesh, (6.4 * math.cos(angle), 1.1, 6.4 * math.sin(angle)), (0.9, 0.6, 0.9), "cream", slices=8, stacks=4)
+    return mesh
+
+
+def make_sky_castle() -> Mesh:
+    """A castle on a cloud (origin at the ground centre, gate on the +Z side): cream walls, four coral towers and a gold flag."""
+    mesh = Mesh("ParkParkSkyCastle")
+    add_ellipsoid(mesh, (0, 0.8, 0), (7.2, 1.0, 6.4), "cream", slices=16, stacks=5)
+    add_box(mesh, (0, 3.2, 0), (9.0, 4.4, 7.0), "cream")
+    add_box(mesh, (0, 5.7, 0), (9.4, 0.6, 7.4), "faded_mint")
+    for sx in (-1, 1):
+        for sz in (-1, 1):
+            add_vertical_cylinder(mesh, 1.1, 1.0, 6.4, "faded_cream", 14, sx * 4.5, sz * 3.5)
+    for sx in (-1, 1):
+        for sz in (-1, 1):
+            x, z = sx * 4.5, sz * 3.5
+            add_cylinder_between(mesh, (x, 6.4, z), (x, 9.0, z), 1.5, 0.05, "coral", 14)
+    add_box(mesh, (0, 2.2, 3.55), (2.4, 3.2, 0.3), "ink")
+    add_cylinder_between(mesh, (0, 6.0, 0), (0, 9.8, 0), 0.08, 0.08, "wood", 6)
+    add_box(mesh, (0.8, 9.4, 0), (1.6, 0.9, 0.06), "gold")
+    return mesh
+
+
+def make_shop_cotton() -> Mesh:
+    """Cotton-candy stall: mint walls, a coral-and-cream awning, and a giant cotton-candy cloud on a cone on the roof."""
+    mesh = Mesh("ParkParkShopCotton")
+    shop_base(mesh, "mint", "coral", "cream")
+    lathe(mesh, [(0.0, 5.0, "cream"), (0.9, 6.4, "cream"), (0.0, 6.5, "cream")], 10)
+    add_ellipsoid(mesh, (0, 7.5, 0), (1.5, 1.2, 1.5), "coral", slices=10, stacks=6)
+    add_ellipsoid(mesh, (0.9, 7.2, 0.3), (0.9, 0.8, 0.9), "faded_cream", slices=8, stacks=5)
+    add_ellipsoid(mesh, (-0.9, 7.1, -0.2), (0.9, 0.8, 0.9), "faded_cream", slices=8, stacks=5)
+    return mesh
+
+
+def make_decor_cloud() -> Mesh:
+    """A little cloud on a stand (origin at the ground point): four puffs on a thin post."""
+    mesh = Mesh("ParkParkDecorCloud")
+    add_vertical_cylinder(mesh, 0.15, 0.0, 2.6, "faded_mint", 8)
+    for x, y, z, r in ((0, 3.4, 0, 1.2), (1.0, 3.2, 0.2, 0.85), (-1.0, 3.2, -0.2, 0.85), (0.2, 3.9, 0.3, 0.75)):
+        add_ellipsoid(mesh, (x, y, z), (r, r * 0.75, r), "cream", slices=10, stacks=6)
+    return mesh
+
+
+def make_decor_rainbow() -> Mesh:
+    """A small rainbow arch on two posts (origin at the ground point, facing +Z)."""
+    mesh = Mesh("ParkParkDecorRainbow")
+    for band, material in enumerate(("coral", "gold", "mint", "faded_mint")):
+        radius = 2.8 - band * 0.4
+        for index in range(14):
+            a0, a1 = math.pi * index / 14, math.pi * (index + 1) / 14
+            add_cylinder_between(mesh, (radius * math.cos(a0), 0.2 + radius * math.sin(a0), 0), (radius * math.cos(a1), 0.2 + radius * math.sin(a1), 0), 0.22, 0.22, material, 6)
+    for side in (-1, 1):
+        add_ellipsoid(mesh, (side * 2.6, 0.5, 0.0), (0.7, 0.5, 0.7), "cream", slices=8, stacks=4)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -3694,6 +3886,20 @@ def main() -> None:
         make_shop_juice(),
         make_decor_fern(),
         make_decor_totem(),
+        make_camel_hub(),
+        make_dune_pod(),
+        make_dune_mound(),
+        make_pyramid(),
+        make_shop_oasis(),
+        make_decor_cactus(),
+        make_decor_obelisk(),
+        make_nimbus_hub(),
+        make_cloud_pod(),
+        make_rainbow_mound(),
+        make_sky_castle(),
+        make_shop_cotton(),
+        make_decor_cloud(),
+        make_decor_rainbow(),
         make_decor_crystal(),
         make_decor_planet(),
         make_swan(),

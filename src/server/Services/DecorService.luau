@@ -169,6 +169,16 @@ local function grayboxDecor(kind: string): Model
 			Enum.PartType.Ball
 		)
 		boulder.CanCollide = true
+	elseif kind == "DecorCactus" then
+		part("Cactus", Vector3.new(2.2, 7.2, 2.2), Vector3.new(0, 3.6, 0), Color3.fromRGB(96, 170, 120), nil).CanCollide =
+			true
+	elseif kind == "DecorObelisk" then
+		part("Obelisk", Vector3.new(1.8, 9, 1.8), Vector3.new(0, 4.5, 0), Color3.fromRGB(226, 205, 160), nil).CanCollide =
+			true
+	elseif kind == "DecorCloud" then
+		part("Cloud", Vector3.new(5, 3.4, 4), Vector3.new(0, 7, 0), Color3.fromRGB(246, 248, 252), Enum.PartType.Ball)
+	elseif kind == "DecorRainbow" then
+		part("Arch", Vector3.new(6, 3, 0.8), Vector3.new(0, 4, 0), Color3.fromRGB(244, 150, 130), nil)
 	elseif kind == "DecorFern" then
 		part(
 			"Fern",
@@ -228,6 +238,8 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 		DecorBarrels = true,
 		DecorLollipop = true,
 		DecorFern = true,
+		DecorCactus = true,
+		DecorCloud = true,
 	}
 	local function place(kind: string, position: Vector3, yaw: number, radius: number)
 		local template = findTemplate(kind)
@@ -373,6 +385,10 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, kids.MinZ, kids.BoundaryZ })
 	local winter = ParkLayout.ZoneBounds.Winter
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, winter.MinZ, winter.BoundaryZ })
+	local desert = ParkLayout.ZoneBounds.Desert
+	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, desert.MinZ, desert.BoundaryZ })
+	local cloud = ParkLayout.ZoneBounds.Cloud
+	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, cloud.MinZ, cloud.BoundaryZ })
 	local jungle = ParkLayout.ZoneBounds.Jungle
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, jungle.MinZ, jungle.BoundaryZ })
 	local candy = ParkLayout.ZoneBounds.Candy
@@ -560,6 +576,63 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 		end
 	end
 	for z = winter.BoundaryZ - 16, winter.MinZ + 12, -24 do
+		for _, side in { -1, 1 } do
+			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
+			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then
+				place("DecorLamp", spot, 0, 1.5)
+			end
+		end
+	end
+
+	-- The 사막 구역: scenery with lamps along its road.
+	local desertProps: { { kind: string, count: number, margin: number, radius: number } } = {
+		{ kind = "DecorCactus", count = 30, margin = 4, radius = 2 },
+		{ kind = "DecorObelisk", count = 8, margin = 6, radius = 2 },
+		{ kind = "DecorRock", count = 20, margin = 6, radius = 4 },
+		{ kind = "DecorPalm", count = 8, margin = 7, radius = 5 },
+	}
+	for _, prop in desertProps do
+		local made = 0
+		local tries = 0
+		while made < prop.count and tries < 3000 do
+			tries += 1
+			local x = random:NextNumber(-WORLD_X, WORLD_X)
+			local z = random:NextNumber(desert.MinZ + 6, desert.BoundaryZ - 8)
+			if not zoneBlocked(x, z, prop.margin) and clear(x, z, prop.radius) then
+				place(prop.kind, Vector3.new(x, 0, z), random:NextNumber(0, math.pi * 2), prop.radius)
+				made += 1
+			end
+		end
+	end
+	for z = desert.BoundaryZ - 16, desert.MinZ + 12, -24 do
+		for _, side in { -1, 1 } do
+			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
+			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then
+				place("DecorLamp", spot, 0, 1.5)
+			end
+		end
+	end
+
+	-- The 구름 구역: scenery with lamps along its road.
+	local cloudProps: { { kind: string, count: number, margin: number, radius: number } } = {
+		{ kind = "DecorCloud", count = 26, margin = 5, radius = 3 },
+		{ kind = "DecorRainbow", count = 8, margin = 6, radius = 4 },
+		{ kind = "DecorFlowers", count = 14, margin = 4, radius = 2.5 },
+	}
+	for _, prop in cloudProps do
+		local made = 0
+		local tries = 0
+		while made < prop.count and tries < 3000 do
+			tries += 1
+			local x = random:NextNumber(-WORLD_X, WORLD_X)
+			local z = random:NextNumber(cloud.MinZ + 6, cloud.BoundaryZ - 8)
+			if not zoneBlocked(x, z, prop.margin) and clear(x, z, prop.radius) then
+				place(prop.kind, Vector3.new(x, 0, z), random:NextNumber(0, math.pi * 2), prop.radius)
+				made += 1
+			end
+		end
+	end
+	for z = cloud.BoundaryZ - 16, cloud.MinZ + 12, -24 do
 		for _, side in { -1, 1 } do
 			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
 			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then

@@ -72,6 +72,14 @@ ParkLayout.ZoneBranchZ = {
 	Mushroom = -1997,
 	Temple = -2112,
 	Juice = -2112,
+	Camel = -2260,
+	Dune = -2260,
+	Pyramid = -2375,
+	Oasis = -2375,
+	Nimbus = -2523,
+	Rainbow = -2523,
+	Castle = -2638,
+	Cotton = -2638,
 } :: { [string]: number }
 ParkLayout.ZoneBounds = {
 	Water = { BoundaryZ = -168, MinZ = -361 },
@@ -82,6 +90,8 @@ ParkLayout.ZoneBounds = {
 	Cove = { BoundaryZ = -1453, MinZ = -1716 },
 	Candy = { BoundaryZ = -1716, MinZ = -1979 },
 	Jungle = { BoundaryZ = -1979, MinZ = -2242 },
+	Desert = { BoundaryZ = -2242, MinZ = -2505 },
+	Cloud = { BoundaryZ = -2505, MinZ = -2768 },
 } :: { [string]: { BoundaryZ: number, MinZ: number } }
 ParkLayout.GeneratorPosition = Vector3.new(24, 0, 52)
 -- The speed shop stands beside the spawn path.
@@ -431,6 +441,54 @@ ParkLayout.Rides = {
 		Pivot = Vector3.new(110, 0, -2137),
 		PlatformRadius = 16,
 		QueueHead = Vector3.new(110, 0, -2127),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Camel = {
+		Pivot = Vector3.new(-60, 0, -2315),
+		PlatformRadius = 26,
+		QueueHead = Vector3.new(-60, 0, -2285),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Dune = {
+		Pivot = Vector3.new(150, 0, -2315),
+		PlatformRadius = 26,
+		QueueHead = Vector3.new(150, 0, -2285),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Pyramid = {
+		Pivot = Vector3.new(-60, 0, -2430),
+		PlatformRadius = 34,
+		QueueHead = Vector3.new(-60, 0, -2400),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Oasis = {
+		Pivot = Vector3.new(110, 0, -2400),
+		PlatformRadius = 16,
+		QueueHead = Vector3.new(110, 0, -2390),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Nimbus = {
+		Pivot = Vector3.new(-60, 0, -2578),
+		PlatformRadius = 26,
+		QueueHead = Vector3.new(-60, 0, -2548),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Rainbow = {
+		Pivot = Vector3.new(150, 0, -2578),
+		PlatformRadius = 26,
+		QueueHead = Vector3.new(150, 0, -2548),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Castle = {
+		Pivot = Vector3.new(-60, 0, -2693),
+		PlatformRadius = 34,
+		QueueHead = Vector3.new(-60, 0, -2663),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Cotton = {
+		Pivot = Vector3.new(110, 0, -2663),
+		PlatformRadius = 16,
+		QueueHead = Vector3.new(110, 0, -2653),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Ferris = {

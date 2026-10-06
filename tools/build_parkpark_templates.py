@@ -106,6 +106,16 @@ MUSHROOM_SCALE = config_number("MushroomScale")
 TEMPLE_SCALE = config_number("TempleScale")
 FERN_SCALE = config_number("FernScale")
 TOTEM_SCALE = config_number("TotemScale")
+CAMELSCALE = config_number("CamelScale")
+DUNESCALE = config_number("DuneScale")
+PYRAMIDSCALE = config_number("PyramidScale")
+CACTUSSCALE = config_number("CactusScale")
+OBELISKSCALE = config_number("ObeliskScale")
+NIMBUSSCALE = config_number("NimbusScale")
+RAINBOWSCALE = config_number("RainbowScale")
+CASTLESCALE = config_number("CastleScale")
+CLOUDSCALE = config_number("CloudScale")
+RAINBOWARCHSCALE = config_number("RainbowArchScale")
 CRYSTAL_SCALE = config_number("CrystalScale")
 PLANET_SCALE = config_number("PlanetScale")
 SWAN_SCALE = config_number("SwanScale")
@@ -389,9 +399,15 @@ def main() -> None:
     build_coconut()
     build_mushroom()
     build_temple()
+    build_spinner_zone_ride("CamelRide", "ParkParkCamelHub", "ParkParkDunePod", CAMELSCALE, 7.4, 2.0)
+    build_bounce_zone_ride("DuneRide", "ParkParkDuneMound", DUNESCALE)
+    build_hidden_zone_ride("PyramidRide", "ParkParkPyramid", PYRAMIDSCALE, (14.4, 9.6, 14.4))
+    build_spinner_zone_ride("NimbusRide", "ParkParkNimbusHub", "ParkParkCloudPod", NIMBUSSCALE, 3.0, 5.0)
+    build_bounce_zone_ride("RainbowRide", "ParkParkRainbowMound", RAINBOWSCALE)
+    build_hidden_zone_ride("CastleRide", "ParkParkSkyCastle", CASTLESCALE, (9.4, 9.8, 7.4))
     build_ball_pit()
     build_rocket()
-    for shop_template, shop_obj in (("IceCreamShop", "ParkParkShopIceCream"), ("PizzaShop", "ParkParkShopPizza"), ("NoodleShop", "ParkParkShopNoodle"), ("CocoaShop", "ParkParkShopCocoa"), ("CookieShop", "ParkParkShopCookie"), ("StarShop", "ParkParkShopStar"), ("TavernShop", "ParkParkShopTavern"), ("SweetsShop", "ParkParkShopSweets"), ("JuiceShop", "ParkParkShopJuice")):
+    for shop_template, shop_obj in (("IceCreamShop", "ParkParkShopIceCream"), ("PizzaShop", "ParkParkShopPizza"), ("NoodleShop", "ParkParkShopNoodle"), ("CocoaShop", "ParkParkShopCocoa"), ("CookieShop", "ParkParkShopCookie"), ("StarShop", "ParkParkShopStar"), ("TavernShop", "ParkParkShopTavern"), ("SweetsShop", "ParkParkShopSweets"), ("JuiceShop", "ParkParkShopJuice"), ("OasisShop", "ParkParkShopOasis"), ("CottonShop", "ParkParkShopCotton")):
         build_shop(shop_template, shop_obj)
     build_flume()
     build_decor()
@@ -1322,6 +1338,75 @@ def build_temple() -> None:
     )
 
 
+def build_spinner_zone_ride(template: str, hub_obj: str, pod_obj: str, scale: float, column_h: float = 6.0, column_d: float = 2.0) -> None:
+    missing = missing_meshes((hub_obj, pod_obj))
+    if missing:
+        print(f"skipped {template}: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    pods = []
+    for index in range(6):
+        angle = 2 * math.pi * index / 6
+        origin = (5.4 * math.cos(angle), 0.98, 5.4 * math.sin(angle))
+        pods.append(mesh_part(f"Seat{index + 1}", pod_obj, origin, 0, False, CREAM, scale))
+    write(
+        template,
+        model(
+            template,
+            [
+                mesh_part("Hub", hub_obj, (0, 0, 0), 0, False, MINT, scale),
+                cylinder_collider("HubCollider", (0, 0.5, 0), 1.0, 16.8, scale),
+                cylinder_collider("ColumnCollider", (0, column_h / 2, 0), column_h, column_d, scale),
+                *pods,
+                console("Console", -26, 24, 0),
+            ],
+        ),
+    )
+
+
+def build_bounce_zone_ride(template: str, obj: str, scale: float) -> None:
+    if missing_meshes((obj,)):
+        print(f"skipped {template}: import {obj} and record its mesh ID first")
+        return
+
+    seats = []
+    for index in range(6):
+        angle = 2 * math.pi * index / 6
+        seats.append(box_collider(f"Seat{index + 1}", (3.2 * math.cos(angle), 1.6, 3.2 * math.sin(angle)), (1, 0.2, 1), 0, scale))
+    write(
+        template,
+        model(
+            template,
+            [
+                mesh_part("Pad", obj, (0, 0, 0), 180, False, CREAM, scale),
+                cylinder_collider("Collider", (0, 0.9, 0), 1.8, 14.0, scale),
+                *seats,
+                console("Console", -24, 24, 0),
+            ],
+        ),
+    )
+
+
+def build_hidden_zone_ride(template: str, obj: str, scale: float, box: tuple[float, float, float]) -> None:
+    if missing_meshes((obj,)):
+        print(f"skipped {template}: import {obj} and record its mesh ID first")
+        return
+
+    seats = [box_collider(f"Seat{index + 1}", (index, 1.0, 0), (1, 0.2, 1), 0, scale) for index in range(6)]
+    write(
+        template,
+        model(
+            template,
+            [
+                mesh_part("Pad", obj, (0, 0, 0), 180, False, MINT, scale),
+                box_collider("Collider", (0, box[1] / 2, 0), box, 0, scale),
+                *seats,
+                console("Console", -24, 30, 0),
+            ],
+        ),
+    )
+
+
 def build_stage() -> None:
     if missing_meshes(("ParkParkShowStage",)):
         print("skipped ShowStage: import ParkParkShowStage and record its mesh ID first")
@@ -1513,6 +1598,10 @@ def build_decor() -> None:
         ("DecorCandyCane", "ParkParkDecorCandyCane", CANDYCANE_SCALE, cylinder_collider("Collider", (0, 2.0, 0), 4.0, 0.7, CANDYCANE_SCALE)),
         ("DecorFern", "ParkParkDecorFern", FERN_SCALE, None),
         ("DecorTotem", "ParkParkDecorTotem", TOTEM_SCALE, box_collider("Collider", (0, 2.4, 0), (1.4, 4.8, 1.4), 0, TOTEM_SCALE)),
+        ("DecorCactus", "ParkParkDecorCactus", CACTUSSCALE, cylinder_collider("Collider", (0, 1.8, 0), 3.6, 1.2, CACTUSSCALE)),
+        ("DecorObelisk", "ParkParkDecorObelisk", OBELISKSCALE, box_collider("Collider", (0, 2.5, 0), (1.8, 5.0, 1.8), 0, OBELISKSCALE)),
+        ("DecorCloud", "ParkParkDecorCloud", CLOUDSCALE, cylinder_collider("Collider", (0, 1.3, 0), 2.6, 0.5, CLOUDSCALE)),
+        ("DecorRainbow", "ParkParkDecorRainbow", RAINBOWARCHSCALE, None),
         ("DecorPine", "ParkParkDecorPine", PINE_SCALE, cylinder_collider("Collider", (0, 1.2, 0), 2.4, 0.8, PINE_SCALE)),
         ("DecorRock", "ParkParkDecorRock", ROCK_SCALE, cylinder_collider("Collider", (0, 1.0, 0), 2.0, 4.4, ROCK_SCALE)),
         ("DecorPalm", "ParkParkDecorPalm", PALM_SCALE, cylinder_collider("Collider", (0, 1.8, 0), 3.6, 1.2, PALM_SCALE)),
