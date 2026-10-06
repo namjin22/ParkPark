@@ -88,7 +88,7 @@ function ParkProgressionService.Start(
 		park.RepairPrompt.Enabled = true
 		notify(
 			player,
-			"입구 청소 완료!",
+			"입구 청소 완료",
 			string.format("+%d %s", GameConfig.EntranceCleanupReward, GameConfig.CurrencyDisplayName)
 		)
 	end)
@@ -120,7 +120,7 @@ function ParkProgressionService.Start(
 		hideModel(park.GateRope)
 		park.GatePrompt.Enabled = false
 		for _, other in Players:GetPlayers() do
-			notify(other, "파크 파크 개장!", "손님이 곧 도착해요")
+			notify(other, "개장했어요", "손님이 곧 도착해요")
 		end
 	end)
 end

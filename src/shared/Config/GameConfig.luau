@@ -1,5 +1,16 @@
 --!strict
 
+export type Cosmetic = {
+	Id: string,
+	Kind: string,
+	Name: string,
+	Cost: number,
+	Color: Color3?,
+	Rainbow: boolean?,
+	Text: string?,
+	PassOnly: boolean?,
+}
+
 export type RideEconomy = {
 	DisplayName: string,
 	-- The ride's model in the park folder and the console players manage it from.
@@ -974,7 +985,7 @@ return {
 			Requires = "Mine",
 		},
 		{
-			Title = "전부 가동!",
+			Title = "전체 가동",
 			Desc = "놀이기구 20개가 동시에 돌아가게 해요",
 			Kind = "Operating",
 			Target = 20,
@@ -1021,6 +1032,67 @@ return {
 	-- Speed shop: each level adds SpeedPerLevel to a player's walk speed; costs are for level 1, 2, ...
 	SpeedLevelCosts = { 1500, 6000, 20000, 60000, 150000 } :: { number },
 	SpeedPerLevel = 4,
+
+	-- The closet: cosmetics only. Coins buy walk trails and name titles; items marked PassOnly come with the optional
+	-- supporter game pass (Monetization.PassId, 0 = not created yet, so nothing Robux-related is active).
+	Monetization = { PassId = 0 },
+	Cosmetics = {
+		{
+			Id = "TrailMint",
+			Kind = "Trail",
+			Name = "민트 반짝",
+			Cost = 5000,
+			Color = Color3.fromRGB(110, 220, 170),
+		},
+		{
+			Id = "TrailCoral",
+			Kind = "Trail",
+			Name = "코랄 불꽃",
+			Cost = 20000,
+			Color = Color3.fromRGB(255, 130, 110),
+		},
+		{
+			Id = "TrailGold",
+			Kind = "Trail",
+			Name = "황금 별빛",
+			Cost = 60000,
+			Color = Color3.fromRGB(255, 215, 110),
+		},
+		{ Id = "TrailRainbow", Kind = "Trail", Name = "무지개", Cost = 150000, Rainbow = true },
+		{
+			Id = "TitleExplorer",
+			Kind = "Title",
+			Name = "개척자",
+			Cost = 3000,
+			Text = "개척자",
+			Color = Color3.fromRGB(150, 225, 190),
+		},
+		{
+			Id = "TitleBoss",
+			Kind = "Title",
+			Name = "놀이공원 사장님",
+			Cost = 15000,
+			Text = "놀이공원 사장님",
+			Color = Color3.fromRGB(255, 190, 110),
+		},
+		{
+			Id = "TitleLegend",
+			Kind = "Title",
+			Name = "전설의 사장",
+			Cost = 50000,
+			Text = "전설의 사장",
+			Color = Color3.fromRGB(255, 120, 160),
+		},
+		{
+			Id = "TitleSupporter",
+			Kind = "Title",
+			Name = "후원자",
+			Cost = 0,
+			Text = "후원자",
+			Color = Color3.fromRGB(255, 225, 120),
+			PassOnly = true,
+		},
+	} :: { Cosmetic },
 
 	-- Daily bonus: this share of the summed fares of all repaired attractions (at least DailyMinimum), times the
 	-- streak multiplier, capped so a mature save cannot collect an entire zone gate from a single login.

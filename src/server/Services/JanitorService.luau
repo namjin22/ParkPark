@@ -299,7 +299,7 @@ function JanitorService.Start(
 		refreshPrompt()
 		notify(
 			player,
-			"청소원을 고용했어요!",
+			"청소원을 고용했어요",
 			string.format(
 				"-%d %s · 치운 쓰레기마다 코인을 받아요 (%d/%d)",
 				cost,

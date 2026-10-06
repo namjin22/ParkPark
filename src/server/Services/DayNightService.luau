@@ -62,7 +62,7 @@ function DayNightService.Start(park: { ParkFolder: Folder }, notify: Notify)
 				setLamps(night)
 				if night and folder:GetAttribute("ParkOpen") == true then
 					for _, player in Players:GetPlayers() do
-						notify(player, "야간 개장!", "밤에는 요금이 15% 올라요")
+						notify(player, "야간 운영", "밤에는 요금이 15% 올라요")
 					end
 				end
 			end

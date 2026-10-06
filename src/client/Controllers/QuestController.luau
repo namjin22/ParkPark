@@ -1,5 +1,8 @@
 --!strict
 
+local UITheme = require(
+	game:GetService("ReplicatedStorage"):WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("UITheme")
+)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
@@ -13,7 +16,7 @@ local QuestController = {}
 
 local function addCorner(parent: Instance, radius: number)
 	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, radius)
+	corner.CornerRadius = UDim.new(0, math.clamp(math.floor(radius / 2), 4, 10))
 	corner.Parent = parent
 end
 
@@ -33,7 +36,7 @@ function QuestController.Start()
 	card.Position = UDim2.new(1, -12, 0, 110)
 	card.Size = UDim2.fromOffset(240, 0)
 	card.AutomaticSize = Enum.AutomaticSize.Y
-	card.BackgroundColor3 = palette.Cream
+	card.BackgroundColor3 = UITheme.Panel
 	card.BorderSizePixel = 0
 	card.Visible = false
 	card.Parent = screenGui
@@ -65,8 +68,8 @@ function QuestController.Start()
 	bindCamera()
 
 	local stroke = Instance.new("UIStroke")
-	stroke.Color = palette.Coral
-	stroke.Thickness = 3
+	stroke.Color = UITheme.Border
+	stroke.Thickness = 1
 	stroke.Parent = card
 	local padding = Instance.new("UIPadding")
 	padding.PaddingTop = UDim.new(0, 8)

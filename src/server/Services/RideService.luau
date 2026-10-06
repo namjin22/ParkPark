@@ -497,7 +497,7 @@ function RideService.Start(
 			refreshBoard()
 			notify(
 				player,
-				string.format("%s 해금!", displayName),
+				string.format("%s 해금", displayName),
 				string.format("-%d %s · 이제 수리하세요", config.UnlockCost, currency)
 			)
 		end
@@ -517,7 +517,7 @@ function RideService.Start(
 			refreshBoard()
 			notify(
 				player,
-				string.format("%s 복구 완료!", displayName),
+				string.format("%s 수리 완료", displayName),
 				string.format("-%d %s · 손님당 +%d %s", config.RepairCost, currency, config.BaseFare, currency)
 			)
 			start()
@@ -537,7 +537,7 @@ function RideService.Start(
 			model:SetAttribute("IncomeLevel", level + 1)
 			notify(
 				player,
-				string.format("%s 요금 인상!", displayName),
+				string.format("%s 요금 인상", displayName),
 				string.format("-%d %s · 손님당 +%d %s", cost, currency, fareForLevel(level + 1), currency)
 			)
 		end
@@ -556,7 +556,7 @@ function RideService.Start(
 			model:SetAttribute("StaffLevel", level + 1)
 			notify(
 				player,
-				string.format("%s 직원 고용!", displayName),
+				string.format("%s 직원 고용", displayName),
 				string.format(
 					"-%d %s · %d초마다 자동으로 %s",
 					cost,

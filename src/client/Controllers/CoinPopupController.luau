@@ -46,7 +46,7 @@ function CoinPopupController.Start()
 		local label = Instance.new("TextLabel")
 		label.Size = UDim2.fromScale(1, 1)
 		label.BackgroundTransparency = 1
-		label.Font = Enum.Font.GothamBlack
+		label.Font = Enum.Font.GothamBold
 		label.Text = text
 		label.TextSize = 26
 		label.TextColor3 = GameConfig.Palette.Gold

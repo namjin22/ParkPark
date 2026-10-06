@@ -112,7 +112,7 @@ function MechanicService.Start(park: { ParkFolder: Folder }, spendCoins: SpendCo
 		folder:SetAttribute("Mechanics", level + 1)
 		notify(
 			player,
-			"정비사 고용!",
+			"정비사를 고용했어요",
 			string.format(
 				"정전이 나도 %d초 안에 전기가 돌아와요",
 				GameConfig.MechanicTimeouts[level + 1]

@@ -36,6 +36,7 @@ local snowService = require(script.Parent.Services.SnowService)
 local spaceService = require(script.Parent.Services.SpaceService)
 local fireworksService = require(script.Parent.Services.FireworksService)
 local dailyService = require(script.Parent.Services.DailyService)
+local cosmeticsService = require(script.Parent.Services.CosmeticsService)
 local travelService = require(script.Parent.Services.TravelService)
 local extraRideService = require(script.Parent.Services.ExtraRideService)
 
@@ -72,7 +73,7 @@ rideService.Start(
 )
 extraRideService.Start(park)
 travelService.Start(park)
-eventService.Start(park, noticeService.Send)
+eventService.Start(park, noticeService.Send, economyService.AwardCoins)
 goalService.Start(park, economyService.AwardCoins, noticeService.Send)
 mechanicService.Start(park, economyService.SpendCoins, noticeService.Send)
 decorShopService.Start(park, economyService.SpendCoins, noticeService.Send, parkBuilder.FindDecorTemplate)
@@ -92,6 +93,12 @@ dailyService.Start(
 	noticeService.Send,
 	persistenceService.GetDaily,
 	persistenceService.SetDaily
+)
+cosmeticsService.Start(
+	economyService.SpendCoins,
+	noticeService.Send,
+	persistenceService.GetCosmetics,
+	persistenceService.SetCosmetics
 )
 dayNightService.Start(park, noticeService.Send)
 bumperCarService.Start(park)

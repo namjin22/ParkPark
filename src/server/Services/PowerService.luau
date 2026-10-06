@@ -181,15 +181,15 @@ function PowerService.Start(park: PowerReferences, awardCoins: AwardCoins, notif
 				awardCoins(player, GameConfig.PowerRestoreReward)
 				notify(
 					player,
-					"전원이 돌아왔어요!",
+					"전원이 복구됐어요",
 					string.format(
-						"+%d %s · 놀이기구가 다시 움직여요",
+						"+%d %s · 놀이기구가 다시 운행해요",
 						GameConfig.PowerRestoreReward,
 						currency
 					)
 				)
 			else
-				notify(player, "전원이 돌아왔어요!", "놀이기구가 다시 움직여요")
+				notify(player, "전원이 복구됐어요", "놀이기구가 다시 운행해요")
 			end
 		end
 	end
@@ -202,9 +202,9 @@ function PowerService.Start(park: PowerReferences, awardCoins: AwardCoins, notif
 		local token = outageToken
 		setPower(false)
 		for _, player in Players:GetPlayers() do
-			notify(player, "정전이에요!", "입구 근처 발전기에서 E를 눌러 전원을 켜세요")
+			notify(player, "정전", "입구 근처 발전기에서 E를 눌러 복구하세요")
 		end
-		popup(GENERATOR_POSITION + Vector3.new(0, 12, 0), "정전!")
+		popup(GENERATOR_POSITION + Vector3.new(0, 12, 0), "정전")
 
 		-- Mechanics (hired at the repair shop) shorten the wait for the power to return by itself.
 		local mechanics = (park.ParkFolder:GetAttribute("Mechanics") :: number?) or 0

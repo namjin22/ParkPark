@@ -1,5 +1,8 @@
 --!strict
 
+local UITheme = require(
+	game:GetService("ReplicatedStorage"):WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("UITheme")
+)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -11,7 +14,7 @@ local HUDController = {}
 
 local function addCorner(parent: Instance, radius: number)
 	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, radius)
+	corner.CornerRadius = UDim.new(0, math.clamp(math.floor(radius / 2), 4, 10))
 	corner.Parent = parent
 end
 
@@ -29,28 +32,18 @@ function HUDController.Start()
 	screenGui.DisplayOrder = 10
 	screenGui.Parent = playerGui
 
-	local shadow = Instance.new("Frame")
-	shadow.Name = "CoinCardShadow"
-	shadow.Position = UDim2.fromOffset(18, 22)
-	shadow.Size = UDim2.fromOffset(210, 64)
-	shadow.BackgroundColor3 = GameConfig.Palette.Ink
-	shadow.BackgroundTransparency = 0.82
-	shadow.BorderSizePixel = 0
-	shadow.Parent = screenGui
-	addCorner(shadow, 18)
-
 	local card = Instance.new("Frame")
 	card.Name = "CoinCard"
 	card.Position = UDim2.fromOffset(16, 18)
-	card.Size = UDim2.fromOffset(210, 64)
-	card.BackgroundColor3 = GameConfig.Palette.Cream
+	card.Size = UDim2.fromOffset(168, 56)
+	card.BackgroundColor3 = UITheme.Panel
 	card.BorderSizePixel = 0
 	card.Parent = screenGui
 	addCorner(card, 18)
 
 	local outline = Instance.new("UIStroke")
-	outline.Color = GameConfig.Palette.Gold
-	outline.Thickness = 1.5
+	outline.Color = UITheme.Border
+	outline.Thickness = 1
 	outline.Transparency = 0.15
 	outline.Parent = card
 
@@ -69,53 +62,33 @@ function HUDController.Start()
 	layout.Padding = UDim.new(0, 11)
 	layout.Parent = card
 
-	local icon = Instance.new("Frame")
-	icon.Name = "CoinIcon"
-	icon.Size = UDim2.fromOffset(38, 38)
-	icon.BackgroundColor3 = GameConfig.Palette.Gold
-	icon.BorderSizePixel = 0
-	icon.LayoutOrder = 1
-	icon.Parent = card
-	addCorner(icon, 19)
-
-	local iconText = Instance.new("TextLabel")
-	iconText.Name = "Sparkle"
-	iconText.BackgroundTransparency = 1
-	iconText.Size = UDim2.fromScale(1, 1)
-	iconText.Font = Enum.Font.GothamBold
-	-- GothamBold has no glyph for "✦"; "★" renders in Studio Play.
-	iconText.Text = "★"
-	iconText.TextColor3 = GameConfig.Palette.Ink
-	iconText.TextSize = 22
-	iconText.Parent = icon
-
 	local textColumn = Instance.new("Frame")
 	textColumn.Name = "CoinText"
-	textColumn.Size = UDim2.new(1, -49, 1, 0)
+	textColumn.Size = UDim2.fromScale(1, 1)
 	textColumn.BackgroundTransparency = 1
 	textColumn.LayoutOrder = 2
 	textColumn.Parent = card
 
 	local title = Instance.new("TextLabel")
 	title.Name = "CoinTitle"
-	title.Position = UDim2.fromOffset(0, 9)
+	title.Position = UDim2.fromOffset(0, 7)
 	title.Size = UDim2.new(1, 0, 0, 16)
 	title.BackgroundTransparency = 1
 	title.Font = Enum.Font.GothamMedium
 	title.Text = GameConfig.CurrencyDisplayName
-	title.TextColor3 = GameConfig.Palette.Ink
+	title.TextColor3 = UITheme.Muted
 	title.TextSize = 12
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.Parent = textColumn
 
 	local count = Instance.new("TextLabel")
 	count.Name = "CoinCount"
-	count.Position = UDim2.fromOffset(0, 25)
+	count.Position = UDim2.fromOffset(0, 22)
 	count.Size = UDim2.new(1, 0, 0, 28)
 	count.BackgroundTransparency = 1
 	count.Font = Enum.Font.GothamBold
-	count.TextColor3 = GameConfig.Palette.Ink
-	count.TextSize = 23
+	count.TextColor3 = UITheme.Text
+	count.TextSize = 22
 	count.TextXAlignment = Enum.TextXAlignment.Left
 	count.TextYAlignment = Enum.TextYAlignment.Top
 	count.Parent = textColumn
@@ -128,15 +101,13 @@ function HUDController.Start()
 	-- A small "+N" / "-N" beside the balance shows each change without any popup in the middle of the screen.
 	local changeLabel = Instance.new("TextLabel")
 	changeLabel.Name = "CoinChange"
-	changeLabel.Position = UDim2.fromOffset(150, 48)
+	changeLabel.Position = UDim2.fromOffset(110, 62)
 	changeLabel.Size = UDim2.fromOffset(72, 24)
 	changeLabel.BackgroundTransparency = 1
-	changeLabel.Font = Enum.Font.GothamBlack
+	changeLabel.Font = Enum.Font.GothamBold
 	changeLabel.TextSize = 18
 	changeLabel.TextXAlignment = Enum.TextXAlignment.Left
 	changeLabel.TextTransparency = 1
-	changeLabel.TextStrokeColor3 = GameConfig.Palette.Ink
-	changeLabel.TextStrokeTransparency = 1
 	changeLabel.Parent = screenGui
 	local changeToken = 0
 
@@ -144,7 +115,7 @@ function HUDController.Start()
 		changeToken += 1
 		local token = changeToken
 		changeLabel.Text = if delta > 0 then string.format("+%d", delta) else string.format("%d", delta)
-		changeLabel.TextColor3 = if delta > 0 then GameConfig.Palette.Mint else GameConfig.Palette.Coral
+		changeLabel.TextColor3 = if delta > 0 then UITheme.Accent else UITheme.Warn
 		changeLabel.Position = UDim2.fromOffset(150, 56)
 		changeLabel.TextTransparency = 0
 		changeLabel.TextStrokeTransparency = 0.6

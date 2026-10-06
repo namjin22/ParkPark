@@ -1,5 +1,8 @@
 --!strict
 
+local UITheme = require(
+	game:GetService("ReplicatedStorage"):WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("UITheme")
+)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
@@ -19,7 +22,7 @@ type Step = {
 
 local function addCorner(parent: Instance, radius: number)
 	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, radius)
+	corner.CornerRadius = UDim.new(0, math.clamp(math.floor(radius / 2), 4, 10))
 	corner.Parent = parent
 end
 
@@ -47,15 +50,15 @@ function ObjectiveController.Start()
 	card.Name = "ObjectiveCard"
 	card.Position = UDim2.fromOffset(16, 92)
 	card.Size = UDim2.fromOffset(250, 60)
-	card.BackgroundColor3 = GameConfig.Palette.Cream
+	card.BackgroundColor3 = UITheme.Panel
 	card.BackgroundTransparency = 0.08
 	card.BorderSizePixel = 0
 	card.Parent = screenGui
 	addCorner(card, 16)
 
 	local outline = Instance.new("UIStroke")
-	outline.Color = GameConfig.Palette.Mint
-	outline.Thickness = 1.5
+	outline.Color = UITheme.Border
+	outline.Thickness = 1
 	outline.Parent = card
 
 	local stepLabel = Instance.new("TextLabel")
@@ -64,7 +67,7 @@ function ObjectiveController.Start()
 	stepLabel.Size = UDim2.new(1, -24, 0, 20)
 	stepLabel.BackgroundTransparency = 1
 	stepLabel.Font = Enum.Font.GothamBold
-	stepLabel.TextColor3 = GameConfig.Palette.Ink
+	stepLabel.TextColor3 = UITheme.Text
 	stepLabel.TextSize = 15
 	stepLabel.TextXAlignment = Enum.TextXAlignment.Left
 	stepLabel.TextTruncate = Enum.TextTruncate.AtEnd
@@ -76,7 +79,7 @@ function ObjectiveController.Start()
 	detailLabel.Size = UDim2.new(1, -24, 0, 18)
 	detailLabel.BackgroundTransparency = 1
 	detailLabel.Font = Enum.Font.GothamMedium
-	detailLabel.TextColor3 = GameConfig.Palette.Ink
+	detailLabel.TextColor3 = UITheme.Text
 	detailLabel.TextTransparency = 0.2
 	detailLabel.TextSize = 12
 	detailLabel.TextXAlignment = Enum.TextXAlignment.Left

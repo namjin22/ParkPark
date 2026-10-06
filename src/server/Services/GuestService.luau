@@ -817,7 +817,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			label.Size = UDim2.fromScale(1, 1)
 			label.BackgroundTransparency = 1
 			label.Font = Enum.Font.GothamBlack
-			label.Text = "★ VIP"
+			label.Text = "VIP"
 			label.TextScaled = true
 			label.TextColor3 = Color3.fromRGB(255, 205, 70)
 			label.TextStrokeTransparency = 0
@@ -827,7 +827,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			for _, player in Players:GetPlayers() do
 				notify(
 					player,
-					"VIP 손님이 왔어요!",
+					"VIP 손님이 도착했어요",
 					string.format("태워 주면 요금이 %d배", GameConfig.VipFareMultiplier)
 				)
 			end

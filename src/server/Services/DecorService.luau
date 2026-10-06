@@ -184,11 +184,43 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 	local random = Random.new(SEED)
 	local placed: { { position: Vector3, radius: number } } = {}
 
+	-- Plants and rocks vary a lot from piece to piece; built things (lamps, benches, fountains) only a little, so
+	-- the park looks laid out by hand rather than stamped from one mould.
+	local NATURAL = {
+		DecorTree = true,
+		DecorBush = true,
+		DecorPalm = true,
+		DecorPine = true,
+		DecorRock = true,
+		DecorCrystal = true,
+		DecorSandcastle = true,
+		DecorFlowers = true,
+	}
 	local function place(kind: string, position: Vector3, yaw: number, radius: number)
 		local template = findTemplate(kind)
 		local model = if template then template:Clone() else grayboxDecor(kind)
 		model.Name = kind
-		model:PivotTo(CFrame.new(position) * CFrame.Angles(0, yaw, 0))
+		local natural = NATURAL[kind] == true
+		local sizeJitter = if natural then random:NextNumber(0.86, 1.16) else random:NextNumber(0.97, 1.03)
+		if sizeJitter ~= 1 then
+			model:ScaleTo(model:GetScale() * sizeJitter)
+		end
+		local lean = if natural then random:NextNumber(-0.045, 0.045) else 0
+		local lift = if natural then random:NextNumber(-0.04, 0.04) else 0
+		local wobble = if natural then 0 else random:NextNumber(-0.08, 0.08)
+		local nudge = if natural
+			then Vector3.zero
+			else Vector3.new(random:NextNumber(-0.7, 0.7), 0, random:NextNumber(-0.7, 0.7))
+		model:PivotTo(CFrame.new(position + nudge) * CFrame.Angles(lean, yaw + wobble, lift))
+		-- A touch of shade difference so no two trees or bushes are the same green.
+		if natural then
+			local shade = random:NextNumber(0, 0.09)
+			for _, part in model:GetDescendants() do
+				if part:IsA("BasePart") and part.Transparency < 1 then
+					part.Color = part.Color:Lerp(Color3.new(0, 0, 0), shade)
+				end
+			end
+		end
 		model.Parent = folder
 		table.insert(placed, { position = position, radius = radius })
 	end
@@ -269,6 +301,24 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 		if not blocked(x, z, 7) and clear(x, z, 8) then
 			place("DecorTree", Vector3.new(x, 0, z), random:NextNumber(0, math.pi * 2), 5)
 			trees += 1
+		end
+	end
+
+	-- Little flower patches in the meadow and along the path edges, in a few sizes.
+	local patches = 0
+	attempts = 0
+	while patches < 46 and attempts < 2500 do
+		attempts += 1
+		local x
+		local z = random:NextNumber(WORLD_MIN_Z + 20, 104)
+		if random:NextNumber() < 0.5 then
+			x = (if random:NextNumber() < 0.5 then -1 else 1) * random:NextNumber(12, 24)
+		else
+			x = random:NextNumber(-WORLD_X, WORLD_X)
+		end
+		if not blocked(x, z, 3) and clear(x, z, 3) then
+			place("DecorFlowers", Vector3.new(x, 0, z), random:NextNumber(0, math.pi * 2), 2)
+			patches += 1
 		end
 	end
 

@@ -47,6 +47,9 @@ type Profile = {
 	speed: number,
 	lastDay: number,
 	streak: number,
+	cosmetics: { string },
+	trail: string,
+	title: string,
 	park: SavedState?,
 	lastCoins: number,
 	dirty: boolean,
@@ -252,6 +255,9 @@ local function loadProfile(player: Player): Profile
 		speed = 0,
 		lastDay = 0,
 		streak = 0,
+		cosmetics = {},
+		trail = "",
+		title = "",
 		park = nil,
 		lastCoins = 0,
 		dirty = false,
@@ -335,6 +341,20 @@ local function loadProfile(player: Player): Profile
 	profile.speed = asNumber(data.Speed, 0, #GameConfig.SpeedLevelCosts, 0)
 	profile.lastDay = asNumber(data.LastDay, 0, 1e6, 0)
 	profile.streak = asNumber(data.Streak, 0, #GameConfig.DailyStreakMultipliers, 0)
+	local known: { [string]: boolean } = {}
+	for _, item in GameConfig.Cosmetics do
+		known[item.Id] = true
+	end
+	profile.cosmetics = {}
+	if type(data.Cosmetics) == "table" then
+		for _, id in data.Cosmetics do
+			if type(id) == "string" and known[id] and #profile.cosmetics < 64 then
+				table.insert(profile.cosmetics, id)
+			end
+		end
+	end
+	profile.trail = if type(data.Trail) == "string" and known[data.Trail] then data.Trail else ""
+	profile.title = if type(data.Title) == "string" and known[data.Title] then data.Title else ""
 	profile.park = sanitizePark(data)
 	profile.status = "ok"
 	return profile
@@ -377,6 +397,9 @@ local function saveProfile(profile: Profile, release: boolean): boolean
 			record.Speed = profile.speed
 			record.LastDay = profile.lastDay
 			record.Streak = profile.streak
+			record.Cosmetics = profile.cosmetics
+			record.Trail = profile.trail
+			record.Title = profile.title
 			if snapshot then
 				record.Park = snapshot.Park
 				record.Rides = snapshot.Rides
@@ -446,6 +469,34 @@ function PersistenceService.SetDaily(player: Player, day: number, streak: number
 	if profile and profile.status == "ok" then
 		profile.lastDay = day
 		profile.streak = streak
+		profile.dirty = true
+		profile.urgent = true
+	end
+end
+
+-- A player's closet: the ids they own and the equipped trail and title (empty string = nothing).
+function PersistenceService.GetCosmetics(player: Player): ({ string }, { Trail: string?, Title: string? })
+	local profile = profiles[player]
+	if profile and profile.status == "ok" then
+		return table.clone(profile.cosmetics),
+			{
+				Trail = if profile.trail ~= "" then profile.trail else nil,
+				Title = if profile.title ~= "" then profile.title else nil,
+			}
+	end
+	return {}, {}
+end
+
+function PersistenceService.SetCosmetics(
+	player: Player,
+	owned: { string },
+	equipped: { Trail: string?, Title: string? }
+)
+	local profile = profiles[player]
+	if profile and profile.status == "ok" then
+		profile.cosmetics = owned
+		profile.trail = equipped.Trail or ""
+		profile.title = equipped.Title or ""
 		profile.dirty = true
 		profile.urgent = true
 	end

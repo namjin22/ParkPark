@@ -287,7 +287,7 @@ function ZoneService.Start(
 			local ready = requiredRide:GetAttribute("IsRepaired") == true
 			local text: string
 			if open then
-				text = "개방!"
+				text = "개방"
 			elseif not ready then
 				text = string.format("먼저 %s 수리", requiredName)
 			else
@@ -331,7 +331,7 @@ function ZoneService.Start(
 			end
 			folder:SetAttribute(attribute, true)
 			for _, other in Players:GetPlayers() do
-				notify(other, string.format("%s 개방!", zoneName), "새 놀이기구가 기다리고 있어요")
+				notify(other, string.format("%s 개방", zoneName), "새 놀이기구를 이용할 수 있어요")
 			end
 		end)
 	end

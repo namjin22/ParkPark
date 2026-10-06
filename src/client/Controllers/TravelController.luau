@@ -1,5 +1,8 @@
 --!strict
 
+local UITheme = require(
+	game:GetService("ReplicatedStorage"):WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("UITheme")
+)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
@@ -13,7 +16,7 @@ local TravelController = {}
 
 local function addCorner(parent: Instance, radius: number)
 	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, radius)
+	corner.CornerRadius = UDim.new(0, math.clamp(math.floor(radius / 2), 4, 10))
 	corner.Parent = parent
 end
 
@@ -22,7 +25,6 @@ function TravelController.Start()
 	local playerGui = player:WaitForChild("PlayerGui")
 	local park = Workspace:WaitForChild("ParkParkWorld")
 	local event = ReplicatedStorage:WaitForChild("ParkParkEvents"):WaitForChild("Travel") :: RemoteEvent
-	local palette = GameConfig.Palette
 
 	local screenGui = Instance.new("ScreenGui")
 	screenGui.Name = "ParkParkTravel"
@@ -33,32 +35,32 @@ function TravelController.Start()
 	local toggle = Instance.new("TextButton")
 	toggle.AnchorPoint = Vector2.new(1, 0.5)
 	toggle.Position = UDim2.new(1, -12, 0.42, 0)
-	toggle.Size = UDim2.fromOffset(72, 72)
-	toggle.BackgroundColor3 = palette.Gold
+	toggle.Size = UDim2.fromOffset(64, 44)
+	toggle.BackgroundColor3 = UITheme.Button
 	toggle.Font = Enum.Font.GothamBold
 	toggle.Text = "이동"
-	toggle.TextColor3 = palette.Ink
-	toggle.TextSize = 22
+	toggle.TextColor3 = UITheme.Text
+	toggle.TextSize = 16
 	toggle.Parent = screenGui
 	addCorner(toggle, 36)
 	local stroke = Instance.new("UIStroke")
-	stroke.Color = palette.Cream
-	stroke.Thickness = 3
+	stroke.Color = UITheme.Border
+	stroke.Thickness = 1
 	stroke.Parent = toggle
 
 	local list = Instance.new("Frame")
 	list.AnchorPoint = Vector2.new(1, 0.5)
 	list.Position = UDim2.new(1, -92, 0.42, 0)
-	list.Size = UDim2.fromOffset(210, 0)
+	list.Size = UDim2.fromOffset(170, 0)
 	list.AutomaticSize = Enum.AutomaticSize.Y
-	list.BackgroundColor3 = palette.Cream
+	list.BackgroundColor3 = UITheme.Panel
 	list.BorderSizePixel = 0
 	list.Visible = false
 	list.Parent = screenGui
 	addCorner(list, 18)
 	local listStroke = Instance.new("UIStroke")
-	listStroke.Color = palette.Gold
-	listStroke.Thickness = 3
+	listStroke.Color = UITheme.Border
+	listStroke.Thickness = 1
 	listStroke.Parent = list
 	local padding = Instance.new("UIPadding")
 	padding.PaddingTop = UDim.new(0, 8)
@@ -78,7 +80,7 @@ function TravelController.Start()
 			and camera.ViewportSize.Y > camera.ViewportSize.X
 		local y = if compactPortrait then 0.54 else 0.42
 		toggle.Position = UDim2.new(1, -12, y, 0)
-		list.Position = UDim2.new(1, -92, y, 0)
+		list.Position = UDim2.new(1, -84, y, 0)
 	end
 	local function bindCamera()
 		local camera = Workspace.CurrentCamera
@@ -92,13 +94,13 @@ function TravelController.Start()
 
 	local function addButton(label: string, destination: string, order: number)
 		local button = Instance.new("TextButton")
-		button.Size = UDim2.new(1, 0, 0, 52)
+		button.Size = UDim2.new(1, 0, 0, 40)
 		button.LayoutOrder = order
-		button.BackgroundColor3 = Color3.fromRGB(255, 250, 235)
+		button.BackgroundColor3 = UITheme.Button
 		button.Font = Enum.Font.GothamBold
 		button.Text = label
-		button.TextColor3 = palette.Ink
-		button.TextSize = 22
+		button.TextColor3 = UITheme.Text
+		button.TextSize = 16
 		button.Parent = list
 		addCorner(button, 14)
 		button.Activated:Connect(function()

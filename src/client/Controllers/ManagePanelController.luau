@@ -1,5 +1,8 @@
 --!strict
 
+local UITheme = require(
+	game:GetService("ReplicatedStorage"):WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("UITheme")
+)
 local Players = game:GetService("Players")
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -23,7 +26,7 @@ local ACTION_ROWS = { "Unlock", "Repair", "Income", "Staff" }
 
 local function addCorner(parent: Instance, radius: number)
 	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, radius)
+	corner.CornerRadius = UDim.new(0, math.clamp(math.floor(radius / 2), 4, 10))
 	corner.Parent = parent
 end
 
@@ -59,7 +62,7 @@ function ManagePanelController.Start()
 	panel.AnchorPoint = Vector2.new(0.5, 1)
 	panel.Position = UDim2.new(0.5, 0, 1, -20)
 	panel.Size = UDim2.new(0.94, 0, 0, PANEL_MAX_HEIGHT)
-	panel.BackgroundColor3 = palette.Cream
+	panel.BackgroundColor3 = UITheme.Panel
 	panel.BorderSizePixel = 0
 	panel.Visible = false
 	panel.Parent = screenGui
@@ -68,8 +71,8 @@ function ManagePanelController.Start()
 	limit.MaxSize = Vector2.new(PANEL_WIDTH, PANEL_MAX_HEIGHT)
 	limit.Parent = panel
 	local stroke = Instance.new("UIStroke")
-	stroke.Color = palette.Gold
-	stroke.Thickness = 3
+	stroke.Color = UITheme.Border
+	stroke.Thickness = 1
 	stroke.Parent = panel
 	local padding = Instance.new("UIPadding")
 	padding.PaddingTop = UDim.new(0, 14)
@@ -163,9 +166,9 @@ function ManagePanelController.Start()
 		frame.Parent = actionList
 		addCorner(frame, 16)
 		local rowStroke = Instance.new("UIStroke")
-		rowStroke.Color = palette.Gold
+		rowStroke.Color = UITheme.Border
 		rowStroke.Transparency = 0.5
-		rowStroke.Thickness = 1.5
+		rowStroke.Thickness = 1
 		rowStroke.Parent = frame
 
 		local title = makeLabel(frame, 23, true, palette.Ink)

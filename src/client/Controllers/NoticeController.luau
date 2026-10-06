@@ -1,12 +1,12 @@
 --!strict
 
+local UITheme = require(
+	game:GetService("ReplicatedStorage"):WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("UITheme")
+)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
-
-local GameConfig =
-	require(ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("GameConfig"))
 
 -- Shows server notices (coins earned/spent, missing coins, park opening) one toast at a time.
 local NoticeController = {}
@@ -15,7 +15,7 @@ local SHOW_SECONDS = 2.2
 
 local function addCorner(parent: Instance, radius: number)
 	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, radius)
+	corner.CornerRadius = UDim.new(0, math.clamp(math.floor(radius / 2), 4, 10))
 	corner.Parent = parent
 end
 
@@ -35,7 +35,7 @@ function NoticeController.Start()
 	card.AnchorPoint = Vector2.new(0.5, 0)
 	card.Position = UDim2.new(0.5, 0, 0, 152)
 	card.Size = UDim2.new(0.9, 0, 0, 66)
-	card.BackgroundColor3 = GameConfig.Palette.Cream
+	card.BackgroundColor3 = UITheme.Panel
 	card.BackgroundTransparency = 1
 	card.BorderSizePixel = 0
 	card.Visible = false
@@ -72,8 +72,8 @@ function NoticeController.Start()
 	bindCamera()
 
 	local outline = Instance.new("UIStroke")
-	outline.Color = GameConfig.Palette.Gold
-	outline.Thickness = 1.5
+	outline.Color = UITheme.Border
+	outline.Thickness = 1
 	outline.Transparency = 1
 	outline.Parent = card
 
@@ -81,7 +81,7 @@ function NoticeController.Start()
 	accent.Name = "Accent"
 	accent.Position = UDim2.fromOffset(0, 10)
 	accent.Size = UDim2.fromOffset(5, 46)
-	accent.BackgroundColor3 = GameConfig.Palette.Coral
+	accent.BackgroundColor3 = UITheme.Accent
 	accent.BackgroundTransparency = 1
 	accent.BorderSizePixel = 0
 	accent.Parent = card
@@ -93,7 +93,7 @@ function NoticeController.Start()
 	title.Size = UDim2.new(1, -34, 0, 26)
 	title.BackgroundTransparency = 1
 	title.Font = Enum.Font.GothamBold
-	title.TextColor3 = GameConfig.Palette.Ink
+	title.TextColor3 = UITheme.Text
 	title.TextSize = 18
 	title.TextTransparency = 1
 	title.TextXAlignment = Enum.TextXAlignment.Left
@@ -105,7 +105,7 @@ function NoticeController.Start()
 	detail.Size = UDim2.new(1, -34, 0, 22)
 	detail.BackgroundTransparency = 1
 	detail.Font = Enum.Font.GothamMedium
-	detail.TextColor3 = GameConfig.Palette.Ink
+	detail.TextColor3 = UITheme.Text
 	detail.TextSize = 14
 	detail.TextTransparency = 1
 	detail.TextXAlignment = Enum.TextXAlignment.Left

@@ -104,7 +104,7 @@ function SpeedShopService.Start(
 		local level = getLevel(player)
 		local cost = GameConfig.SpeedLevelCosts[level + 1]
 		if cost == nil then
-			notify(player, "속도 최대!", "더 올릴 수 없어요")
+			notify(player, "속도 최대", "더 올릴 수 없어요")
 			return
 		end
 		if not spendCoins(player, cost) then
@@ -117,7 +117,7 @@ function SpeedShopService.Start(
 		end
 		setLevel(player, level + 1)
 		publish(player)
-		notify(player, string.format("속도 %d단계!", level + 1), "더 빨리 달릴 수 있어요")
+		notify(player, string.format("속도 %d단계", level + 1), "이동 속도가 올랐어요")
 	end)
 end
 

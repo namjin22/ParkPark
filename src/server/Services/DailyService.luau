@@ -59,8 +59,8 @@ function DailyService.Start(
 			awardCoins(player, reward)
 			notify(
 				player,
-				string.format("출석 %d일째!", streak),
-				string.format("오늘의 보너스 +%d %s", reward, GameConfig.CurrencyDisplayName)
+				string.format("출석 %d일째", streak),
+				string.format("출석 보너스 +%d %s", reward, GameConfig.CurrencyDisplayName)
 			)
 		end)
 	end

@@ -153,7 +153,7 @@ function DecorShopService.Start(
 		folder:SetAttribute("PlotsBought", bought + 1)
 		notify(
 			player,
-			"광장이 예뻐졌어요!",
+			"장식을 설치했어요",
 			string.format(
 				"모든 요금이 %d%% 올랐어요",
 				math.floor((bought + 1) * GameConfig.DecorPlotFareBonus * 100 + 0.5)
