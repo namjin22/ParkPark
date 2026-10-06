@@ -772,7 +772,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			lane = lane,
 			jitter = math.random(-25, 25) / 10,
 			thrill = math.random() < GameConfig.ThrillGuestChance,
-			vip = math.random() < GameConfig.VipGuestChance,
+			vip = math.random() < ((park.ParkFolder:GetAttribute("VipChance") :: number?) or GameConfig.VipGuestChance),
 			joinedAt = 0,
 			ridesTaken = 0,
 			ride = nil,

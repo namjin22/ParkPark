@@ -1293,6 +1293,9 @@ return {
 	-- Now and then a VIP arrives: a golden glow and a label, leaving a tip of this many minutes of the ride's income.
 	VipGuestChance = 0.04,
 	VipTipMinutes = 1,
+	-- Events: during a lucky hour active payouts are multiplied; during a VIP rush this share of arrivals are VIPs.
+	LuckyMultiplier = 3,
+	VipRushChance = 0.4,
 	ThrillRides = {
 		"Coaster",
 		"Drop",

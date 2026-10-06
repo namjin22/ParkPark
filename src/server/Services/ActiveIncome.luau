@@ -23,7 +23,11 @@ function ActiveIncome.PerMinute(folder: Folder): number
 end
 
 function ActiveIncome.Value(folder: Folder, seconds: number): number
-	return math.max(GameConfig.Active.MinimumPayout, math.floor(ActiveIncome.PerMinute(folder) / 60 * seconds + 0.5))
+	local boost = (folder:GetAttribute("ActiveMultiplier") :: number?) or 1
+	return math.max(
+		GameConfig.Active.MinimumPayout,
+		math.floor(ActiveIncome.PerMinute(folder) / 60 * seconds * boost + 0.5)
+	)
 end
 
 return ActiveIncome

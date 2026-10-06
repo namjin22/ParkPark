@@ -33,6 +33,20 @@ local EVENTS = {
 		Crowd = 1,
 		Special = "Chest",
 	},
+	{
+		Name = "행운의 시간",
+		Detail = "줍기, 낚시, 배달 보상이 3배입니다",
+		Fare = 1,
+		Crowd = 1,
+		Special = "Lucky",
+	},
+	{
+		Name = "VIP 단체 방문",
+		Detail = "VIP 손님이 많이 찾아옵니다",
+		Fare = 1,
+		Crowd = 1.2,
+		Special = "VipRush",
+	},
 }
 local COIN_RAIN_SECONDS = 30
 local CHEST_SECONDS = 90
@@ -243,6 +257,13 @@ function EventService.Start(park: { ParkFolder: Folder }, notify: Notify, awardC
 				else
 					broadcast(event.Name .. " 시작", event.Detail)
 				end
+				-- Two events only change a park attribute for their length: ActiveMultiplier (read by ActiveIncome) and
+				-- VipChance (read by GuestService).
+				if event.Special == "Lucky" then
+					folder:SetAttribute("ActiveMultiplier", GameConfig.LuckyMultiplier)
+				elseif event.Special == "VipRush" then
+					folder:SetAttribute("VipChance", GameConfig.VipRushChance)
+				end
 				if event.Special == "CoinRain" then
 					runCoinRain()
 					task.wait(math.max(0, GameConfig.EventSeconds - COIN_RAIN_SECONDS))
@@ -256,6 +277,8 @@ function EventService.Start(park: { ParkFolder: Folder }, notify: Notify, awardC
 				end
 				folder:SetAttribute("FareMultiplier", 1)
 				folder:SetAttribute("CrowdMultiplier", 1)
+				folder:SetAttribute("ActiveMultiplier", nil)
+				folder:SetAttribute("VipChance", nil)
 				folder:SetAttribute("EventName", nil)
 				folder:SetAttribute("EventEnds", nil)
 				broadcast(event.Name .. " 끝", "다음 행사를 기다려요")
