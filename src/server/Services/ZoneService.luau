@@ -60,9 +60,9 @@ end
 local function createFarLabel(board: BasePart, height: number, title: string, subtitle: string): (string) -> ()
 	local billboard = Instance.new("BillboardGui")
 	billboard.Name = "FarLabel"
-	billboard.Size = UDim2.fromOffset(230, 78)
+	billboard.Size = UDim2.fromOffset(150, 52)
 	billboard.StudsOffset = Vector3.new(0, height, 0)
-	billboard.MaxDistance = 130
+	billboard.MaxDistance = 75
 	billboard.LightInfluence = 0
 	billboard.Enabled = false
 	billboard.Parent = board
@@ -80,8 +80,8 @@ local function createFarLabel(board: BasePart, height: number, title: string, su
 		text_.Parent = billboard
 		return text_
 	end
-	line(0, 42, GameConfig.Palette.Ink, title)
-	local sub = line(44, 34, Color3.fromRGB(206, 78, 64), subtitle)
+	line(0, 28, GameConfig.Palette.Ink, title)
+	local sub = line(29, 22, Color3.fromRGB(206, 78, 64), subtitle)
 	return function(text: string)
 		sub.Text = text
 	end

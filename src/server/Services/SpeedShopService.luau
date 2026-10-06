@@ -54,9 +54,9 @@ function SpeedShopService.Start(
 	local sign =
 		part("SignBoard", Vector3.new(9, 3, 0.4), Vector3.new(0, 10.5, 3), palette.Cream, Enum.Material.SmoothPlastic)
 	local billboard = Instance.new("BillboardGui")
-	billboard.Size = UDim2.fromOffset(300, 90)
+	billboard.Size = UDim2.fromOffset(140, 42)
 	billboard.StudsOffset = Vector3.new(0, 4.5, 0)
-	billboard.MaxDistance = 400
+	billboard.MaxDistance = 20
 	billboard.LightInfluence = 0
 	billboard.Parent = sign
 	local label = Instance.new("TextLabel")

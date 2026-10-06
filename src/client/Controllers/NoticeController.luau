@@ -3,6 +3,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
 
 local GameConfig =
 	require(ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("GameConfig"))
@@ -20,6 +21,7 @@ end
 
 function NoticeController.Start()
 	local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
+	local park = Workspace:WaitForChild("ParkParkWorld")
 	local noticeEvent = ReplicatedStorage:WaitForChild("ParkParkEvents"):WaitForChild("Notice") :: RemoteEvent
 
 	local screenGui = Instance.new("ScreenGui")
@@ -44,6 +46,30 @@ function NoticeController.Start()
 	sizeConstraint.MinSize = Vector2.new(240, 66)
 	sizeConstraint.MaxSize = Vector2.new(360, 66)
 	sizeConstraint.Parent = card
+
+	local function compactPortrait(): boolean
+		local camera = Workspace.CurrentCamera
+		return camera ~= nil and camera.ViewportSize.X < 550 and camera.ViewportSize.Y > camera.ViewportSize.X
+	end
+	local function topPosition(): number
+		return if compactPortrait() and type(park:GetAttribute("QuestTitle")) == "string" then 270 else 152
+	end
+	local function updateLayout()
+		card.Size = UDim2.new(if compactPortrait() then 0.76 else 0.9, 0, 0, 66)
+		if card.Visible then
+			card.Position = UDim2.new(0.5, 0, 0, topPosition() + 10)
+		end
+	end
+	local function bindCamera()
+		local camera = Workspace.CurrentCamera
+		if camera then
+			camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateLayout)
+		end
+		updateLayout()
+	end
+	Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(bindCamera)
+	park:GetAttributeChangedSignal("QuestTitle"):Connect(updateLayout)
+	bindCamera()
 
 	local outline = Instance.new("UIStroke")
 	outline.Color = GameConfig.Palette.Gold
@@ -90,8 +116,9 @@ function NoticeController.Start()
 
 	local function fade(visible: boolean, duration: number)
 		local target = if visible then 0 else 1
+		local top = topPosition()
 		TweenService:Create(card, TweenInfo.new(duration, Enum.EasingStyle.Quad), {
-			Position = UDim2.new(0.5, 0, 0, if visible then 162 else 152),
+			Position = UDim2.new(0.5, 0, 0, if visible then top + 10 else top),
 			BackgroundTransparency = target,
 		}):Play()
 		TweenService:Create(outline, TweenInfo.new(duration), { Transparency = if visible then 0.15 else 1 }):Play()

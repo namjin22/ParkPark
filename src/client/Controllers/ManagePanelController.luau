@@ -100,6 +100,7 @@ function ManagePanelController.Start()
 	actionLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	actionLayout.Parent = actionList
 
+	local visibleActionCount = 0
 	local boundCamera: Camera? = nil
 	local function updatePanelSize()
 		local camera = Workspace.CurrentCamera
@@ -107,7 +108,9 @@ function ManagePanelController.Start()
 			return
 		end
 		local availableHeight = math.max(120, camera.ViewportSize.Y - 40)
-		panel.Size = UDim2.new(0.94, 0, 0, math.min(PANEL_MAX_HEIGHT, availableHeight))
+		local rowsHeight = visibleActionCount * 76 + math.max(0, visibleActionCount - 1) * actionLayout.Padding.Offset
+		local contentHeight = 104 + rowsHeight
+		panel.Size = UDim2.new(0.94, 0, 0, math.min(PANEL_MAX_HEIGHT, availableHeight, contentHeight))
 	end
 	local function bindCamera()
 		local camera = Workspace.CurrentCamera
@@ -284,6 +287,14 @@ function ManagePanelController.Start()
 				string.format("최대예요 · %d초마다 자동 %s", GameConfig.StaffIntervals[staffLevel], noun)
 			setButton(staffRow, "최대", false)
 		end
+
+		visibleActionCount = 0
+		for _, row in rows do
+			if row.frame.Visible then
+				visibleActionCount += 1
+			end
+		end
+		updatePanelSize()
 	end
 
 	local function close()
@@ -300,8 +311,8 @@ function ManagePanelController.Start()
 		currentKey = key
 		currentConsole = console
 		actionList.CanvasPosition = Vector2.zero
-		panel.Visible = true
 		refresh()
+		panel.Visible = true
 	end
 
 	for action, row in rows do

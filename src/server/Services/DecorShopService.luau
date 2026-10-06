@@ -82,9 +82,9 @@ function DecorShopService.Start(
 	flower.Shape = Enum.PartType.Ball
 	local sign = part("SignBoard", Vector3.new(9, 3, 0.4), Vector3.new(0, 10.5, 3), palette.Cream)
 	local billboard = Instance.new("BillboardGui")
-	billboard.Size = UDim2.fromOffset(230, 70)
+	billboard.Size = UDim2.fromOffset(140, 42)
 	billboard.StudsOffset = Vector3.new(0, 4.2, 0)
-	billboard.MaxDistance = 130
+	billboard.MaxDistance = 20
 	billboard.LightInfluence = 0
 	billboard.Parent = sign
 	local label = Instance.new("TextLabel")

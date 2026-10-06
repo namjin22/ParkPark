@@ -45,9 +45,9 @@ function MechanicService.Start(park: { ParkFolder: Folder }, spendCoins: SpendCo
 	wrench.CFrame = CFrame.new(position + Vector3.new(0, 5.2, 0)) * CFrame.Angles(0, 0, math.rad(40))
 	local sign = part("SignBoard", Vector3.new(9, 3, 0.4), Vector3.new(0, 10.5, 3), palette.Cream)
 	local billboard = Instance.new("BillboardGui")
-	billboard.Size = UDim2.fromOffset(230, 70)
+	billboard.Size = UDim2.fromOffset(140, 42)
 	billboard.StudsOffset = Vector3.new(0, 4.2, 0)
-	billboard.MaxDistance = 130
+	billboard.MaxDistance = 20
 	billboard.LightInfluence = 0
 	billboard.Parent = sign
 	local label = Instance.new("TextLabel")

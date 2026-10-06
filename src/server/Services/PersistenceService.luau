@@ -20,7 +20,8 @@ local GameConfig =
 -- never saved this session, so a failed load cannot overwrite good data with a fresh start. Where the API
 -- is unavailable (Studio without "Enable Studio Access to API Services") saves go to memory and are lost when
 -- the server closes; the ServerStorage StringValue `DebugSaveSeed` (JSON of a saved profile) seeds that mode
--- for tests.
+-- for tests. Set ServerStorage.BoolValue `DebugUseMemorySaves` to true to force this isolated mode in Studio
+-- even when API services are enabled.
 local PersistenceService = {}
 
 export type SavedState = {
@@ -98,29 +99,37 @@ local function ensureBackend(): Backend
 		return activeBackend
 	end
 
-	local realStore = DataStoreService:GetDataStore(STORE_NAME, STORE_SCOPE)
-	local probeOk, probeError = pcall(function()
-		return realStore:GetAsync("__probe")
-	end)
-	if probeOk or not string.find(tostring(probeError), "Studio access", 1, true) then
-		local datastore: Backend = {
-			name = "datastore",
-			update = function(key: string, transform: (any) -> any): (boolean, any)
-				return pcall(function()
-					return realStore:UpdateAsync(key, transform)
-				end)
-			end,
-			remove = function(key: string)
-				pcall(function()
-					realStore:RemoveAsync(key)
-				end)
-			end,
-		}
-		activeBackend = datastore
-		return datastore
+	local debugMemoryValue = ServerStorage:FindFirstChild("DebugUseMemorySaves")
+	local forceMemory = debugMemoryValue ~= nil and debugMemoryValue:IsA("BoolValue") and debugMemoryValue.Value
+	if not forceMemory then
+		local realStore = DataStoreService:GetDataStore(STORE_NAME, STORE_SCOPE)
+		local probeOk, probeError = pcall(function()
+			return realStore:GetAsync("__probe")
+		end)
+		if probeOk or not string.find(tostring(probeError), "Studio access", 1, true) then
+			local datastore: Backend = {
+				name = "datastore",
+				update = function(key: string, transform: (any) -> any): (boolean, any)
+					return pcall(function()
+						return realStore:UpdateAsync(key, transform)
+					end)
+				end,
+				remove = function(key: string)
+					pcall(function()
+						realStore:RemoveAsync(key)
+					end)
+				end,
+			}
+			activeBackend = datastore
+			return datastore
+		end
 	end
 
-	warn("[ParkPark] DataStore is not available here; progress is kept in memory and will not persist")
+	if forceMemory then
+		warn("[ParkPark] DebugUseMemorySaves is enabled; progress is isolated in memory for this server")
+	else
+		warn("[ParkPark] DataStore is not available here; progress is kept in memory and will not persist")
+	end
 	local seedValue = ServerStorage:FindFirstChild("DebugSaveSeed")
 	if seedValue and seedValue:IsA("StringValue") then
 		local ok, decoded = pcall(function()

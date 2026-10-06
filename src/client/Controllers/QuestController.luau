@@ -38,6 +38,32 @@ function QuestController.Start()
 	card.Visible = false
 	card.Parent = screenGui
 	addCorner(card, 16)
+
+	local function updateLayout()
+		local camera = Workspace.CurrentCamera
+		local compactPortrait = camera ~= nil
+			and camera.ViewportSize.X < 550
+			and camera.ViewportSize.Y > camera.ViewportSize.X
+		if compactPortrait then
+			card.AnchorPoint = Vector2.new(0, 0)
+			card.Position = UDim2.fromOffset(16, 160)
+			card.Size = UDim2.new(1, -32, 0, 0)
+		else
+			card.AnchorPoint = Vector2.new(1, 0)
+			card.Position = UDim2.new(1, -12, 0, 110)
+			card.Size = UDim2.fromOffset(240, 0)
+		end
+	end
+	local function bindCamera()
+		local camera = Workspace.CurrentCamera
+		if camera then
+			camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateLayout)
+		end
+		updateLayout()
+	end
+	Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(bindCamera)
+	bindCamera()
+
 	local stroke = Instance.new("UIStroke")
 	stroke.Color = palette.Coral
 	stroke.Thickness = 3

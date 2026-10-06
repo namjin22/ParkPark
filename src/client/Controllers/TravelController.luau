@@ -71,6 +71,25 @@ function TravelController.Start()
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = list
 
+	local function updateLayout()
+		local camera = Workspace.CurrentCamera
+		local compactPortrait = camera ~= nil
+			and camera.ViewportSize.X < 550
+			and camera.ViewportSize.Y > camera.ViewportSize.X
+		local y = if compactPortrait then 0.54 else 0.42
+		toggle.Position = UDim2.new(1, -12, y, 0)
+		list.Position = UDim2.new(1, -92, y, 0)
+	end
+	local function bindCamera()
+		local camera = Workspace.CurrentCamera
+		if camera then
+			camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateLayout)
+		end
+		updateLayout()
+	end
+	Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(bindCamera)
+	bindCamera()
+
 	local function addButton(label: string, destination: string, order: number)
 		local button = Instance.new("TextButton")
 		button.Size = UDim2.new(1, 0, 0, 52)

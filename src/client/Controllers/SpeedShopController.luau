@@ -14,8 +14,21 @@ local SpeedShopController = {}
 function SpeedShopController.Start()
 	local player = Players.LocalPlayer
 	local park = Workspace:WaitForChild("ParkParkWorld")
-	local shop = park:WaitForChild("SpeedShop")
-	local prompt = shop:WaitForChild("Counter"):WaitForChild("SpeedPrompt") :: ProximityPrompt
+	local shop = park:WaitForChild("SpeedShop", 30)
+	if shop == nil then
+		warn("[ParkPark] Speed shop did not replicate to the client")
+		return
+	end
+	local counter = shop:WaitForChild("Counter", 30)
+	if counter == nil or not counter:IsA("BasePart") then
+		warn("[ParkPark] Speed shop counter did not replicate to the client")
+		return
+	end
+	local prompt = counter:WaitForChild("SpeedPrompt", 30)
+	if prompt == nil or not prompt:IsA("ProximityPrompt") then
+		warn("[ParkPark] Speed shop prompt did not replicate to the client")
+		return
+	end
 
 	local function refresh()
 		local level = (player:GetAttribute("SpeedLevel") :: number?) or 0
