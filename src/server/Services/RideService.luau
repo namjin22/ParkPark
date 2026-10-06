@@ -164,7 +164,7 @@ local function createInfoSign(console: BasePart, ride: Model, displayName: strin
 	post.Shape = Enum.PartType.Cylinder
 	post.Size = Vector3.new(postHeight + 0.5, 0.7, 0.7)
 	post.CFrame = CFrame.new(top + Vector3.new(0, postHeight / 2, 0)) * CFrame.Angles(0, 0, math.pi / 2)
-	post.Color = GameConfig.Palette.Gold
+	post.Color = Color3.fromRGB(104, 108, 114)
 	post.Material = Enum.Material.SmoothPlastic
 	post.Anchored = true
 	post.CanCollide = false
@@ -176,7 +176,7 @@ local function createInfoSign(console: BasePart, ride: Model, displayName: strin
 	board.Name = "SignBoard"
 	board.Size = SIGN_SIZE
 	board.CFrame = CFrame.lookAt(boardCenter, boardCenter + outward)
-	board.Color = GameConfig.Palette.Cream
+	board.Color = Color3.fromRGB(250, 249, 246)
 	board.Material = Enum.Material.SmoothPlastic
 	board.Anchored = true
 	board.CanCollide = false
@@ -188,7 +188,7 @@ local function createInfoSign(console: BasePart, ride: Model, displayName: strin
 	frame.Name = "SignFrame"
 	frame.Size = SIGN_SIZE + Vector3.new(0.6, 0.6, -0.2)
 	frame.CFrame = board.CFrame
-	frame.Color = GameConfig.Palette.Gold
+	frame.Color = Color3.fromRGB(74, 78, 84)
 	frame.Material = Enum.Material.SmoothPlastic
 	frame.Anchored = true
 	frame.CanCollide = false
@@ -213,8 +213,8 @@ local function createInfoSign(console: BasePart, ride: Model, displayName: strin
 			detail = signLabel(gui, 290, 90, 64, true, ink),
 			queue = signLabel(gui, 385, 90, 64, true, ink),
 		})
-		local hint = signLabel(gui, 510, 100, 62, true, Color3.fromRGB(52, 128, 100))
-		hint.Text = "콘솔에서 E · 관리"
+		local hint = signLabel(gui, 510, 100, 62, true, Color3.fromRGB(70, 130, 110))
+		hint.Text = "콘솔에서 E로 관리"
 	end
 	local setFar = createFarLabel(board, SIGN_SIZE.Y / 2 + 1.5, displayName, "")
 	sign.Parent = parent

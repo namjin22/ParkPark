@@ -2,6 +2,7 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ProximityPromptService = game:GetService("ProximityPromptService")
 local SoundService = game:GetService("SoundService")
 
 -- Small interface sounds built into Roblox (rbxasset://sounds), so no uploaded audio is needed: a ping when coins
@@ -31,6 +32,12 @@ function SoundController.Start()
 	local coinSound = makeSound("ParkCoinSound", COIN_SOUND, 0.3)
 	local spendSound = makeSound("ParkSpendSound", SPEND_SOUND, 0.4)
 	local noticeSound = makeSound("ParkNoticeSound", NOTICE_SOUND, 0.25)
+
+	-- Finishing any prompt hold (gathering, fishing, delivery, buying) gives a short click.
+	local clickSound = makeSound("ParkClickSound", "rbxasset://sounds/switch.mp3", 0.35)
+	ProximityPromptService.PromptTriggered:Connect(function()
+		play(clickSound, 1)
+	end)
 
 	local events = ReplicatedStorage:WaitForChild("ParkParkEvents", 30)
 	local notice = if events then events:FindFirstChild("Notice") else nil

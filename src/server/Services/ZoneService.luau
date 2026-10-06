@@ -196,7 +196,7 @@ function ZoneService.Start(
 					name .. "Post",
 					Vector3.new(1.6, 6.4, 1.6),
 					Vector3.new(x, 3.2, boundaryZ),
-					palette.Gold,
+					Color3.fromRGB(104, 78, 56),
 					Enum.Material.SmoothPlastic
 				)
 			end
@@ -214,7 +214,7 @@ function ZoneService.Start(
 				"GatePost",
 				Vector3.new(2.4, 12, 2.4),
 				Vector3.new(roadX + side * half, 6, boundaryZ),
-				palette.Coral,
+				Color3.fromRGB(96, 100, 106),
 				Enum.Material.SmoothPlastic
 			)
 			part(
@@ -222,7 +222,7 @@ function ZoneService.Start(
 				"GateCap",
 				Vector3.new(3.4, 1.2, 3.4),
 				Vector3.new(roadX + side * half, 12.4, boundaryZ),
-				palette.Gold,
+				Color3.fromRGB(70, 74, 80),
 				Enum.Material.SmoothPlastic
 			)
 		end
@@ -231,7 +231,7 @@ function ZoneService.Start(
 			"ZoneBarrier",
 			Vector3.new(half * 2 - 2.4, 5, 1),
 			Vector3.new(roadX, 2.5, boundaryZ),
-			Color3.fromRGB(235, 122, 108),
+			Color3.fromRGB(176, 92, 78),
 			Enum.Material.WoodPlanks
 		)
 		barrier.Transparency = 0.15
@@ -241,7 +241,7 @@ function ZoneService.Start(
 			"ZoneSign",
 			SIGN_SIZE,
 			Vector3.new(roadX, 15.8, boundaryZ),
-			palette.Cream,
+			Color3.fromRGB(250, 249, 246),
 			Enum.Material.SmoothPlastic
 		)
 		sign.CanCollide = false
@@ -250,7 +250,7 @@ function ZoneService.Start(
 			"ZoneSignFrame",
 			SIGN_SIZE + Vector3.new(0.8, 0.8, -0.2),
 			sign.Position,
-			palette.Gold,
+			Color3.fromRGB(74, 78, 84),
 			Enum.Material.SmoothPlastic
 		)
 		frame.CanCollide = false

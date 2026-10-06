@@ -98,7 +98,7 @@ function ManagePanelController.Start()
 	actionList.CanvasSize = UDim2.new(0, 0, 0, 0)
 	actionList.ScrollingDirection = Enum.ScrollingDirection.Y
 	actionList.ScrollBarThickness = 4
-	actionList.ScrollBarImageColor3 = palette.Gold
+	actionList.ScrollBarImageColor3 = UITheme.Border
 	actionList.LayoutOrder = 2
 	actionList.Parent = panel
 	local actionLayout = Instance.new("UIListLayout")
@@ -147,10 +147,10 @@ function ManagePanelController.Start()
 	closeButton.AnchorPoint = Vector2.new(1, 0)
 	closeButton.Position = UDim2.fromScale(1, 0)
 	closeButton.Size = UDim2.fromOffset(96, 48)
-	closeButton.BackgroundColor3 = palette.Ink
+	closeButton.BackgroundColor3 = UITheme.Button
 	closeButton.Font = Enum.Font.GothamBold
 	closeButton.Text = "닫기"
-	closeButton.TextColor3 = palette.Cream
+	closeButton.TextColor3 = UITheme.Text
 	closeButton.TextSize = 22
 	closeButton.Parent = header
 	addCorner(closeButton, 14)
@@ -161,7 +161,7 @@ function ManagePanelController.Start()
 	for index, action in ACTION_ROWS do
 		local frame = Instance.new("Frame")
 		frame.Name = action
-		frame.BackgroundColor3 = Color3.fromRGB(255, 250, 235)
+		frame.BackgroundColor3 = UITheme.Panel
 		frame.BorderSizePixel = 0
 		frame.Size = UDim2.new(1, 0, 0, 76)
 		frame.LayoutOrder = index
@@ -185,7 +185,7 @@ function ManagePanelController.Start()
 		button.AnchorPoint = Vector2.new(1, 0.5)
 		button.Position = UDim2.new(1, -10, 0.5, 0)
 		button.Size = UDim2.fromOffset(142, 56)
-		button.BackgroundColor3 = palette.Mint
+		button.BackgroundColor3 = UITheme.Accent
 		button.Font = Enum.Font.GothamBold
 		button.TextColor3 = Color3.new(1, 1, 1)
 		button.TextSize = 21
@@ -206,7 +206,7 @@ function ManagePanelController.Start()
 
 	local function setButton(row: Row, text: string, usable: boolean)
 		row.button.Text = text
-		row.button.BackgroundColor3 = if usable then palette.Mint else Color3.fromRGB(176, 170, 156)
+		row.button.BackgroundColor3 = if usable then UITheme.Accent else UITheme.Border
 		row.button.AutoButtonColor = usable
 	end
 
