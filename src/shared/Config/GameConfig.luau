@@ -846,6 +846,9 @@ return {
 		DeliveryTimeoutSeconds = 240,
 	},
 	IncomeScale = 1.5,
+	-- Playing together: each extra player in the server raises everyone's ride income by this much, up to the max.
+	PartyBonusPerPlayer = 0.1,
+	PartyBonusMax = 0.4,
 	StaffIncomeBonus = 0.25,
 	AutoBoardSeconds = 2,
 

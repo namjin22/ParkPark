@@ -27,6 +27,11 @@ function IncomeService.Start(park: { ParkFolder: Folder }, gameConfig: any, awar
 			result *= gameConfig.NightFareMultiplier
 		end
 		result *= 1 + ((folder:GetAttribute("PlotsBought") :: number?) or 0) * gameConfig.DecorPlotFareBonus
+		-- Playing together pays: every extra player in the park adds PartyBonusPerPlayer, up to PartyBonusMax.
+		local party =
+			math.min(gameConfig.PartyBonusMax, math.max(0, #Players:GetPlayers() - 1) * gameConfig.PartyBonusPerPlayer)
+		folder:SetAttribute("PartyBonus", party)
+		result *= 1 + party
 		return result
 	end
 

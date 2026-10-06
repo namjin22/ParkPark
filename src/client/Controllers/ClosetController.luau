@@ -79,12 +79,22 @@ function ClosetController.Start()
 		local compactPortrait = camera ~= nil
 			and camera.ViewportSize.X < 550
 			and camera.ViewportSize.Y > camera.ViewportSize.X
-		toggle.Position = if compactPortrait then UDim2.new(1, -12, 0.54, 52) else UDim2.new(1, -12, 0, 302)
-		panel.Position = UDim2.new(1, -84, 0.5, 0)
 		local viewport = if camera then camera.ViewportSize.Y else 600
+		if compactPortrait then
+			toggle.AnchorPoint = Vector2.new(1, 0.5)
+			toggle.Position = UDim2.new(1, -12, 0.54, 52)
+			panel.AnchorPoint = Vector2.new(1, 0.5)
+			panel.Position = UDim2.new(1, -84, 0.5, 0)
+		else
+			toggle.AnchorPoint = Vector2.new(0, 0)
+			toggle.Position = UDim2.fromOffset(88, 150)
+			panel.AnchorPoint = Vector2.new(0, 0)
+			panel.Position = UDim2.fromOffset(16, 200)
+		end
+		local room = if compactPortrait then viewport - 120 else viewport - 220
 		panel.Size = UDim2.fromOffset(
 			if compactPortrait then 230 else 250,
-			math.clamp(layout.AbsoluteContentSize.Y + 16, 80, math.max(120, viewport - 120))
+			math.clamp(layout.AbsoluteContentSize.Y + 16, 80, math.max(120, room))
 		)
 	end
 	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateLayout)
