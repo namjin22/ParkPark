@@ -96,6 +96,11 @@ TREASURE_SCALE = config_number("TreasureScale")
 GHOSTSHIP_SCALE = config_number("GhostShipScale")
 CANNON_SCALE = config_number("CannonScale")
 BARRELS_SCALE = config_number("BarrelsScale")
+LOLLI_SCALE = config_number("LolliScale")
+GUMMY_SCALE = config_number("GummyScale")
+FACTORY_SCALE = config_number("FactoryScale")
+LOLLIPOP_SCALE = config_number("LollipopScale")
+CANDYCANE_SCALE = config_number("CandyCaneScale")
 CRYSTAL_SCALE = config_number("CrystalScale")
 PLANET_SCALE = config_number("PlanetScale")
 SWAN_SCALE = config_number("SwanScale")
@@ -373,9 +378,12 @@ def main() -> None:
     build_corsair()
     build_treasure()
     build_ghost_ship()
+    build_lolli()
+    build_gummy()
+    build_factory()
     build_ball_pit()
     build_rocket()
-    for shop_template, shop_obj in (("IceCreamShop", "ParkParkShopIceCream"), ("PizzaShop", "ParkParkShopPizza"), ("NoodleShop", "ParkParkShopNoodle"), ("CocoaShop", "ParkParkShopCocoa"), ("CookieShop", "ParkParkShopCookie"), ("StarShop", "ParkParkShopStar"), ("TavernShop", "ParkParkShopTavern")):
+    for shop_template, shop_obj in (("IceCreamShop", "ParkParkShopIceCream"), ("PizzaShop", "ParkParkShopPizza"), ("NoodleShop", "ParkParkShopNoodle"), ("CocoaShop", "ParkParkShopCocoa"), ("CookieShop", "ParkParkShopCookie"), ("StarShop", "ParkParkShopStar"), ("TavernShop", "ParkParkShopTavern"), ("SweetsShop", "ParkParkShopSweets")):
         build_shop(shop_template, shop_obj)
     build_flume()
     build_decor()
@@ -1166,6 +1174,76 @@ def build_ghost_ship() -> None:
     )
 
 
+def build_lolli() -> None:
+    needed = ("ParkParkLolliHub", "ParkParkCandyPod")
+    missing = missing_meshes(needed)
+    if missing:
+        print(f"skipped LolliRide: import {', '.join(missing)} and record their mesh IDs first")
+        return
+
+    pods = []
+    for index in range(6):
+        angle = 2 * math.pi * index / 6
+        origin = (5.4 * math.cos(angle), 0.98, 5.4 * math.sin(angle))
+        pods.append(mesh_part(f"Seat{index + 1}", "ParkParkCandyPod", origin, 0, False, CREAM, LOLLI_SCALE))
+    write(
+        "LolliRide",
+        model(
+            "LolliRide",
+            [
+                mesh_part("Hub", "ParkParkLolliHub", (0, 0, 0), 0, False, MINT, LOLLI_SCALE),
+                cylinder_collider("HubCollider", (0, 0.5, 0), 1.0, 16.8, LOLLI_SCALE),
+                cylinder_collider("ColumnCollider", (0, 3.0, 0), 6.0, 1.2, LOLLI_SCALE),
+                *pods,
+                console("Console", -26, 24, 0),
+            ],
+        ),
+    )
+
+
+def build_gummy() -> None:
+    if missing_meshes(("ParkParkGummyMound",)):
+        print("skipped GummyRide: import ParkParkGummyMound and record its mesh ID first")
+        return
+
+    seats = []
+    for index in range(6):
+        angle = 2 * math.pi * index / 6
+        seats.append(box_collider(f"Seat{index + 1}", (3.2 * math.cos(angle), 1.6, 3.2 * math.sin(angle)), (1, 0.2, 1), 0, GUMMY_SCALE))
+    write(
+        "GummyRide",
+        model(
+            "GummyRide",
+            [
+                mesh_part("Pad", "ParkParkGummyMound", (0, 0, 0), 180, False, CREAM, GUMMY_SCALE),
+                cylinder_collider("Collider", (0, 0.9, 0), 1.8, 14.0, GUMMY_SCALE),
+                *seats,
+                console("Console", -24, 24, 0),
+            ],
+        ),
+    )
+
+
+def build_factory() -> None:
+    if missing_meshes(("ParkParkCandyFactory",)):
+        print("skipped FactoryRide: import ParkParkCandyFactory and record its mesh ID first")
+        return
+
+    seats = [box_collider(f"Seat{index + 1}", (index, 1.0, 0), (1, 0.2, 1), 0, FACTORY_SCALE) for index in range(6)]
+    write(
+        "FactoryRide",
+        model(
+            "FactoryRide",
+            [
+                mesh_part("Pad", "ParkParkCandyFactory", (0, 0, 0), 180, False, MINT, FACTORY_SCALE),
+                box_collider("Collider", (0, 3.0, 0), (12.6, 6.0, 9.6), 0, FACTORY_SCALE),
+                *seats,
+                console("Console", -24, 30, 0),
+            ],
+        ),
+    )
+
+
 def build_stage() -> None:
     if missing_meshes(("ParkParkShowStage",)):
         print("skipped ShowStage: import ParkParkShowStage and record its mesh ID first")
@@ -1353,6 +1431,8 @@ def build_decor() -> None:
         ("DecorPlanet", "ParkParkDecorPlanet", PLANET_SCALE, cylinder_collider("Collider", (0, 1.4, 0), 2.8, 2.4, PLANET_SCALE)),
         ("DecorCannon", "ParkParkDecorCannon", CANNON_SCALE, box_collider("Collider", (0, 1.0, 0), (1.8, 2.0, 2.6), 0, CANNON_SCALE)),
         ("DecorBarrels", "ParkParkDecorBarrels", BARRELS_SCALE, cylinder_collider("Collider", (0, 0.9, 0.6), 1.8, 4.2, BARRELS_SCALE)),
+        ("DecorLollipop", "ParkParkDecorLollipop", LOLLIPOP_SCALE, cylinder_collider("Collider", (0, 1.7, 0), 3.4, 0.6, LOLLIPOP_SCALE)),
+        ("DecorCandyCane", "ParkParkDecorCandyCane", CANDYCANE_SCALE, cylinder_collider("Collider", (0, 2.0, 0), 4.0, 0.7, CANDYCANE_SCALE)),
         ("DecorPine", "ParkParkDecorPine", PINE_SCALE, cylinder_collider("Collider", (0, 1.2, 0), 2.4, 0.8, PINE_SCALE)),
         ("DecorRock", "ParkParkDecorRock", ROCK_SCALE, cylinder_collider("Collider", (0, 1.0, 0), 2.0, 4.4, ROCK_SCALE)),
         ("DecorPalm", "ParkParkDecorPalm", PALM_SCALE, cylinder_collider("Collider", (0, 1.8, 0), 3.6, 1.2, PALM_SCALE)),

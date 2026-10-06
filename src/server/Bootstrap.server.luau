@@ -35,6 +35,7 @@ local decorShopService = require(script.Parent.Services.DecorShopService)
 local snowService = require(script.Parent.Services.SnowService)
 local spaceService = require(script.Parent.Services.SpaceService)
 local coveService = require(script.Parent.Services.CoveService)
+local sugarService = require(script.Parent.Services.SugarService)
 local incomeService = require(script.Parent.Services.IncomeService)
 local gatherService = require(script.Parent.Services.GatherService)
 local fishingService = require(script.Parent.Services.FishingService)
@@ -85,6 +86,7 @@ decorShopService.Start(park, economyService.SpendCoins, noticeService.Send, park
 snowService.Start(park)
 spaceService.Start(park)
 coveService.Start(park)
+sugarService.Start(park)
 fireworksService.Start(park)
 speedShopService.Start(
 	park,

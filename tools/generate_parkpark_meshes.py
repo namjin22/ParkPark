@@ -3315,6 +3315,118 @@ def make_decor_barrels() -> Mesh:
     return mesh
 
 
+def make_lolli_hub() -> Mesh:
+    """Rotating candy deck: a striped disc, a giant swirled lollipop in the middle, and a pedestal per gumdrop seat."""
+    mesh = Mesh("ParkParkLolliHub")
+    add_vertical_cylinder(mesh, 8.2, 0.0, 0.6, "cream", 44)
+    add_vertical_cylinder(mesh, 8.25, 0.0, 0.45, "coral", 44)
+    add_torus(mesh, 8.0, 0.14, 0.62, "mint", segments=44, sides=6)
+    for radius, material in ((7.0, "coral"), (5.8, "mint"), (4.6, "coral"), (3.4, "mint")):
+        add_torus(mesh, radius, 0.1, 0.62, material, segments=36, sides=5)
+    add_cylinder_between(mesh, (0, 0.6, 0), (0, 5.2, 0), 0.28, 0.28, "cream", 10)
+    add_cylinder_between(mesh, (0, 5.7, -0.25), (0, 5.7, 0.25), 2.2, 2.2, "coral", 28)
+    add_cylinder_between(mesh, (0, 5.7, 0.2), (0, 5.7, 0.32), 1.5, 1.5, "cream", 28)
+    add_cylinder_between(mesh, (0, 5.7, 0.3), (0, 5.7, 0.4), 0.9, 0.9, "coral", 24)
+    add_cylinder_between(mesh, (0, 5.7, 0.38), (0, 5.7, 0.46), 0.4, 0.4, "cream", 20)
+    for index in range(6):
+        angle = TAU * index / 6
+        x, z = 5.4 * math.cos(angle), 5.4 * math.sin(angle)
+        add_cylinder_between(mesh, (0, 0.9, 0), (x, 0.9, z), 0.14, 0.14, "cream", 8)
+        add_vertical_cylinder(mesh, 1.4, 0.6, 0.9, "mint", 24, x, z)
+    return mesh
+
+
+def make_candy_pod() -> Mesh:
+    """A gumdrop seat (base at y=0): a soft rounded drop with sugar dots and a seat on top at about y=1.72."""
+    mesh = Mesh("ParkParkCandyPod")
+    add_ellipsoid(mesh, (0, 0.85, 0), (1.0, 0.85, 1.0), "coral", slices=14, stacks=7)
+    for index in range(8):
+        angle = TAU * index / 8
+        add_ellipsoid(mesh, (0.92 * math.cos(angle), 0.9, 0.92 * math.sin(angle)), (0.09, 0.09, 0.09), "cream", slices=5, stacks=3)
+    add_box(mesh, (0, 1.72, -0.2), (0.9, 0.14, 1.0), "mint")
+    for side in (-1, 1):
+        add_cylinder_between(mesh, (side * 0.5, 1.75, 0.35), (side * 0.5, 2.3, 0.7), 0.05, 0.05, "gold", 5)
+    add_cylinder_between(mesh, (0, 0.0, 0.0), (0, 0.5, 0.0), 0.09, 0.09, "gold", 6)
+    return mesh
+
+
+def make_gummy_mound() -> Mesh:
+    """A jelly bouncing mound (origin at the ground centre): a wobbly pink dome with gummy bears and gumdrops around it."""
+    mesh = Mesh("ParkParkGummyMound")
+    add_vertical_cylinder(mesh, 6.8, 0.0, 0.9, "cream", 36)
+    lathe(mesh, [(6.6, 0.9, "coral"), (5.2, 1.3, "coral"), (3.0, 1.55, "faded_cream"), (0.0, 1.6, "coral")], 28)
+    add_ellipsoid(mesh, (0, 2.6, 0), (1.0, 1.1, 0.8), "mint", slices=10, stacks=6)
+    add_ellipsoid(mesh, (0, 4.0, 0), (0.7, 0.65, 0.6), "mint", slices=10, stacks=6)
+    for side in (-1, 1):
+        add_ellipsoid(mesh, (side * 0.5, 4.55, 0), (0.22, 0.25, 0.18), "mint", slices=7, stacks=4)
+        add_ellipsoid(mesh, (side * 1.05, 2.9, 0), (0.28, 0.6, 0.3), "mint", slices=7, stacks=4)
+        add_ellipsoid(mesh, (side * 0.45, 1.8, 0), (0.3, 0.55, 0.3), "mint", slices=7, stacks=4)
+    for index in range(8):
+        angle = TAU * index / 8 + 0.2
+        add_ellipsoid(mesh, (6.3 * math.cos(angle), 1.1, 6.3 * math.sin(angle)), (0.8, 0.7, 0.8), ("coral", "mint", "gold", "cream")[index % 4], slices=8, stacks=5)
+    return mesh
+
+
+def make_candy_factory() -> Mesh:
+    """A candy factory (origin at the ground centre, door on the +Z side): cream walls, a coral roof, a swirled chimney, a big gear, and pipes."""
+    mesh = Mesh("ParkParkCandyFactory")
+    add_box(mesh, (0, 2.6, 0), (12.0, 5.2, 9.0), "cream")
+    add_box(mesh, (0, 5.5, 0), (12.8, 0.7, 9.8), "coral")
+    add_box(mesh, (0, 6.6, 0), (9.0, 1.6, 7.0), "mint")
+    add_box(mesh, (0, 7.5, 0), (9.6, 0.3, 7.6), "coral")
+    add_box(mesh, (0, 1.8, 4.55), (3.0, 3.6, 0.2), "ink")
+    add_box(mesh, (0, 3.9, 4.6), (3.8, 0.5, 0.4), "gold")
+    for side in (-1, 1):
+        add_ellipsoid(mesh, (side * 4.2, 2.6, 4.55), (0.8, 0.8, 0.3), "gold", slices=8, stacks=4)
+        add_vertical_cylinder(mesh, 0.55, 5.8, 10.2, "coral" if side < 0 else "cream", 14, side * 4.0, -2.2)
+        add_vertical_cylinder(mesh, 0.7, 10.2, 10.6, "gold", 14, side * 4.0, -2.2)
+    add_cylinder_between(mesh, (6.4, 1.2, 1.0), (6.4, 4.6, 1.0), 0.35, 0.35, "mint", 8)
+    add_cylinder_between(mesh, (6.4, 4.6, 1.0), (4.0, 4.9, 1.0), 0.35, 0.35, "mint", 8)
+    add_cylinder_between(mesh, (-0.3, 2.8, -4.7), (0.3, 2.8, -4.7), 2.0, 2.0, "gold", 20)
+    add_cylinder_between(mesh, (-0.3, 2.8, -4.7), (0.3, 2.8, -4.7), 0.7, 0.7, "ink", 12)
+    add_box(mesh, (0, 0.5, 6.3), (3.2, 0.2, 3.6), "cream")
+    return mesh
+
+
+def make_shop_sweets() -> Mesh:
+    """Sweet shop stall: coral walls, a mint-and-cream awning, and a giant lollipop and jar of candies on the roof."""
+    mesh = Mesh("ParkParkShopSweets")
+    shop_base(mesh, "coral", "mint", "cream")
+    add_cylinder_between(mesh, (-1.6, 5.0, 0), (-1.6, 7.2, 0), 0.14, 0.14, "cream", 8)
+    add_cylinder_between(mesh, (-1.6, 7.6, -0.15), (-1.6, 7.6, 0.15), 1.2, 1.2, "mint", 20)
+    add_cylinder_between(mesh, (-1.6, 7.6, 0.12), (-1.6, 7.6, 0.24), 0.75, 0.75, "cream", 18)
+    lathe(mesh, [(0.0, 5.0, "cream"), (1.0, 5.0, "cream"), (1.2, 6.2, "faded_cream"), (0.9, 6.5, "faded_cream"), (0.0, 6.55, "gold")], 16)
+    for index in range(7):
+        angle = TAU * index / 7
+        add_ellipsoid(mesh, (0.5 * math.cos(angle), 5.5 + 0.2 * (index % 3), 0.4 * math.sin(angle)), (0.28, 0.2, 0.28), ("coral", "mint", "gold")[index % 3], slices=6, stacks=4)
+    return mesh
+
+
+def make_decor_lollipop() -> Mesh:
+    """A standing lollipop (origin at the ground point): a thin stick and a big swirled disc."""
+    mesh = Mesh("ParkParkDecorLollipop")
+    add_vertical_cylinder(mesh, 0.14, 0.0, 3.4, "cream", 8)
+    add_cylinder_between(mesh, (0, 4.6, -0.12), (0, 4.6, 0.12), 1.35, 1.35, "coral", 24)
+    add_cylinder_between(mesh, (0, 4.6, 0.1), (0, 4.6, 0.2), 0.95, 0.95, "cream", 20)
+    add_cylinder_between(mesh, (0, 4.6, 0.18), (0, 4.6, 0.28), 0.55, 0.55, "coral", 16)
+    add_cylinder_between(mesh, (0, 4.6, 0.26), (0, 4.6, 0.34), 0.2, 0.2, "cream", 12)
+    return mesh
+
+
+def make_decor_candy_cane() -> Mesh:
+    """A candy cane (origin at the ground point): a red-and-white striped post with a hooked top."""
+    mesh = Mesh("ParkParkDecorCandyCane")
+    for index in range(7):
+        y0, y1 = index * 0.7, (index + 1) * 0.7
+        add_cylinder_between(mesh, (0, y0, 0), (0, y1, 0), 0.22, 0.22, "coral" if index % 2 == 0 else "cream", 10)
+    for index in range(6):
+        a0, a1 = math.pi * index / 6, math.pi * (index + 1) / 6
+        p0 = (0.7 - 0.7 * math.cos(a0), 4.9 + 0.7 * math.sin(a0), 0)
+        p1 = (0.7 - 0.7 * math.cos(a1), 4.9 + 0.7 * math.sin(a1), 0)
+        add_cylinder_between(mesh, p0, p1, 0.22, 0.22, "coral" if index % 2 == 0 else "cream", 10)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -3455,6 +3567,13 @@ def main() -> None:
         make_shop_tavern(),
         make_decor_cannon(),
         make_decor_barrels(),
+        make_lolli_hub(),
+        make_candy_pod(),
+        make_gummy_mound(),
+        make_candy_factory(),
+        make_shop_sweets(),
+        make_decor_lollipop(),
+        make_decor_candy_cane(),
         make_decor_crystal(),
         make_decor_planet(),
         make_swan(),

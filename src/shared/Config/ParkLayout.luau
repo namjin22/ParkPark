@@ -64,6 +64,10 @@ ParkLayout.ZoneBranchZ = {
 	Treasure = -1471,
 	GhostShip = -1586,
 	Tavern = -1586,
+	Lolli = -1734,
+	Gummy = -1734,
+	Factory = -1849,
+	Sweets = -1849,
 } :: { [string]: number }
 ParkLayout.ZoneBounds = {
 	Water = { BoundaryZ = -168, MinZ = -361 },
@@ -72,6 +76,7 @@ ParkLayout.ZoneBounds = {
 	Winter = { BoundaryZ = -927, MinZ = -1190 },
 	Space = { BoundaryZ = -1190, MinZ = -1453 },
 	Cove = { BoundaryZ = -1453, MinZ = -1716 },
+	Candy = { BoundaryZ = -1716, MinZ = -1979 },
 } :: { [string]: { BoundaryZ: number, MinZ: number } }
 ParkLayout.GeneratorPosition = Vector3.new(24, 0, 52)
 -- The speed shop stands beside the spawn path.
@@ -373,6 +378,30 @@ ParkLayout.Rides = {
 		Pivot = Vector3.new(110, 0, -1611),
 		PlatformRadius = 16,
 		QueueHead = Vector3.new(110, 0, -1601),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Lolli = {
+		Pivot = Vector3.new(-60, 0, -1789),
+		PlatformRadius = 26,
+		QueueHead = Vector3.new(-60, 0, -1759),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Gummy = {
+		Pivot = Vector3.new(150, 0, -1789),
+		PlatformRadius = 26,
+		QueueHead = Vector3.new(150, 0, -1759),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Factory = {
+		Pivot = Vector3.new(-60, 0, -1904),
+		PlatformRadius = 34,
+		QueueHead = Vector3.new(-60, 0, -1874),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Sweets = {
+		Pivot = Vector3.new(110, 0, -1874),
+		PlatformRadius = 16,
+		QueueHead = Vector3.new(110, 0, -1864),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Ferris = {
