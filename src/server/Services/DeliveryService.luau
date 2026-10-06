@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ActiveIncome = require(script.Parent.ActiveIncome)
+local MissionService = require(script.Parent.MissionService)
 local Config = ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config")
 local GameConfig = require(Config:WaitForChild("GameConfig"))
 local ParkLayout = require(Config:WaitForChild("ParkLayout"))
@@ -129,6 +130,7 @@ function DeliveryService.Start(park: { ParkFolder: Folder }, awardCoins: AwardCo
 			who:SetAttribute("DeliveryName", nil)
 			lastDelivery[who] = os.clock()
 			awardCoins(who, reward)
+			MissionService.Report(who, "Deliver")
 			popup(anchor.Position + Vector3.new(0, 6, 0), string.format("배달 완료 +%d", reward))
 			notify(
 				who,

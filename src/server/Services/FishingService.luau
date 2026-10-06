@@ -3,6 +3,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ActiveIncome = require(script.Parent.ActiveIncome)
+local MissionService = require(script.Parent.MissionService)
 local GameConfig =
 	require(ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("GameConfig"))
 
@@ -27,6 +28,7 @@ function FishingService.Start(park: { ParkFolder: Folder }, awardCoins: AwardCoi
 	end
 
 	local function cast(player: Player, position: Vector3)
+		MissionService.Report(player, "Fish")
 		local roll = random:NextNumber(0, total)
 		for _, entry in GameConfig.Active.Fish do
 			roll -= entry.Weight

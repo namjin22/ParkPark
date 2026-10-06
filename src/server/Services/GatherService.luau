@@ -3,6 +3,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ActiveIncome = require(script.Parent.ActiveIncome)
+local MissionService = require(script.Parent.MissionService)
 local Config = ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config")
 local GameConfig = require(Config:WaitForChild("GameConfig"))
 local ParkLayout = require(Config:WaitForChild("ParkLayout"))
@@ -144,6 +145,7 @@ function GatherService.Start(park: { ParkFolder: Folder }, awardCoins: AwardCoin
 					item:Destroy()
 					local amount = ActiveIncome.Value(folder, GameConfig.Active.GatherSeconds)
 					awardCoins(player, amount)
+					MissionService.Report(player, "Gather")
 					popup(Vector3.new(x, 4, z), string.format("%s +%d", area.label, amount))
 					task.delay(GameConfig.Active.GatherRespawnSeconds, function()
 						if folder.Parent ~= nil then

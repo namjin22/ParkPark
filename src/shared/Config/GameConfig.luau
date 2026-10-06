@@ -1052,6 +1052,23 @@ return {
 		DeliveryCooldownSeconds = 20,
 		DeliveryTimeoutSeconds = 240,
 	},
+
+	-- Daily missions: each day one of the tiers below is drawn for gathering, fishing and delivering; the reward is
+	-- `Minutes` of the park's income (see ActiveIncome), at least the minimum payout.
+	Missions = {
+		Gather = {
+			{ Text = "물건 5개 줍기", Goal = 5, Minutes = 4 },
+			{ Text = "물건 12개 줍기", Goal = 12, Minutes = 9 },
+		},
+		Fish = {
+			{ Text = "낚시 3번 하기", Goal = 3, Minutes = 4 },
+			{ Text = "낚시 8번 하기", Goal = 8, Minutes = 9 },
+		},
+		Deliver = {
+			{ Text = "배달 2번 하기", Goal = 2, Minutes = 5 },
+			{ Text = "배달 4번 하기", Goal = 4, Minutes = 11 },
+		},
+	} :: { [string]: { { Text: string, Goal: number, Minutes: number } } },
 	IncomeScale = 1.5,
 	-- Playing together: each extra player in the server raises everyone's ride income by this much, up to the max.
 	PartyBonusPerPlayer = 0.1,

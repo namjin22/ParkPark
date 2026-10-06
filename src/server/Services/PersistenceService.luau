@@ -47,6 +47,8 @@ type Profile = {
 	speed: number,
 	lastDay: number,
 	streak: number,
+	missionDay: number,
+	missionDone: number,
 	cosmetics: { string },
 	trail: string,
 	title: string,
@@ -255,6 +257,8 @@ local function loadProfile(player: Player): Profile
 		speed = 0,
 		lastDay = 0,
 		streak = 0,
+		missionDay = 0,
+		missionDone = 0,
 		cosmetics = {},
 		trail = "",
 		title = "",
@@ -340,6 +344,8 @@ local function loadProfile(player: Player): Profile
 	end
 	profile.speed = asNumber(data.Speed, 0, #GameConfig.SpeedLevelCosts, 0)
 	profile.lastDay = asNumber(data.LastDay, 0, 1e6, 0)
+	profile.missionDay = asNumber(data.MissionDay, 0, 1e6, 0)
+	profile.missionDone = asNumber(data.MissionDone, 0, 7, 0)
 	profile.streak = asNumber(data.Streak, 0, #GameConfig.DailyStreakMultipliers, 0)
 	local known: { [string]: boolean } = {}
 	for _, item in GameConfig.Cosmetics do
@@ -396,6 +402,8 @@ local function saveProfile(profile: Profile, release: boolean): boolean
 			record.Coins = coins
 			record.Speed = profile.speed
 			record.LastDay = profile.lastDay
+			record.MissionDay = profile.missionDay
+			record.MissionDone = profile.missionDone
 			record.Streak = profile.streak
 			record.Cosmetics = profile.cosmetics
 			record.Trail = profile.trail
@@ -469,6 +477,26 @@ function PersistenceService.SetDaily(player: Player, day: number, streak: number
 	if profile and profile.status == "ok" then
 		profile.lastDay = day
 		profile.streak = streak
+		profile.dirty = true
+		profile.urgent = true
+	end
+end
+
+-- A player's finished missions of the day: the UTC day number and a bitmask of the three missions.
+function PersistenceService.GetMissions(player: Player): (number, number)
+	local profile = profiles[player]
+	if profile and profile.status == "ok" then
+		return profile.missionDay, profile.missionDone
+	end
+	-- Not loaded (or the load failed): report all done today so nothing is paid and nothing is overwritten.
+	return os.time() // 86400, 7
+end
+
+function PersistenceService.SetMissions(player: Player, day: number, mask: number)
+	local profile = profiles[player]
+	if profile and profile.status == "ok" then
+		profile.missionDay = day
+		profile.missionDone = mask
 		profile.dirty = true
 		profile.urgent = true
 	end
