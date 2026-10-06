@@ -92,7 +92,14 @@
     "ParkParkDecorPlanet",
     "ParkParkMoonMound",
     "ParkParkShopStar",
-    "ParkParkOrbitHub"
+    "ParkParkOrbitHub",
+    "ParkParkBarrelPod",
+    "ParkParkCorsairHub",
+    "ParkParkDecorCannon",
+    "ParkParkDecorBarrels",
+    "ParkParkShopTavern",
+    "ParkParkGhostShip",
+    "ParkParkTreasureMound"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",
@@ -185,6 +192,13 @@
     "ParkParkDecorPlanet": "rbxassetid://108333688805474",
     "ParkParkMoonMound": "rbxassetid://112769973853312",
     "ParkParkShopStar": "rbxassetid://104928878550179",
-    "ParkParkOrbitHub": "rbxassetid://107820989625578"
+    "ParkParkOrbitHub": "rbxassetid://107820989625578",
+    "ParkParkBarrelPod": "rbxassetid://136863769637056",
+    "ParkParkCorsairHub": "rbxassetid://122107366118397",
+    "ParkParkDecorCannon": "rbxassetid://89430623783176",
+    "ParkParkDecorBarrels": "rbxassetid://103043680101847",
+    "ParkParkShopTavern": "rbxassetid://131719715814517",
+    "ParkParkGhostShip": "rbxassetid://101739491824456",
+    "ParkParkTreasureMound": "rbxassetid://97493416380217"
   }
 }
