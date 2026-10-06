@@ -749,6 +749,26 @@ return {
 	StaffIntervals = { 10, 6, 3 },
 	-- Ride income (see Income.luau): a scale on the guest-count model (1.5 matches the pace measured in play) and the
 	-- income bonus each staff level adds. Guests now board by themselves every AutoBoardSeconds per ride.
+
+	-- Active income: what the player's own work pays, in seconds of the park's current income (see ActiveIncome).
+	-- Gathering is a short hold on a pickup beside the road; fishing a longer hold at a pond with a weighted catch;
+	-- a delivery pays DeliverySeconds, up to four times that for the farthest ride.
+	Active = {
+		MinimumPayout = 5,
+		GatherSeconds = 6,
+		GatherPerArea = 8,
+		GatherRespawnSeconds = 90,
+		FishCastSeconds = 3,
+		Fish = {
+			{ Name = "작은 물고기", Seconds = 6, Weight = 60 },
+			{ Name = "도미", Seconds = 12, Weight = 28 },
+			{ Name = "황금 물고기", Seconds = 40, Weight = 5 },
+			{ Name = "낡은 장화", Seconds = 0, Weight = 7 },
+		},
+		DeliverySeconds = 30,
+		DeliveryCooldownSeconds = 20,
+		DeliveryTimeoutSeconds = 240,
+	},
 	IncomeScale = 1.5,
 	StaffIncomeBonus = 0.25,
 	AutoBoardSeconds = 2,

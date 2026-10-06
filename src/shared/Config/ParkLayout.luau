@@ -95,6 +95,8 @@ ParkLayout.DecorPlots = {
 	Vector3.new(46, 0, 50),
 } :: { Vector3 }
 -- The cleaning cart where janitors are hired, on the other side of the same path.
+-- The delivery desk on the plaza.
+ParkLayout.DeliveryDeskPosition = Vector3.new(-26, 0, 94)
 ParkLayout.JanitorCartPosition = Vector3.new(-24, 0, 52)
 ParkLayout.GroundHalfWidth = 260
 -- The side path runs this far out to each side, past the outermost ride queues.

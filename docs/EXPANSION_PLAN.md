@@ -54,3 +54,23 @@ Working plan for the next content batch: a sixth zone, two new events, and a cos
 - Importing the pirate OBJs through the 3D Importer.
 - Creating a game pass and pasting its id, if they want Robux items.
 - Phone and touch checks of the new panel and the chest prompt.
+
+## 5. Batch 2 (2026-10-06): active income and the candy zone
+
+Request: besides the rides, players should be able to earn coins by their own actions, and development of attractions continues.
+
+### 5.1 Active income (no models needed)
+
+Every payout is a number of seconds of the park's current income (`ActiveIncome`: the summed `IncomePerMinute` of repaired attractions, at least 5 coins), so it scales with progress and cannot outgrow the passive flow.
+
+| System | How it works | Payout | Limits |
+|---|---|---|---|
+| Gathering (줍기) | 8 small pickups per open area (clover, shells, blocks, pine cones, snow crystals, star pieces, gold coins, candies) beside the paths; hold E 0.5 s | 6 s of income | respawn 90 s elsewhere; areas open with their zone |
+| Fishing (낚시) | hold E 3 s at any beach pond in the water zone | weighted catch: 6 s (60%), 12 s (28%), 40 s (5%), old boot 0 (7%) | needs the zone open; 3 s cast |
+| Delivery (배달) | take a parcel at the plaza desk, hold F at the target ride's console | 30 s of income x (1 + distance/600, max 4) | one parcel at a time, 20 s cooldown, 240 s timeout |
+
+Check: an engaged player gathering about two items a minute, fishing now and then and running deliveries adds roughly 30-60% on top of the passive flow; an idle player loses nothing. All three constants live in `GameConfig.Active` for tuning.
+
+### 5.2 Candy zone (사탕 구역), the seventh zone
+
+Same offsets as the earlier zones one zone further north (boundary z = -1716, length 263), four attractions (a lollipop spinner, a gummy bounce, a candy-factory tour, a sweet shop), candy decor, sugar-dust ambience. Gate about 700k coins, steps about 460k to 490k by the balance rule. Needs seven OBJ imports from the user.
