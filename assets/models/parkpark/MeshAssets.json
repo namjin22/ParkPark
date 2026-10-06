@@ -113,7 +113,21 @@
     "ParkParkDecorTotem",
     "ParkParkCoconutHub",
     "ParkParkShopJuice",
-    "ParkParkCoconutPod"
+    "ParkParkCoconutPod",
+    "ParkParkCamelHub",
+    "ParkParkDuneMound",
+    "ParkParkDunePod",
+    "ParkParkPyramid",
+    "ParkParkShopOasis",
+    "ParkParkDecorCactus",
+    "ParkParkDecorObelisk",
+    "ParkParkDecorRainbow",
+    "ParkParkDecorCloud",
+    "ParkParkNimbusHub",
+    "ParkParkCloudPod",
+    "ParkParkRainbowMound",
+    "ParkParkSkyCastle",
+    "ParkParkShopCotton"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",
@@ -227,6 +241,20 @@
     "ParkParkDecorTotem": "rbxassetid://111066565201730",
     "ParkParkCoconutHub": "rbxassetid://73706587268367",
     "ParkParkShopJuice": "rbxassetid://90041607116054",
-    "ParkParkCoconutPod": "rbxassetid://113804779509330"
+    "ParkParkCoconutPod": "rbxassetid://113804779509330",
+    "ParkParkCamelHub": "rbxassetid://104012707707348",
+    "ParkParkDuneMound": "rbxassetid://116477695158171",
+    "ParkParkDunePod": "rbxassetid://70612367072552",
+    "ParkParkPyramid": "rbxassetid://122494988225565",
+    "ParkParkShopOasis": "rbxassetid://135556039112856",
+    "ParkParkDecorCactus": "rbxassetid://102352569394434",
+    "ParkParkDecorObelisk": "rbxassetid://136186509409318",
+    "ParkParkDecorRainbow": "rbxassetid://78439188973919",
+    "ParkParkDecorCloud": "rbxassetid://126318216852104",
+    "ParkParkNimbusHub": "rbxassetid://112818568660830",
+    "ParkParkCloudPod": "rbxassetid://72304598835015",
+    "ParkParkRainbowMound": "rbxassetid://121509974840608",
+    "ParkParkSkyCastle": "rbxassetid://131208530674385",
+    "ParkParkShopCotton": "rbxassetid://123328746571231"
   }
 }
