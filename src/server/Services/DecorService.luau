@@ -168,6 +168,11 @@ local function grayboxDecor(kind: string): Model
 			Enum.PartType.Ball
 		)
 		boulder.CanCollide = true
+	elseif kind == "DecorBarrels" then
+		part("Barrel", Vector3.new(4, 3, 4), Vector3.new(0, 1.5, 0), wood, Enum.PartType.Cylinder).CanCollide = true
+	elseif kind == "DecorCannon" then
+		part("Cannon", Vector3.new(2.4, 2.2, 5), Vector3.new(0, 1.4, 0), Color3.fromRGB(70, 74, 80), nil).CanCollide =
+			true
 	elseif kind == "DecorSandcastle" then
 		part("Castle", Vector3.new(8, 6, 8), Vector3.new(0, 3, 0), Color3.fromRGB(235, 200, 120), nil).CanCollide = true
 	else
@@ -195,6 +200,7 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 		DecorCrystal = true,
 		DecorSandcastle = true,
 		DecorFlowers = true,
+		DecorBarrels = true,
 	}
 	local function place(kind: string, position: Vector3, yaw: number, radius: number)
 		local template = findTemplate(kind)
@@ -340,6 +346,8 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, kids.MinZ, kids.BoundaryZ })
 	local winter = ParkLayout.ZoneBounds.Winter
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, winter.MinZ, winter.BoundaryZ })
+	local cove = ParkLayout.ZoneBounds.Cove
+	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, cove.MinZ, cove.BoundaryZ })
 	local space = ParkLayout.ZoneBounds.Space
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, space.MinZ, space.BoundaryZ })
 	local adventure = ParkLayout.ZoneBounds.Adventure
@@ -521,6 +529,36 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 		end
 	end
 	for z = winter.BoundaryZ - 16, winter.MinZ + 12, -24 do
+		for _, side in { -1, 1 } do
+			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
+			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then
+				place("DecorLamp", spot, 0, 1.5)
+			end
+		end
+	end
+
+	-- The pirate cove: palms, cannons, barrels, rocks and bushes, with lamps along its road.
+	local coveProps: { { kind: string, count: number, margin: number, radius: number } } = {
+		{ kind = "DecorPalm", count = 26, margin = 7, radius = 5 },
+		{ kind = "DecorCannon", count = 10, margin = 6, radius = 3 },
+		{ kind = "DecorBarrels", count = 14, margin = 6, radius = 3 },
+		{ kind = "DecorRock", count = 20, margin = 6, radius = 4 },
+		{ kind = "DecorBush", count = 8, margin = 4, radius = 2 },
+	}
+	for _, prop in coveProps do
+		local made = 0
+		local tries = 0
+		while made < prop.count and tries < 3000 do
+			tries += 1
+			local x = random:NextNumber(-WORLD_X, WORLD_X)
+			local z = random:NextNumber(cove.MinZ + 6, cove.BoundaryZ - 8)
+			if not zoneBlocked(x, z, prop.margin) and clear(x, z, prop.radius) then
+				place(prop.kind, Vector3.new(x, 0, z), random:NextNumber(0, math.pi * 2), prop.radius)
+				made += 1
+			end
+		end
+	end
+	for z = cove.BoundaryZ - 16, cove.MinZ + 12, -24 do
 		for _, side in { -1, 1 } do
 			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
 			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then

@@ -79,7 +79,7 @@ function ClosetController.Start()
 		local compactPortrait = camera ~= nil
 			and camera.ViewportSize.X < 550
 			and camera.ViewportSize.Y > camera.ViewportSize.X
-		local y = if compactPortrait then 0.54 else 0.42
+		local y = if compactPortrait then 0.54 else 0.6
 		toggle.Position = UDim2.new(1, -12, y, 52)
 		panel.Position = UDim2.new(1, -84, 0.5, 0)
 		local viewport = if camera then camera.ViewportSize.Y else 600

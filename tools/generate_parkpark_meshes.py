@@ -3201,6 +3201,120 @@ def make_decor_planet() -> Mesh:
     return mesh
 
 
+def make_corsair_hub() -> Mesh:
+    """Rotating ship-deck for the pirate spinner: a planked disc with a mast and sail in the middle and a pedestal per barrel."""
+    mesh = Mesh("ParkParkCorsairHub")
+    add_vertical_cylinder(mesh, 8.2, 0.0, 0.6, "wood", 44)
+    add_vertical_cylinder(mesh, 8.25, 0.0, 0.45, "ink", 44)
+    add_torus(mesh, 8.0, 0.14, 0.62, "gold", segments=44, sides=6)
+    for index in range(12):
+        angle = TAU * index / 12
+        add_cylinder_between(mesh, (0, 0.64, 0), (7.6 * math.cos(angle), 0.64, 7.6 * math.sin(angle)), 0.07, 0.07, "ink", 4)
+    lathe(mesh, [(0.0, 0.6, "wood"), (1.3, 0.6, "wood"), (0.7, 1.3, "wood"), (0.0, 1.4, "wood")], 14)
+    add_cylinder_between(mesh, (0, 1.2, 0), (0, 7.4, 0), 0.32, 0.22, "wood", 8)
+    add_box(mesh, (0, 5.0, 0.05), (4.2, 3.2, 0.12), "cream")
+    add_box(mesh, (0, 6.7, 0.05), (4.4, 0.18, 0.2), "wood")
+    add_box(mesh, (0.9, 7.1, 0.0), (1.4, 0.8, 0.06), "ink")
+    add_ellipsoid(mesh, (0.9, 7.2, 0.05), (0.2, 0.2, 0.04), "cream", slices=6, stacks=4)
+    for index in range(6):
+        angle = TAU * index / 6
+        x, z = 5.4 * math.cos(angle), 5.4 * math.sin(angle)
+        add_cylinder_between(mesh, (0, 0.9, 0), (x, 0.9, z), 0.16, 0.16, "wood", 8)
+        add_vertical_cylinder(mesh, 1.4, 0.6, 0.9, "ink", 24, x, z)
+    return mesh
+
+
+def make_barrel_pod() -> Mesh:
+    """A barrel seat (base at y=0): wooden staves with iron hoops, a lid with a seat on top at about y=1.72."""
+    mesh = Mesh("ParkParkBarrelPod")
+    lathe(mesh, [(0.0, 0.0, "wood"), (0.8, 0.0, "wood"), (1.0, 0.6, "wood"), (1.0, 1.0, "wood"), (0.8, 1.6, "wood"), (0.0, 1.6, "wood")], 14)
+    for y, radius in ((0.25, 0.9), (0.8, 1.02), (1.35, 0.88)):
+        add_torus(mesh, radius, 0.06, y, "ink", segments=18, sides=5)
+    add_box(mesh, (0, 1.72, -0.2), (0.9, 0.14, 1.0), "coral")
+    for side in (-1, 1):
+        add_cylinder_between(mesh, (side * 0.5, 1.75, 0.35), (side * 0.5, 2.3, 0.7), 0.05, 0.05, "gold", 5)
+    add_cylinder_between(mesh, (0, 0.0, 0.0), (0, 0.5, 0.0), 0.09, 0.09, "gold", 6)
+    return mesh
+
+
+def make_treasure_mound() -> Mesh:
+    """A sandy bouncing mound (origin at the ground centre): a low dune with an open treasure chest and coins on top, a flag, and a few rocks."""
+    mesh = Mesh("ParkParkTreasureMound")
+    add_vertical_cylinder(mesh, 6.8, 0.0, 0.9, "cream", 36)
+    lathe(mesh, [(6.6, 0.9, "cream"), (5.2, 1.3, "faded_cream"), (3.0, 1.55, "cream"), (0.0, 1.6, "cream")], 28)
+    add_box(mesh, (0, 2.1, 0), (2.2, 1.0, 1.4), "wood")
+    add_box(mesh, (0, 2.6, 0), (2.3, 0.18, 1.5), "gold")
+    add_box(mesh, (0, 2.95, -0.62), (2.2, 0.8, 0.12), "wood")
+    for index in range(9):
+        angle = TAU * index / 9
+        add_ellipsoid(mesh, (0.9 * math.cos(angle) * 0.9, 2.75 + 0.1 * (index % 3), 0.5 * math.sin(angle)), (0.22, 0.1, 0.22), "gold", slices=6, stacks=3)
+    add_cylinder_between(mesh, (4.0, 1.5, 3.0), (4.0, 5.2, 3.0), 0.07, 0.07, "wood", 6)
+    add_box(mesh, (4.7, 4.8, 3.0), (1.4, 0.8, 0.06), "ink")
+    for index in range(7):
+        angle = TAU * index / 7 + 0.3
+        add_ellipsoid(mesh, (6.3 * math.cos(angle), 1.1, 6.3 * math.sin(angle)), (0.8, 0.6, 0.8), "faded_cream" if index % 2 else "wood", slices=7, stacks=4)
+    return mesh
+
+
+def make_ghost_ship() -> Mesh:
+    """A beached ghost galleon (origin at the ground centre, gangplank on the +Z side): a tilted dark hull, two masts with torn sails, and glowing portholes."""
+    mesh = Mesh("ParkParkGhostShip")
+    add_box(mesh, (0, 1.2, 0), (7.0, 2.4, 14.0), "ink")
+    add_box(mesh, (0, 2.5, 0), (7.4, 0.3, 14.4), "wood")
+    add_box(mesh, (0, 3.2, -4.8), (6.2, 2.4, 4.0), "wood")
+    add_box(mesh, (0, 4.5, -4.8), (6.6, 0.3, 4.4), "ink")
+    add_box(mesh, (0, 1.8, 7.4), (3.2, 2.0, 1.2), "ink")
+    for side in (-1, 1):
+        for index in range(4):
+            add_ellipsoid(mesh, (side * 3.55, 1.5, -4.5 + index * 3.0), (0.2, 0.35, 0.35), "mint", slices=6, stacks=4)
+    for z, height in ((-1.5, 11.0), (3.5, 9.0)):
+        add_cylinder_between(mesh, (0, 2.6, z), (0, 2.6 + height, z), 0.3, 0.2, "wood", 8)
+        add_box(mesh, (0, 2.6 + height - 2.2, z + 0.05), (4.6, 3.6, 0.1), "faded_cream")
+        add_box(mesh, (0, 2.6 + height - 0.3, z), (4.8, 0.2, 0.25), "wood")
+    add_box(mesh, (0, 14.2, -1.5), (1.4, 0.8, 0.06), "ink")
+    add_box(mesh, (0, 0.9, 9.6), (2.6, 0.2, 3.6), "wood")
+    add_ellipsoid(mesh, (0, 5.4, -6.9), (1.0, 0.9, 0.4), "mint", slices=8, stacks=4)
+    return mesh
+
+
+def make_shop_tavern() -> Mesh:
+    """Pirate tavern stall: dark planks, an ink-and-coral awning, and a ship's wheel above the roof."""
+    mesh = Mesh("ParkParkShopTavern")
+    shop_base(mesh, "wood", "ink", "coral")
+    add_cylinder_between(mesh, (0, 6.4, -0.12), (0, 6.4, 0.12), 1.5, 1.5, "wood", 20)
+    add_cylinder_between(mesh, (0, 6.4, 0.1), (0, 6.4, 0.3), 0.45, 0.45, "gold", 12)
+    for index in range(8):
+        angle = TAU * index / 8
+        add_cylinder_between(mesh, (0, 6.4, 0.2), (1.9 * math.cos(angle), 6.4 + 1.9 * math.sin(angle), 0.2), 0.08, 0.08, "wood", 4)
+    add_cylinder_between(mesh, (0, 5.0, 0.0), (0, 6.4, 0.0), 0.3, 0.3, "wood", 8)
+    return mesh
+
+
+def make_decor_cannon() -> Mesh:
+    """A small harbour cannon (origin at the ground point, muzzle toward +Z): an iron barrel on a wooden carriage with two wheels and a ball stack."""
+    mesh = Mesh("ParkParkDecorCannon")
+    add_box(mesh, (0, 0.9, 0), (1.4, 0.5, 2.2), "wood")
+    add_cylinder_between(mesh, (0, 1.5, -0.9), (0, 1.8, 1.4), 0.5, 0.38, "ink", 12)
+    add_ellipsoid(mesh, (0, 1.82, 1.45), (0.4, 0.4, 0.1), "ink", slices=8, stacks=4)
+    for side in (-1, 1):
+        add_cylinder_between(mesh, (side * 0.8, 0.7, 0.2), (side * 1.05, 0.7, 0.2), 0.7, 0.7, "wood", 14)
+    for index in range(4):
+        add_ellipsoid(mesh, (1.8 + 0.35 * (index % 2), 0.28 + 0.4 * (index // 2), 0.2 * index - 0.2), (0.26, 0.26, 0.26), "ink", slices=7, stacks=4)
+    return mesh
+
+
+def make_decor_barrels() -> Mesh:
+    """Three stacked barrels and a crate (origin at the ground point)."""
+    mesh = Mesh("ParkParkDecorBarrels")
+    for x, z in ((0.0, 0.0), (1.9, 0.3), (0.9, 1.5)):
+        add_vertical_cylinder(mesh, 0.9, 0.0, 1.5, "wood", 12, x, z)
+        for y in (0.25, 1.2):
+            add_torus(mesh, 0.92, 0.05, y, "ink", segments=14, sides=5, transform=lambda px, py, pz, x=x, z=z: (px + x, py, pz + z))
+    add_box(mesh, (-1.6, 0.6, 1.4), (1.3, 1.2, 1.3), "wood")
+    add_box(mesh, (-1.6, 0.6, 1.4), (1.36, 0.16, 1.36), "ink")
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -3334,6 +3448,13 @@ def main() -> None:
         make_moon_mound(),
         make_ufo(),
         make_shop_star(),
+        make_corsair_hub(),
+        make_barrel_pod(),
+        make_treasure_mound(),
+        make_ghost_ship(),
+        make_shop_tavern(),
+        make_decor_cannon(),
+        make_decor_barrels(),
         make_decor_crystal(),
         make_decor_planet(),
         make_swan(),
