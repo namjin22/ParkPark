@@ -56,14 +56,14 @@ function EventService.Start(park: { ParkFolder: Folder }, notify: Notify, awardC
 		local total = 0
 		for _, child in folder:GetChildren() do
 			if child:GetAttribute("IsRepaired") == true then
-				total += (child:GetAttribute("Fare") :: number?) or 0
+				total += (child:GetAttribute("IncomePerMinute") :: number?) or 0
 			end
 		end
 		return total
 	end
 
 	local function runCoinRain()
-		local value = math.max(5, math.floor(fareSum() * 0.01))
+		local value = math.max(5, math.floor(fareSum() * 0.008))
 		local alive = 0
 		local endsAt = os.clock() + COIN_RAIN_SECONDS
 		while os.clock() < endsAt and folder.Parent ~= nil do
@@ -127,7 +127,7 @@ function EventService.Start(park: { ParkFolder: Folder }, notify: Notify, awardC
 			end
 		end
 		local spot = spots[random:NextInteger(1, #spots)]
-		local prize = math.max(50, math.floor(fareSum() * 0.5))
+		local prize = math.max(50, math.floor(fareSum() * 3))
 
 		local chest = Instance.new("Part")
 		chest.Name = "TreasureChest"

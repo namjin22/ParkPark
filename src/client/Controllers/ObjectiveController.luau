@@ -1,5 +1,8 @@
 --!strict
 
+local Income = require(
+	game:GetService("ReplicatedStorage"):WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("Income")
+)
 local UITheme = require(
 	game:GetService("ReplicatedStorage"):WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("UITheme")
 )
@@ -99,15 +102,15 @@ function ObjectiveController.Start()
 			return ready
 		end
 		return string.format(
-			"%d %s 필요 · 지금 %d · 쓰레기 줍기와 손님 태우기로 모으세요",
+			"%d %s 필요 · 지금 %d · 쓰레기를 줍거나 놀이기구 수입으로 모으세요",
 			cost,
 			currency,
 			coins.Value
 		)
 	end
 
-	local function fare(key: string): number
-		return GameConfig.Rides[key].BaseFare
+	local function perMinute(key: string): number
+		return math.floor(Income.PerMinute(key, 0, 0) + 0.5)
 	end
 
 	-- The next attraction in the unlock chain that is not yet repaired, with its console.
@@ -146,18 +149,10 @@ function ObjectiveController.Start()
 		if park:GetAttribute("ParkOpen") ~= true then
 			return {
 				title = "3. 입구에서 개장하세요",
-				detail = "손님들이 놀이기구 앞에 줄을 서요",
+				detail = "개장하면 손님이 오고 놀이기구가 수입을 냅니다",
 				target = gateAnchor,
 			}
 		end
-		if ((park:GetAttribute("GuestsBoarded") :: number?) or 0) < 1 then
-			return {
-				title = "4. 줄 선 손님을 태워주세요",
-				detail = string.format("맨 앞 손님 앞에서 E · 손님당 +%d %s", fare("Carousel"), currency),
-				target = nil,
-			}
-		end
-
 		local key, model, target = nextRide()
 		if key and model then
 			local config = GameConfig.Rides[key]
@@ -179,14 +174,14 @@ function ObjectiveController.Start()
 				title = string.format("5. %s %s", config.DisplayName, if unlocked then "수리" else "해금"),
 				detail = need(
 					cost,
-					string.format("콘솔에서 E · %d %s · 손님당 +%d", cost, currency, fare(key))
+					string.format("콘솔에서 E · %d %s · 분당 +%d", cost, currency, perMinute(key))
 				),
 				target = target,
 			}
 		end
 		return {
 			title = "6. 놀이기구를 키우세요",
-			detail = "콘솔에서 E · 요금 올리기와 직원 고용",
+			detail = "콘솔에서 E · 수입 늘리기와 직원 고용",
 			target = nil,
 		}
 	end

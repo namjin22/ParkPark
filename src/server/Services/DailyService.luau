@@ -20,7 +20,7 @@ function DailyService.Reward(park: { ParkFolder: Folder }, streak: number): numb
 	local total = 0
 	for _, child in park.ParkFolder:GetChildren() do
 		if child:GetAttribute("IsRepaired") == true then
-			total += (child:GetAttribute("Fare") :: number?) or 0
+			total += (child:GetAttribute("IncomePerMinute") :: number?) or 0
 		end
 	end
 	local base = math.max(GameConfig.DailyMinimum, math.floor(total * GameConfig.DailyFareShare))

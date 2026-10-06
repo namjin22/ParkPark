@@ -747,6 +747,11 @@ return {
 	} :: { [string]: { Color: Color3, Material: string } },
 	-- Seconds between automatic boardings for staff level 1, 2, 3 (0 staff means players accept guests).
 	StaffIntervals = { 10, 6, 3 },
+	-- Ride income (see Income.luau): a scale on the guest-count model (1.5 matches the pace measured in play) and the
+	-- income bonus each staff level adds. Guests now board by themselves every AutoBoardSeconds per ride.
+	IncomeScale = 1.5,
+	StaffIncomeBonus = 0.25,
+	AutoBoardSeconds = 2,
 
 	-- Carousel geometry (unscaled OBJ units from ParkParkCarouselRotor.obj).
 	CarouselRotationSeconds = 16,
@@ -984,7 +989,7 @@ return {
 		},
 		{
 			Title = "첫 비명",
-			Desc = "스릴 놀이기구에 손님 8명을 태워요",
+			Desc = "스릴 놀이기구에 손님 8명이 이용해요",
 			Kind = "Counter",
 			Attr = "BoardedThrill",
 			Target = 8,
@@ -1011,7 +1016,7 @@ return {
 		},
 		{
 			Title = "밤손님",
-			Desc = "밤에 손님 12명을 태워요",
+			Desc = "밤에 손님 12명이 이용해요",
 			Kind = "Counter",
 			Attr = "BoardedNight",
 			Target = 12,
@@ -1020,7 +1025,7 @@ return {
 		},
 		{
 			Title = "축제의 주인공",
-			Desc = "행사 중에 손님 15명을 태워요",
+			Desc = "행사 중에 손님 15명이 이용해요",
 			Kind = "Counter",
 			Attr = "BoardedEvent",
 			Target = 15,
@@ -1040,7 +1045,7 @@ return {
 		},
 		{
 			Title = "오리 대행진",
-			Desc = "오리 놀이기구에 손님 20명을 태워요",
+			Desc = "오리 놀이기구에 손님 20명이 이용해요",
 			Kind = "Ride",
 			Ride = "Duck",
 			Target = 20,
@@ -1170,7 +1175,7 @@ return {
 
 	-- Daily bonus: this share of the summed fares of all repaired attractions (at least DailyMinimum), times the
 	-- streak multiplier, capped so a mature save cannot collect an entire zone gate from a single login.
-	DailyFareShare = 2,
+	DailyFareShare = 8,
 	DailyMinimum = 300,
 	DailyMaximum = 75000,
 	DailyStreakMultipliers = { 1, 1.1, 1.25, 1.4, 1.6, 1.8, 2 } :: { number },
@@ -1186,9 +1191,9 @@ return {
 	} :: { { Boarded: number, Reward: number } },
 	-- Thrill-seeking guests (this share of arrivals) pick the rides below three times as often.
 	ThrillGuestChance = 0.3,
-	-- Now and then a VIP arrives: a golden glow and a crown label, paying this many times the fare when boarded.
+	-- Now and then a VIP arrives: a golden glow and a label, leaving a tip of this many minutes of the ride's income.
 	VipGuestChance = 0.04,
-	VipFareMultiplier = 3,
+	VipTipMinutes = 1,
 	ThrillRides = {
 		"Coaster",
 		"Drop",

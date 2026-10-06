@@ -5,6 +5,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local ParkBuilder = require(script.Parent:WaitForChild("ParkBuilder"))
+local Income = require(
+	game:GetService("ReplicatedStorage"):WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("Income")
+)
 local GameConfig =
 	require(ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("GameConfig"))
 
@@ -314,7 +317,6 @@ function RideService.Start(
 		local requiresKey = config.Requires
 		local requiredModel = if requiresKey then rideModels[requiresKey] else nil
 		-- A shop serves its guests; a ride seats them.
-		local staffAction = if config.IsShop == true then "서빙해요" else "태워요"
 		local started = false
 
 		-- The old per-action prompts are gone: everything is done from the manage panel.
@@ -389,11 +391,14 @@ function RideService.Start(
 			return config.BaseFare + level * config.IncomePerLevel
 		end
 
-		-- GuestService reads Fare and StaffInterval each time a guest boards; the panel reads them too.
+		local function perMinute(income: number, staff: number): number
+			return math.floor(Income.PerMinute(ride.key, income, staff) + 0.5)
+		end
+
+		-- IncomeService pays IncomePerMinute every second; the panel and signs read it (and Fare, the ride's grade).
 		local function publishRates()
 			model:SetAttribute("Fare", fareForLevel(incomeLevel()))
-			local level = staffLevel()
-			model:SetAttribute("StaffInterval", if level > 0 then GameConfig.StaffIntervals[level] else 0)
+			model:SetAttribute("IncomePerMinute", Income.PerMinute(ride.key, incomeLevel(), staffLevel()))
 		end
 		publishRates()
 
@@ -401,17 +406,16 @@ function RideService.Start(
 
 		local function refreshBoard()
 			model:SetAttribute("BlockedReason", blockedReason())
-			local fare = fareForLevel(incomeLevel())
 			if not unlocked then
 				local reason = blockedReason()
 				setSign(
-					string.format("손님당 +%d %s", config.BaseFare, currency),
+					string.format("분당 +%d %s", perMinute(0, 0), currency),
 					string.format("해금 %d %s", config.UnlockCost, currency),
 					if reason == "" then "잠겨 있어요" else reason
 				)
 			elseif not repaired then
 				setSign(
-					string.format("손님당 +%d %s", config.BaseFare, currency),
+					string.format("분당 +%d %s", perMinute(0, 0), currency),
 					string.format("수리 %d %s", config.RepairCost, currency),
 					"고장 났어요"
 				)
@@ -429,31 +433,16 @@ function RideService.Start(
 						else 1
 					stars = " · " .. string.rep("★", count)
 				end
-				local interval = (model:GetAttribute("StaffInterval") :: number?) or 0
 				setSign(
-					string.format("손님당 +%d %s", fare, currency),
+					string.format("분당 +%d %s", perMinute(incomeLevel(), staffLevel()), currency),
 					string.format(
-						"요금 Lv %d/%d · 직원 Lv %d/%d",
+						"수입 Lv %d/%d · 직원 Lv %d/%d",
 						incomeLevel(),
 						#config.IncomeCosts,
 						staffLevel(),
 						#config.StaffCosts
 					),
-					if interval > 0
-						then string.format(
-							"대기 %d/%d · 직원이 %d초마다 %s%s",
-							queueLength,
-							GameConfig.QueueMax,
-							interval,
-							staffAction,
-							stars
-						)
-						else string.format(
-							"대기 %d/%d · 손님에게 다가가 허용%s",
-							queueLength,
-							GameConfig.QueueMax,
-							stars
-						)
+					string.format("대기 %d/%d%s", queueLength, GameConfig.QueueMax, stars)
 				)
 			end
 		end
@@ -518,7 +507,7 @@ function RideService.Start(
 			notify(
 				player,
 				string.format("%s 수리 완료", displayName),
-				string.format("-%d %s · 손님당 +%d %s", config.RepairCost, currency, config.BaseFare, currency)
+				string.format("-%d %s · 분당 +%d %s", config.RepairCost, currency, perMinute(0, 0), currency)
 			)
 			start()
 		end
@@ -530,15 +519,15 @@ function RideService.Start(
 				return
 			end
 			if not spendCoins(player, cost) then
-				notEnough(player, cost, "요금 인상")
+				notEnough(player, cost, "수입 증가")
 				return
 			end
 
 			model:SetAttribute("IncomeLevel", level + 1)
 			notify(
 				player,
-				string.format("%s 요금 인상", displayName),
-				string.format("-%d %s · 손님당 +%d %s", cost, currency, fareForLevel(level + 1), currency)
+				string.format("%s 수입 증가", displayName),
+				string.format("-%d %s · 분당 +%d %s", cost, currency, perMinute(level + 1, staffLevel()), currency)
 			)
 		end
 
@@ -558,11 +547,10 @@ function RideService.Start(
 				player,
 				string.format("%s 직원 고용", displayName),
 				string.format(
-					"-%d %s · %d초마다 자동으로 %s",
+					"-%d %s · 수입 +%d%%",
 					cost,
 					currency,
-					GameConfig.StaffIntervals[level + 1],
-					staffAction
+					math.floor(GameConfig.StaffIncomeBonus * 100 + 0.5)
 				)
 			)
 		end

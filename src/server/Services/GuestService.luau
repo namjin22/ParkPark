@@ -462,18 +462,10 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		end
 	end
 
-	local function fareOf(ride: Ride, guest: Guest?): number
-		local base = (ride.model:GetAttribute("Fare") :: number?) or GameConfig.Rides[ride.key].BaseFare
-		local multiplier = (park.ParkFolder:GetAttribute("FareMultiplier") :: number?) or 1
-		if park.ParkFolder:GetAttribute("Night") == true then
-			multiplier *= GameConfig.NightFareMultiplier
-		end
-		-- Every decor-shop plot bought adds a little to every fare.
-		multiplier *= 1 + ((park.ParkFolder:GetAttribute("PlotsBought") :: number?) or 0) * GameConfig.DecorPlotFareBonus
-		if guest and guest.vip then
-			multiplier *= GameConfig.VipFareMultiplier
-		end
-		return math.floor(base * multiplier + 0.5)
+	-- A VIP who boards leaves a tip: VipTipMinutes of that ride's income, paid once on top of the steady income.
+	local function tipOf(ride: Ride): number
+		local perMinute = (ride.model:GetAttribute("IncomePerMinute") :: number?) or 0
+		return math.floor(perMinute * GameConfig.VipTipMinutes + 0.5)
 	end
 
 	local function firstFreeSeat(ride: Ride): number?
@@ -532,7 +524,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		local seat = firstFreeSeat(ride)
 		if seat == nil then
 			if player then
-				notify(player, "자리가 없어요", "타고 있는 손님이 내리면 다시 허용하세요")
+				notify(player, "자리가 없어요", "손님이 내리면 다시 시도하세요")
 			end
 			return false
 		end
@@ -543,12 +535,16 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		guest.seat = seat
 		guest.prompt.Enabled = false
 
-		-- The fare is paid the moment a guest boards, so accepting a guest is immediately rewarded.
-		local fare = fareOf(ride, guest)
-		for _, other in Players:GetPlayers() do
-			awardCoins(other, fare)
+		-- Coins come from the ride's steady income (IncomeService); only a VIP pays something when boarding.
+		if guest.vip then
+			local tip = tipOf(ride)
+			if tip > 0 then
+				for _, other in Players:GetPlayers() do
+					awardCoins(other, tip)
+				end
+				popup(guest.root.Position + Vector3.new(0, 9, 0), string.format("VIP +%d %s", tip, currency))
+			end
 		end
-		popup(guest.root.Position + Vector3.new(0, 9, 0), string.format("+%d %s", fare, currency))
 		-- Per-ride totals are kept as attributes so tests (and later a ride rating) can read them.
 		ride.model:SetAttribute("Boardings", ((ride.model:GetAttribute("Boardings") :: number?) or 0) + 1)
 		park.ParkFolder:SetAttribute(
@@ -800,7 +796,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		end)
 
 		if guest.vip then
-			-- A VIP glows gold, wears a crown label, and pays VipFareMultiplier times the fare.
+			-- A VIP glows gold, wears a label, and leaves a tip when boarding.
 			local glow = Instance.new("Highlight")
 			glow.FillColor = Color3.fromRGB(255, 210, 90)
 			glow.FillTransparency = 0.6
@@ -825,11 +821,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			label.Parent = tag
 			model:SetAttribute("Vip", true)
 			for _, player in Players:GetPlayers() do
-				notify(
-					player,
-					"VIP 손님이 도착했어요",
-					string.format("태워 주면 요금이 %d배", GameConfig.VipFareMultiplier)
-				)
+				notify(player, "VIP 손님이 도착했어요", "이용하면 팁을 남겨요")
 			end
 		end
 
@@ -867,7 +859,6 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			for _, rideInfo in rides do
 				local operating = rideInfo.model:GetAttribute("IsOperating") == true
 				local hasSeat = firstFreeSeat(rideInfo) ~= nil
-				local fare = fareOf(rideInfo)
 				for _, guest in rideInfo.queue do
 					local was = guest.arrived
 					guest.arrived = flatDistance(guest.root.Position, guest.slot) <= ARRIVAL_DISTANCE + 1
@@ -875,20 +866,14 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 						guest.joinedAt = now
 					end
 				end
-				local front = frontGuest(rideInfo)
-				for _, guest in rideInfo.queue do
-					local isHead = guest == front
-					guest.prompt.Enabled = isHead and operating and hasSeat
-					if isHead then
-						guest.prompt.ActionText = if rideInfo.service then "서빙하기" else "태우기"
-						guest.prompt.ObjectText =
-							string.format("%s 손님 · +%d %s", rideInfo.displayName, fare, currency)
-					end
-				end
-
-				local interval = (rideInfo.model:GetAttribute("StaffInterval") :: number?) or 0
-				local head = front
-				if interval > 0 and head and now - rideInfo.lastStaffBoarding >= interval then
+				-- Guests board by themselves: the head of the line gets on whenever a seat is free.
+				local head = frontGuest(rideInfo)
+				if
+					head
+					and operating
+					and hasSeat
+					and now - rideInfo.lastStaffBoarding >= GameConfig.AutoBoardSeconds
+				then
 					if tryBoard(rideInfo, head, nil) then
 						rideInfo.lastStaffBoarding = now
 					end

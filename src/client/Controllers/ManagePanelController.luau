@@ -1,5 +1,8 @@
 --!strict
 
+local Income = require(
+	game:GetService("ReplicatedStorage"):WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("Income")
+)
 local UITheme = require(
 	game:GetService("ReplicatedStorage"):WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("UITheme")
 )
@@ -221,7 +224,6 @@ function ManagePanelController.Start()
 		local repaired = model:GetAttribute("IsRepaired") == true
 		local blocked = (model:GetAttribute("BlockedReason") :: string?) or ""
 		local balance = coins.Value
-		local noun = if config.IsShop == true then "서빙" else "탑승"
 
 		titleLabel.Text = config.DisplayName
 		if not unlocked then
@@ -231,8 +233,8 @@ function ManagePanelController.Start()
 		else
 			local queue = (model:GetAttribute("QueueLength") :: number?) or 0
 			statusLabel.Text = string.format(
-				"손님당 +%d %s · 대기 %d/%d",
-				(model:GetAttribute("Fare") :: number?) or config.BaseFare,
+				"분당 +%d %s · 대기 %d/%d",
+				math.floor(((model:GetAttribute("IncomePerMinute") :: number?) or 0) + 0.5),
 				currency,
 				queue,
 				GameConfig.QueueMax
@@ -244,7 +246,7 @@ function ManagePanelController.Start()
 		unlockRow.title.Text = "해금하기"
 		unlockRow.detail.Text = if blocked ~= ""
 			then blocked
-			else string.format("손님당 +%d %s 수입", config.BaseFare, currency)
+			else string.format("분당 +%d %s 수입", math.floor(Income.PerMinute(key, 0, 0) + 0.5), currency)
 		setButton(
 			unlockRow,
 			if blocked ~= "" then "잠김" else string.format("%d %s", config.UnlockCost, currency),
@@ -265,14 +267,19 @@ function ManagePanelController.Start()
 		incomeRow.frame.Visible = repaired
 		local incomeLevel = (model:GetAttribute("IncomeLevel") :: number?) or 0
 		local incomeCost = config.IncomeCosts[incomeLevel + 1]
-		local fare = config.BaseFare + incomeLevel * config.IncomePerLevel
-		incomeRow.title.Text = string.format("요금 올리기 Lv %d/%d", incomeLevel, #config.IncomeCosts)
+		local staffNow = (model:GetAttribute("StaffLevel") :: number?) or 0
+		local rateNow = math.floor(Income.PerMinute(key, incomeLevel, staffNow) + 0.5)
+		incomeRow.title.Text = string.format("수입 늘리기 Lv %d/%d", incomeLevel, #config.IncomeCosts)
 		if incomeCost then
-			incomeRow.detail.Text =
-				string.format("손님당 +%d → +%d %s", fare, fare + config.IncomePerLevel, currency)
+			incomeRow.detail.Text = string.format(
+				"분당 +%d → +%d %s",
+				rateNow,
+				math.floor(Income.PerMinute(key, incomeLevel + 1, staffNow) + 0.5),
+				currency
+			)
 			setButton(incomeRow, string.format("%d %s", incomeCost, currency), balance >= incomeCost)
 		else
-			incomeRow.detail.Text = string.format("최대예요 · 손님당 +%d %s", fare, currency)
+			incomeRow.detail.Text = string.format("최대예요 · 분당 +%d %s", rateNow, currency)
 			setButton(incomeRow, "최대", false)
 		end
 
@@ -282,12 +289,13 @@ function ManagePanelController.Start()
 		local staffCost = config.StaffCosts[staffLevel + 1]
 		staffRow.title.Text = string.format("직원 고용 Lv %d/%d", staffLevel, #config.StaffCosts)
 		if staffCost then
-			staffRow.detail.Text =
-				string.format("%d초마다 자동으로 %s", GameConfig.StaffIntervals[staffLevel + 1], noun)
+			staffRow.detail.Text = string.format("수입 +%d%%", math.floor(GameConfig.StaffIncomeBonus * 100 + 0.5))
 			setButton(staffRow, string.format("%d %s", staffCost, currency), balance >= staffCost)
 		else
-			staffRow.detail.Text =
-				string.format("최대예요 · %d초마다 자동 %s", GameConfig.StaffIntervals[staffLevel], noun)
+			staffRow.detail.Text = string.format(
+				"최대예요 · 수입 +%d%%",
+				math.floor(GameConfig.StaffIncomeBonus * staffLevel * 100 + 0.5)
+			)
 			setButton(staffRow, "최대", false)
 		end
 
@@ -348,7 +356,7 @@ function ManagePanelController.Start()
 					"IsRepaired",
 					"IncomeLevel",
 					"StaffLevel",
-					"Fare",
+					"IncomePerMinute",
 					"QueueLength",
 					"BlockedReason",
 				}
