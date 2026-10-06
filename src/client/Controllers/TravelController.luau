@@ -78,9 +78,15 @@ function TravelController.Start()
 		local compactPortrait = camera ~= nil
 			and camera.ViewportSize.X < 550
 			and camera.ViewportSize.Y > camera.ViewportSize.X
-		local y = if compactPortrait then 0.54 else 0.6
-		toggle.Position = UDim2.new(1, -12, y, 0)
-		list.Position = UDim2.new(1, -84, y, 0)
+		-- On a wide screen the buttons sit just under the quest card (it ends near y = 215) and clear of the
+		-- phone jump button at the bottom right; on a tall one they keep a fixed share of the height.
+		if compactPortrait then
+			toggle.Position = UDim2.new(1, -12, 0.54, 0)
+			list.Position = UDim2.new(1, -84, 0.54, 0)
+		else
+			toggle.Position = UDim2.new(1, -12, 0, 250)
+			list.Position = UDim2.new(1, -84, 0, 250)
+		end
 	end
 	local function bindCamera()
 		local camera = Workspace.CurrentCamera
