@@ -106,7 +106,14 @@
     "ParkParkCandyPod",
     "ParkParkDecorCandyCane",
     "ParkParkLolliHub",
-    "ParkParkGummyMound"
+    "ParkParkGummyMound",
+    "ParkParkMushroomMound",
+    "ParkParkTemple",
+    "ParkParkDecorFern",
+    "ParkParkDecorTotem",
+    "ParkParkCoconutHub",
+    "ParkParkShopJuice",
+    "ParkParkCoconutPod"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",
@@ -213,6 +220,13 @@
     "ParkParkCandyPod": "rbxassetid://140038443395549",
     "ParkParkDecorCandyCane": "rbxassetid://82676951957615",
     "ParkParkLolliHub": "rbxassetid://97875767315138",
-    "ParkParkGummyMound": "rbxassetid://102951927178704"
+    "ParkParkGummyMound": "rbxassetid://102951927178704",
+    "ParkParkMushroomMound": "rbxassetid://73125417567027",
+    "ParkParkTemple": "rbxassetid://89635622062015",
+    "ParkParkDecorFern": "rbxassetid://121017154774384",
+    "ParkParkDecorTotem": "rbxassetid://111066565201730",
+    "ParkParkCoconutHub": "rbxassetid://73706587268367",
+    "ParkParkShopJuice": "rbxassetid://90041607116054",
+    "ParkParkCoconutPod": "rbxassetid://113804779509330"
   }
 }
