@@ -41,6 +41,7 @@ local desertService = require(script.Parent.Services.DesertService)
 local cloudService = require(script.Parent.Services.CloudService)
 local incomeService = require(script.Parent.Services.IncomeService)
 local missionService = require(script.Parent.Services.MissionService)
+local minigameService = require(script.Parent.Services.MinigameService)
 local gatherService = require(script.Parent.Services.GatherService)
 local fishingService = require(script.Parent.Services.FishingService)
 local deliveryService = require(script.Parent.Services.DeliveryService)
@@ -153,6 +154,13 @@ missionService.Start(
 	persistenceService.SetMissions
 )
 gatherService.Start(park, economyService.AwardCoins, noticeService.Popup)
+minigameService.Start(
+	park,
+	economyService.AwardCoins,
+	noticeService.Send,
+	noticeService.Popup,
+	parkBuilder.FindDecorTemplate
+)
 fishingService.Start(park, economyService.AwardCoins, noticeService.Popup)
 deliveryService.Start(park, economyService.AwardCoins, noticeService.Send, noticeService.Popup)
 powerService.Start(park, economyService.AwardCoins, noticeService.Send, noticeService.Popup)

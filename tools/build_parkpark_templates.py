@@ -399,6 +399,12 @@ def main() -> None:
     build_coconut()
     build_mushroom()
     build_temple()
+    build_booth("RingTossBooth", "ParkParkBoothRing", SHOP_SCALE)
+    build_booth("ShootingBooth", "ParkParkBoothShooting", SHOP_SCALE)
+    build_booth("FortuneBooth", "ParkParkBoothFortune", SHOP_SCALE)
+    build_booth("PhotoBooth", "ParkParkBoothPhoto", SHOP_SCALE)
+    build_booth("ClawBooth", "ParkParkBoothClaw", SHOP_SCALE)
+    build_booth("DartBooth", "ParkParkBoothDart", SHOP_SCALE)
     build_spinner_zone_ride("CamelRide", "ParkParkCamelHub", "ParkParkDunePod", CAMELSCALE, 7.4, 2.0)
     build_bounce_zone_ride("DuneRide", "ParkParkDuneMound", DUNESCALE)
     build_hidden_zone_ride("PyramidRide", "ParkParkPyramid", PYRAMIDSCALE, (14.4, 9.6, 14.4))
@@ -1402,6 +1408,24 @@ def build_hidden_zone_ride(template: str, obj: str, scale: float, box: tuple[flo
                 box_collider("Collider", (0, box[1] / 2, 0), box, 0, scale),
                 *seats,
                 console("Console", -24, 30, 0),
+            ],
+        ),
+    )
+
+
+def build_booth(template: str, obj: str, scale: float) -> None:
+    if missing_meshes((obj,)):
+        print(f"skipped {template}: import {obj} and record its mesh ID first")
+        return
+
+    write(
+        template,
+        model(
+            template,
+            [
+                mesh_part("Pad", obj, (0, 0, 0), 180, False, CREAM, scale),
+                box_collider("Collider", (0, 2.4, -1.2), (8.2, 4.8, 3.4), 0, scale),
+                box_collider("Counter", (0, 1.1, 1.1), (8.0, 2.2, 1.4), 0, scale),
             ],
         ),
     )

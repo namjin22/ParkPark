@@ -3732,6 +3732,76 @@ def make_decor_rainbow() -> Mesh:
     return mesh
 
 
+def booth_base(mesh: Mesh, wall: str, awning_a: str, awning_b: str) -> None:
+    shop_base(mesh, wall, awning_a, awning_b)
+
+
+def make_booth_ring() -> Mesh:
+    """Ring-toss booth: a stall with a rack of bottles and a pile of rings on the counter."""
+    mesh = Mesh("ParkParkBoothRing")
+    booth_base(mesh, "coral", "mint", "cream")
+    for index in range(6):
+        add_vertical_cylinder(mesh, 0.22, 1.86, 2.6, "mint", 8, -2.5 + index * 1.0, 1.0)
+    for index in range(3):
+        add_torus(mesh, 0.5, 0.08, 1.9 + index * 0.1, "gold", segments=14, sides=5, transform=lambda x, y, z, i=index: (x + 3.2, y, z + 1.2 - i * 0.3))
+    return mesh
+
+
+def make_booth_shooting() -> Mesh:
+    """Shooting gallery: a stall with a row of round targets above the counter."""
+    mesh = Mesh("ParkParkBoothShooting")
+    booth_base(mesh, "mint", "coral", "cream")
+    for index in range(5):
+        x = -3.0 + index * 1.5
+        add_cylinder_between(mesh, (x, 3.4, -0.1), (x, 3.4, 0.1), 0.55, 0.55, "coral" if index % 2 == 0 else "cream", 16)
+        add_cylinder_between(mesh, (x, 3.4, 0.08), (x, 3.4, 0.16), 0.25, 0.25, "ink", 12)
+    return mesh
+
+
+def make_booth_fortune() -> Mesh:
+    """Fortune tent: a stall with a crystal ball on a stand and stars on the roof."""
+    mesh = Mesh("ParkParkBoothFortune")
+    booth_base(mesh, "faded_mint", "ink", "gold")
+    add_ellipsoid(mesh, (0, 2.6, 1.1), (0.7, 0.7, 0.7), "dark_glass", slices=12, stacks=7)
+    add_cylinder_between(mesh, (0, 1.9, 1.1), (0, 2.1, 1.1), 0.5, 0.35, "gold", 10)
+    for x in (-2.4, 0.0, 2.4):
+        add_star(mesh, 5.6, 0.7, "gold", x, -1.6)
+    return mesh
+
+
+def make_booth_photo() -> Mesh:
+    """Photo booth: a stall with a striped curtain and a camera on the counter."""
+    mesh = Mesh("ParkParkBoothPhoto")
+    booth_base(mesh, "cream", "coral", "mint")
+    for index in range(5):
+        add_box(mesh, (-2.0 + index * 1.0, 3.0, -0.35), (0.9, 2.4, 0.12), "coral" if index % 2 == 0 else "mint")
+    add_box(mesh, (2.8, 2.1, 1.1), (0.9, 0.6, 0.6), "ink")
+    add_ellipsoid(mesh, (2.8, 2.1, 1.45), (0.22, 0.22, 0.12), "dark_glass", slices=8, stacks=4)
+    return mesh
+
+
+def make_booth_claw() -> Mesh:
+    """Claw machine booth: a glass case with prizes inside and a claw hanging from a rail."""
+    mesh = Mesh("ParkParkBoothClaw")
+    booth_base(mesh, "mint", "gold", "cream")
+    add_box(mesh, (0, 3.4, 1.0), (3.4, 2.6, 1.6), "dark_glass")
+    add_cylinder_between(mesh, (0, 4.5, 1.0), (0, 3.6, 1.0), 0.06, 0.06, "ink", 5)
+    add_cylinder_between(mesh, (-0.3, 3.6, 1.0), (0.3, 3.6, 1.0), 0.25, 0.25, "ink", 8)
+    for index in range(5):
+        add_ellipsoid(mesh, (-1.2 + index * 0.6, 2.4, 1.0), (0.28, 0.28, 0.28), ("coral", "gold", "cream")[index % 3], slices=7, stacks=4)
+    return mesh
+
+
+def make_booth_dart() -> Mesh:
+    """Balloon dart booth: a stall with a board of balloons behind the counter."""
+    mesh = Mesh("ParkParkBoothDart")
+    booth_base(mesh, "coral", "gold", "mint")
+    for row in range(2):
+        for col in range(5):
+            add_ellipsoid(mesh, (-2.8 + col * 1.4 + row * 0.7, 3.2 + row * 1.2, 0.0), (0.45, 0.55, 0.45), ("coral", "gold", "mint", "cream")[(row + col) % 4], slices=8, stacks=5)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -3900,6 +3970,12 @@ def main() -> None:
         make_shop_cotton(),
         make_decor_cloud(),
         make_decor_rainbow(),
+        make_booth_ring(),
+        make_booth_shooting(),
+        make_booth_fortune(),
+        make_booth_photo(),
+        make_booth_claw(),
+        make_booth_dart(),
         make_decor_crystal(),
         make_decor_planet(),
         make_swan(),

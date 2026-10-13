@@ -55,12 +55,12 @@
 
 | # | OBJ 이름 | 용도 | 연결 방식 | 규격·비고 | 상태 |
 |---|---|---|---|---|---|
-| 21 | `ParkParkRingToss` | 고리 던지기 부스 | Minigame | 폭 7, 카운터 +Z, 병 6개 | 대기 |
-| 22 | `ParkParkShootingGallery` | 사격장 | Minigame | 폭 8, 표적 5개 | 대기 |
-| 23 | `ParkParkFortuneTent` | 점집 천막 | Minigame | 폭 6, 수정구슬 | 대기 |
-| 24 | `ParkParkPhotoBooth` | 사진 부스 | Minigame(꾸미기 연계) | 폭 3, 커튼 | 대기 |
-| 25 | `ParkParkClawMachine` | 인형 뽑기 | Minigame | 폭 3, 높이 5 | 대기 |
-| 26 | `ParkParkBalloonDart` | 풍선 다트 | Minigame | 폭 7, 풍선 판 | 대기 |
+| 21 | `ParkParkBoothRing` | 고리 던지기 부스 | Minigame | 폭 7, 카운터 +Z, 병 6개 | OBJ 생성됨 |
+| 22 | `ParkParkBoothShooting` | 사격장 | Minigame | 폭 8, 표적 5개 | OBJ 생성됨 |
+| 23 | `ParkParkBoothFortune` | 점집 천막 | Minigame | 폭 6, 수정구슬 | OBJ 생성됨 |
+| 24 | `ParkParkBoothPhoto` | 사진 부스 | Minigame(꾸미기 연계) | 폭 3, 커튼 | OBJ 생성됨 |
+| 25 | `ParkParkBoothClaw` | 인형 뽑기 | Minigame | 폭 3, 높이 5 | OBJ 생성됨 |
+| 26 | `ParkParkBoothDart` | 풍선 다트 | Minigame | 폭 7, 풍선 판 | OBJ 생성됨 |
 
 ### E. 수익 구조 건물 — 5개
 
@@ -95,7 +95,7 @@
 
 | ID | 항목 | 내용 | 필요 에셋 | 상태 |
 |---|---|---|---|---|
-| S1 | `Minigame` 종류 | 광장 부스 6개. 길게 누르기/타이밍으로 성공하면 `ActiveIncome` 기준 보상, 개인별 재사용 대기 15~30초, 일일 상한 | D(21~26) | 대기 |
+| S1 | `Minigame` 종류 | 광장 부스 6개. 길게 누르기/타이밍으로 성공하면 `ActiveIncome` 기준 보상, 개인별 재사용 대기 15~30초, 일일 상한 | D(21~26) | 그레이박스·가져오기 대기 |
 | S2 | 계절 이벤트 엔진 | 날짜(UTC)로 시즌 선택, 시즌 장식 배치/제거, 시즌 한정 꾸미기 2개, 시즌 미션 | C(15~20) | 대기 |
 | S3 | 금고(방치 수입) | 접속 안 한 시간의 수입을 상한(예: 4시간)까지 적립, 복귀 시 수령 | E(31) | 대기 |
 | S4 | VIP 라운지 / 매표소 / 후원사 간판 | 코인으로 구입하는 영구 시설, 효과는 수입 배수 +5~15% 이내, 저장 | E(27,28,30) | 대기 |

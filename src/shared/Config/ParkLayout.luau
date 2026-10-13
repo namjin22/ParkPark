@@ -115,6 +115,16 @@ ParkLayout.DecorPlots = {
 	Vector3.new(46, 0, 50),
 } :: { Vector3 }
 -- The cleaning cart where janitors are hired, on the other side of the same path.
+-- Plaza minigame booths: three on each side of the main path between the side path and the carousel, fronts toward
+-- the path. `Facing` is the direction the booth looks (its local +Z).
+ParkLayout.MinigameBooths = {
+	{ Key = "Ring", Position = Vector3.new(-28, 0, -28), Facing = Vector3.new(1, 0, 0) },
+	{ Key = "Shoot", Position = Vector3.new(-28, 0, -40), Facing = Vector3.new(1, 0, 0) },
+	{ Key = "Fortune", Position = Vector3.new(-28, 0, -52), Facing = Vector3.new(1, 0, 0) },
+	{ Key = "Photo", Position = Vector3.new(28, 0, -28), Facing = Vector3.new(-1, 0, 0) },
+	{ Key = "Claw", Position = Vector3.new(28, 0, -40), Facing = Vector3.new(-1, 0, 0) },
+	{ Key = "Dart", Position = Vector3.new(28, 0, -52), Facing = Vector3.new(-1, 0, 0) },
+} :: { { Key: string, Position: Vector3, Facing: Vector3 } }
 -- The delivery desk on the plaza.
 ParkLayout.DeliveryDeskPosition = Vector3.new(-26, 0, 94)
 ParkLayout.JanitorCartPosition = Vector3.new(-24, 0, 52)

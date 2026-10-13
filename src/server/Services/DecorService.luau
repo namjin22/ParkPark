@@ -62,6 +62,12 @@ local function blockedByStructures(x: number, z: number, margin: number): boolea
 			ParkLayout.MechanicShopPosition,
 			ParkLayout.DecorShopPosition,
 			ParkLayout.DeliveryDeskPosition,
+			Vector3.new(-28, 0, -28),
+			Vector3.new(-28, 0, -40),
+			Vector3.new(-28, 0, -52),
+			Vector3.new(28, 0, -28),
+			Vector3.new(28, 0, -40),
+			Vector3.new(28, 0, -52),
 			Vector3.new(-32, 0, 52),
 		}
 	do
