@@ -46,6 +46,8 @@
 
 - 반복 21 (2026-10-13): 한 일: S7 해저 구역(키 `Sea`, 열한 번째 구역, 개방 950,000코인, 구름 구역 마지막 가게 `Cotton` 수리 후). 놀이기구 4개 `Seahorse`(스피너)·`Jelly`(점프)·`Aquarium`(투어)·`BubbleTea`(가게), 요금 4,700~5,100·단계 비용 약 630k~660k, 줍기 물건 '진주', 거품 효과 `SeaService`, 장식(산호·해초 + 기존 바위·덤불), 위치는 직전 구역 경계에서 263 스터드 북쪽(-2768 ~ -3031). 구역 정의는 `zones3.py` 방식(저장소 도구로 옮기지 않음)으로 적용했고 OBJ 7개를 생성(템플릿은 가져온 뒤 생성). / 검증: verify.ps1 통과. Play(강제 상태): 4개 모두 수리·운영, 수입 분당 약 3,700~4,000, 대기줄 형성, 구역 문과 거품 효과 존재, 산호·해초 56개 배치, 줍기 물건 8개, 캡처에서 그레이박스 건물·도로·가로등 확인, Output 오류 없음. Rojo 플러그인 연결이 끊겨 있어 변경된 스크립트 6개를 `execute_luau`로 Studio에 직접 넣어 검증함(플러그인이 다시 연결되면 같은 내용으로 맞춰짐). / 다음: S8 로봇 도시 구역(같은 방식). 사용자 확인 대기: Rojo 플러그인 다시 연결, 새 OBJ 가져오기.
 
+- 반복 22 (2026-10-13): 한 일: S8 로봇 도시 구역(키 `Tech`, 열두 번째, 개방 1,030,000코인, 해저 구역 마지막 가게 `BubbleTea` 수리 후, z -3031 ~ -3294). `Robot`(스피너)·`Neon`(점프)·`TechFactory`(투어)·`Ramen`(가게), 요금 5,000~5,400, 단계 비용 약 670k~700k, 줍기 물건 '나사', 효과 `TechService`(네온 입자), 장식(네온 간판·안테나 + 바위·덤불). OBJ 7개 생성(`ParkParkRobotHub`/`GearPod`/`NeonMound`/`RobotFactory`/`ShopRamen`/`DecorNeonSign`/`DecorAntenna`). / 검증: verify.ps1 통과. Play(강제 상태): 4개 모두 수리·운영, 수입 분당 약 3,700~4,000, 대기줄 형성, 구역 문·입자 효과·장식 40개·줍기 물건 8개 확인, Output 오류 없음. Studio 동기화가 늦어 변경 스크립트 6개 + 새 서비스를 `execute_luau`로 직접 넣어 검증. 첫 시도는 Play 시작이 느려 실패해서 대기 시간을 늘려 다시 실행. 시설 모양 캡처는 하지 않음. / 다음: 반복 23은 S9 열기구 관광 시설(그레이박스, 트랙 종류 재사용 검토), 반복 24는 4와 6의 배수라 점검(B)과 코드 리뷰(C).
+
 ## 가져오기 대기 목록 (사용자가 3D Importer로 가져올 OBJ)
 
 - ParkParkBoothRing
@@ -68,6 +70,13 @@
 - ParkParkShopBubbleTea
 - ParkParkDecorCoral
 - ParkParkDecorSeaweed
+- ParkParkRobotHub
+- ParkParkGearPod
+- ParkParkNeonMound
+- ParkParkRobotFactory
+- ParkParkShopRamen
+- ParkParkDecorNeonSign
+- ParkParkDecorAntenna
 
 ## 사용자 메모 (폰 확인, 패스 ID, 오디오 ID 등)
 

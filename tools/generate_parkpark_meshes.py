@@ -3990,6 +3990,101 @@ def make_decor_seaweed() -> Mesh:
     return mesh
 
 
+def make_robot_hub() -> Mesh:
+    """Rotating robot deck: a dark disc with neon bands, an antenna column in the middle, a pedestal per seat."""
+    mesh = Mesh("ParkParkRobotHub")
+    add_vertical_cylinder(mesh, 8.2, 0.0, 0.6, "dark_glass", 44)
+    add_vertical_cylinder(mesh, 8.25, 0.0, 0.45, "ink", 44)
+    add_torus(mesh, 7.8, 0.14, 0.64, "mint", segments=44, sides=6)
+    add_torus(mesh, 4.0, 0.1, 0.62, "coral", segments=36, sides=6)
+    lathe(mesh, [(1.4, 0.6, "ink"), (1.0, 1.4, "dark_glass"), (0.5, 6.0, "faded_mint"), (0.0, 7.6, "coral")], 10)
+    for y, material in ((2.4, "mint"), (3.6, "gold"), (4.8, "mint")):
+        add_torus(mesh, 0.85, 0.09, y, material, segments=16, sides=5)
+    for index in range(6):
+        angle = TAU * index / 6
+        x, z = 5.4 * math.cos(angle), 5.4 * math.sin(angle)
+        add_cylinder_between(mesh, (0, 0.9, 0), (x, 0.9, z), 0.16, 0.16, "faded_mint", 8)
+        add_vertical_cylinder(mesh, 1.4, 0.6, 0.9, "mint", 24, x, z)
+    return mesh
+
+
+def make_gear_pod() -> Mesh:
+    """A gear seat (base at y=0): a toothed disc under a seat on top at about y=1.72."""
+    mesh = Mesh("ParkParkGearPod")
+    add_vertical_cylinder(mesh, 0.85, 0.0, 0.5, "gold", 16)
+    for index in range(8):
+        angle = TAU * index / 8
+        add_box(mesh, (0.95 * math.cos(angle), 0.25, 0.95 * math.sin(angle)), (0.32, 0.5, 0.32), "gold")
+    lathe(mesh, [(0.5, 0.5, "faded_mint"), (0.7, 1.0, "mint"), (0.6, 1.5, "mint"), (0.0, 1.62, "faded_mint")], 12)
+    add_box(mesh, (0, 1.72, -0.2), (0.9, 0.14, 1.0), "coral")
+    for side in (-1, 1):
+        add_cylinder_between(mesh, (side * 0.5, 1.75, 0.35), (side * 0.5, 2.3, 0.7), 0.05, 0.05, "gold", 5)
+    return mesh
+
+
+def make_neon_mound() -> Mesh:
+    """A neon bounce pad (origin at the ground centre): a dark grid dome ringed with glowing bands."""
+    mesh = Mesh("ParkParkNeonMound")
+    add_vertical_cylinder(mesh, 6.8, 0.0, 0.9, "ink", 36)
+    lathe(mesh, [(6.6, 0.9, "dark_glass"), (5.7, 1.2, "ink"), (4.6, 1.45, "dark_glass"), (3.4, 1.55, "ink"), (2.2, 1.6, "dark_glass"), (0.0, 1.6, "dark_glass")], 32)
+    for radius, y, material in ((6.4, 1.0, "mint"), (4.8, 1.38, "coral"), (3.0, 1.58, "mint")):
+        add_torus(mesh, radius, 0.1, y, material, segments=40, sides=6)
+    for index in range(8):
+        angle = TAU * index / 8 + 0.2
+        add_cylinder_between(mesh, (1.2 * math.cos(angle), 1.62, 1.2 * math.sin(angle)), (6.2 * math.cos(angle), 1.12, 6.2 * math.sin(angle)), 0.07, 0.07, "gold", 5)
+    return mesh
+
+
+def make_robot_factory() -> Mesh:
+    """A small robot factory (origin at the ground centre, entrance on +Z): a mint hall with chimneys and a conveyor."""
+    mesh = Mesh("ParkParkRobotFactory")
+    add_box(mesh, (0, 0.25, 0), (13.4, 0.5, 11.4), "faded_cream")
+    add_box(mesh, (0, 3.3, -0.6), (12.6, 5.6, 9.4), "mint")
+    add_box(mesh, (0, 6.3, -0.6), (13.0, 0.6, 9.8), "dark_glass")
+    for x in (-4.0, 4.0):
+        add_vertical_cylinder(mesh, 0.7, 6.6, 9.8, "ink", 12, x, -3.0)
+        add_ellipsoid(mesh, (x, 10.2, -3.0), (0.9, 0.5, 0.9), "faded_cream", slices=8, stacks=4)
+    add_box(mesh, (0, 2.0, 4.1), (3.0, 3.6, 0.3), "ink")
+    add_box(mesh, (0, 0.8, 5.0), (9.0, 0.4, 1.2), "ink")
+    for index in range(5):
+        add_box(mesh, (-3.2 + index * 1.6, 1.15, 5.0), (0.7, 0.7, 0.7), "gold")
+    add_box(mesh, (0, 5.2, 4.9), (7.0, 1.0, 0.3), "coral")
+    return mesh
+
+
+def make_shop_ramen() -> Mesh:
+    """Ramen stall: coral walls, a mint-and-cream awning, and a big bowl with noodles and chopsticks on the roof."""
+    mesh = Mesh("ParkParkShopRamen")
+    shop_base(mesh, "coral", "mint", "cream")
+    add_cylinder_between(mesh, (0, 5.0, 0), (0, 6.4, 0), 0.7, 1.7, "cream", 16)
+    add_ellipsoid(mesh, (0, 6.5, 0), (1.5, 0.45, 1.5), "gold", slices=12, stacks=4)
+    for side in (-1, 1):
+        add_cylinder_between(mesh, (side * 0.35, 6.7, 0), (side * 0.8 + 0.9, 8.4, 0.2), 0.07, 0.07, "wood", 5)
+    return mesh
+
+
+def make_decor_neon_sign() -> Mesh:
+    """A neon sign (origin at the ground point): a post carrying a dark panel with two glowing bars."""
+    mesh = Mesh("ParkParkDecorNeonSign")
+    add_vertical_cylinder(mesh, 0.15, 0.0, 3.6, "faded_mint", 8)
+    add_box(mesh, (0, 4.2, 0), (2.6, 1.4, 0.2), "ink")
+    add_box(mesh, (0, 4.45, 0.14), (2.0, 0.22, 0.12), "mint")
+    add_box(mesh, (0, 3.95, 0.14), (1.4, 0.22, 0.12), "coral")
+    return mesh
+
+
+def make_decor_antenna() -> Mesh:
+    """An antenna tower (origin at the ground point): a thin tapering mast with rungs, a dish and a red tip."""
+    mesh = Mesh("ParkParkDecorAntenna")
+    add_cylinder_between(mesh, (0, 0, 0), (0, 7.4, 0), 0.5, 0.1, "faded_mint", 8)
+    for index in range(5):
+        y = 1.0 + index * 1.3
+        add_box(mesh, (0, y, 0), (1.0 - index * 0.14, 0.1, 0.1), "cream")
+    add_ellipsoid(mesh, (0.5, 6.6, 0), (0.6, 0.18, 0.6), "cream", slices=10, stacks=4)
+    add_ellipsoid(mesh, (0, 7.7, 0), (0.18, 0.18, 0.18), "coral", slices=6, stacks=4)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -4165,6 +4260,13 @@ def main() -> None:
         make_shop_bubble_tea(),
         make_decor_coral(),
         make_decor_seaweed(),
+        make_robot_hub(),
+        make_gear_pod(),
+        make_neon_mound(),
+        make_robot_factory(),
+        make_shop_ramen(),
+        make_decor_neon_sign(),
+        make_decor_antenna(),
         make_booth_ring(),
         make_booth_shooting(),
         make_booth_fortune(),

@@ -194,6 +194,12 @@ local function grayboxDecor(kind: string): Model
 			true
 	elseif kind == "DecorSeaweed" then
 		part("Seaweed", Vector3.new(0.8, 3, 0.8), Vector3.new(0, 1.5, 0), Color3.fromRGB(90, 170, 120), nil)
+	elseif kind == "DecorNeonSign" then
+		part("Sign", Vector3.new(2.6, 1.4, 0.3), Vector3.new(0, 4.2, 0), Color3.fromRGB(40, 46, 60), nil).CanCollide =
+			true
+	elseif kind == "DecorAntenna" then
+		part("Mast", Vector3.new(0.8, 8, 0.8), Vector3.new(0, 4, 0), Color3.fromRGB(150, 180, 170), nil).CanCollide =
+			true
 	elseif kind == "DecorFern" then
 		part(
 			"Fern",
@@ -408,6 +414,8 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, cloud.MinZ, cloud.BoundaryZ })
 	local sea = ParkLayout.ZoneBounds.Sea
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, sea.MinZ, sea.BoundaryZ })
+	local tech = ParkLayout.ZoneBounds.Tech
+	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, tech.MinZ, tech.BoundaryZ })
 	local jungle = ParkLayout.ZoneBounds.Jungle
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, jungle.MinZ, jungle.BoundaryZ })
 	local candy = ParkLayout.ZoneBounds.Candy
@@ -681,6 +689,35 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 		end
 	end
 	for z = sea.BoundaryZ - 16, sea.MinZ + 12, -24 do
+		for _, side in { -1, 1 } do
+			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
+			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then
+				place("DecorLamp", spot, 0, 1.5)
+			end
+		end
+	end
+
+	-- The 로봇 도시: scenery with lamps along its road.
+	local techProps: { { kind: string, count: number, margin: number, radius: number } } = {
+		{ kind = "DecorNeonSign", count = 22, margin = 5, radius = 2.5 },
+		{ kind = "DecorAntenna", count = 18, margin = 6, radius = 2 },
+		{ kind = "DecorRock", count = 14, margin = 6, radius = 4 },
+		{ kind = "DecorBush", count = 16, margin = 4, radius = 2.5 },
+	}
+	for _, prop in techProps do
+		local made = 0
+		local tries = 0
+		while made < prop.count and tries < 3000 do
+			tries += 1
+			local x = random:NextNumber(-WORLD_X, WORLD_X)
+			local z = random:NextNumber(tech.MinZ + 6, tech.BoundaryZ - 8)
+			if not zoneBlocked(x, z, prop.margin) and clear(x, z, prop.radius) then
+				place(prop.kind, Vector3.new(x, 0, z), random:NextNumber(0, math.pi * 2), prop.radius)
+				made += 1
+			end
+		end
+	end
+	for z = tech.BoundaryZ - 16, tech.MinZ + 12, -24 do
 		for _, side in { -1, 1 } do
 			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
 			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then
