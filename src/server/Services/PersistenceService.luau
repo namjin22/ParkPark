@@ -89,6 +89,22 @@ type Backend = {
 local STORE_NAME = "ParkParkSave"
 local STORE_SCOPE = "v1"
 local SAVE_VERSION = 1
+
+-- Told to the player when their progress cannot be loaded or saved (set by Bootstrap to the notice service).
+local playerNotifier: ((Player, string, string) -> ())? = nil
+local lastSaveWarning: { [Player]: number } = {}
+
+local function tell(player: Player, title: string, detail: string, delaySeconds: number?)
+	local notifier = playerNotifier
+	if notifier == nil then
+		return
+	end
+	task.delay(delaySeconds or 0, function()
+		if player:IsDescendantOf(Players) then
+			notifier(player, title, detail)
+		end
+	end)
+end
 local LOCK_SECONDS = 180
 local LOAD_ATTEMPTS = 4
 local SAVE_ATTEMPTS = 4
@@ -346,7 +362,26 @@ local function loadProfile(player: Player): Profile
 		end
 	end
 
+	if loaded and type(data) == "table" and type(data.Version) == "number" and data.Version > SAVE_VERSION then
+		-- Written by a newer version of the game (a rollback): do not touch it.
+		warn(
+			string.format(
+				"[ParkPark] %s's save uses format %d, newer than %d; leaving it alone",
+				player.Name,
+				data.Version,
+				SAVE_VERSION
+			)
+		)
+		loaded = false
+	end
+
 	if not loaded then
+		tell(
+			player,
+			"저장을 불러오지 못했어요",
+			"이번 접속의 진행은 저장되지 않아요. 잠시 뒤 다시 들어와 주세요",
+			8
+		)
 		profile.status = "failed"
 		warn(
 			string.format(
@@ -498,6 +533,11 @@ local function saveProfile(profile: Profile, release: boolean): boolean
 
 	profile.saving = false
 	if lostLock then
+		tell(
+			profile.player,
+			"저장이 중단됐어요",
+			"다른 곳에서 같은 계정이 접속해 이번 접속의 진행은 저장되지 않아요"
+		)
 		profile.status = "failed"
 		warn(
 			string.format(
@@ -510,6 +550,14 @@ local function saveProfile(profile: Profile, release: boolean): boolean
 	if not ok then
 		profile.dirty = true
 		warn(string.format("[ParkPark] Could not save %s's progress (%s)", profile.player.Name, tostring(result)))
+		if os.clock() - (lastSaveWarning[profile.player] or -1000) > 180 then
+			lastSaveWarning[profile.player] = os.clock()
+			tell(
+				profile.player,
+				"저장이 늦어지고 있어요",
+				"다시 시도하는 중이에요. 잠시 기다려 주세요"
+			)
+		end
 		return false
 	end
 	profile.lastSave = os.clock()
@@ -706,6 +754,10 @@ function PersistenceService.SetCosmetics(
 		profile.dirty = true
 		profile.urgent = true
 	end
+end
+
+function PersistenceService.SetNotifier(send: (Player, string, string) -> ())
+	playerNotifier = send
 end
 
 function PersistenceService.SetFixedHost(value: boolean)

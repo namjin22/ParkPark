@@ -63,6 +63,7 @@ local travelService = require(script.Parent.Services.TravelService)
 local extraRideService = require(script.Parent.Services.ExtraRideService)
 local ownerService = require(script.Parent.Services.OwnerService)
 
+persistenceService.SetNotifier(noticeService.Send)
 -- Create leaderstats before the builder's bounded asset waits so the HUD never stalls.
 economyService.SetStartingCoinsProvider(persistenceService.LoadCoins)
 economyService.Initialize()
