@@ -3,6 +3,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config")
+local ParkAccess = require(script.Parent.ParkAccess)
 local GameConfig = require(Config:WaitForChild("GameConfig"))
 local ParkLayout = require(Config:WaitForChild("ParkLayout"))
 
@@ -92,6 +93,10 @@ function MechanicService.Start(park: { ParkFolder: Folder }, spendCoins: SpendCo
 	refresh()
 
 	prompt.Triggered:Connect(function(player: Player)
+		if not ParkAccess.CanManage(player) then
+			ParkAccess.Deny(player)
+			return
+		end
 		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 		if root == nil or not root:IsA("BasePart") or (root.Position - counter.Position).Magnitude > 24 then
 			return

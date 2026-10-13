@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config")
+local ParkAccess = require(script.Parent.ParkAccess)
 local GameConfig = require(Config:WaitForChild("GameConfig"))
 local ParkLayout = require(Config:WaitForChild("ParkLayout"))
 
@@ -307,6 +308,10 @@ function ZoneService.Start(
 		refresh()
 
 		prompt.Triggered:Connect(function(player: Player)
+			if not ParkAccess.CanManage(player) then
+				ParkAccess.Deny(player)
+				return
+			end
 			if isOpen() or requiredRide:GetAttribute("IsRepaired") ~= true then
 				return
 			end

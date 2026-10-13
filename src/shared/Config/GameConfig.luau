@@ -1515,6 +1515,9 @@ return {
 	-- The park-wide multipliers (events, night, season, landmarks, decor plots, party, weather) are capped at this
 	-- product; a ride's own `Featured` bonus is applied on top.
 	IncomeMultiplierCap = 3,
+	-- Personal parks (OwnerService): each player owns a park in a reserved server of their own; visitors in it cannot
+	-- manage and earn this share of the income. `TeleportRetries` extra tries when a lobby teleport does not go through.
+	PersonalParks = { Enabled = true, VisitorIncomeShare = 0.5, TeleportRetries = 2 },
 	AutoBoardSeconds = 2,
 
 	-- Carousel geometry (unscaled OBJ units from ParkParkCarouselRotor.obj).

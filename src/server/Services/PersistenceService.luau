@@ -4,7 +4,17 @@ local DataStoreService = game:GetService("DataStoreService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local ServerStorage = game:GetService("ServerStorage")
+
+-- The Debug* test values in ServerStorage are honoured in Studio only, so a value left in a published place
+-- can never redirect or delete saves.
+local function debugValue(name: string): Instance?
+	if not RunService:IsStudio() then
+		return nil
+	end
+	return ServerStorage:FindFirstChild(name)
+end
 
 local GameConfig =
 	require(ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("GameConfig"))
@@ -93,6 +103,8 @@ local JOB_ID = if game.JobId ~= "" then game.JobId else "studio"
 local profiles: { [Player]: Profile } = {}
 local activeBackend: Backend? = nil
 local hostPlayer: Player? = nil
+-- In personal parks the first player stays the only host: the park snapshot never moves to a visitor's profile.
+local fixedHost = false
 local collectPark: (() -> SavedState)? = nil
 local memory: { [string]: any } = {}
 local seed: any = nil
@@ -113,7 +125,7 @@ local function ensureBackend(): Backend
 		return activeBackend
 	end
 
-	local debugMemoryValue = ServerStorage:FindFirstChild("DebugUseMemorySaves")
+	local debugMemoryValue = debugValue("DebugUseMemorySaves")
 	local forceMemory = debugMemoryValue ~= nil and debugMemoryValue:IsA("BoolValue") and debugMemoryValue.Value
 	if not forceMemory then
 		local realStore = DataStoreService:GetDataStore(STORE_NAME, STORE_SCOPE)
@@ -144,7 +156,7 @@ local function ensureBackend(): Backend
 	else
 		warn("[ParkPark] DataStore is not available here; progress is kept in memory and will not persist")
 	end
-	local seedValue = ServerStorage:FindFirstChild("DebugSaveSeed")
+	local seedValue = debugValue("DebugSaveSeed")
 	if seedValue and seedValue:IsA("StringValue") then
 		local ok, decoded = pcall(function()
 			return HttpService:JSONDecode(seedValue.Value)
@@ -296,7 +308,7 @@ local function loadProfile(player: Player): Profile
 	local store = ensureBackend()
 	-- Test hook: a ServerStorage StringValue `DebugResetSave` holding this user's id deletes their saved profile once,
 	-- before it is read (the Studio assistant cannot reach DataStores itself, so test saves are cleared this way).
-	local resetFlag = ServerStorage:FindFirstChild("DebugResetSave")
+	local resetFlag = debugValue("DebugResetSave")
 	if resetFlag and resetFlag:IsA("StringValue") and resetFlag.Value == tostring(player.UserId) then
 		resetFlag:Destroy()
 		local removed = pcall(function()
@@ -696,6 +708,14 @@ function PersistenceService.SetCosmetics(
 	end
 end
 
+function PersistenceService.SetFixedHost(value: boolean)
+	fixedHost = value
+end
+
+function PersistenceService.GetHost(): Player?
+	return hostPlayer
+end
+
 -- Waits for the first player, makes them the host, and returns the park they saved (nil for a new park or a
 -- failed load). Call before the park is built.
 function PersistenceService.LoadParkState(): SavedState?
@@ -747,7 +767,7 @@ local function onPlayerRemoving(player: Player)
 		saveProfile(profile, true)
 	end
 	profiles[player] = nil
-	if hostPlayer == player then
+	if hostPlayer == player and not fixedHost then
 		pickHost(player)
 	end
 end
@@ -771,7 +791,7 @@ function PersistenceService.Start(collect: () -> SavedState, watch: { Instance }
 			local now = os.clock()
 			local currentHost = hostPlayer
 			local hostProfile = if currentHost then profiles[currentHost] else nil
-			if hostProfile == nil or hostProfile.status == "failed" then
+			if (hostProfile == nil or hostProfile.status == "failed") and not fixedHost then
 				pickHost(currentHost)
 			end
 			for player, profile in profiles do

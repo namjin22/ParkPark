@@ -5,6 +5,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config")
+local ParkAccess = require(script.Parent.ParkAccess)
 local GameConfig = require(Config:WaitForChild("GameConfig"))
 local ParkLayout = require(Config:WaitForChild("ParkLayout"))
 
@@ -272,6 +273,10 @@ function JanitorService.Start(
 	refreshPrompt()
 
 	prompt.Triggered:Connect(function(player: Player)
+		if not ParkAccess.CanManage(player) then
+			ParkAccess.Deny(player)
+			return
+		end
 		local character = player.Character
 		local playerRoot = character and character:FindFirstChild("HumanoidRootPart")
 		if playerRoot == nil or not playerRoot:IsA("BasePart") then

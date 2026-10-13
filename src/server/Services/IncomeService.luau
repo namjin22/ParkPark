@@ -2,6 +2,8 @@
 
 local Players = game:GetService("Players")
 
+local ParkAccess = require(script.Parent.ParkAccess)
+
 -- Pays the ride income: once a second every repaired, running attraction adds its coins-per-minute flow
 -- (`IncomePerMinute`, published by RideService) to every player, times the park-wide multipliers (events, night,
 -- decor plots). Fractions are carried over so slow early rides still pay out exactly. Every few seconds a small
@@ -89,7 +91,11 @@ function IncomeService.Start(park: { ParkFolder: Folder }, gameConfig: any, awar
 				end
 				if total > 0 then
 					for _, player in Players:GetPlayers() do
-						local owed = (carry[player] or 0) + total
+						-- A visitor in someone else's park earns a share of what the owner earns.
+						local share = if ParkAccess.IsVisitor(player)
+							then gameConfig.PersonalParks.VisitorIncomeShare
+							else 1
+						local owed = (carry[player] or 0) + total * share
 						local whole = math.floor(owed)
 						carry[player] = owed - whole
 						if whole > 0 then

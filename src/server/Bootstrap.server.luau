@@ -61,12 +61,15 @@ local dailyService = require(script.Parent.Services.DailyService)
 local cosmeticsService = require(script.Parent.Services.CosmeticsService)
 local travelService = require(script.Parent.Services.TravelService)
 local extraRideService = require(script.Parent.Services.ExtraRideService)
+local ownerService = require(script.Parent.Services.OwnerService)
 
 -- Create leaderstats before the builder's bounded asset waits so the HUD never stalls.
 economyService.SetStartingCoinsProvider(persistenceService.LoadCoins)
 economyService.Initialize()
 noticeService.Initialize()
 -- The first player to join hosts the park: their saved park (if any) is what gets built.
+-- In a personal (reserved) server the first player stays the owner whatever happens later.
+persistenceService.SetFixedHost(ownerService.Mode() == "Personal")
 local savedPark = persistenceService.LoadParkState()
 parkBuilder.SetSavedState(savedPark :: any)
 print(if savedPark then "[ParkPark] Building park world from a saved game" else "[ParkPark] Building park world")
@@ -94,6 +97,7 @@ rideService.Start(
 	noticeService.Send
 )
 extraRideService.Start(park)
+ownerService.Start(park, noticeService.Send, persistenceService.GetHost)
 travelService.Start(park)
 eventService.Start(park, noticeService.Send, economyService.AwardCoins)
 goalService.Start(park, economyService.AwardCoins, noticeService.Send)

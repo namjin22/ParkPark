@@ -3,6 +3,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local ParkAccess = require(script.Parent.ParkAccess)
 local GameConfig =
 	require(ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("GameConfig"))
 
@@ -71,6 +72,10 @@ function ParkProgressionService.Start(
 	end
 
 	park.CleanupPrompt.Triggered:Connect(function(player: Player)
+		if not ParkAccess.CanManage(player) then
+			ParkAccess.Deny(player)
+			return
+		end
 		if entranceCleared or not canUsePrompt(player, park.CleanupTarget, park.CleanupPrompt) then
 			return
 		end
@@ -106,6 +111,10 @@ function ParkProgressionService.Start(
 
 	local gateAnchor = park.GatePrompt.Parent
 	park.GatePrompt.Triggered:Connect(function(player: Player)
+		if not ParkAccess.CanManage(player) then
+			ParkAccess.Deny(player)
+			return
+		end
 		if
 			park.ParkFolder:GetAttribute("ParkOpen") == true
 			or park.Carousel:GetAttribute("IsRepaired") ~= true

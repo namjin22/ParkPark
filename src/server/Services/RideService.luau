@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
+local ParkAccess = require(script.Parent.ParkAccess)
 local ParkBuilder = require(script.Parent:WaitForChild("ParkBuilder"))
 local Income = require(
 	game:GetService("ReplicatedStorage"):WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("Income")
@@ -572,6 +573,10 @@ function RideService.Start(
 		lastAction[player] = nil
 	end)
 	actionRemote.OnServerEvent:Connect(function(player: Player, key: unknown, action: unknown)
+		if not ParkAccess.CanManage(player) then
+			ParkAccess.Deny(player)
+			return
+		end
 		if type(key) ~= "string" or type(action) ~= "string" or not ACTIONS[action] then
 			return
 		end
