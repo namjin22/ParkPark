@@ -14,3 +14,4 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+assets/models/parkpark/import_queue/

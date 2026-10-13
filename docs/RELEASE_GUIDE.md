@@ -27,14 +27,26 @@
 
 ## 2. 베타 게시 (별도 경험으로)
 
-1. Studio에서 **File → Publish to Roblox As...** 로 **새 경험**을 만드세요(이름 예: `ParkPark Beta`). 기존 경험을 덮어쓰지 않고,
-   저장 데이터(DataStore)도 경험별로 분리되어 있어 안전합니다.
-2. 새 경험의 **Game Settings**에서:
-   - **Security**: *Enable Studio Access to API Services* 켜기(저장과 순위판에 필요), *Allow HTTP Requests*는 끄기.
-   - **Places → Max Players**: **12** 권장(개인 공원에 친구가 놀러 오는 구조라 60은 필요 없습니다).
-   - **Devices**: 컴퓨터, 휴대폰, 태블릿만 켜고 **콘솔은 끄기**(게임패드 조작을 확인하지 못했습니다).
-   - **Privacy**: 베타 동안 **Private**(친구만 초대) 또는 Friends.
-3. **Creator Hub에서 데이터 저장 허용**이 이미 켜져 있는지 확인(Studio 보안 설정과 별개로 웹에서도 켜야 합니다).
+**먼저 알아 둘 것:** 지금 Studio에 열려 있는 장소는 기존 경험(장소 ID `125769714156272`)입니다. 웹에서 새 경험을 만들어도 Studio가
+자동으로 그쪽을 가리키지 않아서, 이 상태로 Game Settings를 열면 **기존 경험의 설정**을 바꾸게 됩니다. 아래 순서로 하세요.
+
+1. Studio 위쪽 메뉴에서 **File → Publish to Roblox As...** 를 누릅니다.
+2. 열린 창의 경험 목록에서 **방금 만든 새 경험을 선택**하고 *Create*(또는 *Overwrite*)를 누릅니다. 이후 이 Studio는 새 경험의 장소가 됩니다.
+   (정식 공개 때 기존 경험에 다시 게시하려면 같은 방법으로 그 경험을 선택하면 됩니다.)
+3. 게시가 끝나면 Studio 위쪽 **Home 탭 → Game Settings**(톱니 아이콘) 또는 **File → Game Settings...** 를 엽니다.
+   창 왼쪽에 이런 메뉴가 있습니다:
+   - **Basic Info**: 이름, 설명, 장르, **Devices**(컴퓨터·휴대폰·태블릿만 켜고 **콘솔은 끄기**)
+   - **Permissions**: 공개 범위. 베타 동안 **Private** 또는 **Friends**
+   - **Security**: **Enable Studio Access to API Services 켜기**(저장·순위판에 필요), *Allow HTTP Requests*는 끄기
+   - **Places**: 장소 목록. 여기서 **Max Players**를 **12**로(보이지 않으면 아래 *웹에서 설정* 참고)
+   - Monetization, Avatar는 건드리지 않아도 됩니다.
+4. 바꾼 뒤 **Save** 를 누릅니다.
+
+**웹에서 설정**(Studio에서 못 찾을 때): create.roblox.com → **Creations** → 새 경험을 열기 → 왼쪽 **Settings**(기본 정보, 접근 권한, 보안)
+와 **Places**(장소 → 설정에서 최대 인원). 못 찾겠으면 화면 캡처를 보여 주세요. 최대 인원은 지금 60이어도 동작에 문제가 없고(개인 공원에
+친구가 몇 명 오는 구조), 베타에서는 가장 마지막에 바꿔도 됩니다. **반드시 해야 하는 것은 API Services 켜기와 콘솔 끄기입니다.**
+
+저장 데이터(DataStore)는 경험마다 분리되어 있어서 새 경험은 처음 상태에서 시작합니다. 기존 경험에 있는 진행은 그대로 남습니다.
 
 ## 3. 친구 시험 (2~3명, 약 30분)
 

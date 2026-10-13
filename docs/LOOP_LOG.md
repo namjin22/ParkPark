@@ -62,13 +62,11 @@
 
 - 반복 28 (2026-10-13, '정식 출시까지'): 한 일: 장소 점검(`game.Name` ParkPark, 스트리밍 켜짐, 스크립트 95개, 템플릿 113개, 디버그 값 없음; 최대 인원이 60이라 12 권장; Workspace에 있던 떠돌이 `Part` 한 개 삭제), 처음 상태 전체 흐름 재확인(청소 → 수리 → 개장 → 손님 9명, 오류 없음), 로딩 화면(`ReplicatedFirst`, `src/first/Loading.client.luau`, 프로젝트 매핑 추가: Rojo 재시작 필요), 출시 가이드 `docs/RELEASE_GUIDE.md`(사용자 할 일, 베타 시험 표, 연령 설문 참고, 스토어 문구, 출시 후 점검). / 검증: verify.ps1 통과, 로딩 화면은 14초로 늘린 시험판에서 첫 프레임부터 표시되고 정상 제거되는 것을 확인한 뒤 원래 값(1.5초)으로 되돌림. 확인 못 한 것: 게시된 장소 기능(텔레포트·초대·순위판·분석), 폰 실기기. / 다음: 사용자 폰 확인과 모델 5개 가져오기, 베타 경험 게시와 친구 시험, 결과에 따라 수정.
 
+- 반복 29 (2026-10-13): 한 일: 사용자가 가져온 모델 5개(랜드마크 3, 열기구 2)의 ID를 기록하고 템플릿 4개(`LandmarkTicket/Sponsor/Lounge`, `BalloonRide`)를 만들어 Studio에 반영(복사본 정리, 가져온 원본 삭제). 가져오기 순서 번호 도구 `tools/queue_import.py` 추가(대기 중인 OBJ를 `import_queue/NN_이름.obj`로 복사, 공용 mtl·png 포함, Studio 이름의 번호는 ID 기록 때 제거). / 검증: Play(모든 구역·시설 3종 2단계): 랜드마크 3개와 열기구가 모두 템플릿으로 렌더, 열기구 좌석 높이 2.3 → 26.2로 상승, 시설 보너스 0.15, 오류 없음. 확인 못 한 것: 도감 시설 방향의 세부(캡처만 확인). / 다음: 사용자 폰 확인, 새 경험에 게시(Publish As로 새 경험 선택), 친구 시험.
+
 ## 가져오기 대기 목록 (사용자가 3D Importer로 가져올 OBJ)
 
-- ParkParkLandmarkTicket
-- ParkParkLandmarkSponsor
-- ParkParkLandmarkLounge
-- ParkParkBalloonPad
-- ParkParkBalloonBalloon
+- (비어 있음 — 2026-10-13 모두 가져옴. 다음부터는 `python tools/queue_import.py`가 `import_queue/`에 번호를 붙여 준비합니다)
 
 ## 사용자 메모 (폰 확인, 패스 ID, 오디오 ID 등)
 

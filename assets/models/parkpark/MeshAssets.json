@@ -154,7 +154,12 @@
     "ParkParkDecorXmasTree",
     "ParkParkShopRamen",
     "ParkParkAquariumTunnel",
-    "ParkParkDecorSpookyLamp"
+    "ParkParkDecorSpookyLamp",
+    "ParkParkLandmarkSponsor",
+    "ParkParkBalloonPad",
+    "ParkParkLandmarkLounge",
+    "ParkParkBalloonBalloon",
+    "ParkParkLandmarkTicket"
   ],
   "meshes": {
     "ParkParkStorybookEntrance": "rbxassetid://128949435785416",
@@ -309,6 +314,11 @@
     "ParkParkDecorXmasTree": "rbxassetid://136366148929052",
     "ParkParkShopRamen": "rbxassetid://87678674920864",
     "ParkParkAquariumTunnel": "rbxassetid://129147777150362",
-    "ParkParkDecorSpookyLamp": "rbxassetid://121553749659011"
+    "ParkParkDecorSpookyLamp": "rbxassetid://121553749659011",
+    "ParkParkLandmarkSponsor": "rbxassetid://140156097781714",
+    "ParkParkBalloonPad": "rbxassetid://132457969651655",
+    "ParkParkLandmarkLounge": "rbxassetid://111498479108284",
+    "ParkParkBalloonBalloon": "rbxassetid://100760181726903",
+    "ParkParkLandmarkTicket": "rbxassetid://73647382092675"
   }
 }
