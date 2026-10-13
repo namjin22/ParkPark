@@ -216,6 +216,13 @@ function CosmeticsService.Start(
 			if item.PassOnly or has(player, id) then
 				return
 			end
+			if item.Season then
+				local park = workspace:FindFirstChild("ParkParkWorld")
+				if park == nil or park:GetAttribute("Season") ~= item.Season then
+					notify(player, item.Name, "계절 한정이라 지금은 구입할 수 없어요")
+					return
+				end
+			end
 			if not spendCoins(player, item.Cost) then
 				notify(
 					player,

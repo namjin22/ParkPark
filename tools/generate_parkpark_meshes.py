@@ -3817,6 +3817,77 @@ def make_coin_vault() -> Mesh:
     return mesh
 
 
+def make_decor_pumpkin() -> Mesh:
+    """A pumpkin with a carved face (origin at the ground point)."""
+    mesh = Mesh("ParkParkDecorPumpkin")
+    add_ellipsoid(mesh, (0, 1.0, 0), (1.3, 1.0, 1.3), "coral", slices=14, stacks=8)
+    add_cylinder_between(mesh, (0, 1.9, 0), (0.15, 2.4, 0), 0.2, 0.15, "mint", 6)
+    for side in (-1, 1):
+        add_box(mesh, (side * 0.45, 1.25, 1.2), (0.28, 0.32, 0.12), "ink")
+    add_box(mesh, (0, 0.6, 1.25), (0.8, 0.2, 0.12), "ink")
+    return mesh
+
+
+def make_decor_spooky_lamp() -> Mesh:
+    """A purple post lantern with a little ghost shape (origin at the ground point)."""
+    mesh = Mesh("ParkParkDecorSpookyLamp")
+    add_vertical_cylinder(mesh, 0.16, 0.0, 4.6, "ink", 8)
+    add_ellipsoid(mesh, (0, 5.2, 0), (0.8, 1.0, 0.8), "cream", slices=10, stacks=6)
+    for side in (-1, 1):
+        add_ellipsoid(mesh, (side * 0.28, 5.4, 0.7), (0.1, 0.14, 0.06), "ink", slices=5, stacks=3)
+    return mesh
+
+
+def make_decor_snowman() -> Mesh:
+    """A snowman with a scarf and a hat (origin at the ground point)."""
+    mesh = Mesh("ParkParkDecorSnowman")
+    add_ellipsoid(mesh, (0, 1.0, 0), (1.1, 1.0, 1.1), "cream", slices=12, stacks=7)
+    add_ellipsoid(mesh, (0, 2.5, 0), (0.8, 0.75, 0.8), "cream", slices=12, stacks=7)
+    add_ellipsoid(mesh, (0, 3.6, 0), (0.55, 0.55, 0.55), "cream", slices=10, stacks=6)
+    add_box(mesh, (0, 2.0, 0), (1.3, 0.25, 1.3), "coral")
+    add_box(mesh, (0, 4.3, 0), (0.7, 0.7, 0.7), "ink")
+    add_box(mesh, (0, 3.95, 0), (1.0, 0.1, 1.0), "ink")
+    add_box(mesh, (0, 3.6, 0.55), (0.12, 0.12, 0.4), "gold")
+    return mesh
+
+
+def make_decor_xmas_tree() -> Mesh:
+    """A decorated Christmas tree with a star (origin at the ground point)."""
+    mesh = Mesh("ParkParkDecorXmasTree")
+    add_vertical_cylinder(mesh, 0.4, 0.0, 1.0, "wood", 8)
+    lathe(mesh, [(2.6, 1.0, "mint"), (0.0, 4.2, "mint")], 12)
+    lathe(mesh, [(2.0, 3.2, "mint"), (0.0, 6.0, "mint")], 12)
+    lathe(mesh, [(1.3, 5.2, "mint"), (0.0, 7.4, "mint")], 12)
+    for index in range(10):
+        angle = TAU * index / 10
+        radius = 1.8 - 1.0 * (index % 3) * 0.4
+        add_ellipsoid(mesh, (radius * math.cos(angle), 2.2 + (index % 5) * 1.0, radius * math.sin(angle)), (0.2, 0.2, 0.2), ("coral", "gold", "cream")[index % 3], slices=6, stacks=4)
+    add_star(mesh, 7.6, 0.8, "gold")
+    return mesh
+
+
+def make_decor_paper_lantern() -> Mesh:
+    """Three paper lanterns hanging from a short pole (origin at the ground point)."""
+    mesh = Mesh("ParkParkDecorPaperLantern")
+    add_vertical_cylinder(mesh, 0.14, 0.0, 5.2, "wood", 8)
+    add_box(mesh, (0, 5.2, 0), (2.6, 0.14, 0.14), "wood")
+    for x in (-1.1, 0.0, 1.1):
+        add_cylinder_between(mesh, (x, 5.2, 0), (x, 4.6, 0), 0.03, 0.03, "ink", 4)
+        add_ellipsoid(mesh, (x, 4.0, 0), (0.45, 0.6, 0.45), "coral", slices=10, stacks=6)
+        add_box(mesh, (x, 3.35, 0), (0.1, 0.45, 0.1), "gold")
+    return mesh
+
+
+def make_decor_firework_launcher() -> Mesh:
+    """A small firework launcher: a wooden crate with three tubes (origin at the ground point)."""
+    mesh = Mesh("ParkParkDecorFireworkLauncher")
+    add_box(mesh, (0, 0.5, 0), (1.8, 1.0, 1.4), "wood")
+    for index in range(3):
+        x = -0.55 + index * 0.55
+        add_cylinder_between(mesh, (x, 0.9, 0), (x + 0.1, 2.0, 0), 0.22, 0.22, ("coral", "gold", "mint")[index], 8)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -3992,6 +4063,12 @@ def main() -> None:
         make_booth_claw(),
         make_booth_dart(),
         make_coin_vault(),
+        make_decor_pumpkin(),
+        make_decor_spooky_lamp(),
+        make_decor_snowman(),
+        make_decor_xmas_tree(),
+        make_decor_paper_lantern(),
+        make_decor_firework_launcher(),
         make_decor_crystal(),
         make_decor_planet(),
         make_swan(),

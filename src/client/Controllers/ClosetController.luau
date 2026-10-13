@@ -122,6 +122,7 @@ function ClosetController.Start()
 		label.Parent = panel
 	end
 
+	local park = workspace:FindFirstChild("ParkParkWorld")
 	local function ownedSet(): { [string]: boolean }
 		local set = {}
 		for id in string.gmatch((player:GetAttribute("Owned") :: string?) or "", "[^,]+") do
@@ -165,6 +166,10 @@ function ClosetController.Start()
 				row.Activated:Connect(function()
 					remote:FireServer(if isOn then "Unequip" else "Equip", item.Id)
 				end)
+			elseif item.Season and (park == nil or park:GetAttribute("Season") ~= item.Season) then
+				row.BackgroundColor3 = UITheme.Button
+				row.TextColor3 = UITheme.Muted
+				row.Text = item.Name .. "  (계절 한정)"
 			elseif item.PassOnly then
 				row.BackgroundColor3 = UITheme.Button
 				row.TextColor3 = UITheme.Muted
@@ -185,6 +190,9 @@ function ClosetController.Start()
 	end
 	for _, name in { "Owned", "Trail", "Title" } do
 		player:GetAttributeChangedSignal(name):Connect(rebuild)
+	end
+	if park then
+		park:GetAttributeChangedSignal("Season"):Connect(rebuild)
 	end
 	rebuild()
 

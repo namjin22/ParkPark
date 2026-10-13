@@ -9,6 +9,7 @@ export type Cosmetic = {
 	Rainbow: boolean?,
 	Text: string?,
 	PassOnly: boolean?,
+	Season: string?,
 }
 
 export type RideEconomy = {
@@ -95,6 +96,7 @@ return {
 	TempleScale = 2.2,
 	FernScale = 2,
 	TotemScale = 2,
+	SeasonDecorScale = 2,
 	CamelScale = 2.4,
 	DuneScale = 2.4,
 	PyramidScale = 2.2,
@@ -1160,6 +1162,72 @@ return {
 	-- The coin vault (VaultService): while a player is away the park's income is stored at this share of the
 	-- current per-minute income, for at most CapSeconds, and only for absences longer than MinimumAwaySeconds.
 	Vault = { Efficiency = 0.25, CapSeconds = 14400, MinimumAwaySeconds = 120 },
+
+	-- Seasonal events (SeasonService): active between the given UTC dates (the end may wrap past new year). While
+	-- on, `Decor` kinds line the main path, income gets `IncomeBonus`, and cosmetics with `Season = Key` can be bought.
+	Seasons = {
+		{
+			Key = "Halloween",
+			Name = "핼러윈",
+			Detail = "길가에 호박과 등불이 놓였어요. 수입이 조금 늘어요",
+			FromMonth = 10,
+			FromDay = 24,
+			ToMonth = 11,
+			ToDay = 2,
+			IncomeBonus = 0.08,
+			Seed = 1031,
+			Decor = { "DecorPumpkin", "DecorSpookyLamp" },
+		},
+		{
+			Key = "Winter",
+			Name = "겨울맞이",
+			Detail = "눈사람과 트리가 놓였어요. 수입이 조금 늘어요",
+			FromMonth = 12,
+			FromDay = 15,
+			ToMonth = 1,
+			ToDay = 2,
+			IncomeBonus = 0.08,
+			Seed = 1225,
+			Decor = { "DecorSnowman", "DecorXmasTree", "DecorFireworkLauncher" },
+		},
+		{
+			Key = "NewYear",
+			Name = "새해 등불",
+			Detail = "한지 등이 길을 밝혀요. 수입이 조금 늘어요",
+			FromMonth = 1,
+			FromDay = 20,
+			ToMonth = 2,
+			ToDay = 12,
+			IncomeBonus = 0.08,
+			Seed = 211,
+			Decor = { "DecorPaperLantern", "DecorFireworkLauncher" },
+		},
+		{
+			Key = "Harvest",
+			Name = "한가위",
+			Detail = "한지 등이 길을 밝혀요. 수입이 조금 늘어요",
+			FromMonth = 9,
+			FromDay = 15,
+			ToMonth = 9,
+			ToDay = 30,
+			IncomeBonus = 0.08,
+			Seed = 915,
+			Decor = { "DecorPaperLantern", "DecorPumpkin" },
+		},
+	} :: {
+		{
+			Key: string,
+			Name: string,
+			Detail: string,
+			FromMonth: number,
+			FromDay: number,
+			ToMonth: number,
+			ToDay: number,
+			IncomeBonus: number,
+			Seed: number,
+			Decor: { string },
+		}
+	},
 	IncomeScale = 1.5,
 	-- Playing together: each extra player in the server raises everyone's ride income by this much, up to the max.
 	PartyBonusPerPlayer = 0.1,
@@ -1575,6 +1643,40 @@ return {
 			Cost = 50000,
 			Text = "전설의 사장",
 			Color = Color3.fromRGB(255, 120, 160),
+		},
+		{
+			Id = "TrailPumpkin",
+			Kind = "Trail",
+			Name = "호박 불꽃",
+			Cost = 25000,
+			Color = Color3.fromRGB(240, 140, 50),
+			Season = "Halloween",
+		},
+		{
+			Id = "TitleGhostHunter",
+			Kind = "Title",
+			Name = "유령 사냥꾼",
+			Cost = 20000,
+			Text = "유령 사냥꾼",
+			Color = Color3.fromRGB(170, 130, 220),
+			Season = "Halloween",
+		},
+		{
+			Id = "TrailSnow",
+			Kind = "Trail",
+			Name = "눈꽃 반짝",
+			Cost = 25000,
+			Color = Color3.fromRGB(200, 230, 255),
+			Season = "Winter",
+		},
+		{
+			Id = "TitleSanta",
+			Kind = "Title",
+			Name = "산타 도우미",
+			Cost = 20000,
+			Text = "산타 도우미",
+			Color = Color3.fromRGB(230, 90, 80),
+			Season = "Winter",
 		},
 		{
 			Id = "TitleSupporter",

@@ -106,6 +106,8 @@ MUSHROOM_SCALE = config_number("MushroomScale")
 TEMPLE_SCALE = config_number("TempleScale")
 FERN_SCALE = config_number("FernScale")
 TOTEM_SCALE = config_number("TotemScale")
+PUMPKIN_SCALE = config_number("SeasonDecorScale")
+SEASON_SCALE = config_number("SeasonDecorScale")
 CAMELSCALE = config_number("CamelScale")
 DUNESCALE = config_number("DuneScale")
 PYRAMIDSCALE = config_number("PyramidScale")
@@ -1645,6 +1647,12 @@ def build_decor() -> None:
         ("DecorObelisk", "ParkParkDecorObelisk", OBELISKSCALE, box_collider("Collider", (0, 2.5, 0), (1.8, 5.0, 1.8), 0, OBELISKSCALE)),
         ("DecorCloud", "ParkParkDecorCloud", CLOUDSCALE, cylinder_collider("Collider", (0, 1.3, 0), 2.6, 0.5, CLOUDSCALE)),
         ("DecorRainbow", "ParkParkDecorRainbow", RAINBOWARCHSCALE, None),
+        ("DecorPumpkin", "ParkParkDecorPumpkin", PUMPKIN_SCALE, None),
+        ("DecorSpookyLamp", "ParkParkDecorSpookyLamp", SEASON_SCALE, cylinder_collider("Collider", (0, 2.4, 0), 4.8, 0.5, SEASON_SCALE)),
+        ("DecorSnowman", "ParkParkDecorSnowman", SEASON_SCALE, cylinder_collider("Collider", (0, 2.2, 0), 4.4, 2.0, SEASON_SCALE)),
+        ("DecorXmasTree", "ParkParkDecorXmasTree", SEASON_SCALE, cylinder_collider("Collider", (0, 3.0, 0), 6.0, 2.4, SEASON_SCALE)),
+        ("DecorPaperLantern", "ParkParkDecorPaperLantern", SEASON_SCALE, cylinder_collider("Collider", (0, 2.6, 0), 5.2, 0.4, SEASON_SCALE)),
+        ("DecorFireworkLauncher", "ParkParkDecorFireworkLauncher", SEASON_SCALE, box_collider("Collider", (0, 0.6, 0), (1.8, 1.2, 1.4), 0, SEASON_SCALE)),
         ("DecorPine", "ParkParkDecorPine", PINE_SCALE, cylinder_collider("Collider", (0, 1.2, 0), 2.4, 0.8, PINE_SCALE)),
         ("DecorRock", "ParkParkDecorRock", ROCK_SCALE, cylinder_collider("Collider", (0, 1.0, 0), 2.0, 4.4, ROCK_SCALE)),
         ("DecorPalm", "ParkParkDecorPalm", PALM_SCALE, cylinder_collider("Collider", (0, 1.8, 0), 3.6, 1.2, PALM_SCALE)),

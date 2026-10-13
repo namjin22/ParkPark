@@ -32,6 +32,7 @@ function IncomeService.Start(park: { ParkFolder: Folder }, gameConfig: any, awar
 			math.min(gameConfig.PartyBonusMax, math.max(0, #Players:GetPlayers() - 1) * gameConfig.PartyBonusPerPlayer)
 		folder:SetAttribute("PartyBonus", party)
 		result *= 1 + party
+		result *= 1 + ((folder:GetAttribute("SeasonBonus") :: number?) or 0)
 		return result
 	end
 
