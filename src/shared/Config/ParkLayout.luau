@@ -125,6 +125,8 @@ ParkLayout.MinigameBooths = {
 	{ Key = "Claw", Position = Vector3.new(28, 0, -40), Facing = Vector3.new(-1, 0, 0) },
 	{ Key = "Dart", Position = Vector3.new(28, 0, -52), Facing = Vector3.new(-1, 0, 0) },
 } :: { { Key: string, Position: Vector3, Facing: Vector3 } }
+-- The coin vault on the west side of the plaza.
+ParkLayout.VaultPosition = Vector3.new(-62, 0, 36)
 -- The delivery desk on the plaza.
 ParkLayout.DeliveryDeskPosition = Vector3.new(-26, 0, 94)
 ParkLayout.JanitorCartPosition = Vector3.new(-24, 0, 52)

@@ -49,6 +49,8 @@ type Profile = {
 	streak: number,
 	missionDay: number,
 	missionDone: number,
+	lastSeen: number,
+	vault: number,
 	cosmetics: { string },
 	trail: string,
 	title: string,
@@ -259,6 +261,8 @@ local function loadProfile(player: Player): Profile
 		streak = 0,
 		missionDay = 0,
 		missionDone = 0,
+		lastSeen = 0,
+		vault = 0,
 		cosmetics = {},
 		trail = "",
 		title = "",
@@ -345,6 +349,8 @@ local function loadProfile(player: Player): Profile
 	profile.speed = asNumber(data.Speed, 0, #GameConfig.SpeedLevelCosts, 0)
 	profile.lastDay = asNumber(data.LastDay, 0, 1e6, 0)
 	profile.missionDay = asNumber(data.MissionDay, 0, 1e6, 0)
+	profile.lastSeen = asNumber(data.LastSeen, 0, 4e9, 0)
+	profile.vault = asNumber(data.Vault, 0, 1e12, 0)
 	profile.missionDone = asNumber(data.MissionDone, 0, 7, 0)
 	profile.streak = asNumber(data.Streak, 0, #GameConfig.DailyStreakMultipliers, 0)
 	local known: { [string]: boolean } = {}
@@ -403,6 +409,8 @@ local function saveProfile(profile: Profile, release: boolean): boolean
 			record.Speed = profile.speed
 			record.LastDay = profile.lastDay
 			record.MissionDay = profile.missionDay
+			record.LastSeen = os.time()
+			record.Vault = profile.vault
 			record.MissionDone = profile.missionDone
 			record.Streak = profile.streak
 			record.Cosmetics = profile.cosmetics
@@ -477,6 +485,27 @@ function PersistenceService.SetDaily(player: Player, day: number, streak: number
 	if profile and profile.status == "ok" then
 		profile.lastDay = day
 		profile.streak = streak
+		profile.dirty = true
+		profile.urgent = true
+	end
+end
+
+-- The coin vault: the time the player was last seen (when their profile was last written) and what is waiting.
+function PersistenceService.GetVault(player: Player): (number, number)
+	local profile = profiles[player]
+	if profile and profile.status == "ok" then
+		return profile.lastSeen, profile.vault
+	end
+	-- Not loaded (or the load failed): nothing to credit and nothing to overwrite.
+	return 0, 0
+end
+
+function PersistenceService.SetVault(player: Player, vault: number)
+	local profile = profiles[player]
+	if profile and profile.status == "ok" then
+		profile.vault = math.max(0, math.floor(vault))
+		-- The credit for the time away has now been taken, so start counting from this session.
+		profile.lastSeen = os.time()
 		profile.dirty = true
 		profile.urgent = true
 	end

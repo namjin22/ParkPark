@@ -1156,6 +1156,10 @@ return {
 			BaseSeconds = 0,
 		},
 	} :: { [string]: any },
+
+	-- The coin vault (VaultService): while a player is away the park's income is stored at this share of the
+	-- current per-minute income, for at most CapSeconds, and only for absences longer than MinimumAwaySeconds.
+	Vault = { Efficiency = 0.25, CapSeconds = 14400, MinimumAwaySeconds = 120 },
 	IncomeScale = 1.5,
 	-- Playing together: each extra player in the server raises everyone's ride income by this much, up to the max.
 	PartyBonusPerPlayer = 0.1,

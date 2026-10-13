@@ -399,6 +399,7 @@ def main() -> None:
     build_coconut()
     build_mushroom()
     build_temple()
+    build_vault()
     build_booth("RingTossBooth", "ParkParkBoothRing", SHOP_SCALE)
     build_booth("ShootingBooth", "ParkParkBoothShooting", SHOP_SCALE)
     build_booth("FortuneBooth", "ParkParkBoothFortune", SHOP_SCALE)
@@ -1426,6 +1427,24 @@ def build_booth(template: str, obj: str, scale: float) -> None:
                 mesh_part("Pad", obj, (0, 0, 0), 180, False, CREAM, scale),
                 box_collider("Collider", (0, 2.4, -1.2), (8.2, 4.8, 3.4), 0, scale),
                 box_collider("Counter", (0, 1.1, 1.1), (8.0, 2.2, 1.4), 0, scale),
+            ],
+        ),
+    )
+
+
+def build_vault() -> None:
+    if missing_meshes(("ParkParkCoinVault",)):
+        print("skipped CoinVault: import ParkParkCoinVault and record its mesh ID first")
+        return
+
+    write(
+        "CoinVault",
+        model(
+            "CoinVault",
+            [
+                mesh_part("Pad", "ParkParkCoinVault", (0, 0, 0), 180, False, CREAM, SHOP_SCALE),
+                box_collider("Collider", (0, 3.1, 0), (7.0, 6.4, 5.4), 0, SHOP_SCALE),
+                box_collider("Counter", (0, 2.8, 2.6), (4.2, 4.2, 0.6), 0, SHOP_SCALE),
             ],
         ),
     )

@@ -3802,6 +3802,21 @@ def make_booth_dart() -> Mesh:
     return mesh
 
 
+def make_coin_vault() -> Mesh:
+    """A walk-up coin vault (origin at the ground centre, door on the +Z side): a steel body, a gold door with a wheel, and coin piles."""
+    mesh = Mesh("ParkParkCoinVault")
+    add_box(mesh, (0, 3.0, 0), (6.6, 6.0, 5.0), "ink")
+    add_box(mesh, (0, 6.2, 0), (7.0, 0.5, 5.4), "wood")
+    add_box(mesh, (0, 2.8, 2.55), (4.2, 4.2, 0.3), "gold")
+    add_cylinder_between(mesh, (0, 2.8, 2.7), (0, 2.8, 3.0), 0.8, 0.8, "ink", 14)
+    for angle in (0.0, 1.571, 3.142, 4.712):
+        add_cylinder_between(mesh, (0, 2.8, 2.95), (0.9 * math.cos(angle), 2.8 + 0.9 * math.sin(angle), 2.95), 0.08, 0.08, "ink", 4)
+    for index in range(7):
+        add_vertical_cylinder(mesh, 0.55, 0.0, 0.18 + 0.12 * (index % 3), "gold", 10, -2.4 + index * 0.8, 3.8)
+    add_ellipsoid(mesh, (0, 7.2, 0), (0.9, 0.9, 0.9), "gold", slices=10, stacks=6)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -3976,6 +3991,7 @@ def main() -> None:
         make_booth_photo(),
         make_booth_claw(),
         make_booth_dart(),
+        make_coin_vault(),
         make_decor_crystal(),
         make_decor_planet(),
         make_swan(),

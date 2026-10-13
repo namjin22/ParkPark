@@ -41,6 +41,7 @@ local desertService = require(script.Parent.Services.DesertService)
 local cloudService = require(script.Parent.Services.CloudService)
 local incomeService = require(script.Parent.Services.IncomeService)
 local missionService = require(script.Parent.Services.MissionService)
+local vaultService = require(script.Parent.Services.VaultService)
 local minigameService = require(script.Parent.Services.MinigameService)
 local gatherService = require(script.Parent.Services.GatherService)
 local fishingService = require(script.Parent.Services.FishingService)
@@ -154,6 +155,15 @@ missionService.Start(
 	persistenceService.SetMissions
 )
 gatherService.Start(park, economyService.AwardCoins, noticeService.Popup)
+vaultService.Start(
+	park,
+	economyService.AwardCoins,
+	noticeService.Send,
+	noticeService.Popup,
+	parkBuilder.FindDecorTemplate,
+	persistenceService.GetVault,
+	persistenceService.SetVault
+)
 minigameService.Start(
 	park,
 	economyService.AwardCoins,
