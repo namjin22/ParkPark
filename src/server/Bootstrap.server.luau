@@ -62,6 +62,8 @@ local cosmeticsService = require(script.Parent.Services.CosmeticsService)
 local travelService = require(script.Parent.Services.TravelService)
 local extraRideService = require(script.Parent.Services.ExtraRideService)
 local ownerService = require(script.Parent.Services.OwnerService)
+local analyticsHub = require(script.Parent.Services.AnalyticsHub)
+local leaderboardService = require(script.Parent.Services.LeaderboardService)
 
 persistenceService.SetNotifier(noticeService.Send)
 -- Create leaderstats before the builder's bounded asset waits so the HUD never stalls.
@@ -99,6 +101,10 @@ rideService.Start(
 )
 extraRideService.Start(park)
 ownerService.Start(park, noticeService.Send, persistenceService.GetHost)
+analyticsHub.Start(park)
+leaderboardService.Start(park, persistenceService.GetHost, function()
+	return persistenceService.Mode() == "datastore"
+end)
 travelService.Start(park)
 eventService.Start(park, noticeService.Send, economyService.AwardCoins)
 goalService.Start(park, economyService.AwardCoins, noticeService.Send)

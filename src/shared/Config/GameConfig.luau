@@ -1515,6 +1515,14 @@ return {
 	-- The park-wide multipliers (events, night, season, landmarks, decor plots, party, weather) are capped at this
 	-- product; a ride's own `Featured` bonus is applied on top.
 	IncomeMultiplierCap = 3,
+	-- Background music and crowd ambience (MusicController). Free library tracks from the Creator Store (APM Music
+	-- and Pro Sound Effects); swap the ids to change the soundtrack.
+	Audio = {
+		MusicVolume = 0.25,
+		AmbienceVolume = 0.1,
+		Playlist = { 9046387364, 1835681370, 1842302279 },
+		Ambience = 9112787259,
+	},
 	-- Personal parks (OwnerService): each player owns a park in a reserved server of their own; visitors in it cannot
 	-- manage and earn this share of the income. `TeleportRetries` extra tries when a lobby teleport does not go through.
 	PersonalParks = { Enabled = true, VisitorIncomeShare = 0.5, TeleportRetries = 2 },

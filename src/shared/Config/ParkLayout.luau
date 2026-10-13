@@ -156,6 +156,8 @@ ParkLayout.MonorailStationInset = 16
 ParkLayout.WeatherRainbowCenter = Vector3.new(0, 6, -60)
 ParkLayout.WeatherRainbowHalfWidth = 120
 ParkLayout.WeatherRainbowHeight = 90
+-- The top-parks board near the spawn (LeaderboardService), facing the arriving players.
+ParkLayout.LeaderboardPosition = Vector3.new(-14, 0, 66)
 -- The delivery desk on the plaza.
 ParkLayout.DeliveryDeskPosition = Vector3.new(-26, 0, 94)
 ParkLayout.JanitorCartPosition = Vector3.new(-24, 0, 52)

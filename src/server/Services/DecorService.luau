@@ -63,6 +63,7 @@ local function blockedByStructures(x: number, z: number, margin: number): boolea
 			ParkLayout.DecorShopPosition,
 			ParkLayout.DeliveryDeskPosition,
 			ParkLayout.VaultPosition,
+			ParkLayout.LeaderboardPosition,
 			ParkLayout.Landmarks.Ticket.Position,
 			ParkLayout.Landmarks.Sponsor.Position,
 			ParkLayout.Landmarks.Lounge.Position,

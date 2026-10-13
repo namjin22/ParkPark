@@ -3,6 +3,8 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local AnalyticsHub = require(script.Parent.AnalyticsHub)
+
 local GameConfig =
 	require(ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("GameConfig"))
 
@@ -98,6 +100,7 @@ function EconomyService.AwardCoins(player: Player, amount: number): boolean
 	end
 
 	coins.Value += amount
+	AnalyticsHub.Economy(player, "Source", amount, coins.Value)
 	return true
 end
 
@@ -113,6 +116,7 @@ function EconomyService.SpendCoins(player: Player, amount: number): boolean
 	end
 
 	coins.Value -= amount
+	AnalyticsHub.Economy(player, "Sink", amount, coins.Value)
 	return true
 end
 
