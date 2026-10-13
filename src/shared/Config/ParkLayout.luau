@@ -134,6 +134,12 @@ ParkLayout.Landmarks = {
 	Sponsor = { Position = Vector3.new(18, 0, 37), Facing = Vector3.new(-1, 0, 0) },
 	Lounge = { Position = Vector3.new(62, 0, 36), Facing = Vector3.new(-1, 0, 0) },
 } :: { [string]: { Position: Vector3, Facing: Vector3 } }
+-- The monorail rail runs above the zone road: its x, height, the park station's z and how far inside each zone's
+-- gate that zone's station stands.
+ParkLayout.MonorailX = 52
+ParkLayout.MonorailY = 30
+ParkLayout.MonorailParkZ = -28
+ParkLayout.MonorailStationInset = 16
 -- The rainbow (WeatherService) arcs over the park north of the plaza: centre of the arc's base line, half its
 -- width and the height of its curve.
 ParkLayout.WeatherRainbowCenter = Vector3.new(0, 6, -60)
