@@ -51,13 +51,21 @@ function NoticeController.Start()
 		local camera = Workspace.CurrentCamera
 		return camera ~= nil and camera.ViewportSize.X < 550 and camera.ViewportSize.Y > camera.ViewportSize.X
 	end
-	local function topPosition(): number
-		return if compactPortrait() and type(park:GetAttribute("QuestTitle")) == "string" then 270 else 152
+	-- Portrait phones: below the guide and quest cards. Wide screens: bottom centre between the thumbstick and jump
+	-- button, away from the card column on the left and the quest card on the right.
+	local function restPosition(visible: boolean): UDim2
+		if compactPortrait() then
+			local top = if type(park:GetAttribute("QuestTitle")) == "string" then 270 else 152
+			return UDim2.new(0.5, 0, 0, if visible then top + 10 else top)
+		end
+		return UDim2.new(0.5, 0, 1, if visible then -24 else 0)
 	end
 	local function updateLayout()
-		card.Size = UDim2.new(if compactPortrait() then 0.76 else 0.9, 0, 0, 66)
+		local portrait = compactPortrait()
+		card.AnchorPoint = if portrait then Vector2.new(0.5, 0) else Vector2.new(0.5, 1)
+		card.Size = UDim2.new(if portrait then 0.76 else 0.9, 0, 0, 66)
 		if card.Visible then
-			card.Position = UDim2.new(0.5, 0, 0, topPosition() + 10)
+			card.Position = restPosition(true)
 		end
 	end
 	local function bindCamera()
@@ -116,9 +124,8 @@ function NoticeController.Start()
 
 	local function fade(visible: boolean, duration: number)
 		local target = if visible then 0 else 1
-		local top = topPosition()
 		TweenService:Create(card, TweenInfo.new(duration, Enum.EasingStyle.Quad), {
-			Position = UDim2.new(0.5, 0, 0, if visible then top + 10 else top),
+			Position = restPosition(visible),
 			BackgroundTransparency = target,
 		}):Play()
 		TweenService:Create(outline, TweenInfo.new(duration), { Transparency = if visible then 0.15 else 1 }):Play()
@@ -137,6 +144,7 @@ function NoticeController.Start()
 		showing = true
 		title.Text = nextNotice.title
 		detail.Text = nextNotice.detail
+		card.Position = restPosition(false)
 		card.Visible = true
 		fade(true, 0.22)
 		task.delay(SHOW_SECONDS, function()
