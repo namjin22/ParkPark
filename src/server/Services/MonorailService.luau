@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local MissionService = require(script.Parent.MissionService)
 local Config = ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config")
 local GameConfig = require(Config:WaitForChild("GameConfig"))
 local ParkLayout = require(Config:WaitForChild("ParkLayout"))
@@ -124,6 +125,10 @@ function MonorailService.Start(park: { ParkFolder: Folder })
 		table.insert(stations, station)
 	end
 
+	-- Which station the train is at (or heading to); remapped by key when a station opens out of order.
+	local index = 1
+	local target = 1
+
 	local function rebuild()
 		-- New zone stations are appended in zone order, which is also northwards.
 		local changed = false
@@ -143,9 +148,13 @@ function MonorailService.Start(park: { ParkFolder: Folder })
 		if not changed then
 			return
 		end
+		local currentStation = stations[index]
+		local targetStation = stations[target]
 		table.sort(stations, function(a: Station, b: Station)
 			return a.z > b.z
 		end)
+		index = table.find(stations, currentStation) or 1
+		target = table.find(stations, targetStation) or index
 		-- The rail spans from the park station to the last open one, with a pillar every 140 studs.
 		local first = stations[1].z + 16
 		local last = stations[#stations].z - 16
@@ -169,8 +178,6 @@ function MonorailService.Start(park: { ParkFolder: Folder })
 
 	-- Train state.
 	local position = stations[1].z
-	local index = 1
-	local target = 1
 	local direction = 1
 	local docked = true
 	local dockUntil = os.clock() + settings.DockSeconds
@@ -232,6 +239,7 @@ function MonorailService.Start(park: { ParkFolder: Folder })
 						if seat.Occupant == nil then
 							(character :: Model):PivotTo(seat.CFrame + Vector3.new(0, 3, 0))
 							seat:Sit(humanoid)
+							MissionService.Report(player, "Monorail")
 							break
 						end
 					end
@@ -244,13 +252,17 @@ function MonorailService.Start(park: { ParkFolder: Folder })
 	setPrompts()
 
 	local lastSeatCheck = 0
+	local lastRebuild = 0
 	RunService.Heartbeat:Connect(function(dt: number)
 		if folder.Parent == nil then
 			return
 		end
-		rebuild()
-		connectPrompts()
 		local now = os.clock()
+		if now - lastRebuild > 1 then
+			lastRebuild = now
+			rebuild()
+			connectPrompts()
+		end
 		local powered = folder:GetAttribute("PowerOut") ~= true
 		if docked then
 			if now - lastSeatCheck > 0.5 then

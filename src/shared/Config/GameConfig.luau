@@ -1077,7 +1077,7 @@ return {
 	-- Achievements (AchievementService): `Kind` is a lifetime counter (Gather, Fish, Deliver, Play) or a park
 	-- milestone (Rides repaired, Zones open, Boarded guests, Landmarks tiers, Plots bought); `Target` -1 means every
 	-- ride or zone. Paid once with `Minutes` of the park's income; `Title` is a reward-only title.
-	StatKinds = { "Gather", "Fish", "Deliver", "Play" } :: { string },
+	StatKinds = { "Gather", "Fish", "Deliver", "Play", "Monorail" } :: { string },
 	Achievements = {
 		{ Id = "GatherFirst", Name = "첫 줍기", Kind = "Gather", Target = 1, Minutes = 2 },
 		{ Id = "Gather100", Name = "수집가", Kind = "Gather", Target = 100, Minutes = 10 },
@@ -1097,6 +1097,9 @@ return {
 		},
 		{ Id = "PlayFirst", Name = "첫 도전", Kind = "Play", Target = 1, Minutes = 2 },
 		{ Id = "Play50", Name = "부스 단골", Kind = "Play", Target = 50, Minutes = 15 },
+		{ Id = "MonorailFirst", Name = "모노레일 첫 탑승", Kind = "Monorail", Target = 1, Minutes = 3 },
+		{ Id = "Monorail20", Name = "모노레일 단골", Kind = "Monorail", Target = 20, Minutes = 15 },
+		{ Id = "Monorail100", Name = "모노레일 마니아", Kind = "Monorail", Target = 100, Minutes = 30 },
 		{ Id = "Rides1", Name = "첫 수리", Kind = "Rides", Target = 1, Minutes = 3 },
 		{ Id = "Rides10", Name = "놀이기구 10개", Kind = "Rides", Target = 10, Minutes = 15 },
 		{ Id = "Rides25", Name = "놀이기구 25개", Kind = "Rides", Target = 25, Minutes = 30 },
