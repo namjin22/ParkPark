@@ -34,6 +34,7 @@ function IncomeService.Start(park: { ParkFolder: Folder }, gameConfig: any, awar
 		result *= 1 + party
 		result *= 1 + ((folder:GetAttribute("SeasonBonus") :: number?) or 0)
 		result *= 1 + ((folder:GetAttribute("LandmarkBonus") :: number?) or 0)
+		result *= (folder:GetAttribute("WeatherMultiplier") :: number?) or 1
 		return result
 	end
 

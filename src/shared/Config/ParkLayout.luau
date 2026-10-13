@@ -134,6 +134,11 @@ ParkLayout.Landmarks = {
 	Sponsor = { Position = Vector3.new(18, 0, 37), Facing = Vector3.new(-1, 0, 0) },
 	Lounge = { Position = Vector3.new(62, 0, 36), Facing = Vector3.new(-1, 0, 0) },
 } :: { [string]: { Position: Vector3, Facing: Vector3 } }
+-- The rainbow (WeatherService) arcs over the park north of the plaza: centre of the arc's base line, half its
+-- width and the height of its curve.
+ParkLayout.WeatherRainbowCenter = Vector3.new(0, 6, -60)
+ParkLayout.WeatherRainbowHalfWidth = 120
+ParkLayout.WeatherRainbowHeight = 90
 -- The delivery desk on the plaza.
 ParkLayout.DeliveryDeskPosition = Vector3.new(-26, 0, 94)
 ParkLayout.JanitorCartPosition = Vector3.new(-24, 0, 52)

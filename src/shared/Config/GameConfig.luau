@@ -1850,6 +1850,29 @@ return {
 	-- as a group of two or three (the children are smaller), pick the same first ride and prefer FamilyRides; scenic
 	-- guests prefer ScenicRides. A preference counts a ride three times when one is chosen.
 	ThrillGuestChance = 0.3,
+	-- Weather (WeatherService): a shower every IntervalMin..IntervalMax seconds while the park is open, a rainbow
+	-- after RainbowChance of them. IndoorRides are favoured (counted three times) by guests while it rains.
+	Weather = {
+		IntervalMin = 420,
+		IntervalMax = 720,
+		RainSeconds = 90,
+		RainMultiplier = 0.9,
+		RainbowSeconds = 60,
+		RainbowMultiplier = 1.15,
+		RainbowChance = 0.6,
+	},
+	IndoorRides = {
+		"Haunted",
+		"Maze",
+		"Show",
+		"Cave",
+		"GhostShip",
+		"Factory",
+		"Temple",
+		"Pyramid",
+		"Castle",
+		"Ufo",
+	} :: { string },
 	FamilyGroupChance = 0.15,
 	FamilyChildScale = 0.75,
 	ScenicGuestChance = 0.2,

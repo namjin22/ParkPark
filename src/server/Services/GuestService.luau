@@ -593,13 +593,23 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		scenicRides[key] = true
 	end
 
+	local indoorRides: { [string]: boolean } = {}
+	for _, key in GameConfig.IndoorRides do
+		indoorRides[key] = true
+	end
+
 	local function pickRide(previous: Ride?, thrill: boolean?, prefers: { [string]: boolean }?): Ride?
 		local open: { Ride } = {}
+		local raining = park.ParkFolder:GetAttribute("Weather") == "Rain"
 		for _, ride in rides do
 			if ride.model:GetAttribute("IsOperating") == true and #ride.queue < GameConfig.QueueMax then
 				table.insert(open, ride)
 				-- A thrill-seeker counts a thrill ride three times, so it is picked three times as often.
-				if (thrill and thrillRides[ride.key]) or (prefers and prefers[ride.key]) then
+				if
+					(thrill and thrillRides[ride.key])
+					or (prefers and prefers[ride.key])
+					or (raining and indoorRides[ride.key])
+				then
 					table.insert(open, ride)
 					table.insert(open, ride)
 				end
