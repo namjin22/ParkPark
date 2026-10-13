@@ -15,9 +15,9 @@
 1. **Rojo 다시 시작**: 로딩 화면을 위해 `default.project.json`에 `ReplicatedFirst`가 추가됐습니다.
    프로젝트 루트에서 `rojo serve default.project.json`을 다시 켜고 Studio의 Rojo 플러그인에서 **Connect**를 누르세요.
    (Studio 장소에는 로딩 스크립트가 이미 들어가 있어서, 다시 연결하지 않아도 게시본에는 포함됩니다.)
-2. **모델 5개 가져오기**(3D Importer, 이전과 같은 방식): `assets/models/parkpark/`의
-   `ParkParkLandmarkTicket`, `ParkParkLandmarkSponsor`, `ParkParkLandmarkLounge`, `ParkParkBalloonPad`, `ParkParkBalloonBalloon`.
-   가져온 뒤 알려 주시면 ID를 기록하고 템플릿을 만듭니다. (안 가져와도 도형으로 동작합니다.)
+2. **모델 5개 가져오기: 완료**(2026-10-13, 템플릿까지 만들어 Play에서 확인). 앞으로 새 모델이 생기면
+   `python tools/queue_import.py`가 `assets/models/parkpark/import_queue/`에 `01_이름.obj`처럼 번호를 붙여 준비하므로,
+   3D Importer에서 그 폴더의 `.obj`를 전부 한 번에 선택해 가져오면 됩니다.
 3. **폰 확인**(직접 해 보실 항목):
    - 첫 화면: 로딩 화면이 보였다가 사라지는지, 안내 카드가 보이는지.
    - 버튼 6개(이동, 꾸미기, 미션, 도감, 친구 공원, 음악)가 겹치지 않고 눌리는지, 패널이 화면을 벗어나지 않는지.
