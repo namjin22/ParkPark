@@ -54,7 +54,7 @@ function MinigameService.Start(
 )
 	local folder = park.ParkFolder
 	local settings = GameConfig.MinigameSettings
-	local random = Random.new(41)
+	local random = Random.new()
 	local holder = Instance.new("Folder")
 	holder.Name = "Minigames"
 	holder.Parent = folder
