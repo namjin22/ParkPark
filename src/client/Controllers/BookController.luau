@@ -184,6 +184,18 @@ function BookController.Start()
 				end
 			end
 		end
+		local stampText = player:GetAttribute("Stamps")
+		if type(stampText) == "string" then
+			local count = 0
+			for _ in string.gmatch(stampText, "[^,]+") do
+				count += 1
+			end
+			local total = #GameConfig.ZoneOrder + 1
+			local row = rowFor("Stamps", 98)
+			row.Text =
+				string.format("모노레일 도장  %d/%d%s", count, total, if count >= total then "  완성" else "")
+			row.BackgroundColor3 = if count >= total then UITheme.ButtonOn else UITheme.Button
+		end
 		local achievements = player:GetAttribute("Achievements")
 		if type(achievements) == "string" then
 			local order = 99
@@ -202,6 +214,7 @@ function BookController.Start()
 	end
 	player:GetAttributeChangedSignal("Book"):Connect(refresh)
 	player:GetAttributeChangedSignal("Achievements"):Connect(refresh)
+	player:GetAttributeChangedSignal("Stamps"):Connect(refresh)
 	refresh()
 
 	-- Only one of the side panels (missions, book) is open at a time.

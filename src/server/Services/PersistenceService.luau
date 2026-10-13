@@ -54,6 +54,7 @@ type Profile = {
 	weekCounts: { [string]: number },
 	stats: { [string]: number },
 	achievements: { string },
+	stamps: { string },
 	lastSeen: number,
 	vault: number,
 	book: { [string]: number },
@@ -275,6 +276,7 @@ local function loadProfile(player: Player): Profile
 		weekCounts = {},
 		stats = {},
 		achievements = {},
+		stamps = {},
 		lastSeen = 0,
 		vault = 0,
 		book = {},
@@ -381,6 +383,16 @@ local function loadProfile(player: Player): Profile
 	for _, kind in GameConfig.StatKinds do
 		profile.stats[kind] = asNumber(statsRaw[kind], 0, 1e7, 0)
 	end
+	local stampRaw = if type(data.Stamps) == "table" then data.Stamps else {}
+	local knownStamps: { [string]: boolean } = { Park = true }
+	for _, zone in GameConfig.ZoneOrder do
+		knownStamps[zone] = true
+	end
+	for _, key in stampRaw do
+		if type(key) == "string" and knownStamps[key] and not table.find(profile.stamps, key) then
+			table.insert(profile.stamps, key)
+		end
+	end
 	local achRaw = if type(data.Achievements) == "table" then data.Achievements else {}
 	local knownAch: { [string]: boolean } = {}
 	for _, def in GameConfig.Achievements do
@@ -457,6 +469,7 @@ local function saveProfile(profile: Profile, release: boolean): boolean
 			record.WeekCounts = profile.weekCounts
 			record.Stats = profile.stats
 			record.Achievements = profile.achievements
+			record.Stamps = profile.stamps
 			record.Streak = profile.streak
 			record.Cosmetics = profile.cosmetics
 			record.Trail = profile.trail
@@ -634,6 +647,23 @@ function PersistenceService.SetAchievements(player: Player, stats: { [string]: n
 	if profile and profile.status == "ok" then
 		profile.stats = table.clone(stats)
 		profile.achievements = table.clone(ids)
+		profile.dirty = true
+	end
+end
+
+-- Monorail stamp rally: the station keys already stamped.
+function PersistenceService.GetStamps(player: Player): { string }
+	local profile = profiles[player]
+	if profile and profile.status == "ok" then
+		return table.clone(profile.stamps)
+	end
+	return {}
+end
+
+function PersistenceService.SetStamps(player: Player, keys: { string })
+	local profile = profiles[player]
+	if profile and profile.status == "ok" then
+		profile.stamps = table.clone(keys)
 		profile.dirty = true
 	end
 end

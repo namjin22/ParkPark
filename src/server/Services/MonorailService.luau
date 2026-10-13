@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local ActiveIncome = require(script.Parent.ActiveIncome)
 local MissionService = require(script.Parent.MissionService)
 local Config = ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config")
 local GameConfig = require(Config:WaitForChild("GameConfig"))
@@ -32,7 +33,14 @@ local function newPart(parent: Instance, name: string, size: Vector3, position: 
 	return part
 end
 
-function MonorailService.Start(park: { ParkFolder: Folder })
+function MonorailService.Start(
+	park: { ParkFolder: Folder },
+	awardCoins: (Player, number) -> boolean,
+	notify: (Player, string, string) -> (),
+	getStamps: (Player) -> { string },
+	setStamps: (Player, { string }) -> (),
+	grant: (Player, string) -> boolean
+)
 	local folder = park.ParkFolder
 	local settings = GameConfig.Monorail
 	local palette = GameConfig.Palette
@@ -81,6 +89,84 @@ function MonorailService.Start(park: { ParkFolder: Folder })
 	end
 	train.PrimaryPart = lead
 	train.Parent = holder
+
+	-- Stamp rally: a player collects a stamp for each station the train docks at while they ride it (and the one they
+	-- board at). Each new stamp pays StampMinutes of the park's income; all stamps give the title StampTitle.
+	local stamps: { [Player]: { [string]: boolean } } = {}
+	local function publishStamps(player: Player)
+		local list: { string } = {}
+		local mine: { [string]: boolean } = stamps[player] or {}
+		for key in mine do
+			table.insert(list, key)
+		end
+		table.sort(list)
+		player:SetAttribute("Stamps", table.concat(list, ","))
+	end
+	local function stampTotal(): number
+		return #GameConfig.ZoneOrder + 1
+	end
+	local function giveStamp(player: Player, station: Station)
+		local mine = stamps[player]
+		if mine == nil or mine[station.key] then
+			return
+		end
+		mine[station.key] = true
+		local list: { string } = {}
+		for key in mine do
+			table.insert(list, key)
+		end
+		setStamps(player, list)
+		publishStamps(player)
+		local reward = ActiveIncome.Value(folder, GameConfig.Monorail.StampMinutes * 60)
+		awardCoins(player, reward)
+		notify(
+			player,
+			"정거장 도장",
+			string.format(
+				"%s · %d/%d · +%d %s",
+				station.name,
+				#list,
+				stampTotal(),
+				reward,
+				GameConfig.CurrencyDisplayName
+			)
+		)
+		if #list >= stampTotal() then
+			grant(player, GameConfig.Monorail.StampTitle)
+		end
+	end
+	local function stampRiders(station: Station)
+		for _, seat in seats do
+			local occupant = seat.Occupant
+			local character = occupant and occupant.Parent
+			local player = character and Players:GetPlayerFromCharacter(character)
+			if player then
+				giveStamp(player, station)
+			end
+		end
+	end
+
+	local function onStampPlayer(player: Player)
+		task.spawn(function()
+			player:WaitForChild("leaderstats", 30)
+			if player.Parent == nil then
+				return
+			end
+			local set: { [string]: boolean } = {}
+			for _, key in getStamps(player) do
+				set[key] = true
+			end
+			stamps[player] = set
+			publishStamps(player)
+		end)
+	end
+	Players.PlayerAdded:Connect(onStampPlayer)
+	for _, player in Players:GetPlayers() do
+		onStampPlayer(player)
+	end
+	Players.PlayerRemoving:Connect(function(player: Player)
+		stamps[player] = nil
+	end)
 
 	local function groundNear(station: Station): Vector3
 		return station.kiosk.Position + Vector3.new(-3, 3.5, 0)
@@ -240,6 +326,7 @@ function MonorailService.Start(park: { ParkFolder: Folder })
 							(character :: Model):PivotTo(seat.CFrame + Vector3.new(0, 3, 0))
 							seat:Sit(humanoid)
 							MissionService.Report(player, "Monorail")
+							giveStamp(player, station)
 							break
 						end
 					end
@@ -298,6 +385,7 @@ function MonorailService.Start(park: { ParkFolder: Folder })
 			docked = true
 			dockUntil = now + settings.DockSeconds
 			folder:SetAttribute("MonorailAt", stations[index].key)
+			stampRiders(stations[index])
 			if index == 1 or index == #stations then
 				setDown(stations[index])
 			end

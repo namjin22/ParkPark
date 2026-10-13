@@ -127,7 +127,14 @@ cosmeticsService.Start(
 )
 dayNightService.Start(park, noticeService.Send)
 weatherService.Start(park, noticeService.Send)
-monorailService.Start(park)
+monorailService.Start(
+	park,
+	economyService.AwardCoins,
+	noticeService.Send,
+	persistenceService.GetStamps,
+	persistenceService.SetStamps,
+	cosmeticsService.Grant
+)
 featuredService.Start(park, noticeService.Send)
 bumperCarService.Start(park)
 teacupService.Start(park)

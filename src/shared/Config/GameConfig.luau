@@ -1823,6 +1823,15 @@ return {
 			BookOnly = true,
 		},
 		{
+			Id = "TitleTraveler",
+			Kind = "Title",
+			Name = "순례자",
+			Cost = 0,
+			Text = "순례자",
+			Color = Color3.fromRGB(140, 190, 240),
+			BookOnly = true,
+		},
+		{
 			Id = "TitleSupporter",
 			Kind = "Title",
 			Name = "후원자",
@@ -1856,7 +1865,7 @@ return {
 	-- Today's recommended ride (FeaturedService): one repaired attraction per day pays this much more.
 	Featured = { Bonus = 0.25 },
 	-- Monorail (MonorailService): a free elevated train between the park end and every open zone.
-	Monorail = { Speed = 90, DockSeconds = 9, Cars = 3 },
+	Monorail = { Speed = 90, DockSeconds = 9, Cars = 3, StampMinutes = 2, StampTitle = "TitleTraveler" },
 	-- Weather (WeatherService): a shower every IntervalMin..IntervalMax seconds while the park is open, a rainbow
 	-- after RainbowChance of them. IndoorRides are favoured (counted three times) by guests while it rains.
 	Weather = {
