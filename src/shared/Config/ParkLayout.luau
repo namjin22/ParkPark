@@ -76,6 +76,7 @@ ParkLayout.ZoneBranchZ = {
 	Neon = -3049,
 	TechFactory = -3164,
 	Ramen = -3164,
+	Balloon = -3164,
 	Seahorse = -2786,
 	Jelly = -2786,
 	Aquarium = -2901,
@@ -577,6 +578,12 @@ ParkLayout.Rides = {
 		Pivot = Vector3.new(110, 0, -3189),
 		PlatformRadius = 16,
 		QueueHead = Vector3.new(110, 0, -3179),
+		QueueDirection = Vector3.new(0, 0, 1),
+	},
+	Balloon = {
+		Pivot = Vector3.new(150, 0, -3219),
+		PlatformRadius = 26,
+		QueueHead = Vector3.new(150, 0, -3189),
 		QueueDirection = Vector3.new(0, 0, 1),
 	},
 	Ferris = {

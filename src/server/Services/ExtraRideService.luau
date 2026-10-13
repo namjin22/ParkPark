@@ -105,7 +105,7 @@ local function buildGraybox(key: string, spec: ExtraSpec): Model
 		)
 		collider.CFrame = CFrame.new(0, 1, 0) * CFrame.Angles(0, 0, math.pi / 2)
 		hide(collider)
-	elseif spec.Kind == "Bounce" then
+	elseif spec.Kind == "Bounce" or spec.Kind == "Lift" then
 		makePart(
 			model,
 			"Pad",
@@ -142,6 +142,18 @@ local function buildGraybox(key: string, spec: ExtraSpec): Model
 			nil
 		)
 		hide(collider)
+		if spec.Kind == "Lift" then
+			-- A tethered balloon above the pad; the seats and the balloon rise and sink together.
+			local balloon = makePart(
+				model,
+				"Balloon",
+				Vector3.new(11 * scale, 13 * scale, 11 * scale),
+				Vector3.new(0, 14 * scale, 0),
+				Color3.fromRGB(235, 122, 108),
+				Enum.PartType.Ball
+			)
+			balloon.CanCollide = false
+		end
 	elseif spec.Kind == "Shop" then
 		makePart(
 			model,
@@ -376,6 +388,30 @@ function ExtraRideService.Start(park: ParkBuilder.References)
 						frame = frame + hub.CFrame.UpVector * lift
 					end
 					seat.CFrame = frame
+				end
+			end)
+		elseif spec.Kind == "Lift" then
+			local rest: { CFrame } = {}
+			for _, seat in extra.Seats do
+				table.insert(rest, seat.CFrame)
+			end
+			local balloon = ride:FindFirstChild("Balloon", true)
+			local balloonRest = if balloon and balloon:IsA("BasePart") then balloon.CFrame else nil
+			local height = spec.BounceHeight or 24
+			local period = spec.BouncePeriod or 40
+			local clock = 0
+			RunService.Heartbeat:Connect(function(deltaTime: number)
+				if ride:GetAttribute("IsOperating") ~= true then
+					return
+				end
+				clock += math.min(deltaTime, MAX_STEP)
+				-- Up, a pause at the top and back down: a smooth cosine over one period.
+				local lift = (0.5 - 0.5 * math.cos(clock / period * 2 * math.pi)) * height
+				for index, seat in extra.Seats do
+					seat.CFrame = rest[index] + Vector3.new(0, lift, 0)
+				end
+				if balloon and balloon:IsA("BasePart") and balloonRest then
+					balloon.CFrame = balloonRest + Vector3.new(0, lift, 0)
 				end
 			end)
 		elseif spec.Kind == "Bounce" then

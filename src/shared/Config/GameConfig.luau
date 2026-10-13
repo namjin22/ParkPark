@@ -119,6 +119,7 @@ return {
 	TechFactoryScale = 2.2,
 	NeonSignScale = 2,
 	AntennaScale = 2,
+	BalloonRideScale = 2.2,
 	CrystalScale = 2,
 	PlanetScale = 2,
 	SledScale = 2.4,
@@ -1027,6 +1028,20 @@ return {
 			IncomeCosts = { 211000, 391000, 629000, 948000 },
 			StaffCosts = { 273000, 464000, 742000 },
 		},
+		Balloon = {
+			DisplayName = "열기구 전망대",
+			ModelName = "BalloonRide",
+			ConsoleName = "BalloonRideConsole",
+			UnlockCost = 483000,
+			RepairCost = 227000,
+			BaseFare = 5500,
+			Requires = "Ramen",
+			Zone = "Tech",
+			RideSeconds = 36,
+			IncomePerLevel = 1833,
+			IncomeCosts = { 214000, 396000, 638000, 961000 },
+			StaffCosts = { 277000, 471000, 753000 },
+		},
 		Noodle = {
 			DisplayName = "국수 가게",
 			ModelName = "NoodleShop",
@@ -1109,6 +1124,7 @@ return {
 		"Neon",
 		"TechFactory",
 		"Ramen",
+		"Balloon",
 	},
 	-- Zones beyond the first: what opening each costs (paid at its gate once the park's last attraction of the
 	-- previous zone is repaired) and how it is named.

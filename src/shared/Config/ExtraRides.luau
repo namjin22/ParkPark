@@ -8,6 +8,7 @@ local GameConfig = require(script.Parent:WaitForChild("GameConfig"))
 --   Spinner:  `Hub` turns and the `Seat1..N` parts spin on their own axes (like the teacups).
 --   Carousel: `Hub` turns and the `Seat1..N` parts bob up and down on their poles.
 --   Bounce:   the `Seat1..N` parts hop up and down in turn on a fixed pad.
+--   Lift:     the `Seat1..N` parts (and a `Balloon` part, if any) rise and sink together on a slow cosine.
 --   Hidden:   guests walk in and are out of sight for the tour (like the haunted house); `Seat1..N` are markers.
 --   Static:   guests stand in front of a fixed attraction (a stage); `Seat1..N` are ground markers.
 --   Shop:     a counter (`Counter` part) where the head guest is served, like the snack stand.
@@ -542,6 +543,16 @@ local ExtraRides: { [string]: ExtraSpec } = {
 		SeatCount = 1,
 		SeatLift = 0,
 		RiderHip = 0,
+	},
+	Balloon = {
+		Kind = "Lift",
+		Template = GameConfig.Rides.Balloon.ModelName,
+		Scale = GameConfig.BalloonRideScale,
+		SeatCount = 6,
+		SeatLift = 0,
+		RiderHip = 3.0,
+		BounceHeight = 26,
+		BouncePeriod = 40,
 	},
 	Maze = {
 		Kind = "Hidden",
