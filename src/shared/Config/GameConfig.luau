@@ -1846,8 +1846,38 @@ return {
 		{ Boarded = 2500, Reward = 48000 },
 		{ Boarded = 6000, Reward = 135000 },
 	} :: { { Boarded: number, Reward: number } },
-	-- Thrill-seeking guests (this share of arrivals) pick the rides below three times as often.
+	-- Guest types. Thrill-seekers (this share of arrivals) pick the rides below three times as often. Families arrive
+	-- as a group of two or three (the children are smaller), pick the same first ride and prefer FamilyRides; scenic
+	-- guests prefer ScenicRides. A preference counts a ride three times when one is chosen.
 	ThrillGuestChance = 0.3,
+	FamilyGroupChance = 0.15,
+	FamilyChildScale = 0.75,
+	ScenicGuestChance = 0.2,
+	FamilyRides = {
+		"Carousel",
+		"Teacups",
+		"Ferris",
+		"Swan",
+		"Duck",
+		"Bunny",
+		"Train",
+		"Bounce",
+		"BallPit",
+		"Reindeer",
+		"Penguin",
+		"Sled",
+		"Gummy",
+	} :: { string },
+	ScenicRides = {
+		"Ferris",
+		"Sky",
+		"Show",
+		"Swan",
+		"Moon",
+		"Rainbow",
+		"Castle",
+		"Cave",
+	} :: { string },
 	-- Now and then a VIP arrives: a golden glow and a label, leaving a tip of this many minutes of the ride's income.
 	VipGuestChance = 0.04,
 	VipTipMinutes = 1,

@@ -51,9 +51,14 @@ type GuestReferences = {
 	TrainCars: Model,
 }
 
+type Group = { ride: any, id: number }
+
 type Guest = {
 	joinedAt: number,
 	thrill: boolean,
+	kind: string,
+	prefers: { [string]: boolean }?,
+	group: Group?,
 	vip: boolean,
 	model: Model,
 	humanoid: Humanoid,
@@ -579,13 +584,22 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		thrillRides[key] = true
 	end
 
-	local function pickRide(previous: Ride?, thrill: boolean?): Ride?
+	local familyRides: { [string]: boolean } = {}
+	for _, key in GameConfig.FamilyRides do
+		familyRides[key] = true
+	end
+	local scenicRides: { [string]: boolean } = {}
+	for _, key in GameConfig.ScenicRides do
+		scenicRides[key] = true
+	end
+
+	local function pickRide(previous: Ride?, thrill: boolean?, prefers: { [string]: boolean }?): Ride?
 		local open: { Ride } = {}
 		for _, ride in rides do
 			if ride.model:GetAttribute("IsOperating") == true and #ride.queue < GameConfig.QueueMax then
 				table.insert(open, ride)
 				-- A thrill-seeker counts a thrill ride three times, so it is picked three times as often.
-				if thrill and thrillRides[ride.key] then
+				if (thrill and thrillRides[ride.key]) or (prefers and prefers[ride.key]) then
 					table.insert(open, ride)
 					table.insert(open, ride)
 				end
@@ -692,10 +706,25 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		local fromPosition = guest.root.Position
 
 		while guest.alive and guest.ridesTaken < GameConfig.GuestMaxRides do
-			local chosen = pickRide(previousRide, guest.thrill)
+			local chosen: Ride? = nil
+			local group = guest.group
+			if group and group.ride and guest.ridesTaken == 0 then
+				-- A family goes to the same first ride while it is running and has room.
+				local shared = group.ride :: Ride
+				if shared.model:GetAttribute("IsOperating") == true and #shared.queue < GameConfig.QueueMax then
+					chosen = shared
+				end
+			end
+			if chosen == nil then
+				chosen = pickRide(previousRide, guest.thrill, guest.prefers)
+			end
 			if chosen == nil then
 				break
 			end
+			if group and group.ride == nil then
+				group.ride = chosen
+			end
+			guest.model:SetAttribute("RideKey", chosen.key)
 
 			guest.ride = chosen
 			guest.arrived = false
@@ -741,7 +770,8 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 		end
 	end
 
-	local function spawnGuest()
+	local familyCount = 0
+	local function spawnGuest(family: Group?, child: boolean?)
 		local model = createGuestModel()
 		if model == nil then
 			return
@@ -771,7 +801,10 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			prompt = prompt,
 			lane = lane,
 			jitter = math.random(-25, 25) / 10,
-			thrill = math.random() < GameConfig.ThrillGuestChance,
+			thrill = family == nil and math.random() < GameConfig.ThrillGuestChance,
+			kind = "Normal",
+			prefers = nil,
+			group = family,
 			vip = math.random() < ((park.ParkFolder:GetAttribute("VipChance") :: number?) or GameConfig.VipGuestChance),
 			joinedAt = 0,
 			ridesTaken = 0,
@@ -781,6 +814,23 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			seat = nil,
 			alive = true,
 		}
+
+		if family then
+			guest.kind = if child then "Child" else "Family"
+			guest.prefers = familyRides
+		elseif guest.thrill then
+			guest.kind = "Thrill"
+		elseif math.random() < GameConfig.ScenicGuestChance then
+			guest.kind = "Scenic"
+			guest.prefers = scenicRides
+		end
+		model:SetAttribute("GuestType", guest.kind)
+		if family then
+			model:SetAttribute("FamilyId", family.id)
+		end
+		if child then
+			model:ScaleTo(GameConfig.FamilyChildScale)
+		end
 
 		prompt.Triggered:Connect(function(player: Player)
 			local current = guest.ride
@@ -898,7 +948,17 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			)
 			if park.ParkFolder:GetAttribute("ParkOpen") == true and guestCount < capacity then
 				if pickRide(nil) ~= nil then
-					spawnGuest()
+					if guestCount + 3 <= capacity and math.random() < GameConfig.FamilyGroupChance then
+						-- A family of two or three arrives together, a little apart so they do not stack up.
+						familyCount += 1
+						local group: Group = { ride = nil, id = familyCount }
+						for index = 1, math.random(2, 3) do
+							spawnGuest(group, index > 1)
+							task.wait(0.8)
+						end
+					else
+						spawnGuest(nil, false)
+					end
 				end
 			end
 			task.wait(math.max(GameConfig.GuestSpawnMinSeconds, GameConfig.GuestSpawnSeconds - 0.2 * operating))
