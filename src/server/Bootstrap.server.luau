@@ -43,6 +43,7 @@ local incomeService = require(script.Parent.Services.IncomeService)
 local missionService = require(script.Parent.Services.MissionService)
 local seasonService = require(script.Parent.Services.SeasonService)
 local vaultService = require(script.Parent.Services.VaultService)
+local landmarkService = require(script.Parent.Services.LandmarkService)
 local minigameService = require(script.Parent.Services.MinigameService)
 local gatherService = require(script.Parent.Services.GatherService)
 local fishingService = require(script.Parent.Services.FishingService)
@@ -166,6 +167,7 @@ vaultService.Start(
 	persistenceService.GetVault,
 	persistenceService.SetVault
 )
+landmarkService.Start(park, economyService.SpendCoins, noticeService.Send, parkBuilder.FindDecorTemplate)
 minigameService.Start(
 	park,
 	economyService.AwardCoins,
@@ -234,6 +236,9 @@ persistenceService.Start(function()
 		Mechanics = (park.ParkFolder:GetAttribute("Mechanics") :: number?) or 0,
 		PlotsBought = (park.ParkFolder:GetAttribute("PlotsBought") :: number?) or 0,
 	}
+	for key in gameConfig.Landmarks do
+		parkState["Landmark_" .. key] = (park.ParkFolder:GetAttribute("Landmark_" .. key) :: number?) or 0
+	end
 	for zone in gameConfig.ZoneCosts do
 		parkState["Zone_" .. zone] = park.ParkFolder:GetAttribute("Zone_" .. zone) == true
 	end

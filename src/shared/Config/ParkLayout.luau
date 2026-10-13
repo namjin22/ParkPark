@@ -127,6 +127,13 @@ ParkLayout.MinigameBooths = {
 } :: { { Key: string, Position: Vector3, Facing: Vector3 } }
 -- The coin vault on the west side of the plaza.
 ParkLayout.VaultPosition = Vector3.new(-62, 0, 36)
+-- Landmark buildings (GameConfig.Landmarks): the ticket booth beside the gate, the sponsor board across from it, and
+-- the VIP lounge mirroring the vault on the east side of the plaza. `Facing` is the direction the front looks.
+ParkLayout.Landmarks = {
+	Ticket = { Position = Vector3.new(-16, 0, 33), Facing = Vector3.new(1, 0, 0) },
+	Sponsor = { Position = Vector3.new(18, 0, 37), Facing = Vector3.new(-1, 0, 0) },
+	Lounge = { Position = Vector3.new(62, 0, 36), Facing = Vector3.new(-1, 0, 0) },
+} :: { [string]: { Position: Vector3, Facing: Vector3 } }
 -- The delivery desk on the plaza.
 ParkLayout.DeliveryDeskPosition = Vector3.new(-26, 0, 94)
 ParkLayout.JanitorCartPosition = Vector3.new(-24, 0, 52)

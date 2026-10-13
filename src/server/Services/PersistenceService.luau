@@ -212,6 +212,9 @@ local function sanitizePark(raw: any): SavedState?
 		Rides = {},
 		Janitors = asNumber(raw.Janitors, 0, #GameConfig.JanitorCosts, 0),
 	}
+	for key, landmark in GameConfig.Landmarks do
+		state.Park["Landmark_" .. key] = asNumber(parkRaw["Landmark_" .. key], 0, #landmark.Costs, 0)
+	end
 	for zone in GameConfig.ZoneCosts do
 		state.Park["Zone_" .. zone] = parkRaw["Zone_" .. zone] == true
 	end

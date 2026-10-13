@@ -1075,6 +1075,14 @@ return {
 	-- Plaza minigame booths (MinigameService): `Tries` rolls at `HitChance` each paying `SecondsPerHit` of the park's
 	-- income (plus `BaseSeconds`), or a weighted `Draw`. A booth has its own cooldown, every play a short global one,
 	-- and the hourly cap keeps the total a small side income.
+	-- Permanent plaza buildings bought with coins in two tiers (hold E). Each adds its tier's share to every ride's
+	-- income; all three at tier 2 add 15%. `Zone` is the zone that must be open (nil = the park only has to be open).
+	LandmarkOrder = { "Ticket", "Sponsor", "Lounge" } :: { string },
+	Landmarks = {
+		Ticket = { Name = "매표소", Costs = { 10000, 60000 }, Bonus = { 0.03, 0.06 } },
+		Sponsor = { Name = "후원사 간판", Costs = { 16000, 100000 }, Bonus = { 0.02, 0.04 }, Zone = "Water" },
+		Lounge = { Name = "VIP 라운지", Costs = { 30000, 180000 }, Bonus = { 0.03, 0.05 }, Zone = "Kids" },
+	} :: { [string]: { Name: string, Costs: { number }, Bonus: { number }, Zone: string? } },
 	MinigameSettings = { GlobalCooldownSeconds = 6, WindowSeconds = 3600, MaxPlaysPerWindow = 40 },
 	Minigames = {
 		Ring = {
