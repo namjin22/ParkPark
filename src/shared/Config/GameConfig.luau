@@ -1074,9 +1074,6 @@ return {
 		},
 	} :: { [string]: { { Text: string, Goal: number, Minutes: number } } },
 
-	-- Plaza minigame booths (MinigameService): `Tries` rolls at `HitChance` each paying `SecondsPerHit` of the park's
-	-- income (plus `BaseSeconds`), or a weighted `Draw`. A booth has its own cooldown, every play a short global one,
-	-- and the hourly cap keeps the total a small side income.
 	-- The collection book: every area has one kind of pickup (GatherService); a page is full after PageTarget pickups
 	-- and pays PageMinutes of the park's income once. All pages full gives the title TitleId.
 	Book = { PageTarget = 20, PageMinutes = 5, TitleId = "TitleCollector" },
@@ -1115,6 +1112,31 @@ return {
 		Sponsor = { Name = "후원사 간판", Costs = { 16000, 100000 }, Bonus = { 0.02, 0.04 }, Zone = "Water" },
 		Lounge = { Name = "VIP 라운지", Costs = { 30000, 180000 }, Bonus = { 0.03, 0.05 }, Zone = "Kids" },
 	} :: { [string]: { Name: string, Costs: { number }, Bonus: { number }, Zone: string? } },
+	-- Weekly goals (WeeklyService): one per activity, the tier drawn from the week number; the reward is `Minutes` of the
+	-- park's income. Counts are saved for the week, the progress of the daily missions is not.
+	WeeklyOrder = { "Gather", "Fish", "Deliver", "Play" } :: { string },
+	Weekly = {
+		Gather = {
+			{ Text = "이번 주 물건 60개 줍기", Goal = 60, Minutes = 20 },
+			{ Text = "이번 주 물건 120개 줍기", Goal = 120, Minutes = 40 },
+		},
+		Fish = {
+			{ Text = "이번 주 낚시 20번 하기", Goal = 20, Minutes = 20 },
+			{ Text = "이번 주 낚시 40번 하기", Goal = 40, Minutes = 40 },
+		},
+		Deliver = {
+			{ Text = "이번 주 배달 12번 하기", Goal = 12, Minutes = 25 },
+			{ Text = "이번 주 배달 24번 하기", Goal = 24, Minutes = 45 },
+		},
+		Play = {
+			{ Text = "이번 주 부스 30번 하기", Goal = 30, Minutes = 20 },
+			{ Text = "이번 주 부스 60번 하기", Goal = 60, Minutes = 35 },
+		},
+	} :: { [string]: { { Text: string, Goal: number, Minutes: number } } },
+
+	-- Plaza minigame booths (MinigameService): `Tries` rolls at `HitChance` each paying `SecondsPerHit` of the park's
+	-- income (plus `BaseSeconds`), or a weighted `Draw`. A booth has its own cooldown, every play a short global one,
+	-- and the hourly cap keeps the total a small side income.
 	MinigameSettings = { GlobalCooldownSeconds = 6, WindowSeconds = 3600, MaxPlaysPerWindow = 40 },
 	Minigames = {
 		Ring = {

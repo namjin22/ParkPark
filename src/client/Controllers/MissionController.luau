@@ -103,11 +103,39 @@ function MissionController.Start()
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.Parent = panel
 
-	local rows: { TextLabel } = {}
-	for index = 1, 3 do
+	local list = Instance.new("ScrollingFrame")
+	list.Size = UDim2.new(1, 0, 0, 280)
+	list.LayoutOrder = 1
+	list.BackgroundTransparency = 1
+	list.BorderSizePixel = 0
+	list.ScrollBarThickness = 4
+	list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	list.CanvasSize = UDim2.new()
+	list.Parent = panel
+	local listLayout = Instance.new("UIListLayout")
+	listLayout.Padding = UDim.new(0, 6)
+	listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	listLayout.Parent = list
+	local function fitList()
+		local camera = Workspace.CurrentCamera
+		if camera == nil then
+			return
+		end
+		local view = camera.ViewportSize
+		local portrait = view.X < 550 and view.Y > view.X
+		local room = if portrait then view.Y * 0.5 - 40 else view.Y - 198 - 60
+		list.Size = UDim2.new(1, 0, 0, math.clamp(room, 110, 280))
+	end
+	fitList()
+	local fitCamera = Workspace.CurrentCamera
+	if fitCamera then
+		fitCamera:GetPropertyChangedSignal("ViewportSize"):Connect(fitList)
+	end
+
+	local function makeRow(order: number): TextLabel
 		local row = Instance.new("TextLabel")
-		row.Size = UDim2.new(1, 0, 0, 38)
-		row.LayoutOrder = index
+		row.Size = UDim2.new(1, -8, 0, 38)
+		row.LayoutOrder = order
 		row.BackgroundColor3 = UITheme.Button
 		row.BorderSizePixel = 0
 		row.Font = Enum.Font.GothamMedium
@@ -115,30 +143,60 @@ function MissionController.Start()
 		row.TextColor3 = UITheme.Text
 		row.TextXAlignment = Enum.TextXAlignment.Left
 		row.Text = ""
-		row.Parent = panel
+		row.Parent = list
 		addCorner(row, 8)
 		local rowPadding = Instance.new("UIPadding")
 		rowPadding.PaddingLeft = UDim.new(0, 8)
 		rowPadding.PaddingRight = UDim.new(0, 8)
 		rowPadding.Parent = row
-		rows[index] = row
+		return row
 	end
 
-	local function refresh()
-		for index, row in rows do
-			local raw = player:GetAttribute("Mission" .. index)
-			if type(raw) == "string" then
-				local text, shown, goal, reward, done = string.match(raw, "^(.-)|(%d+)|(%d+)|(%d+)|(%d)$")
-				if text and shown and goal and reward then
-					local state = if done == "1" then "완료" else string.format("%s/%s", shown, goal)
-					row.Text = string.format("%s\n%s · +%s %s", text, state, reward, GameConfig.CurrencyDisplayName)
-					row.BackgroundColor3 = if done == "1" then UITheme.ButtonOn else UITheme.Button
-				end
-			end
+	local DAILY = 3
+	local WEEKLY = #GameConfig.WeeklyOrder
+	local dailyRows: { TextLabel } = {}
+	for index = 1, DAILY do
+		dailyRows[index] = makeRow(index)
+	end
+	local weeklyHeader = Instance.new("TextLabel")
+	weeklyHeader.Size = UDim2.new(1, -8, 0, 20)
+	weeklyHeader.LayoutOrder = 10
+	weeklyHeader.BackgroundTransparency = 1
+	weeklyHeader.Font = Enum.Font.GothamBold
+	weeklyHeader.Text = "이번 주 목표"
+	weeklyHeader.TextColor3 = UITheme.Muted
+	weeklyHeader.TextSize = 14
+	weeklyHeader.TextXAlignment = Enum.TextXAlignment.Left
+	weeklyHeader.Parent = list
+	local weeklyRows: { TextLabel } = {}
+	for index = 1, WEEKLY do
+		weeklyRows[index] = makeRow(10 + index)
+	end
+
+	local function show(row: TextLabel, raw: unknown)
+		if type(raw) ~= "string" then
+			return
+		end
+		local text, shown, goal, reward, done = string.match(raw, "^(.-)|(%d+)|(%d+)|(%d+)|(%d)$")
+		if text and shown and goal and reward then
+			local state = if done == "1" then "완료" else string.format("%s/%s", shown, goal)
+			row.Text = string.format("%s\n%s · +%s %s", text, state, reward, GameConfig.CurrencyDisplayName)
+			row.BackgroundColor3 = if done == "1" then UITheme.ButtonOn else UITheme.Button
 		end
 	end
-	for index = 1, 3 do
+	local function refresh()
+		for index, row in dailyRows do
+			show(row, player:GetAttribute("Mission" .. index))
+		end
+		for index, row in weeklyRows do
+			show(row, player:GetAttribute("Weekly" .. index))
+		end
+	end
+	for index = 1, DAILY do
 		player:GetAttributeChangedSignal("Mission" .. index):Connect(refresh)
+	end
+	for index = 1, WEEKLY do
+		player:GetAttributeChangedSignal("Weekly" .. index):Connect(refresh)
 	end
 	refresh()
 

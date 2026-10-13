@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ActiveIncome = require(script.Parent.ActiveIncome)
+local MissionService = require(script.Parent.MissionService)
 local Config = ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config")
 local GameConfig = require(Config:WaitForChild("GameConfig"))
 local ParkLayout = require(Config:WaitForChild("ParkLayout"))
@@ -129,6 +130,7 @@ function MinigameService.Start(
 			seconds = hits * def.SecondsPerHit + def.BaseSeconds
 			summary = string.format("%d/%d", hits, def.Tries)
 		end
+		MissionService.Report(player, "Play")
 		local amount = if seconds > 0 then ActiveIncome.Value(folder, seconds) else 0
 		if amount > 0 then
 			awardCoins(player, amount)

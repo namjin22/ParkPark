@@ -116,6 +116,21 @@ function BookController.Start()
 	listLayout.Padding = UDim.new(0, 4)
 	listLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	listLayout.Parent = list
+	local function fitList()
+		local camera = Workspace.CurrentCamera
+		if camera == nil then
+			return
+		end
+		local view = camera.ViewportSize
+		local portrait = view.X < 550 and view.Y > view.X
+		local room = if portrait then view.Y * 0.5 - 40 else view.Y - 198 - 60
+		list.Size = UDim2.new(1, 0, 0, math.clamp(room, 110, 260))
+	end
+	fitList()
+	local fitCamera = Workspace.CurrentCamera
+	if fitCamera then
+		fitCamera:GetPropertyChangedSignal("ViewportSize"):Connect(fitList)
+	end
 
 	local rows: { [string]: TextLabel } = {}
 	local function rowFor(key: string, order: number): TextLabel

@@ -49,6 +49,9 @@ type Profile = {
 	streak: number,
 	missionDay: number,
 	missionDone: number,
+	weekId: number,
+	weekDone: number,
+	weekCounts: { [string]: number },
 	lastSeen: number,
 	vault: number,
 	book: { [string]: number },
@@ -265,6 +268,9 @@ local function loadProfile(player: Player): Profile
 		streak = 0,
 		missionDay = 0,
 		missionDone = 0,
+		weekId = 0,
+		weekDone = 0,
+		weekCounts = {},
 		lastSeen = 0,
 		vault = 0,
 		book = {},
@@ -361,6 +367,12 @@ local function loadProfile(player: Player): Profile
 		profile.book[key] = asNumber(bookRaw[key], 0, GameConfig.Book.PageTarget, 0)
 	end
 	profile.missionDone = asNumber(data.MissionDone, 0, 7, 0)
+	profile.weekId = asNumber(data.WeekId, 0, 1e6, 0)
+	profile.weekDone = asNumber(data.WeekDone, 0, 15, 0)
+	local weekRaw = if type(data.WeekCounts) == "table" then data.WeekCounts else {}
+	for _, kind in GameConfig.WeeklyOrder do
+		profile.weekCounts[kind] = asNumber(weekRaw[kind], 0, 100000, 0)
+	end
 	profile.streak = asNumber(data.Streak, 0, #GameConfig.DailyStreakMultipliers, 0)
 	local known: { [string]: boolean } = {}
 	for _, item in GameConfig.Cosmetics do
@@ -422,6 +434,9 @@ local function saveProfile(profile: Profile, release: boolean): boolean
 			record.Vault = profile.vault
 			record.Book = profile.book
 			record.MissionDone = profile.missionDone
+			record.WeekId = profile.weekId
+			record.WeekDone = profile.weekDone
+			record.WeekCounts = profile.weekCounts
 			record.Streak = profile.streak
 			record.Cosmetics = profile.cosmetics
 			record.Trail = profile.trail
@@ -557,6 +572,26 @@ function PersistenceService.SetMissions(player: Player, day: number, mask: numbe
 		profile.missionDone = mask
 		profile.dirty = true
 		profile.urgent = true
+	end
+end
+
+-- Weekly goals: the week number, the bitmask of finished goals and the counts for the week.
+function PersistenceService.GetWeekly(player: Player): (number, number, { [string]: number })
+	local profile = profiles[player]
+	if profile and profile.status == "ok" then
+		return profile.weekId, profile.weekDone, table.clone(profile.weekCounts)
+	end
+	-- Not loaded (or the load failed): report every goal done so nothing is paid and nothing is overwritten.
+	return os.time() // 604800, 15, {}
+end
+
+function PersistenceService.SetWeekly(player: Player, week: number, mask: number, counts: { [string]: number })
+	local profile = profiles[player]
+	if profile and profile.status == "ok" then
+		profile.weekId = week
+		profile.weekDone = mask
+		profile.weekCounts = table.clone(counts)
+		profile.dirty = true
 	end
 end
 
