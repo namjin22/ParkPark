@@ -51,6 +51,7 @@ type Profile = {
 	missionDone: number,
 	lastSeen: number,
 	vault: number,
+	book: { [string]: number },
 	cosmetics: { string },
 	trail: string,
 	title: string,
@@ -266,6 +267,7 @@ local function loadProfile(player: Player): Profile
 		missionDone = 0,
 		lastSeen = 0,
 		vault = 0,
+		book = {},
 		cosmetics = {},
 		trail = "",
 		title = "",
@@ -354,6 +356,10 @@ local function loadProfile(player: Player): Profile
 	profile.missionDay = asNumber(data.MissionDay, 0, 1e6, 0)
 	profile.lastSeen = asNumber(data.LastSeen, 0, 4e9, 0)
 	profile.vault = asNumber(data.Vault, 0, 1e12, 0)
+	local bookRaw = if type(data.Book) == "table" then data.Book else {}
+	for _, key in GameConfig.GatherOrder do
+		profile.book[key] = asNumber(bookRaw[key], 0, GameConfig.Book.PageTarget, 0)
+	end
 	profile.missionDone = asNumber(data.MissionDone, 0, 7, 0)
 	profile.streak = asNumber(data.Streak, 0, #GameConfig.DailyStreakMultipliers, 0)
 	local known: { [string]: boolean } = {}
@@ -414,6 +420,7 @@ local function saveProfile(profile: Profile, release: boolean): boolean
 			record.MissionDay = profile.missionDay
 			record.LastSeen = os.time()
 			record.Vault = profile.vault
+			record.Book = profile.book
 			record.MissionDone = profile.missionDone
 			record.Streak = profile.streak
 			record.Cosmetics = profile.cosmetics
@@ -490,6 +497,25 @@ function PersistenceService.SetDaily(player: Player, day: number, streak: number
 		profile.streak = streak
 		profile.dirty = true
 		profile.urgent = true
+	end
+end
+
+-- The collection book: pickups counted per area (capped at the page target).
+function PersistenceService.GetBook(player: Player): { [string]: number }
+	local profile = profiles[player]
+	if profile and profile.status == "ok" then
+		return profile.book
+	end
+	return {}
+end
+
+function PersistenceService.SetBook(player: Player, book: { [string]: number })
+	local profile = profiles[player]
+	if profile and profile.status == "ok" then
+		for key, count in book do
+			profile.book[key] = count
+		end
+		profile.dirty = true
 	end
 end
 

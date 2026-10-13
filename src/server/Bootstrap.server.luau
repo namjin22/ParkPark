@@ -41,6 +41,7 @@ local desertService = require(script.Parent.Services.DesertService)
 local cloudService = require(script.Parent.Services.CloudService)
 local incomeService = require(script.Parent.Services.IncomeService)
 local missionService = require(script.Parent.Services.MissionService)
+local bookService = require(script.Parent.Services.BookService)
 local seasonService = require(script.Parent.Services.SeasonService)
 local vaultService = require(script.Parent.Services.VaultService)
 local landmarkService = require(script.Parent.Services.LandmarkService)
@@ -155,6 +156,14 @@ missionService.Start(
 	noticeService.Send,
 	persistenceService.GetMissions,
 	persistenceService.SetMissions
+)
+bookService.Start(
+	park,
+	economyService.AwardCoins,
+	noticeService.Send,
+	persistenceService.GetBook,
+	persistenceService.SetBook,
+	cosmeticsService.Grant
 )
 gatherService.Start(park, economyService.AwardCoins, noticeService.Popup)
 seasonService.Start(park, noticeService.Send, parkBuilder.FindDecorTemplate)

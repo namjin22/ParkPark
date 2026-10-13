@@ -3,6 +3,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ActiveIncome = require(script.Parent.ActiveIncome)
+local BookService = require(script.Parent.BookService)
 local MissionService = require(script.Parent.MissionService)
 local Config = ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config")
 local GameConfig = require(Config:WaitForChild("GameConfig"))
@@ -30,8 +31,8 @@ local function areas(): { Area }
 	local list: { Area } = {
 		{
 			key = "Entrance",
-			label = "클로버",
-			color = Color3.fromRGB(120, 210, 130),
+			label = GameConfig.GatherKinds.Entrance.Label,
+			color = GameConfig.GatherKinds.Entrance.Color,
 			minZ = -80,
 			maxZ = 56,
 			x = function(random: Random)
@@ -42,26 +43,14 @@ local function areas(): { Area }
 			end,
 		},
 	}
-	local zoneLabels: { [string]: { string | Color3 } } = {
-		Water = { "조개껍데기", Color3.fromRGB(255, 190, 170) },
-		Kids = { "장난감 블록", Color3.fromRGB(255, 120, 120) },
-		Adventure = { "솔방울", Color3.fromRGB(190, 140, 90) },
-		Winter = { "눈 결정", Color3.fromRGB(190, 230, 255) },
-		Space = { "별 조각", Color3.fromRGB(190, 160, 255) },
-		Cove = { "금화", Color3.fromRGB(255, 215, 100) },
-		Candy = { "알사탕", Color3.fromRGB(255, 130, 190) },
-		Jungle = { "바나나", Color3.fromRGB(255, 224, 90) },
-		Desert = { "선인장 열매", Color3.fromRGB(255, 150, 90) },
-		Cloud = { "구름 조각", Color3.fromRGB(190, 215, 255) },
-	}
 	for _, zone in GameConfig.ZoneOrder do
 		local bounds = ParkLayout.ZoneBounds[zone]
-		local style = zoneLabels[zone]
+		local style = GameConfig.GatherKinds[zone]
 		if bounds and style then
 			table.insert(list, {
 				key = zone,
-				label = style[1] :: string,
-				color = style[2] :: Color3,
+				label = style.Label,
+				color = style.Color,
 				minZ = bounds.MinZ + 30,
 				maxZ = bounds.BoundaryZ - 30,
 				x = function(random: Random)
@@ -143,6 +132,7 @@ function GatherService.Start(park: { ParkFolder: Folder }, awardCoins: AwardCoin
 					local amount = ActiveIncome.Value(folder, GameConfig.Active.GatherSeconds)
 					awardCoins(player, amount)
 					MissionService.Report(player, "Gather")
+					BookService.Record(player, area.key)
 					popup(Vector3.new(x, 4, z), string.format("%s +%d", area.label, amount))
 					task.delay(GameConfig.Active.GatherRespawnSeconds, function()
 						if folder.Parent ~= nil then

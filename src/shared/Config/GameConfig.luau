@@ -10,6 +10,8 @@ export type Cosmetic = {
 	Text: string?,
 	PassOnly: boolean?,
 	Season: string?,
+	-- Only given by the collection book (cannot be bought).
+	BookOnly: boolean?,
 }
 
 export type RideEconomy = {
@@ -1075,6 +1077,36 @@ return {
 	-- Plaza minigame booths (MinigameService): `Tries` rolls at `HitChance` each paying `SecondsPerHit` of the park's
 	-- income (plus `BaseSeconds`), or a weighted `Draw`. A booth has its own cooldown, every play a short global one,
 	-- and the hourly cap keeps the total a small side income.
+	-- The collection book: every area has one kind of pickup (GatherService); a page is full after PageTarget pickups
+	-- and pays PageMinutes of the park's income once. All pages full gives the title TitleId.
+	Book = { PageTarget = 20, PageMinutes = 5, TitleId = "TitleCollector" },
+	GatherOrder = {
+		"Entrance",
+		"Water",
+		"Kids",
+		"Adventure",
+		"Winter",
+		"Space",
+		"Cove",
+		"Candy",
+		"Jungle",
+		"Desert",
+		"Cloud",
+	} :: { string },
+	GatherKinds = {
+		Entrance = { Label = "클로버", Color = Color3.fromRGB(120, 210, 130) },
+		Water = { Label = "조개껍데기", Color = Color3.fromRGB(255, 190, 170) },
+		Kids = { Label = "장난감 블록", Color = Color3.fromRGB(255, 120, 120) },
+		Adventure = { Label = "솔방울", Color = Color3.fromRGB(190, 140, 90) },
+		Winter = { Label = "눈 결정", Color = Color3.fromRGB(190, 230, 255) },
+		Space = { Label = "별 조각", Color = Color3.fromRGB(190, 160, 255) },
+		Cove = { Label = "금화", Color = Color3.fromRGB(255, 215, 100) },
+		Candy = { Label = "알사탕", Color = Color3.fromRGB(255, 130, 190) },
+		Jungle = { Label = "바나나", Color = Color3.fromRGB(255, 224, 90) },
+		Desert = { Label = "선인장 열매", Color = Color3.fromRGB(255, 150, 90) },
+		Cloud = { Label = "구름 조각", Color = Color3.fromRGB(190, 215, 255) },
+	} :: { [string]: { Label: string, Color: Color3 } },
+
 	-- Permanent plaza buildings bought with coins in two tiers (hold E). Each adds its tier's share to every ride's
 	-- income; all three at tier 2 add 15%. `Zone` is the zone that must be open (nil = the park only has to be open).
 	LandmarkOrder = { "Ticket", "Sponsor", "Lounge" } :: { string },
@@ -1685,6 +1717,15 @@ return {
 			Text = "산타 도우미",
 			Color = Color3.fromRGB(230, 90, 80),
 			Season = "Winter",
+		},
+		{
+			Id = "TitleCollector",
+			Kind = "Title",
+			Name = "도감 박사",
+			Cost = 0,
+			Text = "도감 박사",
+			Color = Color3.fromRGB(120, 200, 240),
+			BookOnly = true,
 		},
 		{
 			Id = "TitleSupporter",

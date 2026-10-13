@@ -142,8 +142,15 @@ function MissionController.Start()
 	end
 	refresh()
 
+	-- Only one of the side panels (missions, book) is open at a time.
+	playerGui:GetAttributeChangedSignal("OpenPanel"):Connect(function()
+		if playerGui:GetAttribute("OpenPanel") ~= "Missions" then
+			panel.Visible = false
+		end
+	end)
 	toggle.Activated:Connect(function()
 		panel.Visible = not panel.Visible
+		playerGui:SetAttribute("OpenPanel", if panel.Visible then "Missions" else "")
 	end)
 end
 

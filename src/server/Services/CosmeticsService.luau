@@ -12,6 +12,7 @@ local GameConfig =
 -- Ownership and the equipped items are saved with the player; the server publishes them as player attributes
 -- (`Owned` = comma-separated ids, `Trail`, `Title`) for the client panel and applies them to the character.
 local CosmeticsService = {}
+local grantImpl: ((Player, string) -> boolean)? = nil
 
 type Equipped = { Trail: string?, Title: string? }
 type GetState = (Player) -> ({ string }, Equipped)
@@ -31,6 +32,14 @@ local function ownsPass(player: Player): boolean
 		return MarketplaceService:UserOwnsGamePassAsync(player.UserId, passId)
 	end)
 	return ok and owned == true
+end
+
+-- Gives an item without a purchase (collection book titles). Returns whether the player now owns it.
+function CosmeticsService.Grant(player: Player, id: string): boolean
+	if grantImpl then
+		return grantImpl(player, id)
+	end
+	return false
 end
 
 function CosmeticsService.Start(
@@ -155,6 +164,21 @@ function CosmeticsService.Start(
 		setState(player, ownedList(player), equipped[player] or ({} :: Equipped))
 	end
 
+	grantImpl = function(player: Player, id: string): boolean
+		local item = itemsById[id]
+		if item == nil or item.PassOnly or owned[player] == nil or equipped[player] == nil then
+			return false
+		end
+		if owned[player][id] then
+			return true
+		end
+		owned[player][id] = true
+		publish(player)
+		persist(player)
+		notify(player, item.Name, "도감을 완성해 이름표를 받았어요")
+		return true
+	end
+
 	local function onPlayer(player: Player)
 		task.spawn(function()
 			-- The saved state is loaded before leaderstats appears.
@@ -213,7 +237,7 @@ function CosmeticsService.Start(
 		local state = equipped[player]
 		local slot = if item.Kind == "Trail" then "Trail" else "Title"
 		if action == "Buy" then
-			if item.PassOnly or has(player, id) then
+			if item.PassOnly or item.BookOnly or has(player, id) then
 				return
 			end
 			if item.Season then
