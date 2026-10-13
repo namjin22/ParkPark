@@ -52,6 +52,8 @@ type Profile = {
 	weekId: number,
 	weekDone: number,
 	weekCounts: { [string]: number },
+	stats: { [string]: number },
+	achievements: { string },
 	lastSeen: number,
 	vault: number,
 	book: { [string]: number },
@@ -271,6 +273,8 @@ local function loadProfile(player: Player): Profile
 		weekId = 0,
 		weekDone = 0,
 		weekCounts = {},
+		stats = {},
+		achievements = {},
 		lastSeen = 0,
 		vault = 0,
 		book = {},
@@ -373,6 +377,20 @@ local function loadProfile(player: Player): Profile
 	for _, kind in GameConfig.WeeklyOrder do
 		profile.weekCounts[kind] = asNumber(weekRaw[kind], 0, 100000, 0)
 	end
+	local statsRaw = if type(data.Stats) == "table" then data.Stats else {}
+	for _, kind in GameConfig.StatKinds do
+		profile.stats[kind] = asNumber(statsRaw[kind], 0, 1e7, 0)
+	end
+	local achRaw = if type(data.Achievements) == "table" then data.Achievements else {}
+	local knownAch: { [string]: boolean } = {}
+	for _, def in GameConfig.Achievements do
+		knownAch[def.Id] = true
+	end
+	for _, id in achRaw do
+		if type(id) == "string" and knownAch[id] then
+			table.insert(profile.achievements, id)
+		end
+	end
 	profile.streak = asNumber(data.Streak, 0, #GameConfig.DailyStreakMultipliers, 0)
 	local known: { [string]: boolean } = {}
 	for _, item in GameConfig.Cosmetics do
@@ -437,6 +455,8 @@ local function saveProfile(profile: Profile, release: boolean): boolean
 			record.WeekId = profile.weekId
 			record.WeekDone = profile.weekDone
 			record.WeekCounts = profile.weekCounts
+			record.Stats = profile.stats
+			record.Achievements = profile.achievements
 			record.Streak = profile.streak
 			record.Cosmetics = profile.cosmetics
 			record.Trail = profile.trail
@@ -591,6 +611,29 @@ function PersistenceService.SetWeekly(player: Player, week: number, mask: number
 		profile.weekId = week
 		profile.weekDone = mask
 		profile.weekCounts = table.clone(counts)
+		profile.dirty = true
+	end
+end
+
+-- Achievements: lifetime counters and the ids already paid.
+function PersistenceService.GetAchievements(player: Player): ({ [string]: number }, { string })
+	local profile = profiles[player]
+	if profile and profile.status == "ok" then
+		return table.clone(profile.stats), table.clone(profile.achievements)
+	end
+	-- Not loaded (or the load failed): everything counts as paid so nothing is granted or overwritten.
+	local all = {}
+	for _, def in GameConfig.Achievements do
+		table.insert(all, def.Id)
+	end
+	return {}, all
+end
+
+function PersistenceService.SetAchievements(player: Player, stats: { [string]: number }, ids: { string })
+	local profile = profiles[player]
+	if profile and profile.status == "ok" then
+		profile.stats = table.clone(stats)
+		profile.achievements = table.clone(ids)
 		profile.dirty = true
 	end
 end

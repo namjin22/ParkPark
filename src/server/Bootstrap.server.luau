@@ -43,6 +43,7 @@ local incomeService = require(script.Parent.Services.IncomeService)
 local missionService = require(script.Parent.Services.MissionService)
 local bookService = require(script.Parent.Services.BookService)
 local weeklyService = require(script.Parent.Services.WeeklyService)
+local achievementService = require(script.Parent.Services.AchievementService)
 local seasonService = require(script.Parent.Services.SeasonService)
 local vaultService = require(script.Parent.Services.VaultService)
 local landmarkService = require(script.Parent.Services.LandmarkService)
@@ -151,6 +152,14 @@ trackService.Start({
 })
 dropService.Start(park)
 decorService.Start(park, parkBuilder.FindDecorTemplate)
+achievementService.Start(
+	park,
+	economyService.AwardCoins,
+	noticeService.Send,
+	persistenceService.GetAchievements,
+	persistenceService.SetAchievements,
+	cosmeticsService.Grant
+)
 weeklyService.Start(
 	park,
 	economyService.AwardCoins,

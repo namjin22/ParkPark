@@ -10,7 +10,7 @@ export type Cosmetic = {
 	Text: string?,
 	PassOnly: boolean?,
 	Season: string?,
-	-- Only given by the collection book (cannot be bought).
+	-- Only given as a reward (collection book, achievements); cannot be bought.
 	BookOnly: boolean?,
 }
 
@@ -1074,6 +1074,49 @@ return {
 		},
 	} :: { [string]: { { Text: string, Goal: number, Minutes: number } } },
 
+	-- Achievements (AchievementService): `Kind` is a lifetime counter (Gather, Fish, Deliver, Play) or a park
+	-- milestone (Rides repaired, Zones open, Boarded guests, Landmarks tiers, Plots bought); `Target` -1 means every
+	-- ride or zone. Paid once with `Minutes` of the park's income; `Title` is a reward-only title.
+	StatKinds = { "Gather", "Fish", "Deliver", "Play" } :: { string },
+	Achievements = {
+		{ Id = "GatherFirst", Name = "첫 줍기", Kind = "Gather", Target = 1, Minutes = 2 },
+		{ Id = "Gather100", Name = "수집가", Kind = "Gather", Target = 100, Minutes = 10 },
+		{ Id = "Gather500", Name = "수집왕", Kind = "Gather", Target = 500, Minutes = 30 },
+		{ Id = "FishFirst", Name = "첫 낚시", Kind = "Fish", Target = 1, Minutes = 2 },
+		{ Id = "Fish50", Name = "낚시꾼", Kind = "Fish", Target = 50, Minutes = 10 },
+		{ Id = "Fish200", Name = "낚시 달인", Kind = "Fish", Target = 200, Minutes = 30, Title = "TitleFisher" },
+		{ Id = "DeliverFirst", Name = "첫 배달", Kind = "Deliver", Target = 1, Minutes = 2 },
+		{ Id = "Deliver50", Name = "배달 50번", Kind = "Deliver", Target = 50, Minutes = 15 },
+		{
+			Id = "Deliver200",
+			Name = "배달 명인",
+			Kind = "Deliver",
+			Target = 200,
+			Minutes = 40,
+			Title = "TitleCourier",
+		},
+		{ Id = "PlayFirst", Name = "첫 도전", Kind = "Play", Target = 1, Minutes = 2 },
+		{ Id = "Play50", Name = "부스 단골", Kind = "Play", Target = 50, Minutes = 15 },
+		{ Id = "Rides1", Name = "첫 수리", Kind = "Rides", Target = 1, Minutes = 3 },
+		{ Id = "Rides10", Name = "놀이기구 10개", Kind = "Rides", Target = 10, Minutes = 15 },
+		{ Id = "Rides25", Name = "놀이기구 25개", Kind = "Rides", Target = 25, Minutes = 30 },
+		{ Id = "RidesAll", Name = "모든 놀이기구 수리", Kind = "Rides", Target = -1, Minutes = 60 },
+		{ Id = "Zones1", Name = "첫 구역 열기", Kind = "Zones", Target = 1, Minutes = 10 },
+		{
+			Id = "ZonesAll",
+			Name = "모든 구역 개방",
+			Kind = "Zones",
+			Target = -1,
+			Minutes = 60,
+			Title = "TitlePioneer",
+		},
+		{ Id = "Boarded1000", Name = "손님 1,000명", Kind = "Boarded", Target = 1000, Minutes = 20 },
+		{ Id = "Boarded10000", Name = "손님 10,000명", Kind = "Boarded", Target = 10000, Minutes = 45 },
+		{ Id = "Landmarks3", Name = "시설 3단계 건설", Kind = "Landmarks", Target = 3, Minutes = 15 },
+		{ Id = "LandmarksAll", Name = "시설 모두 최대", Kind = "Landmarks", Target = 6, Minutes = 45 },
+		{ Id = "Plots6", Name = "광장 꾸미기", Kind = "Plots", Target = 6, Minutes = 20 },
+	} :: { { Id: string, Name: string, Kind: string, Target: number, Minutes: number, Title: string? } },
+
 	-- The collection book: every area has one kind of pickup (GatherService); a page is full after PageTarget pickups
 	-- and pays PageMinutes of the park's income once. All pages full gives the title TitleId.
 	Book = { PageTarget = 20, PageMinutes = 5, TitleId = "TitleCollector" },
@@ -1747,6 +1790,33 @@ return {
 			Cost = 0,
 			Text = "도감 박사",
 			Color = Color3.fromRGB(120, 200, 240),
+			BookOnly = true,
+		},
+		{
+			Id = "TitleFisher",
+			Kind = "Title",
+			Name = "낚시 달인",
+			Cost = 0,
+			Text = "낚시 달인",
+			Color = Color3.fromRGB(110, 190, 230),
+			BookOnly = true,
+		},
+		{
+			Id = "TitleCourier",
+			Kind = "Title",
+			Name = "배달 명인",
+			Cost = 0,
+			Text = "배달 명인",
+			Color = Color3.fromRGB(240, 170, 90),
+			BookOnly = true,
+		},
+		{
+			Id = "TitlePioneer",
+			Kind = "Title",
+			Name = "개척왕",
+			Cost = 0,
+			Text = "개척왕",
+			Color = Color3.fromRGB(150, 210, 120),
 			BookOnly = true,
 		},
 		{

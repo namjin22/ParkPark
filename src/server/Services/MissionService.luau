@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ActiveIncome = require(script.Parent.ActiveIncome)
+local AchievementService = require(script.Parent.AchievementService)
 local WeeklyService = require(script.Parent.WeeklyService)
 local GameConfig =
 	require(ReplicatedStorage:WaitForChild("ParkRebornShared"):WaitForChild("Config"):WaitForChild("GameConfig"))
@@ -65,6 +66,7 @@ end
 
 function MissionService.Report(player: Player, kind: string)
 	WeeklyService.Report(player, kind)
+	AchievementService.Report(player, kind)
 	if not started or doneMask[player] == nil then
 		return
 	end

@@ -173,7 +173,7 @@ function ClosetController.Start()
 			elseif item.BookOnly then
 				row.BackgroundColor3 = UITheme.Button
 				row.TextColor3 = UITheme.Muted
-				row.Text = item.Name .. "  (도감 완성 보상)"
+				row.Text = item.Name .. "  (도감·업적 보상)"
 			elseif item.PassOnly then
 				row.BackgroundColor3 = UITheme.Button
 				row.TextColor3 = UITheme.Muted

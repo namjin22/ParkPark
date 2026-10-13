@@ -97,7 +97,7 @@ function BookController.Start()
 	title.LayoutOrder = 0
 	title.BackgroundTransparency = 1
 	title.Font = Enum.Font.GothamBold
-	title.Text = string.format("도감 · 쪽마다 %d개", GameConfig.Book.PageTarget)
+	title.Text = string.format("도감 · 쪽마다 %d개, 업적", GameConfig.Book.PageTarget)
 	title.TextColor3 = UITheme.Muted
 	title.TextSize = 14
 	title.TextXAlignment = Enum.TextXAlignment.Left
@@ -158,24 +158,50 @@ function BookController.Start()
 		return row
 	end
 
+	local achievementHeader = Instance.new("TextLabel")
+	achievementHeader.Size = UDim2.new(1, -8, 0, 20)
+	achievementHeader.LayoutOrder = 99
+	achievementHeader.BackgroundTransparency = 1
+	achievementHeader.Font = Enum.Font.GothamBold
+	achievementHeader.Text = "업적"
+	achievementHeader.TextColor3 = UITheme.Muted
+	achievementHeader.TextSize = 14
+	achievementHeader.TextXAlignment = Enum.TextXAlignment.Left
+	achievementHeader.Parent = list
+
 	local function refresh()
 		local raw = player:GetAttribute("Book")
-		if type(raw) ~= "string" then
-			return
+		if type(raw) == "string" then
+			local order = 0
+			for entry in string.gmatch(raw, "[^;]+") do
+				local key, label, count, target = string.match(entry, "^(.-)|(.-)|(%d+)|(%d+)$")
+				if key and label and count and target then
+					order += 1
+					local row = rowFor(key, order)
+					local full = tonumber(count) >= tonumber(target)
+					row.Text = string.format("%s  %s/%s%s", label, count, target, if full then "  완성" else "")
+					row.BackgroundColor3 = if full then UITheme.ButtonOn else UITheme.Button
+				end
+			end
 		end
-		local order = 0
-		for entry in string.gmatch(raw, "[^;]+") do
-			local key, label, count, target = string.match(entry, "^(.-)|(.-)|(%d+)|(%d+)$")
-			if key and label and count and target then
-				order += 1
-				local row = rowFor(key, order)
-				local full = tonumber(count) >= tonumber(target)
-				row.Text = string.format("%s  %s/%s%s", label, count, target, if full then "  완성" else "")
-				row.BackgroundColor3 = if full then UITheme.ButtonOn else UITheme.Button
+		local achievements = player:GetAttribute("Achievements")
+		if type(achievements) == "string" then
+			local order = 99
+			for entry in string.gmatch(achievements, "[^;]+") do
+				local name, shown, goal, done = string.match(entry, "^(.-)|(%d+)|(%d+)|(%d)$")
+				if name and shown and goal and done then
+					order += 1
+					local row = rowFor("A" .. order, order)
+					row.Text = if done == "1"
+						then string.format("%s  완료", name)
+						else string.format("%s  %s/%s", name, shown, goal)
+					row.BackgroundColor3 = if done == "1" then UITheme.ButtonOn else UITheme.Button
+				end
 			end
 		end
 	end
 	player:GetAttributeChangedSignal("Book"):Connect(refresh)
+	player:GetAttributeChangedSignal("Achievements"):Connect(refresh)
 	refresh()
 
 	-- Only one of the side panels (missions, book) is open at a time.
