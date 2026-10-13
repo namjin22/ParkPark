@@ -35,6 +35,9 @@ function IncomeService.Start(park: { ParkFolder: Folder }, gameConfig: any, awar
 		result *= 1 + ((folder:GetAttribute("SeasonBonus") :: number?) or 0)
 		result *= 1 + ((folder:GetAttribute("LandmarkBonus") :: number?) or 0)
 		result *= (folder:GetAttribute("WeatherMultiplier") :: number?) or 1
+		-- Night, season, landmarks, decor, party, events and weather can pile up; the total is capped.
+		result = math.min(result, gameConfig.IncomeMultiplierCap)
+		folder:SetAttribute("IncomeMultiplier", result)
 		return result
 	end
 
