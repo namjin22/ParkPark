@@ -112,10 +112,7 @@ function GatherService.Start(park: { ParkFolder: Folder }, awardCoins: AwardCoin
 				item.CanCollide = false
 				item.Position = Vector3.new(x, 1.4, z)
 				item.Parent = holder
-				local glow = Instance.new("Highlight")
-				glow.FillTransparency = 1
-				glow.OutlineColor = area.color
-				glow.Parent = item
+				-- No Highlight here: the engine renders at most 31 at once, and VIPs, the delivery marker and the guide use them.
 				local tag = Instance.new("BillboardGui")
 				tag.Size = UDim2.fromOffset(110, 26)
 				tag.StudsOffset = Vector3.new(0, 2.2, 0)
