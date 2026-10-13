@@ -25,6 +25,12 @@
           "$path": "src/client"
         }
       }
+    },
+    "ReplicatedFirst": {
+      "$className": "ReplicatedFirst",
+      "ParkParkLoading": {
+        "$path": "src/first/Loading.client.luau"
+      }
     }
   }
 }
