@@ -120,6 +120,7 @@ return {
 	NeonSignScale = 2,
 	AntennaScale = 2,
 	BalloonRideScale = 2.2,
+	LandmarkScale = 1,
 	CrystalScale = 2,
 	PlanetScale = 2,
 	SledScale = 2.4,

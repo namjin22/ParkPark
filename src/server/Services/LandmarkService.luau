@@ -167,6 +167,16 @@ function LandmarkService.Start(
 						local template = findTemplate("Landmark" .. key)
 						local model = if template then template:Clone() else buildShape(key, tier)
 						model.Name = "Landmark" .. key
+						if template and tier >= 2 then
+							local anchor = model:FindFirstChildWhichIsA("BasePart", true)
+							if anchor then
+								local light = Instance.new("PointLight")
+								light.Color = palette.Gold
+								light.Range = 18
+								light.Brightness = 1.2
+								light.Parent = anchor
+							end
+						end
 						model:PivotTo(pivot)
 						model.Parent = holder
 						standing = model

@@ -4085,6 +4085,105 @@ def make_decor_antenna() -> Mesh:
     return mesh
 
 
+def make_landmark_ticket() -> Mesh:
+    """Ticket booth (origin at the ground centre, front on +Z): mint walls, a coral counter, a striped awning and a star."""
+    mesh = Mesh("ParkParkLandmarkTicket")
+    add_box(mesh, (0, 0.2, 0), (10, 0.4, 7), "cream")
+    add_box(mesh, (0, 3.4, -2.4), (7, 6, 0.6), "mint")
+    for side in (-1, 1):
+        add_box(mesh, (side * 3.2, 3.4, -0.4), (0.6, 6, 4.4), "mint")
+    add_box(mesh, (0, 1.6, 1.8), (7, 2.4, 1.2), "coral")
+    add_box(mesh, (0, 2.9, 1.8), (7.4, 0.2, 1.6), "gold")
+    for index in range(8):
+        x0 = -4.2 + 8.4 * index / 8
+        x1 = -4.2 + 8.4 * (index + 1) / 8
+        add_slab(
+            mesh,
+            [
+                (x0, 6.3, -2.8), (x1, 6.3, -2.8), (x1, 6.5, -2.8), (x0, 6.5, -2.8),
+                (x0, 5.5, 3.2), (x1, 5.5, 3.2), (x1, 5.7, 3.2), (x0, 5.7, 3.2),
+            ],
+            "coral" if index % 2 == 0 else "cream",
+        )
+    add_box(mesh, (0, 4.4, -2.05), (3.6, 1.8, 0.1), "dark_glass")
+    add_box(mesh, (0, 7.3, 0.4), (5.6, 1.1, 0.3), "gold")
+    add_star(mesh, 8.7, 0.9, "gold", 0.0, 0.4)
+    return mesh
+
+
+def make_landmark_sponsor() -> Mesh:
+    """Sponsor board (origin at the ground centre, face on +Z): two dark posts, a cream board with gold frame and badges."""
+    mesh = Mesh("ParkParkLandmarkSponsor")
+    for x in (-4.0, 4.0):
+        add_vertical_cylinder(mesh, 0.4, 0.0, 9.4, "ink", 10, x, 0.0)
+        add_ellipsoid(mesh, (x, 9.5, 0), (0.5, 0.5, 0.5), "gold", slices=8, stacks=5)
+    add_box(mesh, (0, 7.0, 0), (9.4, 5.0, 0.5), "cream")
+    add_box(mesh, (0, 9.7, 0), (10, 0.5, 0.7), "gold")
+    add_box(mesh, (0, 4.3, 0), (10, 0.5, 0.7), "gold")
+    for x, material in ((-2.8, "coral"), (0.0, "mint"), (2.8, "gold")):
+        add_ellipsoid(mesh, (x, 7.1, 0.3), (1.15, 1.15, 0.14), material, slices=14, stacks=6)
+    add_box(mesh, (0, 5.5, 0.3), (6.6, 0.25, 0.1), "faded_cream")
+    return mesh
+
+
+def make_landmark_lounge() -> Mesh:
+    """VIP lounge (origin at the ground centre, open on +Z): gold columns and roof over a rug, a couch and a table."""
+    mesh = Mesh("ParkParkLandmarkLounge")
+    add_box(mesh, (0, 0.2, 0), (10, 0.4, 7), "cream")
+    for x in (-4.0, 4.0):
+        for z in (-2.4, 2.4):
+            add_vertical_cylinder(mesh, 0.45, 0.4, 7.4, "gold", 12, x, z)
+    add_box(mesh, (0, 7.7, 0), (10.6, 0.7, 7.6), "gold")
+    add_box(mesh, (0, 8.2, 0), (9.0, 0.4, 6.2), "coral")
+    add_box(mesh, (0, 0.5, 0.6), (5, 0.1, 6), "coral")
+    add_box(mesh, (0, 1.2, -1.9), (6, 1.6, 1.4), "mint")
+    add_box(mesh, (0, 2.0, -2.5), (6, 1.6, 0.4), "mint")
+    add_vertical_cylinder(mesh, 0.9, 0.5, 1.3, "wood", 14, 0.0, 1.4)
+    add_ellipsoid(mesh, (0, 6.6, 0), (0.7, 0.7, 0.7), "gold", slices=10, stacks=6)
+    add_cylinder_between(mesh, (0, 7.35, 0), (0, 6.9, 0), 0.06, 0.06, "ink", 5)
+    return mesh
+
+
+def make_balloon_pad() -> Mesh:
+    """Balloon launch pad (origin at the ground centre): a round platform with a mooring post, sandbags and a rail."""
+    mesh = Mesh("ParkParkBalloonPad")
+    add_vertical_cylinder(mesh, 7.0, 0.0, 0.9, "cream", 40)
+    add_torus(mesh, 6.9, 0.2, 0.9, "gold", segments=40, sides=6)
+    add_vertical_cylinder(mesh, 0.5, 0.9, 3.0, "ink", 10)
+    add_ellipsoid(mesh, (0, 3.2, 0), (0.7, 0.4, 0.7), "gold", slices=8, stacks=5)
+    for index in range(6):
+        angle = TAU * index / 6 + 0.3
+        add_ellipsoid(mesh, (5.2 * math.cos(angle), 1.2, 5.2 * math.sin(angle)), (0.7, 0.5, 0.7), "faded_cream", slices=8, stacks=5)
+    for index in range(12):
+        angle = TAU * index / 12
+        add_vertical_cylinder(mesh, 0.12, 0.9, 2.0, "wood", 6, 6.5 * math.cos(angle), 6.5 * math.sin(angle))
+    add_torus(mesh, 6.5, 0.08, 1.95, "wood", segments=40, sides=5)
+    return mesh
+
+
+def make_balloon_balloon() -> Mesh:
+    """Hot-air balloon (origin at the basket floor's top): a wicker basket ring, ropes and a striped envelope above."""
+    mesh = Mesh("ParkParkBalloonBalloon")
+    add_vertical_cylinder(mesh, 3.5, -0.9, 0.1, "wood", 28)
+    add_torus(mesh, 3.45, 0.22, 1.4, "gold", segments=28, sides=6)
+    for index in range(12):
+        angle = TAU * index / 12
+        x, z = 3.4 * math.cos(angle), 3.4 * math.sin(angle)
+        add_vertical_cylinder(mesh, 0.12, 0.1, 1.4, "wood", 6, x, z)
+        add_cylinder_between(mesh, (x, 1.4, z), (0.6 * x, 7.0, 0.6 * z), 0.07, 0.07, "ink", 5)
+    profile = []
+    steps = 16
+    for step in range(steps + 1):
+        t = step / steps
+        y = 6.2 + 18.0 * t
+        radius = max(0.0, 8.4 * math.sin(math.pi * t) ** 0.8)
+        radius = max(radius, 1.8) if step < steps else 0.0
+        band = ("coral", "cream", "mint", "gold")[min(3, step * 4 // steps)]
+        profile.append((radius, y, band))
+    lathe(mesh, profile, 28)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -4267,6 +4366,11 @@ def main() -> None:
         make_shop_ramen(),
         make_decor_neon_sign(),
         make_decor_antenna(),
+        make_landmark_ticket(),
+        make_landmark_sponsor(),
+        make_landmark_lounge(),
+        make_balloon_pad(),
+        make_balloon_balloon(),
         make_booth_ring(),
         make_booth_shooting(),
         make_booth_fortune(),

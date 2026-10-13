@@ -58,9 +58,15 @@
 
 - 반복 26 (2026-10-13, 사용자가 OBJ 27개를 가져옴): 한 일: Studio 작업 공간의 가져온 모델 27개에서 메시 ID를 읽어 `MeshAssets.json`에 기록(`meshes`·`textured` 각 153개), `tools/build_parkpark_templates.py`로 템플릿 25개 생성(부스 6, 금고 1, 계절 장식 6, 해저 6, 로봇 도시 6), 가져온 원본 27개와 Rojo가 두 번 만든 복사본 25개를 Studio에서 지움(`ParkParkAssets` 113개). / 검증: Play(모든 구역 열림, `ForceSeason` Halloween): 부스 6개·금고·해저 4개 시설·로봇 도시 4개 시설이 모두 메시로 렌더(템플릿 사용), 계절 장식 26개와 산호·해초·네온 간판·안테나가 모두 템플릿, 캡처에서 고리 던지기 부스의 카운터가 길을 향함, 해마 회전·로봇 공장·금고·호박·유령 등불 모양 확인, Output 오류 없음. 해파리 점프·버블티·라멘·네온 점프·수족관은 메시 개수만 확인(캡처 없음), 놀이기구 탑승 높이와 방향은 확인 못 함. / 다음: 사용자 폰 확인과 플레이 느낌 피드백 대기.
 
+- 반복 27 (2026-10-13, 사용자가 출시 점검 P0·P1 전부를 맡김): 한 일: (c) 사람마다 자기 공원 구현(`OwnerService`, `ParkAccess`, 방문자 관리 거부와 수입 0.5배, 주인 고정 저장, 친구 초대·방문), 디버그 값 Studio 전용, 저장 실패·중단 알림과 더 새 형식 보호, 분석 지표(`AnalyticsHub`), 순위판(`LeaderboardService`), 배경 음악(`MusicController`), 영어 번역(`LocalizeController`+`Strings`), 랜드마크 3종과 열기구 OBJ 5개 생성(템플릿 코드 포함). / 검증: verify.ps1 통과. Play: 방문자 모의에서 해금 거부(`unlocked=false`)와 수입 14/28(0.5배), 주인에서 해금 성공; 원격 이벤트 8개에 잘못된 값 232회 + 초고속 300회 → 서버 오류 없음·상태 변화 없음·제한 동작; 실제 DataStore 읽기로 새 필드 확인; 영어 화면 샘플에서 한국어 잔여 0, 한국어 로케일에서는 그대로; 18분 장시간 시험에서 인스턴스·프레임 안정. 확인 못 한 것: 실제 텔레포트·초대·친구 방문·분석·순위판(게시된 장소에서만 동작), 두 명 이상 접속, 게임패드, 음악 청취. / 다음: 사용자 폰 확인, 가져오기 대기 OBJ 5개 가져오기, 베타 장소 게시 후 친구와 시험.
+
 ## 가져오기 대기 목록 (사용자가 3D Importer로 가져올 OBJ)
 
-- (비어 있음 — 2026-10-13 27개를 모두 가져와 템플릿까지 만들었습니다)
+- ParkParkLandmarkTicket
+- ParkParkLandmarkSponsor
+- ParkParkLandmarkLounge
+- ParkParkBalloonPad
+- ParkParkBalloonBalloon
 
 ## 사용자 메모 (폰 확인, 패스 ID, 오디오 ID 등)
 

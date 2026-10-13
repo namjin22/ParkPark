@@ -128,6 +128,8 @@ NEONSCALE = config_number("NeonScale")
 TECHFACTORYSCALE = config_number("TechFactoryScale")
 NEONSIGNSCALE = config_number("NeonSignScale")
 ANTENNASCALE = config_number("AntennaScale")
+BALLOONRIDESCALE = config_number("BalloonRideScale")
+LANDMARK_SCALE = config_number("LandmarkScale")
 CRYSTAL_SCALE = config_number("CrystalScale")
 PLANET_SCALE = config_number("PlanetScale")
 SWAN_SCALE = config_number("SwanScale")
@@ -394,6 +396,7 @@ def main() -> None:
     build_maze()
     build_swan()
     build_stage()
+    build_balloon()
     build_penguin()
     build_sled()
     build_cave()
@@ -1468,6 +1471,29 @@ def build_vault() -> None:
     )
 
 
+def build_balloon() -> None:
+    if missing_meshes(("ParkParkBalloonPad", "ParkParkBalloonBalloon")):
+        print("skipped BalloonRide: import the pad and balloon meshes and record their IDs first")
+        return
+    seats = []
+    for index in range(6):
+        angle = 2 * math.pi * index / 6
+        seats.append(box_collider(f"Seat{index + 1}", (2.6 * math.cos(angle), 1.05, 2.6 * math.sin(angle)), (1, 0.2, 1), 0, BALLOONRIDESCALE))
+    write(
+        "BalloonRide",
+        model(
+            "BalloonRide",
+            [
+                mesh_part("Pad", "ParkParkBalloonPad", (0, 0, 0), 180, False, CREAM, BALLOONRIDESCALE),
+                cylinder_collider("Collider", (0, 0.9, 0), 1.8, 14.0, BALLOONRIDESCALE),
+                *seats,
+                mesh_part("Balloon", "ParkParkBalloonBalloon", (0, 0.9, 0), 180, False, CORAL, BALLOONRIDESCALE),
+                console("Console", -24, 24, 0),
+            ],
+        ),
+    )
+
+
 def build_stage() -> None:
     if missing_meshes(("ParkParkShowStage",)):
         print("skipped ShowStage: import ParkParkShowStage and record its mesh ID first")
@@ -1673,6 +1699,9 @@ def build_decor() -> None:
         ("DecorSeaweed", "ParkParkDecorSeaweed", SEAWEEDSCALE, None),
         ("DecorNeonSign", "ParkParkDecorNeonSign", NEONSIGNSCALE, box_collider("Collider", (0, 2.5, 0), (2.6, 5.0, 0.5), 0, NEONSIGNSCALE)),
         ("DecorAntenna", "ParkParkDecorAntenna", ANTENNASCALE, cylinder_collider("Collider", (0, 4.0, 0), 8.0, 0.9, ANTENNASCALE)),
+        ("LandmarkTicket", "ParkParkLandmarkTicket", LANDMARK_SCALE, box_collider("Collider", (0, 3.0, 0), (9.4, 6.0, 6.6), 0, LANDMARK_SCALE)),
+        ("LandmarkSponsor", "ParkParkLandmarkSponsor", LANDMARK_SCALE, box_collider("Collider", (0, 5.0, 0), (9.6, 9.6, 0.9), 0, LANDMARK_SCALE)),
+        ("LandmarkLounge", "ParkParkLandmarkLounge", LANDMARK_SCALE, cylinder_collider("Collider", (0, 0.9, 0), 1.0, 3.0, LANDMARK_SCALE)),
         ("DecorPine", "ParkParkDecorPine", PINE_SCALE, cylinder_collider("Collider", (0, 1.2, 0), 2.4, 0.8, PINE_SCALE)),
         ("DecorRock", "ParkParkDecorRock", ROCK_SCALE, cylinder_collider("Collider", (0, 1.0, 0), 2.0, 4.4, ROCK_SCALE)),
         ("DecorPalm", "ParkParkDecorPalm", PALM_SCALE, cylinder_collider("Collider", (0, 1.8, 0), 3.6, 1.2, PALM_SCALE)),
