@@ -1850,6 +1850,8 @@ return {
 	-- as a group of two or three (the children are smaller), pick the same first ride and prefer FamilyRides; scenic
 	-- guests prefer ScenicRides. A preference counts a ride three times when one is chosen.
 	ThrillGuestChance = 0.3,
+	-- Today's recommended ride (FeaturedService): one repaired attraction per day pays this much more.
+	Featured = { Bonus = 0.25 },
 	-- Monorail (MonorailService): a free elevated train between the park end and every open zone.
 	Monorail = { Speed = 90, DockSeconds = 9, Cars = 3 },
 	-- Weather (WeatherService): a shower every IntervalMin..IntervalMax seconds while the park is open, a rainbow

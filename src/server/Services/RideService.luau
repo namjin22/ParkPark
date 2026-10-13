@@ -335,6 +335,7 @@ function RideService.Start(
 		manage.RequiresLineOfSight = false
 		manage.KeyboardKeyCode = Enum.KeyCode.E
 		manage:SetAttribute("RideKey", ride.key)
+		model:SetAttribute("RideKey", ride.key)
 		manage.Parent = ride.console
 
 		-- Each attraction opens up only after the one before it in the chain has been repaired.

@@ -54,6 +54,9 @@ function IncomeService.Start(park: { ParkFolder: Folder }, gameConfig: any, awar
 						local perMinute = ride:GetAttribute("IncomePerMinute")
 						if type(perMinute) == "number" and perMinute > 0 then
 							local earned = perMinute * factor
+							if ride:GetAttribute("Featured") == true then
+								earned *= 1 + gameConfig.Featured.Bonus
+							end
 							total += earned
 							rideCarry[ride] = (rideCarry[ride] or 0) + earned
 							if now - (lastPopup[ride] or 0) >= POPUP_SECONDS then
