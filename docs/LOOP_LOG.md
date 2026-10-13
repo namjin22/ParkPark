@@ -56,35 +56,11 @@
 
 - 반복 25 (2026-10-13, 사용자가 두 결정을 위임): 한 일: (1) 수입 배수 상한을 3배로 확정 — 이벤트·밤·계절·시설·꾸미기·파티·날씨를 곱한 합계를 `GameConfig.IncomeMultiplierCap`(3)으로 자르고(`IncomeService`) 공원 속성 `IncomeMultiplier`로 노출, 놀이기구별 '오늘의 추천' 보너스는 상한 밖. (2) 후반 구역 비용 재조정 — 단계 시간이 후반에 오히려 짧아지던 것을 '8분 + 0.3분 x (순번-9)' 이상, 줄어들지 않게 올림: 순번 10 이후 37개 놀이기구의 해금·수리·수입 업그레이드·직원 비용을 같은 비율로, 구역 문은 첫 단계의 1.5배 이상으로 올림(예: 마지막 놀이기구 열기구 710k → 1,929k, 로봇 도시 문 1,030k → 2,439k, 해저 문 950k → 2,015k). 초반 9개와 이미 충분한 단계는 그대로. 기준 모델(직원 0, 업그레이드 0, 배수 없음)로 전체 약 17시간 → 약 23시간, 단계당 5~16분 → 8~25분. `tools/pacing_model.py`로 다시 계산 가능. / 검증: verify.ps1 통과. 모델 재계산에서 단계 시간이 순번 38까지 4~20분으로 오르고 이후 20~25분을 유지, 구역 문은 단계의 1.5배. Play: `FareMultiplier` 5를 강제해도 `IncomeMultiplier`가 3으로 잘림(캐러셀 분당 45, 30초에 129코인은 추천 +25%와 VIP 팁 포함). 실제 사람이 하는 플레이 시간은 업그레이드·이벤트·직접 수입 때문에 모델보다 짧을 것이며 측정하지 않음. / 다음: 사용자 모델 가져오기(27개)와 폰 확인 대기. 코드 전용 백로그와 결정 사항은 모두 소진.
 
+- 반복 26 (2026-10-13, 사용자가 OBJ 27개를 가져옴): 한 일: Studio 작업 공간의 가져온 모델 27개에서 메시 ID를 읽어 `MeshAssets.json`에 기록(`meshes`·`textured` 각 153개), `tools/build_parkpark_templates.py`로 템플릿 25개 생성(부스 6, 금고 1, 계절 장식 6, 해저 6, 로봇 도시 6), 가져온 원본 27개와 Rojo가 두 번 만든 복사본 25개를 Studio에서 지움(`ParkParkAssets` 113개). / 검증: Play(모든 구역 열림, `ForceSeason` Halloween): 부스 6개·금고·해저 4개 시설·로봇 도시 4개 시설이 모두 메시로 렌더(템플릿 사용), 계절 장식 26개와 산호·해초·네온 간판·안테나가 모두 템플릿, 캡처에서 고리 던지기 부스의 카운터가 길을 향함, 해마 회전·로봇 공장·금고·호박·유령 등불 모양 확인, Output 오류 없음. 해파리 점프·버블티·라멘·네온 점프·수족관은 메시 개수만 확인(캡처 없음), 놀이기구 탑승 높이와 방향은 확인 못 함. / 다음: 사용자 폰 확인과 플레이 느낌 피드백 대기.
+
 ## 가져오기 대기 목록 (사용자가 3D Importer로 가져올 OBJ)
 
-- ParkParkBoothRing
-- ParkParkBoothShooting
-- ParkParkBoothFortune
-- ParkParkBoothPhoto
-- ParkParkBoothClaw
-- ParkParkBoothDart
-- ParkParkCoinVault
-- ParkParkDecorPumpkin
-- ParkParkDecorSpookyLamp
-- ParkParkDecorSnowman
-- ParkParkDecorXmasTree
-- ParkParkDecorPaperLantern
-- ParkParkDecorFireworkLauncher
-- ParkParkSeahorseHub
-- ParkParkBubblePod
-- ParkParkJellyMound
-- ParkParkAquariumTunnel
-- ParkParkShopBubbleTea
-- ParkParkDecorCoral
-- ParkParkDecorSeaweed
-- ParkParkRobotHub
-- ParkParkGearPod
-- ParkParkNeonMound
-- ParkParkRobotFactory
-- ParkParkShopRamen
-- ParkParkDecorNeonSign
-- ParkParkDecorAntenna
+- (비어 있음 — 2026-10-13 27개를 모두 가져와 템플릿까지 만들었습니다)
 
 ## 사용자 메모 (폰 확인, 패스 ID, 오디오 ID 등)
 
