@@ -25,6 +25,7 @@ local started = false
 local stats: { [Player]: Stats } = {}
 local unlocked: { [Player]: { [string]: boolean } } = {}
 local evaluateRef: ((Player) -> ())? = nil
+local persistRef: ((Player) -> ())? = nil
 
 function AchievementService.Report(player: Player, kind: string)
 	if not started or stats[player] == nil then
@@ -32,6 +33,10 @@ function AchievementService.Report(player: Player, kind: string)
 	end
 	local mine = stats[player]
 	mine[kind] = math.min((mine[kind] or 0) + 1, 1e7)
+	-- Counters are saved on every report (the autosave batches them), not only when something unlocks.
+	if persistRef then
+		persistRef(player)
+	end
 	if evaluateRef then
 		evaluateRef(player)
 	end
@@ -122,6 +127,10 @@ function AchievementService.Start(
 		local changed = false
 		for _, def in GameConfig.Achievements do
 			if not mine[def.Id] and value(def, player) >= target(def) then
+				-- A reward title that cannot be given yet (closet still loading) postpones the whole unlock.
+				if def.Title and not grant(player, def.Title) then
+					continue
+				end
 				mine[def.Id] = true
 				changed = true
 				local reward = ActiveIncome.Value(folder, def.Minutes * 60)
@@ -131,9 +140,6 @@ function AchievementService.Start(
 					"업적 달성",
 					string.format("%s · +%d %s", def.Name, reward, GameConfig.CurrencyDisplayName)
 				)
-				if def.Title then
-					grant(player, def.Title)
-				end
 			end
 		end
 		if changed then
@@ -143,6 +149,7 @@ function AchievementService.Start(
 	end
 
 	evaluateRef = evaluate
+	persistRef = persist
 
 	local function onPlayer(player: Player)
 		task.spawn(function()

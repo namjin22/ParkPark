@@ -69,6 +69,17 @@ function BookService.Start(
 			end
 			counts[player] = mine
 			publish(player)
+			-- A book that is already complete (title not given yet, for example after a failed grant) gets its title now.
+			local complete = true
+			for _, key in GameConfig.GatherOrder do
+				if (mine[key] or 0) < target then
+					complete = false
+					break
+				end
+			end
+			if complete then
+				grant(player, GameConfig.Book.TitleId)
+			end
 		end)
 	end
 	Players.PlayerAdded:Connect(onPlayer)
