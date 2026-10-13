@@ -118,6 +118,11 @@ RAINBOWSCALE = config_number("RainbowScale")
 CASTLESCALE = config_number("CastleScale")
 CLOUDSCALE = config_number("CloudScale")
 RAINBOWARCHSCALE = config_number("RainbowArchScale")
+SEAHORSESCALE = config_number("SeahorseScale")
+JELLYSCALE = config_number("JellyScale")
+AQUARIUMSCALE = config_number("AquariumScale")
+CORALSCALE = config_number("CoralScale")
+SEAWEEDSCALE = config_number("SeaweedScale")
 CRYSTAL_SCALE = config_number("CrystalScale")
 PLANET_SCALE = config_number("PlanetScale")
 SWAN_SCALE = config_number("SwanScale")
@@ -414,9 +419,12 @@ def main() -> None:
     build_spinner_zone_ride("NimbusRide", "ParkParkNimbusHub", "ParkParkCloudPod", NIMBUSSCALE, 3.0, 5.0)
     build_bounce_zone_ride("RainbowRide", "ParkParkRainbowMound", RAINBOWSCALE)
     build_hidden_zone_ride("CastleRide", "ParkParkSkyCastle", CASTLESCALE, (9.4, 9.8, 7.4))
+    build_spinner_zone_ride("SeahorseRide", "ParkParkSeahorseHub", "ParkParkBubblePod", SEAHORSESCALE, 7.4, 2.0)
+    build_bounce_zone_ride("JellyRide", "ParkParkJellyMound", JELLYSCALE)
+    build_hidden_zone_ride("AquariumRide", "ParkParkAquariumTunnel", AQUARIUMSCALE, (14.4, 7.4, 12.4))
     build_ball_pit()
     build_rocket()
-    for shop_template, shop_obj in (("IceCreamShop", "ParkParkShopIceCream"), ("PizzaShop", "ParkParkShopPizza"), ("NoodleShop", "ParkParkShopNoodle"), ("CocoaShop", "ParkParkShopCocoa"), ("CookieShop", "ParkParkShopCookie"), ("StarShop", "ParkParkShopStar"), ("TavernShop", "ParkParkShopTavern"), ("SweetsShop", "ParkParkShopSweets"), ("JuiceShop", "ParkParkShopJuice"), ("OasisShop", "ParkParkShopOasis"), ("CottonShop", "ParkParkShopCotton")):
+    for shop_template, shop_obj in (("IceCreamShop", "ParkParkShopIceCream"), ("PizzaShop", "ParkParkShopPizza"), ("NoodleShop", "ParkParkShopNoodle"), ("CocoaShop", "ParkParkShopCocoa"), ("CookieShop", "ParkParkShopCookie"), ("StarShop", "ParkParkShopStar"), ("TavernShop", "ParkParkShopTavern"), ("SweetsShop", "ParkParkShopSweets"), ("JuiceShop", "ParkParkShopJuice"), ("OasisShop", "ParkParkShopOasis"), ("CottonShop", "ParkParkShopCotton"), ("BubbleTeaShop", "ParkParkShopBubbleTea")):
         build_shop(shop_template, shop_obj)
     build_flume()
     build_decor()
@@ -1653,6 +1661,8 @@ def build_decor() -> None:
         ("DecorXmasTree", "ParkParkDecorXmasTree", SEASON_SCALE, cylinder_collider("Collider", (0, 3.0, 0), 6.0, 2.4, SEASON_SCALE)),
         ("DecorPaperLantern", "ParkParkDecorPaperLantern", SEASON_SCALE, cylinder_collider("Collider", (0, 2.6, 0), 5.2, 0.4, SEASON_SCALE)),
         ("DecorFireworkLauncher", "ParkParkDecorFireworkLauncher", SEASON_SCALE, box_collider("Collider", (0, 0.6, 0), (1.8, 1.2, 1.4), 0, SEASON_SCALE)),
+        ("DecorCoral", "ParkParkDecorCoral", CORALSCALE, cylinder_collider("Collider", (0, 1.8, 0), 3.6, 1.6, CORALSCALE)),
+        ("DecorSeaweed", "ParkParkDecorSeaweed", SEAWEEDSCALE, None),
         ("DecorPine", "ParkParkDecorPine", PINE_SCALE, cylinder_collider("Collider", (0, 1.2, 0), 2.4, 0.8, PINE_SCALE)),
         ("DecorRock", "ParkParkDecorRock", ROCK_SCALE, cylinder_collider("Collider", (0, 1.0, 0), 2.0, 4.4, ROCK_SCALE)),
         ("DecorPalm", "ParkParkDecorPalm", PALM_SCALE, cylinder_collider("Collider", (0, 1.8, 0), 3.6, 1.2, PALM_SCALE)),

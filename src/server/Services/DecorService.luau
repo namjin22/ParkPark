@@ -189,6 +189,11 @@ local function grayboxDecor(kind: string): Model
 		part("Cloud", Vector3.new(5, 3.4, 4), Vector3.new(0, 7, 0), Color3.fromRGB(246, 248, 252), Enum.PartType.Ball)
 	elseif kind == "DecorRainbow" then
 		part("Arch", Vector3.new(6, 3, 0.8), Vector3.new(0, 4, 0), Color3.fromRGB(244, 150, 130), nil)
+	elseif kind == "DecorCoral" then
+		part("Coral", Vector3.new(3, 3.6, 3), Vector3.new(0, 1.8, 0), Color3.fromRGB(240, 130, 120), nil).CanCollide =
+			true
+	elseif kind == "DecorSeaweed" then
+		part("Seaweed", Vector3.new(0.8, 3, 0.8), Vector3.new(0, 1.5, 0), Color3.fromRGB(90, 170, 120), nil)
 	elseif kind == "DecorFern" then
 		part(
 			"Fern",
@@ -248,6 +253,8 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 		DecorBarrels = true,
 		DecorLollipop = true,
 		DecorFern = true,
+		DecorCoral = true,
+		DecorSeaweed = true,
 		DecorCactus = true,
 		DecorCloud = true,
 	}
@@ -399,6 +406,8 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, desert.MinZ, desert.BoundaryZ })
 	local cloud = ParkLayout.ZoneBounds.Cloud
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, cloud.MinZ, cloud.BoundaryZ })
+	local sea = ParkLayout.ZoneBounds.Sea
+	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, sea.MinZ, sea.BoundaryZ })
 	local jungle = ParkLayout.ZoneBounds.Jungle
 	table.insert(zoneRects, { roadX - roadHalf, roadX + roadHalf, jungle.MinZ, jungle.BoundaryZ })
 	local candy = ParkLayout.ZoneBounds.Candy
@@ -643,6 +652,35 @@ function DecorService.Start(park: { ParkFolder: Folder }, findTemplate: FindTemp
 		end
 	end
 	for z = cloud.BoundaryZ - 16, cloud.MinZ + 12, -24 do
+		for _, side in { -1, 1 } do
+			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
+			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then
+				place("DecorLamp", spot, 0, 1.5)
+			end
+		end
+	end
+
+	-- The 해저 구역: scenery with lamps along its road.
+	local seaProps: { { kind: string, count: number, margin: number, radius: number } } = {
+		{ kind = "DecorCoral", count = 26, margin = 5, radius = 3 },
+		{ kind = "DecorSeaweed", count = 30, margin = 4, radius = 2 },
+		{ kind = "DecorRock", count = 16, margin = 6, radius = 4 },
+		{ kind = "DecorBush", count = 20, margin = 4, radius = 2.5 },
+	}
+	for _, prop in seaProps do
+		local made = 0
+		local tries = 0
+		while made < prop.count and tries < 3000 do
+			tries += 1
+			local x = random:NextNumber(-WORLD_X, WORLD_X)
+			local z = random:NextNumber(sea.MinZ + 6, sea.BoundaryZ - 8)
+			if not zoneBlocked(x, z, prop.margin) and clear(x, z, prop.radius) then
+				place(prop.kind, Vector3.new(x, 0, z), random:NextNumber(0, math.pi * 2), prop.radius)
+				made += 1
+			end
+		end
+	end
+	for z = sea.BoundaryZ - 16, sea.MinZ + 12, -24 do
 		for _, side in { -1, 1 } do
 			local spot = Vector3.new(roadX + side * (roadHalf + 5.5), 0, z)
 			if not zoneBlocked(spot.X, spot.Z, 0) and clear(spot.X, spot.Z, 1.5) then

@@ -3888,6 +3888,108 @@ def make_decor_firework_launcher() -> Mesh:
     return mesh
 
 
+def make_seahorse_hub() -> Mesh:
+    """Rotating reef deck: a pale disc edged with coral lumps, a tall coral column in the middle, a pedestal per seat."""
+    mesh = Mesh("ParkParkSeahorseHub")
+    add_vertical_cylinder(mesh, 8.2, 0.0, 0.6, "cream", 44)
+    add_vertical_cylinder(mesh, 8.25, 0.0, 0.45, "faded_mint", 44)
+    for index in range(14):
+        angle = TAU * index / 14
+        add_ellipsoid(mesh, (8.0 * math.cos(angle), 0.7, 8.0 * math.sin(angle)), (0.7, 0.6, 0.7), "coral" if index % 2 == 0 else "gold", slices=8, stacks=5)
+    lathe(mesh, [(1.6, 0.6, "coral"), (1.1, 1.4, "coral"), (0.8, 6.0, "faded_mint"), (0.0, 7.4, "gold")], 12)
+    for index in range(5):
+        angle = TAU * index / 5
+        add_cylinder_between(mesh, (0.5 * math.cos(angle), 2.2, 0.5 * math.sin(angle)), (1.6 * math.cos(angle), 4.4, 1.6 * math.sin(angle)), 0.3, 0.12, "coral", 8)
+    for index in range(6):
+        angle = TAU * index / 6
+        x, z = 5.4 * math.cos(angle), 5.4 * math.sin(angle)
+        add_cylinder_between(mesh, (0, 0.9, 0), (x, 0.9, z), 0.16, 0.16, "cream", 8)
+        add_vertical_cylinder(mesh, 1.4, 0.6, 0.9, "gold", 24, x, z)
+    return mesh
+
+
+def make_bubble_pod() -> Mesh:
+    """A bubble seat (base at y=0): a ring of small bubbles under a seat on top at about y=1.72."""
+    mesh = Mesh("ParkParkBubblePod")
+    lathe(mesh, [(0.0, 0.0, "faded_mint"), (0.8, 0.0, "faded_mint"), (1.0, 0.7, "mint"), (0.95, 1.3, "mint"), (0.0, 1.6, "faded_mint")], 14)
+    for index in range(6):
+        angle = TAU * index / 6
+        add_ellipsoid(mesh, (0.95 * math.cos(angle), 0.8, 0.95 * math.sin(angle)), (0.32, 0.32, 0.32), "cream", slices=8, stacks=5)
+    add_box(mesh, (0, 1.72, -0.2), (0.9, 0.14, 1.0), "coral")
+    for side in (-1, 1):
+        add_cylinder_between(mesh, (side * 0.5, 1.75, 0.35), (side * 0.5, 2.3, 0.7), 0.05, 0.05, "gold", 5)
+    add_cylinder_between(mesh, (0, 0.0, 0.0), (0, 0.5, 0.0), 0.09, 0.09, "gold", 6)
+    return mesh
+
+
+def make_jelly_mound() -> Mesh:
+    """A bouncy jellyfish pad (origin at the ground centre): a wobbly coral dome on a pale base with trailing strands."""
+    mesh = Mesh("ParkParkJellyMound")
+    add_vertical_cylinder(mesh, 6.8, 0.0, 0.9, "cream", 36)
+    lathe(mesh, [(6.6, 0.9, "coral"), (5.7, 1.2, "faded_coral"), (4.6, 1.45, "coral"), (3.4, 1.55, "faded_coral"), (2.2, 1.6, "coral"), (0.0, 1.6, "coral")], 32)
+    for index in range(10):
+        angle = TAU * index / 10 + 0.2
+        x, z = 6.5 * math.cos(angle), 6.5 * math.sin(angle)
+        add_cylinder_between(mesh, (x, 0.9, z), (x * 1.05, 0.1, z * 1.05), 0.2, 0.08, "mint", 6)
+        add_ellipsoid(mesh, (x, 1.0, z), (0.5, 0.35, 0.5), "gold", slices=8, stacks=4)
+    return mesh
+
+
+def make_aquarium_tunnel() -> Mesh:
+    """An aquarium: a glass dome over a pale base with a back wall and a sign arch (origin at the ground centre, entrance on +Z)."""
+    mesh = Mesh("ParkParkAquariumTunnel")
+    add_box(mesh, (0, 0.25, 0), (14.4, 0.5, 12.4), "cream")
+    add_box(mesh, (0, 3.0, -5.7), (14.0, 5.0, 0.6), "mint")
+    for side in (-1, 1):
+        add_box(mesh, (side * 6.9, 2.8, 0.0), (0.5, 4.6, 11.0), "dark_glass")
+    add_ellipsoid(mesh, (0, 5.0, -0.2), (7.2, 2.6, 6.0), "dark_glass", slices=18, stacks=8)
+    for x, y, z, material in ((-3.0, 3.2, 1.0, "coral"), (2.5, 3.8, -1.5, "gold"), (-1.0, 4.6, -2.5, "coral"), (4.0, 2.8, 2.0, "gold")):
+        add_ellipsoid(mesh, (x, y, z), (0.9, 0.4, 0.3), material, slices=8, stacks=4)
+        add_box(mesh, (x - 1.0, y, z), (0.3, 0.5, 0.1), material)
+    for side in (-1, 1):
+        add_vertical_cylinder(mesh, 0.35, 0.5, 6.2, "gold", 10, side * 3.2, 5.7)
+    add_box(mesh, (0, 6.6, 5.7), (7.4, 1.2, 0.4), "coral")
+    add_box(mesh, (0, 2.0, 5.9), (0.1, 0.1, 0.1), "ink")
+    return mesh
+
+
+def make_shop_bubble_tea() -> Mesh:
+    """Bubble-tea stall: mint walls, a coral-and-cream awning, and a big cup with a straw on the roof."""
+    mesh = Mesh("ParkParkShopBubbleTea")
+    shop_base(mesh, "mint", "coral", "cream")
+    add_cylinder_between(mesh, (0, 5.0, 0), (0, 7.4, 0), 0.9, 1.4, "cream", 16)
+    add_vertical_cylinder(mesh, 1.5, 7.4, 7.7, "coral", 16)
+    add_cylinder_between(mesh, (0.4, 7.7, 0), (0.9, 9.4, 0), 0.12, 0.12, "gold", 6)
+    for index in range(5):
+        angle = TAU * index / 5
+        add_ellipsoid(mesh, (0.45 * math.cos(angle), 5.45, 0.45 * math.sin(angle)), (0.3, 0.3, 0.3), "ink", slices=6, stacks=4)
+    return mesh
+
+
+def make_decor_coral() -> Mesh:
+    """A coral cluster (origin at the ground point): five branching arms on a low mound."""
+    mesh = Mesh("ParkParkDecorCoral")
+    add_ellipsoid(mesh, (0, 0.2, 0), (1.3, 0.45, 1.3), "faded_cream", slices=10, stacks=4)
+    for index in range(5):
+        angle = TAU * index / 5
+        tip = (0.9 * math.cos(angle), 2.8 + 0.4 * (index % 2), 0.9 * math.sin(angle))
+        add_cylinder_between(mesh, (0.2 * math.cos(angle), 0.3, 0.2 * math.sin(angle)), tip, 0.34, 0.14, "coral" if index % 2 == 0 else "gold", 8)
+        add_ellipsoid(mesh, tip, (0.22, 0.22, 0.22), "coral", slices=6, stacks=4)
+    return mesh
+
+
+def make_decor_seaweed() -> Mesh:
+    """Swaying seaweed (origin at the ground point): five thin strands bent in three pieces."""
+    mesh = Mesh("ParkParkDecorSeaweed")
+    for index in range(5):
+        angle = TAU * index / 5
+        bx, bz = 0.5 * math.cos(angle), 0.5 * math.sin(angle)
+        points = [(bx, 0.0, bz), (bx + 0.2, 1.0, bz), (bx - 0.15, 2.0, bz + 0.1), (bx + 0.1, 3.0, bz)]
+        for start, end in zip(points, points[1:]):
+            add_cylinder_between(mesh, start, end, 0.1, 0.08, "mint" if index % 2 == 0 else "faded_mint", 5)
+    return mesh
+
+
 def make_litter() -> Mesh:
     """A small cluster of park litter: a dropped cup, a wrapper, a popcorn tub, and an apple core."""
     mesh = Mesh("ParkParkLitter")
@@ -4056,6 +4158,13 @@ def main() -> None:
         make_shop_cotton(),
         make_decor_cloud(),
         make_decor_rainbow(),
+        make_seahorse_hub(),
+        make_bubble_pod(),
+        make_jelly_mound(),
+        make_aquarium_tunnel(),
+        make_shop_bubble_tea(),
+        make_decor_coral(),
+        make_decor_seaweed(),
         make_booth_ring(),
         make_booth_shooting(),
         make_booth_fortune(),
