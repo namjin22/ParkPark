@@ -32,24 +32,10 @@ function ClosetController.Start()
 	screenGui.DisplayOrder = 12
 	screenGui.Parent = playerGui
 
-	local toggle = Instance.new("TextButton")
-	toggle.AnchorPoint = Vector2.new(1, 0.5)
-	toggle.Size = UDim2.fromOffset(64, 44)
-	toggle.BackgroundColor3 = UITheme.Button
-	toggle.Font = Enum.Font.GothamBold
-	toggle.Text = "꾸미기"
-	toggle.TextColor3 = UITheme.Text
-	toggle.TextSize = 16
-	toggle.Parent = screenGui
-	addCorner(toggle, 36)
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = UITheme.Border
-	stroke.Thickness = 1
-	stroke.Parent = toggle
+	local toggle = UITheme.MenuButton("꾸미기", screenGui)
 
 	local panel = Instance.new("ScrollingFrame")
-	panel.AnchorPoint = Vector2.new(1, 0.5)
-	panel.Size = UDim2.fromOffset(250, 300)
+	panel.Size = UDim2.fromOffset(220, 260)
 	panel.CanvasSize = UDim2.fromOffset(0, 0)
 	panel.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	panel.ScrollBarThickness = 4
@@ -58,43 +44,32 @@ function ClosetController.Start()
 	panel.BorderSizePixel = 0
 	panel.Visible = false
 	panel.Parent = screenGui
-	addCorner(panel, 18)
+	addCorner(panel, 12)
 	local panelStroke = Instance.new("UIStroke")
 	panelStroke.Color = UITheme.Border
 	panelStroke.Thickness = 1
 	panelStroke.Parent = panel
 	local padding = Instance.new("UIPadding")
-	padding.PaddingTop = UDim.new(0, 8)
-	padding.PaddingBottom = UDim.new(0, 8)
-	padding.PaddingLeft = UDim.new(0, 8)
-	padding.PaddingRight = UDim.new(0, 8)
+	padding.PaddingTop = UDim.new(0, 6)
+	padding.PaddingBottom = UDim.new(0, 6)
+	padding.PaddingLeft = UDim.new(0, 6)
+	padding.PaddingRight = UDim.new(0, 6)
 	padding.Parent = panel
 	local layout = Instance.new("UIListLayout")
-	layout.Padding = UDim.new(0, 6)
+	layout.Padding = UDim.new(0, 4)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = panel
 
 	local function updateLayout()
 		local camera = Workspace.CurrentCamera
-		local compactPortrait = camera ~= nil
-			and camera.ViewportSize.X < 550
-			and camera.ViewportSize.Y > camera.ViewportSize.X
+		local compactPortrait = camera ~= nil and UITheme.IsPortrait(camera.ViewportSize)
 		local viewport = if camera then camera.ViewportSize.Y else 600
-		if compactPortrait then
-			toggle.AnchorPoint = Vector2.new(1, 0.5)
-			toggle.Position = UDim2.new(1, -12, 0.54, 52)
-			panel.AnchorPoint = Vector2.new(1, 0.5)
-			panel.Position = UDim2.new(1, -84, 0.5, 0)
-		else
-			toggle.AnchorPoint = Vector2.new(0, 0)
-			toggle.Position = UDim2.fromOffset(88, 150)
-			panel.AnchorPoint = Vector2.new(0, 0)
-			panel.Position = UDim2.fromOffset(16, 200)
-		end
-		local room = if compactPortrait then viewport - 120 else viewport - 220
+		toggle.AnchorPoint, toggle.Position = UITheme.MenuSlot(2, compactPortrait)
+		panel.AnchorPoint, panel.Position = UITheme.MenuPanel(compactPortrait)
+		local room = if compactPortrait then viewport * (1 - UITheme.MenuColumnY) - 24 else viewport - 190
 		panel.Size = UDim2.fromOffset(
-			if compactPortrait then 230 else 250,
-			math.clamp(layout.AbsoluteContentSize.Y + 16, 80, math.max(120, room))
+			if compactPortrait then 200 else 220,
+			math.clamp(layout.AbsoluteContentSize.Y + 12, 80, math.max(120, room))
 		)
 	end
 	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateLayout)
@@ -111,13 +86,13 @@ function ClosetController.Start()
 	local function header(text: string, order: number)
 		local label = Instance.new("TextLabel")
 		label.Name = "Header"
-		label.Size = UDim2.new(1, 0, 0, 22)
+		label.Size = UDim2.new(1, 0, 0, 18)
 		label.LayoutOrder = order
 		label.BackgroundTransparency = 1
 		label.Font = Enum.Font.GothamBold
 		label.Text = text
 		label.TextColor3 = UITheme.Muted
-		label.TextSize = 14
+		label.TextSize = 12
 		label.TextXAlignment = Enum.TextXAlignment.Left
 		label.Parent = panel
 	end
@@ -151,13 +126,13 @@ function ClosetController.Start()
 			order += 1
 			local row = Instance.new("TextButton")
 			row.Name = item.Id
-			row.Size = UDim2.new(1, 0, 0, 38)
+			row.Size = UDim2.new(1, 0, 0, 30)
 			row.LayoutOrder = order
 			row.Font = Enum.Font.GothamBold
-			row.TextSize = 15
+			row.TextSize = 12
 			row.TextColor3 = UITheme.Text
 			row.Parent = panel
-			addCorner(row, 12)
+			addCorner(row, 10)
 			local isOwned = owned[item.Id] == true
 			local isOn = item.Id == trail or item.Id == title
 			if isOwned then
@@ -200,8 +175,15 @@ function ClosetController.Start()
 	end
 	rebuild()
 
+	-- One menu panel at a time (shared with the other menu panels through the PlayerGui attribute).
+	playerGui:GetAttributeChangedSignal("OpenPanel"):Connect(function()
+		if playerGui:GetAttribute("OpenPanel") ~= "Closet" then
+			panel.Visible = false
+		end
+	end)
 	toggle.Activated:Connect(function()
 		panel.Visible = not panel.Visible
+		playerGui:SetAttribute("OpenPanel", if panel.Visible then "Closet" else "")
 	end)
 end
 

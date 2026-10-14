@@ -32,26 +32,10 @@ function TravelController.Start()
 	screenGui.DisplayOrder = 12
 	screenGui.Parent = playerGui
 
-	local toggle = Instance.new("TextButton")
-	toggle.AnchorPoint = Vector2.new(1, 0.5)
-	toggle.Position = UDim2.new(1, -12, 0.42, 0)
-	toggle.Size = UDim2.fromOffset(64, 44)
-	toggle.BackgroundColor3 = UITheme.Button
-	toggle.Font = Enum.Font.GothamBold
-	toggle.Text = "이동"
-	toggle.TextColor3 = UITheme.Text
-	toggle.TextSize = 16
-	toggle.Parent = screenGui
-	addCorner(toggle, 36)
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = UITheme.Border
-	stroke.Thickness = 1
-	stroke.Parent = toggle
+	local toggle = UITheme.MenuButton("이동", screenGui)
 
 	local list = Instance.new("Frame")
-	list.AnchorPoint = Vector2.new(1, 0.5)
-	list.Position = UDim2.new(1, -92, 0.42, 0)
-	list.Size = UDim2.fromOffset(170, 0)
+	list.Size = UDim2.fromOffset(168, 0)
 	list.AutomaticSize = Enum.AutomaticSize.Y
 	list.BackgroundColor3 = UITheme.Panel
 	list.BorderSizePixel = 0
@@ -63,34 +47,24 @@ function TravelController.Start()
 	listStroke.Thickness = 1
 	listStroke.Parent = list
 	local padding = Instance.new("UIPadding")
-	padding.PaddingTop = UDim.new(0, 8)
-	padding.PaddingBottom = UDim.new(0, 8)
-	padding.PaddingLeft = UDim.new(0, 8)
-	padding.PaddingRight = UDim.new(0, 8)
+	padding.PaddingTop = UDim.new(0, 6)
+	padding.PaddingBottom = UDim.new(0, 6)
+	padding.PaddingLeft = UDim.new(0, 6)
+	padding.PaddingRight = UDim.new(0, 6)
 	padding.Parent = list
-	local layout = Instance.new("UIListLayout")
-	layout.Padding = UDim.new(0, 6)
+	-- Two columns: with every zone open the list has thirteen places, too tall for a phone held sideways.
+	local layout = Instance.new("UIGridLayout")
+	layout.CellSize = UDim2.fromOffset(76, 28)
+	layout.CellPadding = UDim2.fromOffset(4, 4)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = list
 
+	-- The shared menu strip (UITheme.MenuSlot): first slot; the list opens where every menu panel opens.
 	local function updateLayout()
 		local camera = Workspace.CurrentCamera
-		local compactPortrait = camera ~= nil
-			and camera.ViewportSize.X < 550
-			and camera.ViewportSize.Y > camera.ViewportSize.X
-		-- Wide screens: the two buttons sit on the left under the guide card, away from the phone's jump button
-		-- (bottom right) and the quest card (top right); the list opens below them. Tall screens: right edge.
-		if compactPortrait then
-			toggle.AnchorPoint = Vector2.new(1, 0.5)
-			toggle.Position = UDim2.new(1, -12, 0.54, 0)
-			list.AnchorPoint = Vector2.new(1, 0.5)
-			list.Position = UDim2.new(1, -84, 0.54, 0)
-		else
-			toggle.AnchorPoint = Vector2.new(0, 0)
-			toggle.Position = UDim2.fromOffset(16, 150)
-			list.AnchorPoint = Vector2.new(0, 0)
-			list.Position = UDim2.fromOffset(16, 200)
-		end
+		local portrait = camera ~= nil and UITheme.IsPortrait(camera.ViewportSize)
+		toggle.AnchorPoint, toggle.Position = UITheme.MenuSlot(1, portrait)
+		list.AnchorPoint, list.Position = UITheme.MenuPanel(portrait)
 	end
 	local function bindCamera()
 		local camera = Workspace.CurrentCamera
@@ -104,15 +78,15 @@ function TravelController.Start()
 
 	local function addButton(label: string, destination: string, order: number)
 		local button = Instance.new("TextButton")
-		button.Size = UDim2.new(1, 0, 0, 40)
 		button.LayoutOrder = order
 		button.BackgroundColor3 = UITheme.Button
 		button.Font = Enum.Font.GothamBold
 		button.Text = label
 		button.TextColor3 = UITheme.Text
-		button.TextSize = 16
+		button.TextSize = 12
+		button.TextWrapped = true
 		button.Parent = list
-		addCorner(button, 14)
+		addCorner(button, 10)
 		button.Activated:Connect(function()
 			list.Visible = false
 			event:FireServer(destination)
@@ -136,8 +110,14 @@ function TravelController.Start()
 	for _, zone in GameConfig.ZoneOrder do
 		park:GetAttributeChangedSignal("Zone_" .. zone):Connect(rebuild)
 	end
+	playerGui:GetAttributeChangedSignal("OpenPanel"):Connect(function()
+		if playerGui:GetAttribute("OpenPanel") ~= "Travel" then
+			list.Visible = false
+		end
+	end)
 	toggle.Activated:Connect(function()
 		list.Visible = not list.Visible
+		playerGui:SetAttribute("OpenPanel", if list.Visible then "Travel" else "")
 	end)
 	rebuild()
 end

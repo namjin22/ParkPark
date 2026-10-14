@@ -51,8 +51,8 @@ function ObjectiveController.Start()
 
 	local card = Instance.new("Frame")
 	card.Name = "ObjectiveCard"
-	card.Position = UDim2.fromOffset(16, 92)
-	card.Size = UDim2.fromOffset(250, 60)
+	card.Position = UDim2.fromOffset(16, 72)
+	card.Size = UDim2.fromOffset(240, 50)
 	card.BackgroundColor3 = UITheme.Panel
 	card.BackgroundTransparency = 0.08
 	card.BorderSizePixel = 0
@@ -66,25 +66,25 @@ function ObjectiveController.Start()
 
 	local stepLabel = Instance.new("TextLabel")
 	stepLabel.Name = "Step"
-	stepLabel.Position = UDim2.fromOffset(14, 8)
-	stepLabel.Size = UDim2.new(1, -24, 0, 20)
+	stepLabel.Position = UDim2.fromOffset(10, 6)
+	stepLabel.Size = UDim2.new(1, -18, 0, 18)
 	stepLabel.BackgroundTransparency = 1
 	stepLabel.Font = Enum.Font.GothamBold
 	stepLabel.TextColor3 = UITheme.Text
-	stepLabel.TextSize = 15
+	stepLabel.TextSize = 13
 	stepLabel.TextXAlignment = Enum.TextXAlignment.Left
 	stepLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	stepLabel.Parent = card
 
 	local detailLabel = Instance.new("TextLabel")
 	detailLabel.Name = "Detail"
-	detailLabel.Position = UDim2.fromOffset(14, 31)
-	detailLabel.Size = UDim2.new(1, -24, 0, 18)
+	detailLabel.Position = UDim2.fromOffset(10, 27)
+	detailLabel.Size = UDim2.new(1, -18, 0, 16)
 	detailLabel.BackgroundTransparency = 1
 	detailLabel.Font = Enum.Font.GothamMedium
 	detailLabel.TextColor3 = UITheme.Text
 	detailLabel.TextTransparency = 0.2
-	detailLabel.TextSize = 12
+	detailLabel.TextSize = 11
 	detailLabel.TextXAlignment = Enum.TextXAlignment.Left
 	detailLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	detailLabel.Parent = card

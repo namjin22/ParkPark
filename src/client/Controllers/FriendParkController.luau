@@ -34,19 +34,7 @@ function FriendParkController.Start()
 	screenGui.DisplayOrder = 12
 	screenGui.Parent = playerGui
 
-	local toggle = Instance.new("TextButton")
-	toggle.Size = UDim2.fromOffset(72, 44)
-	toggle.BackgroundColor3 = UITheme.Button
-	toggle.Font = Enum.Font.GothamBold
-	toggle.Text = "친구 공원"
-	toggle.TextColor3 = UITheme.Text
-	toggle.TextSize = 15
-	toggle.Parent = screenGui
-	addCorner(toggle, 16)
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = UITheme.Border
-	stroke.Thickness = 1
-	stroke.Parent = toggle
+	local toggle = UITheme.MenuButton("친구 공원", screenGui)
 
 	local banner = Instance.new("TextLabel")
 	banner.AnchorPoint = Vector2.new(0.5, 0)
@@ -56,13 +44,13 @@ function FriendParkController.Start()
 	banner.BorderSizePixel = 0
 	banner.Font = Enum.Font.GothamBold
 	banner.TextColor3 = UITheme.Text
-	banner.TextSize = 14
+	banner.TextSize = 12
 	banner.Visible = false
 	banner.Parent = screenGui
 	addCorner(banner, 8)
 
 	local panel = Instance.new("Frame")
-	panel.Size = UDim2.fromOffset(260, 0)
+	panel.Size = UDim2.fromOffset(220, 0)
 	panel.AutomaticSize = Enum.AutomaticSize.Y
 	panel.BackgroundColor3 = UITheme.Panel
 	panel.BorderSizePixel = 0
@@ -86,20 +74,9 @@ function FriendParkController.Start()
 
 	local function updateLayout()
 		local camera = Workspace.CurrentCamera
-		local compactPortrait = camera ~= nil
-			and camera.ViewportSize.X < 550
-			and camera.ViewportSize.Y > camera.ViewportSize.X
-		if compactPortrait then
-			toggle.AnchorPoint = Vector2.new(1, 0.5)
-			toggle.Position = UDim2.new(1, -12, 0.54, 208)
-			panel.AnchorPoint = Vector2.new(1, 0.5)
-			panel.Position = UDim2.new(1, -92, 0.5, 0)
-		else
-			toggle.AnchorPoint = Vector2.new(0, 0)
-			toggle.Position = UDim2.fromOffset(304, 150)
-			panel.AnchorPoint = Vector2.new(0, 0)
-			panel.Position = UDim2.fromOffset(16, 198)
-		end
+		local compactPortrait = camera ~= nil and UITheme.IsPortrait(camera.ViewportSize)
+		toggle.AnchorPoint, toggle.Position = UITheme.MenuSlot(5, compactPortrait)
+		panel.AnchorPoint, panel.Position = UITheme.MenuPanel(compactPortrait)
 	end
 	local function bindCamera()
 		local camera = Workspace.CurrentCamera
@@ -120,7 +97,7 @@ function FriendParkController.Start()
 		button.Font = Enum.Font.GothamMedium
 		button.Text = text
 		button.TextColor3 = UITheme.Text
-		button.TextSize = 14
+		button.TextSize = 12
 		button.Parent = panel
 		addCorner(button, 8)
 		return button
@@ -133,7 +110,7 @@ function FriendParkController.Start()
 	title.Font = Enum.Font.GothamBold
 	title.Text = "친구 공원"
 	title.TextColor3 = UITheme.Muted
-	title.TextSize = 14
+	title.TextSize = 12
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.Parent = panel
 

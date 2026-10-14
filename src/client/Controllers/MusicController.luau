@@ -13,12 +13,6 @@ local UITheme = require(Config:WaitForChild("UITheme"))
 -- both off for the session. A track that cannot load is skipped, and with no playable track nothing happens.
 local MusicController = {}
 
-local function addCorner(parent: Instance, radius: number)
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, radius)
-	corner.Parent = parent
-end
-
 function MusicController.Start()
 	local player = Players.LocalPlayer
 	local playerGui = player:WaitForChild("PlayerGui")
@@ -95,32 +89,12 @@ function MusicController.Start()
 	screenGui.ResetOnSpawn = false
 	screenGui.DisplayOrder = 12
 	screenGui.Parent = playerGui
-	local toggle = Instance.new("TextButton")
-	toggle.Size = UDim2.fromOffset(52, 44)
-	toggle.BackgroundColor3 = UITheme.Button
-	toggle.Font = Enum.Font.GothamBold
-	toggle.Text = "음악"
-	toggle.TextColor3 = UITheme.Text
-	toggle.TextSize = 15
-	toggle.Parent = screenGui
-	addCorner(toggle, 16)
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = UITheme.Border
-	stroke.Thickness = 1
-	stroke.Parent = toggle
+	local toggle = UITheme.MenuButton("음악", screenGui)
 
 	local function updateLayout()
 		local camera = Workspace.CurrentCamera
-		local compactPortrait = camera ~= nil
-			and camera.ViewportSize.X < 550
-			and camera.ViewportSize.Y > camera.ViewportSize.X
-		if compactPortrait then
-			toggle.AnchorPoint = Vector2.new(1, 0.5)
-			toggle.Position = UDim2.new(1, -12, 0.54, 260)
-		else
-			toggle.AnchorPoint = Vector2.new(0, 0)
-			toggle.Position = UDim2.fromOffset(384, 150)
-		end
+		local compactPortrait = camera ~= nil and UITheme.IsPortrait(camera.ViewportSize)
+		toggle.AnchorPoint, toggle.Position = UITheme.MenuSlot(6, compactPortrait)
 	end
 	local function bindCamera()
 		local camera = Workspace.CurrentCamera

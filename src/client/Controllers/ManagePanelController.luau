@@ -22,8 +22,10 @@ local GameConfig =
 local ManagePanelController = {}
 
 local CLOSE_DISTANCE = 30
-local PANEL_WIDTH = 460
-local PANEL_MAX_HEIGHT = 480
+local PANEL_WIDTH = 360
+local PANEL_MAX_HEIGHT = 330
+local HEADER_HEIGHT = 44
+local ROW_HEIGHT = 52
 
 local ACTION_ROWS = { "Unlock", "Repair", "Income", "Staff" }
 
@@ -63,13 +65,13 @@ function ManagePanelController.Start()
 	local panel = Instance.new("Frame")
 	panel.Name = "Panel"
 	panel.AnchorPoint = Vector2.new(0.5, 1)
-	panel.Position = UDim2.new(0.5, 0, 1, -20)
+	panel.Position = UDim2.new(0.5, 0, 1, -12)
 	panel.Size = UDim2.new(0.94, 0, 0, PANEL_MAX_HEIGHT)
 	panel.BackgroundColor3 = UITheme.Panel
 	panel.BorderSizePixel = 0
 	panel.Visible = false
 	panel.Parent = screenGui
-	addCorner(panel, 22)
+	addCorner(panel, 14)
 	local limit = Instance.new("UISizeConstraint")
 	limit.MaxSize = Vector2.new(PANEL_WIDTH, PANEL_MAX_HEIGHT)
 	limit.Parent = panel
@@ -78,13 +80,13 @@ function ManagePanelController.Start()
 	stroke.Thickness = 1
 	stroke.Parent = panel
 	local padding = Instance.new("UIPadding")
-	padding.PaddingTop = UDim.new(0, 14)
-	padding.PaddingBottom = UDim.new(0, 16)
-	padding.PaddingLeft = UDim.new(0, 16)
-	padding.PaddingRight = UDim.new(0, 16)
+	padding.PaddingTop = UDim.new(0, 10)
+	padding.PaddingBottom = UDim.new(0, 10)
+	padding.PaddingLeft = UDim.new(0, 12)
+	padding.PaddingRight = UDim.new(0, 12)
 	padding.Parent = panel
 	local layout = Instance.new("UIListLayout")
-	layout.Padding = UDim.new(0, 10)
+	layout.Padding = UDim.new(0, 6)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = panel
 
@@ -93,7 +95,7 @@ function ManagePanelController.Start()
 	actionList.Name = "Actions"
 	actionList.BackgroundTransparency = 1
 	actionList.BorderSizePixel = 0
-	actionList.Size = UDim2.new(1, 0, 1, -(64 + layout.Padding.Offset))
+	actionList.Size = UDim2.new(1, 0, 1, -(HEADER_HEIGHT + layout.Padding.Offset))
 	actionList.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	actionList.CanvasSize = UDim2.new(0, 0, 0, 0)
 	actionList.ScrollingDirection = Enum.ScrollingDirection.Y
@@ -102,7 +104,7 @@ function ManagePanelController.Start()
 	actionList.LayoutOrder = 2
 	actionList.Parent = panel
 	local actionLayout = Instance.new("UIListLayout")
-	actionLayout.Padding = UDim.new(0, 10)
+	actionLayout.Padding = UDim.new(0, 6)
 	actionLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	actionLayout.Parent = actionList
 
@@ -114,8 +116,9 @@ function ManagePanelController.Start()
 			return
 		end
 		local availableHeight = math.max(120, camera.ViewportSize.Y - 40)
-		local rowsHeight = visibleActionCount * 76 + math.max(0, visibleActionCount - 1) * actionLayout.Padding.Offset
-		local contentHeight = 104 + rowsHeight
+		local rowsHeight = visibleActionCount * ROW_HEIGHT
+			+ math.max(0, visibleActionCount - 1) * actionLayout.Padding.Offset
+		local contentHeight = HEADER_HEIGHT + layout.Padding.Offset + 20 + rowsHeight
 		panel.Size = UDim2.new(0.94, 0, 0, math.min(PANEL_MAX_HEIGHT, availableHeight, contentHeight))
 	end
 	local function bindCamera()
@@ -135,25 +138,25 @@ function ManagePanelController.Start()
 	-- Header: the ride's name, its state, and a close button.
 	local header = Instance.new("Frame")
 	header.BackgroundTransparency = 1
-	header.Size = UDim2.new(1, 0, 0, 64)
+	header.Size = UDim2.new(1, 0, 0, HEADER_HEIGHT)
 	header.LayoutOrder = 1
 	header.Parent = panel
-	local titleLabel = makeLabel(header, 30, true, palette.Ink)
-	titleLabel.Size = UDim2.new(1, -110, 0, 36)
-	local statusLabel = makeLabel(header, 20, false, palette.Ink)
-	statusLabel.Position = UDim2.fromOffset(0, 38)
-	statusLabel.Size = UDim2.new(1, -110, 0, 26)
+	local titleLabel = makeLabel(header, 18, true, palette.Ink)
+	titleLabel.Size = UDim2.new(1, -72, 0, 22)
+	local statusLabel = makeLabel(header, 12, false, palette.Ink)
+	statusLabel.Position = UDim2.fromOffset(0, 24)
+	statusLabel.Size = UDim2.new(1, -72, 0, 18)
 	local closeButton = Instance.new("TextButton")
 	closeButton.AnchorPoint = Vector2.new(1, 0)
 	closeButton.Position = UDim2.fromScale(1, 0)
-	closeButton.Size = UDim2.fromOffset(96, 48)
+	closeButton.Size = UDim2.fromOffset(60, 30)
 	closeButton.BackgroundColor3 = UITheme.Button
 	closeButton.Font = Enum.Font.GothamBold
 	closeButton.Text = "닫기"
 	closeButton.TextColor3 = UITheme.Text
-	closeButton.TextSize = 22
+	closeButton.TextSize = 13
 	closeButton.Parent = header
-	addCorner(closeButton, 14)
+	addCorner(closeButton, 10)
 
 	-- One row per action: what it does, and a big button with its price.
 	type Row = { frame: Frame, title: TextLabel, detail: TextLabel, button: TextButton }
@@ -163,34 +166,34 @@ function ManagePanelController.Start()
 		frame.Name = action
 		frame.BackgroundColor3 = UITheme.Panel
 		frame.BorderSizePixel = 0
-		frame.Size = UDim2.new(1, 0, 0, 76)
+		frame.Size = UDim2.new(1, 0, 0, ROW_HEIGHT)
 		frame.LayoutOrder = index
 		frame.Visible = false
 		frame.Parent = actionList
-		addCorner(frame, 16)
+		addCorner(frame, 10)
 		local rowStroke = Instance.new("UIStroke")
 		rowStroke.Color = UITheme.Border
 		rowStroke.Transparency = 0.5
 		rowStroke.Thickness = 1
 		rowStroke.Parent = frame
 
-		local title = makeLabel(frame, 23, true, palette.Ink)
-		title.Position = UDim2.fromOffset(14, 8)
-		title.Size = UDim2.new(1, -170, 0, 30)
-		local detail = makeLabel(frame, 18, false, palette.Ink)
-		detail.Position = UDim2.fromOffset(14, 40)
-		detail.Size = UDim2.new(1, -170, 0, 28)
+		local title = makeLabel(frame, 14, true, palette.Ink)
+		title.Position = UDim2.fromOffset(10, 7)
+		title.Size = UDim2.new(1, -126, 0, 18)
+		local detail = makeLabel(frame, 11, false, palette.Ink)
+		detail.Position = UDim2.fromOffset(10, 28)
+		detail.Size = UDim2.new(1, -126, 0, 16)
 
 		local button = Instance.new("TextButton")
 		button.AnchorPoint = Vector2.new(1, 0.5)
-		button.Position = UDim2.new(1, -10, 0.5, 0)
-		button.Size = UDim2.fromOffset(142, 56)
+		button.Position = UDim2.new(1, -8, 0.5, 0)
+		button.Size = UDim2.fromOffset(108, 36)
 		button.BackgroundColor3 = UITheme.Accent
 		button.Font = Enum.Font.GothamBold
 		button.TextColor3 = Color3.new(1, 1, 1)
-		button.TextSize = 21
+		button.TextSize = 13
 		button.Parent = frame
-		addCorner(button, 14)
+		addCorner(button, 10)
 
 		rows[action] = { frame = frame, title = title, detail = detail, button = button }
 	end

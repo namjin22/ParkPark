@@ -34,7 +34,7 @@ function NoticeController.Start()
 	card.Name = "NoticeToast"
 	card.AnchorPoint = Vector2.new(0.5, 0)
 	card.Position = UDim2.new(0.5, 0, 0, 152)
-	card.Size = UDim2.new(0.9, 0, 0, 66)
+	card.Size = UDim2.new(0.9, 0, 0, 50)
 	card.BackgroundColor3 = UITheme.Panel
 	card.BackgroundTransparency = 1
 	card.BorderSizePixel = 0
@@ -43,8 +43,8 @@ function NoticeController.Start()
 	addCorner(card, 18)
 
 	local sizeConstraint = Instance.new("UISizeConstraint")
-	sizeConstraint.MinSize = Vector2.new(240, 66)
-	sizeConstraint.MaxSize = Vector2.new(360, 66)
+	sizeConstraint.MinSize = Vector2.new(220, 50)
+	sizeConstraint.MaxSize = Vector2.new(320, 50)
 	sizeConstraint.Parent = card
 
 	local function compactPortrait(): boolean
@@ -55,7 +55,7 @@ function NoticeController.Start()
 	-- button, away from the card column on the left and the quest card on the right.
 	local function restPosition(visible: boolean): UDim2
 		if compactPortrait() then
-			local top = if type(park:GetAttribute("QuestTitle")) == "string" then 270 else 152
+			local top = if type(park:GetAttribute("QuestTitle")) == "string" then 220 else 130
 			return UDim2.new(0.5, 0, 0, if visible then top + 10 else top)
 		end
 		return UDim2.new(0.5, 0, 1, if visible then -24 else 0)
@@ -63,7 +63,7 @@ function NoticeController.Start()
 	local function updateLayout()
 		local portrait = compactPortrait()
 		card.AnchorPoint = if portrait then Vector2.new(0.5, 0) else Vector2.new(0.5, 1)
-		card.Size = UDim2.new(if portrait then 0.76 else 0.9, 0, 0, 66)
+		card.Size = UDim2.new(if portrait then 0.76 else 0.9, 0, 0, 50)
 		if card.Visible then
 			card.Position = restPosition(true)
 		end
@@ -87,8 +87,8 @@ function NoticeController.Start()
 
 	local accent = Instance.new("Frame")
 	accent.Name = "Accent"
-	accent.Position = UDim2.fromOffset(0, 10)
-	accent.Size = UDim2.fromOffset(5, 46)
+	accent.Position = UDim2.fromOffset(0, 8)
+	accent.Size = UDim2.fromOffset(4, 34)
 	accent.BackgroundColor3 = UITheme.Accent
 	accent.BackgroundTransparency = 1
 	accent.BorderSizePixel = 0
@@ -97,26 +97,28 @@ function NoticeController.Start()
 
 	local title = Instance.new("TextLabel")
 	title.Name = "Title"
-	title.Position = UDim2.fromOffset(16, 8)
-	title.Size = UDim2.new(1, -34, 0, 26)
+	title.Position = UDim2.fromOffset(12, 6)
+	title.Size = UDim2.new(1, -24, 0, 20)
 	title.BackgroundTransparency = 1
 	title.Font = Enum.Font.GothamBold
 	title.TextColor3 = UITheme.Text
-	title.TextSize = 18
+	title.TextSize = 14
 	title.TextTransparency = 1
 	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.TextTruncate = Enum.TextTruncate.AtEnd
 	title.Parent = card
 
 	local detail = Instance.new("TextLabel")
 	detail.Name = "Detail"
-	detail.Position = UDim2.fromOffset(16, 36)
-	detail.Size = UDim2.new(1, -34, 0, 22)
+	detail.Position = UDim2.fromOffset(12, 27)
+	detail.Size = UDim2.new(1, -24, 0, 16)
 	detail.BackgroundTransparency = 1
 	detail.Font = Enum.Font.GothamMedium
 	detail.TextColor3 = UITheme.Text
-	detail.TextSize = 14
+	detail.TextSize = 12
 	detail.TextTransparency = 1
 	detail.TextXAlignment = Enum.TextXAlignment.Left
+	detail.TextTruncate = Enum.TextTruncate.AtEnd
 	detail.Parent = card
 
 	local queue: { { title: string, detail: string } } = {}

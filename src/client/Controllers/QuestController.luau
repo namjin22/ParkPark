@@ -34,7 +34,7 @@ function QuestController.Start()
 	local card = Instance.new("Frame")
 	card.AnchorPoint = Vector2.new(1, 0)
 	card.Position = UDim2.new(1, -12, 0, 110)
-	card.Size = UDim2.fromOffset(240, 0)
+	card.Size = UDim2.fromOffset(210, 0)
 	card.AutomaticSize = Enum.AutomaticSize.Y
 	card.BackgroundColor3 = UITheme.Panel
 	card.BorderSizePixel = 0
@@ -44,17 +44,16 @@ function QuestController.Start()
 
 	local function updateLayout()
 		local camera = Workspace.CurrentCamera
-		local compactPortrait = camera ~= nil
-			and camera.ViewportSize.X < 550
-			and camera.ViewportSize.Y > camera.ViewportSize.X
+		local compactPortrait = camera ~= nil and UITheme.IsPortrait(camera.ViewportSize)
+		-- Portrait: full width under the guide card. Wide: top right, below Roblox's player list.
 		if compactPortrait then
 			card.AnchorPoint = Vector2.new(0, 0)
-			card.Position = UDim2.fromOffset(16, 160)
+			card.Position = UDim2.fromOffset(16, 130)
 			card.Size = UDim2.new(1, -32, 0, 0)
 		else
 			card.AnchorPoint = Vector2.new(1, 0)
 			card.Position = UDim2.new(1, -12, 0, 110)
-			card.Size = UDim2.fromOffset(240, 0)
+			card.Size = UDim2.fromOffset(210, 0)
 		end
 	end
 	local function bindCamera()
@@ -72,19 +71,19 @@ function QuestController.Start()
 	stroke.Thickness = 1
 	stroke.Parent = card
 	local padding = Instance.new("UIPadding")
-	padding.PaddingTop = UDim.new(0, 8)
-	padding.PaddingBottom = UDim.new(0, 10)
-	padding.PaddingLeft = UDim.new(0, 12)
-	padding.PaddingRight = UDim.new(0, 12)
+	padding.PaddingTop = UDim.new(0, 6)
+	padding.PaddingBottom = UDim.new(0, 7)
+	padding.PaddingLeft = UDim.new(0, 10)
+	padding.PaddingRight = UDim.new(0, 10)
 	padding.Parent = card
 	local layout = Instance.new("UIListLayout")
-	layout.Padding = UDim.new(0, 4)
+	layout.Padding = UDim.new(0, 3)
 	layout.Parent = card
 
 	local function label(size: number, bold: boolean, color: Color3, order: number): TextLabel
 		local text = Instance.new("TextLabel")
 		text.BackgroundTransparency = 1
-		text.Size = UDim2.new(1, 0, 0, size + 4)
+		text.Size = UDim2.new(1, 0, 0, size + 2)
 		text.AutomaticSize = Enum.AutomaticSize.Y
 		text.Font = if bold then Enum.Font.GothamBold else Enum.Font.GothamMedium
 		text.TextSize = size
@@ -95,22 +94,22 @@ function QuestController.Start()
 		text.Parent = card
 		return text
 	end
-	local title = label(18, true, palette.Ink, 1)
-	local desc = label(14, false, palette.Ink, 2)
+	local title = label(13, true, palette.Ink, 1)
+	local desc = label(11, false, palette.Ink, 2)
 	local bar = Instance.new("Frame")
-	bar.Size = UDim2.new(1, 0, 0, 12)
+	bar.Size = UDim2.new(1, 0, 0, 6)
 	bar.BackgroundColor3 = Color3.fromRGB(226, 214, 190)
 	bar.BorderSizePixel = 0
 	bar.LayoutOrder = 3
 	bar.Parent = card
-	addCorner(bar, 6)
+	addCorner(bar, 3)
 	local fill = Instance.new("Frame")
 	fill.Size = UDim2.fromScale(0, 1)
 	fill.BackgroundColor3 = palette.Mint
 	fill.BorderSizePixel = 0
 	fill.Parent = bar
-	addCorner(fill, 6)
-	local reward = label(14, true, Color3.fromRGB(206, 78, 64), 4)
+	addCorner(fill, 3)
+	local reward = label(11, true, Color3.fromRGB(206, 78, 64), 4)
 
 	local function refresh()
 		local name = park:GetAttribute("QuestTitle")

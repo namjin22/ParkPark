@@ -34,8 +34,8 @@ function HUDController.Start()
 
 	local card = Instance.new("Frame")
 	card.Name = "CoinCard"
-	card.Position = UDim2.fromOffset(16, 18)
-	card.Size = UDim2.fromOffset(168, 56)
+	card.Position = UDim2.fromOffset(16, 16)
+	card.Size = UDim2.fromOffset(150, 48)
 	card.BackgroundColor3 = UITheme.Panel
 	card.BorderSizePixel = 0
 	card.Parent = screenGui
@@ -52,8 +52,8 @@ function HUDController.Start()
 	scale.Parent = card
 
 	local padding = Instance.new("UIPadding")
-	padding.PaddingLeft = UDim.new(0, 12)
-	padding.PaddingRight = UDim.new(0, 14)
+	padding.PaddingLeft = UDim.new(0, 10)
+	padding.PaddingRight = UDim.new(0, 10)
 	padding.Parent = card
 
 	local layout = Instance.new("UIListLayout")
@@ -71,24 +71,24 @@ function HUDController.Start()
 
 	local title = Instance.new("TextLabel")
 	title.Name = "CoinTitle"
-	title.Position = UDim2.fromOffset(0, 7)
-	title.Size = UDim2.new(1, 0, 0, 16)
+	title.Position = UDim2.fromOffset(0, 5)
+	title.Size = UDim2.new(1, 0, 0, 14)
 	title.BackgroundTransparency = 1
 	title.Font = Enum.Font.GothamMedium
 	title.Text = GameConfig.CurrencyDisplayName
 	title.TextColor3 = UITheme.Muted
-	title.TextSize = 12
+	title.TextSize = 11
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.Parent = textColumn
 
 	local count = Instance.new("TextLabel")
 	count.Name = "CoinCount"
-	count.Position = UDim2.fromOffset(0, 22)
-	count.Size = UDim2.new(1, 0, 0, 28)
+	count.Position = UDim2.fromOffset(0, 19)
+	count.Size = UDim2.new(1, 0, 0, 24)
 	count.BackgroundTransparency = 1
 	count.Font = Enum.Font.GothamBold
 	count.TextColor3 = UITheme.Text
-	count.TextSize = 22
+	count.TextSize = 19
 	count.TextXAlignment = Enum.TextXAlignment.Left
 	count.TextYAlignment = Enum.TextYAlignment.Top
 	count.Parent = textColumn
@@ -105,7 +105,7 @@ function HUDController.Start()
 	changeLabel.Size = UDim2.fromOffset(72, 24)
 	changeLabel.BackgroundTransparency = 1
 	changeLabel.Font = Enum.Font.GothamBold
-	changeLabel.TextSize = 18
+	changeLabel.TextSize = 15
 	changeLabel.TextXAlignment = Enum.TextXAlignment.Left
 	changeLabel.TextTransparency = 1
 	changeLabel.Parent = screenGui
@@ -116,11 +116,11 @@ function HUDController.Start()
 		local token = changeToken
 		changeLabel.Text = if delta > 0 then string.format("+%d", delta) else string.format("%d", delta)
 		changeLabel.TextColor3 = if delta > 0 then UITheme.Accent else UITheme.Warn
-		changeLabel.Position = UDim2.fromOffset(150, 56)
+		changeLabel.Position = UDim2.fromOffset(132, 46)
 		changeLabel.TextTransparency = 0
 		changeLabel.TextStrokeTransparency = 0.6
 		TweenService:Create(changeLabel, TweenInfo.new(1.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			Position = UDim2.fromOffset(150, 44),
+			Position = UDim2.fromOffset(132, 36),
 			TextTransparency = 1,
 			TextStrokeTransparency = 1,
 		}):Play()

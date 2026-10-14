@@ -28,22 +28,10 @@ function BookController.Start()
 	screenGui.DisplayOrder = 12
 	screenGui.Parent = playerGui
 
-	local toggle = Instance.new("TextButton")
-	toggle.Size = UDim2.fromOffset(64, 44)
-	toggle.BackgroundColor3 = UITheme.Button
-	toggle.Font = Enum.Font.GothamBold
-	toggle.Text = "도감"
-	toggle.TextColor3 = UITheme.Text
-	toggle.TextSize = 16
-	toggle.Parent = screenGui
-	addCorner(toggle, 16)
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = UITheme.Border
-	stroke.Thickness = 1
-	stroke.Parent = toggle
+	local toggle = UITheme.MenuButton("도감", screenGui)
 
 	local panel = Instance.new("Frame")
-	panel.Size = UDim2.fromOffset(250, 0)
+	panel.Size = UDim2.fromOffset(220, 0)
 	panel.AutomaticSize = Enum.AutomaticSize.Y
 	panel.BackgroundColor3 = UITheme.Panel
 	panel.BorderSizePixel = 0
@@ -67,20 +55,9 @@ function BookController.Start()
 
 	local function updateLayout()
 		local camera = Workspace.CurrentCamera
-		local compactPortrait = camera ~= nil
-			and camera.ViewportSize.X < 550
-			and camera.ViewportSize.Y > camera.ViewportSize.X
-		if compactPortrait then
-			toggle.AnchorPoint = Vector2.new(1, 0.5)
-			toggle.Position = UDim2.new(1, -12, 0.54, 156)
-			panel.AnchorPoint = Vector2.new(1, 0.5)
-			panel.Position = UDim2.new(1, -84, 0.5, 0)
-		else
-			toggle.AnchorPoint = Vector2.new(0, 0)
-			toggle.Position = UDim2.fromOffset(232, 150)
-			panel.AnchorPoint = Vector2.new(0, 0)
-			panel.Position = UDim2.fromOffset(16, 198)
-		end
+		local compactPortrait = camera ~= nil and UITheme.IsPortrait(camera.ViewportSize)
+		toggle.AnchorPoint, toggle.Position = UITheme.MenuSlot(4, compactPortrait)
+		panel.AnchorPoint, panel.Position = UITheme.MenuPanel(compactPortrait)
 	end
 	local function bindCamera()
 		local camera = Workspace.CurrentCamera
@@ -99,7 +76,7 @@ function BookController.Start()
 	title.Font = Enum.Font.GothamBold
 	title.Text = string.format("도감 · 쪽마다 %d개, 업적", GameConfig.Book.PageTarget)
 	title.TextColor3 = UITheme.Muted
-	title.TextSize = 14
+	title.TextSize = 12
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.Parent = panel
 
@@ -123,7 +100,7 @@ function BookController.Start()
 		end
 		local view = camera.ViewportSize
 		local portrait = view.X < 550 and view.Y > view.X
-		local room = if portrait then view.Y * 0.5 - 40 else view.Y - 198 - 60
+		local room = if portrait then view.Y * 0.6 - 40 else view.Y - 168 - 50
 		list.Size = UDim2.new(1, 0, 0, math.clamp(room, 110, 260))
 	end
 	fitList()
@@ -144,7 +121,7 @@ function BookController.Start()
 		row.BackgroundColor3 = UITheme.Button
 		row.BorderSizePixel = 0
 		row.Font = Enum.Font.GothamMedium
-		row.TextSize = 14
+		row.TextSize = 12
 		row.TextColor3 = UITheme.Text
 		row.TextXAlignment = Enum.TextXAlignment.Left
 		row.Text = ""
@@ -165,7 +142,7 @@ function BookController.Start()
 	achievementHeader.Font = Enum.Font.GothamBold
 	achievementHeader.Text = "업적"
 	achievementHeader.TextColor3 = UITheme.Muted
-	achievementHeader.TextSize = 14
+	achievementHeader.TextSize = 12
 	achievementHeader.TextXAlignment = Enum.TextXAlignment.Left
 	achievementHeader.Parent = list
 
