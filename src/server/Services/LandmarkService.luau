@@ -122,7 +122,7 @@ function LandmarkService.Start(
 			local billboard = Instance.new("BillboardGui")
 			billboard.Size = UDim2.fromOffset(150, 44)
 			billboard.StudsOffset = Vector3.new(0, 2, 0)
-			billboard.MaxDistance = 60
+			billboard.MaxDistance = 30
 			billboard.LightInfluence = 0
 			billboard.Parent = sign
 			local label = Instance.new("TextLabel")

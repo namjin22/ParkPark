@@ -40,6 +40,20 @@ function UITheme.MenuPanel(portrait: boolean): (Vector2, UDim2)
 	return Vector2.new(0, 0), UDim2.fromOffset(16, UITheme.MenuPanelTop)
 end
 
+-- Height of a ScreenGui's own canvas in its layout units: below Roblox's top bar and before its UIScale, which is
+-- what a panel's offsets are measured in. (The camera's viewport includes the top bar and ignores the scale.)
+function UITheme.CanvasHeight(gui: LayerCollector): number
+	local scale = gui:FindFirstChildOfClass("UIScale")
+	return gui.AbsoluteSize.Y / (if scale and scale.Scale > 0 then scale.Scale else 1)
+end
+
+-- How tall a menu panel may be before it reaches the bottom of the screen.
+function UITheme.MenuPanelRoom(gui: LayerCollector, portrait: boolean): number
+	local height = UITheme.CanvasHeight(gui)
+	local top = if portrait then height * UITheme.MenuColumnY else UITheme.MenuPanelTop
+	return height - top - 12
+end
+
 -- Tall, narrow screens (phones held upright).
 function UITheme.IsPortrait(viewport: Vector2): boolean
 	return viewport.X < 550 and viewport.Y > viewport.X

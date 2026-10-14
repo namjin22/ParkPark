@@ -115,7 +115,7 @@ function ManagePanelController.Start()
 		if camera == nil then
 			return
 		end
-		local availableHeight = math.max(120, camera.ViewportSize.Y - 40)
+		local availableHeight = math.max(120, UITheme.CanvasHeight(screenGui) - 24)
 		local rowsHeight = visibleActionCount * ROW_HEIGHT
 			+ math.max(0, visibleActionCount - 1) * actionLayout.Padding.Offset
 		local contentHeight = HEADER_HEIGHT + layout.Padding.Offset + 20 + rowsHeight
@@ -134,6 +134,7 @@ function ManagePanelController.Start()
 	end
 	Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(bindCamera)
 	bindCamera()
+	panel:GetPropertyChangedSignal("Visible"):Connect(updatePanelSize)
 
 	-- Header: the ride's name, its state, and a close button.
 	local header = Instance.new("Frame")

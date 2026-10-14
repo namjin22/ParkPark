@@ -98,16 +98,17 @@ function BookController.Start()
 		if camera == nil then
 			return
 		end
-		local view = camera.ViewportSize
-		local portrait = view.X < 550 and view.Y > view.X
-		local room = if portrait then view.Y * 0.6 - 40 else view.Y - 168 - 50
-		list.Size = UDim2.new(1, 0, 0, math.clamp(room, 110, 260))
+		-- The list gets what is left under the panel's title and padding.
+		local room = UITheme.MenuPanelRoom(screenGui, UITheme.IsPortrait(camera.ViewportSize)) - 44
+		list.Size = UDim2.new(1, 0, 0, math.clamp(room, 90, 260))
 	end
 	fitList()
 	local fitCamera = Workspace.CurrentCamera
 	if fitCamera then
 		fitCamera:GetPropertyChangedSignal("ViewportSize"):Connect(fitList)
 	end
+	-- Recomputed on opening as well: the screen scale is added after the panel is built.
+	panel:GetPropertyChangedSignal("Visible"):Connect(fitList)
 
 	local rows: { [string]: TextLabel } = {}
 	local function rowFor(key: string, order: number): TextLabel

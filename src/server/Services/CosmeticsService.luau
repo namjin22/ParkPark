@@ -144,7 +144,7 @@ function CosmeticsService.Start(
 			tag.Name = "ParkTitle"
 			tag.Size = UDim2.fromOffset(150, 28)
 			tag.StudsOffset = Vector3.new(0, 2.6, 0)
-			tag.MaxDistance = 80
+			tag.MaxDistance = 40
 			tag.LightInfluence = 0
 			tag.Parent = head
 			local label = Instance.new("TextLabel")

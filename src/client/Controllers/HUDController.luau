@@ -98,10 +98,10 @@ function HUDController.Start()
 	local displayedCoins = coins.Value
 	count.Text = tostring(displayedCoins)
 
-	-- A small "+N" / "-N" beside the balance shows each change without any popup in the middle of the screen.
+	-- A small "+N" / "-N" just right of the coin card shows each change without any popup in the middle of the screen.
 	local changeLabel = Instance.new("TextLabel")
 	changeLabel.Name = "CoinChange"
-	changeLabel.Position = UDim2.fromOffset(110, 62)
+	changeLabel.Position = UDim2.fromOffset(172, 26)
 	changeLabel.Size = UDim2.fromOffset(72, 24)
 	changeLabel.BackgroundTransparency = 1
 	changeLabel.Font = Enum.Font.GothamBold
@@ -116,11 +116,11 @@ function HUDController.Start()
 		local token = changeToken
 		changeLabel.Text = if delta > 0 then string.format("+%d", delta) else string.format("%d", delta)
 		changeLabel.TextColor3 = if delta > 0 then UITheme.Accent else UITheme.Warn
-		changeLabel.Position = UDim2.fromOffset(132, 46)
+		changeLabel.Position = UDim2.fromOffset(172, 26)
 		changeLabel.TextTransparency = 0
 		changeLabel.TextStrokeTransparency = 0.6
 		TweenService:Create(changeLabel, TweenInfo.new(1.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			Position = UDim2.fromOffset(132, 36),
+			Position = UDim2.fromOffset(172, 14),
 			TextTransparency = 1,
 			TextStrokeTransparency = 1,
 		}):Play()

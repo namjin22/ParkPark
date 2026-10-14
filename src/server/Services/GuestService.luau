@@ -866,7 +866,7 @@ function GuestService.Start(park: GuestReferences, awardCoins: AwardCoins, notif
 			local tag = Instance.new("BillboardGui")
 			tag.Size = UDim2.fromOffset(110, 34)
 			tag.StudsOffset = Vector3.new(0, 4.2, 0)
-			tag.MaxDistance = 90
+			tag.MaxDistance = 50
 			tag.LightInfluence = 0
 			tag.Parent = root
 			local label = Instance.new("TextLabel")

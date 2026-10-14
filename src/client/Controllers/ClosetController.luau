@@ -63,10 +63,9 @@ function ClosetController.Start()
 	local function updateLayout()
 		local camera = Workspace.CurrentCamera
 		local compactPortrait = camera ~= nil and UITheme.IsPortrait(camera.ViewportSize)
-		local viewport = if camera then camera.ViewportSize.Y else 600
 		toggle.AnchorPoint, toggle.Position = UITheme.MenuSlot(2, compactPortrait)
 		panel.AnchorPoint, panel.Position = UITheme.MenuPanel(compactPortrait)
-		local room = if compactPortrait then viewport * (1 - UITheme.MenuColumnY) - 24 else viewport - 190
+		local room = UITheme.MenuPanelRoom(screenGui, compactPortrait)
 		panel.Size = UDim2.fromOffset(
 			if compactPortrait then 200 else 220,
 			math.clamp(layout.AbsoluteContentSize.Y + 12, 80, math.max(120, room))

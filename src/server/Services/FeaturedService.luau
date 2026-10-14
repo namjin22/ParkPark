@@ -78,7 +78,7 @@ function FeaturedService.Start(park: { ParkFolder: Folder }, notify: Notify)
 			gui.Name = "FeaturedTag"
 			gui.Size = UDim2.fromOffset(170, 34)
 			gui.StudsOffset = Vector3.new(0, 11, 0)
-			gui.MaxDistance = 120
+			gui.MaxDistance = 70
 			gui.LightInfluence = 0
 			gui.Parent = anchor
 			local label = Instance.new("TextLabel")

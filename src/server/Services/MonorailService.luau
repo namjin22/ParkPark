@@ -183,7 +183,7 @@ function MonorailService.Start(
 		local billboard = Instance.new("BillboardGui")
 		billboard.Size = UDim2.fromOffset(160, 36)
 		billboard.StudsOffset = Vector3.new(0, 2.4, 0)
-		billboard.MaxDistance = 80
+		billboard.MaxDistance = 50
 		billboard.LightInfluence = 0
 		billboard.Parent = sign
 		local label = Instance.new("TextLabel")

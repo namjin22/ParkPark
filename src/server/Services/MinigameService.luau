@@ -160,7 +160,7 @@ function MinigameService.Start(
 			local billboard = Instance.new("BillboardGui")
 			billboard.Size = UDim2.fromOffset(150, 34)
 			billboard.StudsOffset = Vector3.new(0, 7, 0)
-			billboard.MaxDistance = 45
+			billboard.MaxDistance = 30
 			billboard.LightInfluence = 0
 			billboard.Parent = counter
 			local label = Instance.new("TextLabel")
